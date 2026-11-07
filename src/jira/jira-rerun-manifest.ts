@@ -1,3 +1,4 @@
+import { parseJiraWorkflowStep } from "./jira-workflow";
 import { parseStepIntent } from "../discovery/step-intent-parser";
 import type { JiraScenarioInput } from "./jira-semantic-executor";
 
@@ -6,6 +7,7 @@ export function redactJiraScenarioInputs(scenario: JiraScenarioInput): JiraScena
   let canonicalIndex = 1;
   return { ...scenario, steps: scenario.steps.map(step => {
     const [text, expected] = step.split(/\nEsperado:\s*/i);
+    if (parseJiraWorkflowStep(text)) { canonicalIndex += expected?.trim() ? 2 : 1; return step; }
     const intent = parseStepIntent(text)[0];
     const index = canonicalIndex;
     canonicalIndex += expected?.trim() ? 2 : 1;

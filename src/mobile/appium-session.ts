@@ -3,6 +3,11 @@ import { getCurrentAppiumServer } from "./appium-server-manager";
 
 export type AppiumSessionOptions = {
   appiumPort: number;
+  /**
+   * Explicit Appium endpoint (the tunnel to the Appium on the user's PC). When set, the
+   * server's own Appium manager is ignored.
+   */
+  appiumHost?: string;
   apkPath?: string;
   appPackage?: string;
   appActivity?: string;
@@ -10,6 +15,8 @@ export type AppiumSessionOptions = {
   systemPort?: number;
   maxSessionAttempts?: number;
   retryDelayMs?: number;
+  /** Merged last: lets a caller attach without relaunching the app, tune idle waits, etc. */
+  extraCapabilities?: Record<string, unknown>;
 };
 
 let remoteFn: typeof remote = remote;
@@ -142,9 +149,11 @@ export type AppiumSessionHealth = {
 export async function probeAppiumHealth(
   appiumPort: number,
   timeoutMs = 3000,
+  /** Explicit endpoint (agent tunnel): skips the server's Appium manager. */
+  appiumHost?: string,
 ): Promise<AppiumSessionHealth> {
-  const resolved = getCurrentAppiumServer();
-  const host = resolved?.host ?? resolveAppiumHost();
+  const resolved = appiumHost ? undefined : getCurrentAppiumServer();
+  const host = appiumHost ?? resolved?.host ?? resolveAppiumHost();
   const port = resolved?.port ?? appiumPort;
   const url = `http://${host}:${port}/status`;
   try {
@@ -232,8 +241,8 @@ export async function createSession(opts: AppiumSessionOptions): Promise<Webdriv
   // Always connect to the port/host the Appium manager actually resolved (it may
   // have selected a fallback port when the preferred one was occupied). Fall back
   // to the caller-provided port only when the manager has no tracked server.
-  const resolvedServer = getCurrentAppiumServer();
-  const appiumHost = resolvedServer?.host ?? resolveAppiumHost();
+  const resolvedServer = opts.appiumHost ? undefined : getCurrentAppiumServer();
+  const appiumHost = opts.appiumHost ?? resolvedServer?.host ?? resolveAppiumHost();
   const appiumPort = resolvedServer?.port ?? opts.appiumPort;
   const capabilities: Record<string, unknown> = {
     platformName: "Android",
@@ -261,6 +270,8 @@ export async function createSession(opts: AppiumSessionOptions): Promise<Webdriv
   if (Number.isInteger(opts.systemPort) && Number(opts.systemPort) > 0) {
     capabilities["appium:systemPort"] = Number(opts.systemPort);
   }
+
+  if (opts.extraCapabilities) Object.assign(capabilities, opts.extraCapabilities);
 
   const remoteOptions = {
     hostname: appiumHost,

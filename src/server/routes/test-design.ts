@@ -13,9 +13,12 @@ import {
 } from "../../test-design/test-design-publisher";
 import { resolveSubtaskType, SubtaskTypeNotFoundError } from "../../test-design/jira-subtask-type";
 import { canAccessProject, canWriteProject, type Principal } from "../../auth/principal";
-import { getProjectBySlug } from "../../db/project-repository";
+import { getProjectBySlug, listProjects } from "../../db/project-repository";
+import { listCaseExecutionResults } from "../services/execution-summary.service";
+import { computeTestDesignExecutionMetrics, executionMetricsRange } from "../../test-design/test-design-execution-metrics";
 import * as repo from "../../db/test-design-repository";
 import { loadTestDesignJiraIssue } from "../../test-design/jira-story-loader";
+import { editedDesignSourceNeedsReview, refreshEditedTestDesignScenario } from "../../test-design/test-design-edited-source";
 import {
   findPublishIssues,
   markEditedScenarios,
@@ -520,7 +523,22 @@ testDesignRouter.put(
         ? { ...scenario, knowledgeProfileSlug: draft.projectSlug }
         : scenario,
     );
-    const saved = await repo.saveStoryScenarios(draft.id, story.id, scenarios);
+    let reviewedScenarios = scenarios;
+    if (scenarios.some(editedDesignSourceNeedsReview)) {
+      try {
+        // Editing uses the same deterministic Jira review as launch-time replay. It is
+        // intentionally not an AI regeneration and does not certify live UI behavior.
+        const issue = await generationDeps.loadIssue(story.issueKey);
+        reviewedScenarios = await Promise.all(scenarios.map(scenario =>
+          refreshEditedTestDesignScenario(scenario, issue),
+        ));
+      } catch {
+        // Keep autosave available if Jira is temporarily unreachable; the prior
+        // source diagnostics remain attached until the next successful review.
+        console.warn(`[test-design:edit-review] deferred story=${story.issueKey} reason=source_unavailable`);
+      }
+    }
+    const saved = await repo.saveStoryScenarios(draft.id, story.id, reviewedScenarios);
     res.json({ story: saved });
   }),
 );
@@ -774,5 +792,42 @@ testDesignRouter.post(
       `[test-design:jira] draft=${draft.id} ` + results.map((r) => `${r.issueKey}:${r.status}${r.subtaskKey ? `->${r.subtaskKey}` : ""}`).join(" "),
     );
     res.json({ draft: updated, results });
+  }),
+);
+
+// ---------------------------------------------------------------------------
+// Dashboard metrics
+// ---------------------------------------------------------------------------
+
+/**
+ * Design cases and how they did when executed, over the last `days` (default 30).
+ * Limited to the drafts the caller can see, and to `projectSlug` when given (the
+ * route policy already checked the caller may read that project).
+ */
+testDesignRouter.get(
+  "/metrics",
+  handle(async (req, res) => {
+    const principal = principalOf(req);
+    const requestedDays = Number(req.query.days);
+    const days = Number.isInteger(requestedDays) && requestedDays >= 1 && requestedDays <= 365 ? requestedDays : 30;
+    const projectSlug = typeof req.query.projectSlug === "string" ? req.query.projectSlug.trim().toLowerCase() : "";
+
+    const drafts = (await repo.listDraftsWithStories())
+      .filter((draft) => canSeeDraft(principal, draft))
+      .filter((draft) => !projectSlug || draft.projectSlug?.toLowerCase() === projectSlug);
+    const projectNames = new Map((await listProjects()).map((p) => [p.slug.toLowerCase(), p.name]));
+    let testRailBaseUrl: string | null = null;
+    try {
+      testRailBaseUrl = requireTestRailConfig(config).url;
+    } catch {
+      // TestRail not configured: cases are listed without links.
+    }
+
+    res.json({
+      metrics: computeTestDesignExecutionMetrics(drafts, listCaseExecutionResults(), executionMetricsRange(days), {
+        projectNames,
+        testRailBaseUrl,
+      }),
+    });
   }),
 );

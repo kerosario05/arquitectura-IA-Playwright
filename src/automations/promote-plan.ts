@@ -58,9 +58,10 @@ import { buildDataContext, type DataContextEntry } from "../data/data-context";
 import { buildPromotedDataManifest, savePromotedDataManifestSync } from "../data/promoted-data";
 import { validatePromotedSpecRuntimeContract } from "./runtime/promoted-runtime-contract";
 import { materializePromotedRuntimeEnv } from "./runtime/promoted-spec-runtime";
+import { materializeServiceBindingsEnv, type RuntimeServiceBinding } from "../service-catalog/runtime-service-values";
 import { getSectionSlug, rewritePromotedAuthFlowHelperImport, rewritePromotedRuntimeImport, runHybridSpecGeneration, validatePromotedSpecInternalImports, type SpecGenerationDiagnostics, type SpecGenerationSourceScenario } from "./spec-generation-hybrid";
 import { buildSpecExecutionContract } from "./spec-execution-contract";
-import { compileDeterministicSpec } from "./spec-compiler/deterministic-spec-compiler";
+import { compileDeterministicSpec, countRequiredActionSteps } from "./spec-compiler/deterministic-spec-compiler";
 import {
   buildPromotedArtifactIdentity,
   isEligibleForDeterministicRevalidation,
@@ -118,6 +119,8 @@ interface PromoteInput {
    * static/configured data when building runtimeInputValues for functionalExecution.
    */
   runtimeEntries?: DataContextEntry[];
+  /** Runtime authority reserved for promoted-spec verification, distinct from Discovery inputs. */
+  verificationRuntimeEntries?: DataContextEntry[];
 }
 
 export async function materializePromotionContext(input: {
@@ -449,6 +452,8 @@ export type VerifyPromotedSpecOptions = {
      * carry -- never the reverse.
      */
     scenarioRuntimeValues?: Record<string, string>;
+    /** Catalog services (OTP...) the run's fields are bound to; resolved by the runtime at the step. */
+    serviceBindings?: RuntimeServiceBinding[];
   };
   /**
    * Live sink for the spawned child's stdout/stderr, called per completed line AS the process
@@ -572,7 +577,11 @@ export async function resolveVerifyPromotedSpecAppExecEnv(
   // global/default testData is used only as a fallback for keys the scenario doesn't supply.
   const appGlobalRuntimeValues = resolvedDeps.resolvePromotedScenarioRuntimeValues(appSlug);
   const effectiveRuntimeValues = { ...appGlobalRuntimeValues, ...(appContext.scenarioRuntimeValues ?? {}) };
-  execEnv = { ...execEnv, ...materializePromotedRuntimeEnv(effectiveRuntimeValues) };
+  execEnv = {
+    ...execEnv,
+    ...materializePromotedRuntimeEnv(effectiveRuntimeValues),
+    ...materializeServiceBindingsEnv(appContext.serviceBindings),
+  };
 
   const specSourceForRequiredKeys = await resolvedDeps.readSpecSource(specPath).catch(() => "");
   const requiredPromotedEnvKeys = resolveRequiredPromotedEnvKeysFromSource(specSourceForRequiredKeys);
@@ -735,7 +744,7 @@ export async function verifyPromotedSpec(
   let execEnv: NodeJS.ProcessEnv = process.env;
   try {
     const specPathNormalized = specPath.replace(/\\/g, "/");
-    const cmd = `npx playwright test "${specPathNormalized}" --config=playwright.config.ts --timeout=${timeoutMs}`;
+    const cmd = `npx playwright test "${specPathNormalized}" --config=playwright.config.ts --reporter=list --timeout=${timeoutMs}`;
     console.log(`[promote-plan] Verifying promoted spec: ${cmd}`);
     if (options.headless !== undefined) {
       console.log(`[promoted-runtime-launch] executionSource=${options.executionSource ?? "unknown"} headless=${options.headless} specPath=${specPathNormalized} scenarioId=${options.scenarioId ?? "unknown"}`);
@@ -1670,9 +1679,7 @@ export async function promoteExecutionPlan(
         pageObjectRegistry: registry,
       });
       const deterministicResult = compileDeterministicSpec(deterministicContract, { targetSpecPath: appPaths.specPath });
-      const requiredActionSteps = deterministicContract.steps.filter(
-        (s) => s.required !== false && ["fill", "press", "click"].includes(s.operation),
-      ).length;
+      const requiredActionSteps = countRequiredActionSteps(deterministicContract);
       // Navigation is a required compiled capability, but it is not an interactive
       // scenario action. Keep this parity gate scoped to the same operations as
       // requiredActionSteps so adding a plan-backed setup navigation does not
@@ -2055,9 +2062,23 @@ export async function promoteExecutionPlan(
   // --- Verify promoted spec if requested ---
   if (input.verifySpec && appPaths.specPath && automationStatus === "active") {
     console.log(`[promote-plan] Running spec verification for ${appPaths.specPath}`);
+    const verificationRuntimeEntries = input.verificationRuntimeEntries;
+    const verificationRuntimeValues = verificationRuntimeEntries && verificationRuntimeEntries.length > 0
+      ? Object.fromEntries(verificationRuntimeEntries.map((entry) => [entry.key, entry.value]))
+      : undefined;
     const verificationResult = await verifyPromotedSpec(
       appPaths.specPath,
-      input.specVerificationTimeoutMs ?? 90000
+      input.specVerificationTimeoutMs ?? 90000,
+      verificationRuntimeValues
+        ? {
+            executionSource: input.executionSource,
+            appContext: {
+              appSlug: appProfile.appSlug,
+              caseId: plan.scenario.caseId,
+              scenarioRuntimeValues: verificationRuntimeValues,
+            },
+          }
+        : {},
     );
 
     appIndexEntry.specVerificationStatus = verificationResult.status;

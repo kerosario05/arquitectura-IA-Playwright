@@ -203,3 +203,62 @@ test("clave de agente: sin configurar acepta todo; configurada exige la misma", 
   assert.equal(agentKeyAccepted("otro", "secreto"), false);
   assert.equal(agentKeyAccepted("secreto", "secreto"), true);
 });
+
+const ANDROID = {
+  sdkFound: true,
+  sdkPath: "C:\Sdk",
+  adbVersion: "35.0.2",
+  emulatorFound: true,
+  avds: ["Pixel_6"],
+  devices: [{ serial: "emulator-5554", state: "device", kind: "emulator" as const, avd: "Pixel_6" }],
+  checkedAt: new Date().toISOString(),
+};
+
+test("Android del PC: se guarda acotado y un agente viejo (sin android) no cuenta como listo", () => {
+  const registry = new LocalAgentRegistry(fakePackage(), () => undefined);
+  connect(registry, "agente-viejo", "10.0.0.5");
+  assert.equal(registry.hasAndroid(registry.get("agente-viejo")!), false);
+  assert.throws(() => registry.requestEmulator("agente-viejo", "Pixel_6"), /Android Studio/);
+
+  connect(registry, "agente-nuevo", "10.0.0.6", { android: { ...ANDROID, avds: ["Pixel_6", 42 as never, "x".repeat(500)] } });
+  const agent = registry.get("agente-nuevo")!;
+  assert.equal(registry.hasAndroid(agent), true);
+  assert.deepEqual(agent.android?.avds, ["Pixel_6", "x".repeat(128)]);
+});
+
+test("emulador: pide start_emulator una vez, sigue el avance y queda listo con su serial", () => {
+  const registry = new LocalAgentRegistry(fakePackage(), () => undefined);
+  const { socket, handlers } = connect(registry, "agente-0001", "10.0.0.5", { android: ANDROID });
+  assert.throws(() => registry.requestEmulator("agente-0001", "NoExiste"), /no existe en tu equipo/);
+
+  const first = registry.requestEmulator("agente-0001", "Pixel_6");
+  assert.equal(registry.requestEmulator("agente-0001", "Pixel_6").requestId, first.requestId, "idempotente mientras arranca");
+  const starts = socket.sent.filter((m) => m.t === "start_emulator");
+  assert.deepEqual(starts, [{ t: "start_emulator", requestId: first.requestId, avd: "Pixel_6" }]);
+
+  handlers.onMessage(JSON.stringify({ t: "emulator_progress", requestId: first.requestId, avd: "Pixel_6", phase: "booting" }));
+  assert.equal(registry.emulatorState("agente-0001")?.state, "booting");
+  handlers.onMessage(JSON.stringify({ t: "emulator_ready", requestId: "otra", avd: "Pixel_6", serial: "emulator-9999" }));
+  assert.equal(registry.emulatorState("agente-0001")?.state, "booting", "ignora respuestas de otra petición");
+  handlers.onMessage(JSON.stringify({ t: "emulator_ready", requestId: first.requestId, avd: "Pixel_6", serial: "emulator-5554" }));
+  assert.deepEqual(
+    { state: registry.emulatorState("agente-0001")?.state, serial: registry.emulatorState("agente-0001")?.serial },
+    { state: "ready", serial: "emulator-5554" },
+  );
+
+  registry.stopEmulator("agente-0001", "emulator-5554");
+  assert.deepEqual(socket.sent.at(-1), { t: "stop_emulator", serial: "emulator-5554" });
+  assert.throws(() => registry.stopEmulator("agente-0001", "R58M123"), /no está encendido/);
+});
+
+test("refreshStatus pide estado fresco solo si el que hay es viejo, y no repite la petición", () => {
+  const registry = new LocalAgentRegistry(fakePackage(), () => undefined);
+  const { socket } = connect(registry, "agente-0001", "10.0.0.5", { android: ANDROID });
+  registry.refreshStatus("agente-0001", 10_000);
+  assert.equal(socket.sent.filter((m) => m.t === "status_request").length, 0, "estado recién recibido");
+
+  const old = connect(registry, "agente-0002", "10.0.0.6", { android: { ...ANDROID, checkedAt: "2026-01-01T00:00:00.000Z" } });
+  registry.refreshStatus("agente-0002", 10_000);
+  registry.refreshStatus("agente-0002", 10_000);
+  assert.equal(old.socket.sent.filter((m) => m.t === "status_request").length, 1);
+});

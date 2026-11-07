@@ -1,5 +1,6 @@
 import type { FieldOwnerDiagnostic, RecordedTechnicalTarget } from "./session-trace.types";
 import type { StructuralOwnerIdentity, SemanticRuntimeEvidence, PlaywrightRecorderEvidence } from "./structural-owner-identity";
+import type { SelectionTriggerEvidence } from "./selection-trigger-evidence";
 
 /**
  * CaptureEngine V2 -- internal model only, NOT wired into `WebSessionRecorder` yet.
@@ -60,6 +61,8 @@ export type CaptureOwner = {
   technicalRefs?: string[];
   /** The field/group this owner was resolved to belong to, when field-owner resolution ran. */
   associatedField?: string;
+  /** Present only for native selectors or a captured ARIA popup -> unique listbox relation. */
+  selectionTriggerEvidence?: SelectionTriggerEvidence;
   /** Free-form evidence of the group/container the owner resolution considered, diagnostic only. */
   groupEvidence?: string;
   /** From the platform's `disabled` attribute. Never used to decide execution readiness here. */
@@ -99,6 +102,8 @@ export type CaptureOwnerCandidate = {
   technicalRoleName?: string;
   roleTechnicalIdentityEligible?: boolean;
   associatedField?: string;
+  /** Present only for native selectors or a captured ARIA popup -> unique listbox relation. */
+  selectionTriggerEvidence?: SelectionTriggerEvidence;
   groupEvidence?: string;
   /** Whether this candidate came from a browser event with trusted physical provenance. */
   trustedClick?: boolean;

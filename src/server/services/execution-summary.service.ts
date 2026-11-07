@@ -9,19 +9,59 @@
  *   - the TestRail Test Run (id + derived URL) and the run summary
  *   - the defects that were registered in Jira for that run
  *
- * Read-only. No manifest is written here.
+ * Source artifacts are read-only. Only the derived execution-list index is written.
  */
 import * as fs from "node:fs";
+import { randomUUID } from 'node:crypto';
 import * as path from "node:path";
 import { config } from "../../config/env";
 import { defectChecklistStore } from "./defect-checklist-store";
+import { createArtifactJsonReader, createRefreshingSnapshot, forEachArtifact } from './execution-list-cache';
 
 const LAUNCH_ARTIFACTS_DIR = path.join(process.cwd(), ".artifacts", "scenario-launch-runs");
 const PREVIEW_RUN_ARTIFACTS_DIR = path.join(process.cwd(), ".artifacts", "scenario-preview-runs");
 const RUN_HISTORY_DIR = path.join(process.cwd(), ".artifacts", "qa-lab-run-history");
 const EVIDENCE_ROOT = path.join(process.cwd(), ".artifacts", "evidence");
 const EXECUTION_LIST_CACHE_MS = 25_000;
-let executionListCache: { createdAt: number; items: ExecutionSummaryListItem[] } | null = null;
+const pick = (value: any, keys: string[]) => Object.fromEntries(keys.map(key => [key, value?.[key]]));
+// Cache only the list projection, never large steps, logs or runtime inputs.
+const readListJson = createArtifactJsonReader(20000, (value, file) => {
+  if (file.endsWith('launch-manifest.json')) return {
+    ...pick(value, ['jobId','createdAt','completedAt','status','appSlug','summary','jira','testRail']),
+    publishedCases: value.publishedCases?.map((row: any) => pick(row, ['scenarioId','executionScenarioId','launchScenarioId','testrailCustomScenarioId','title','caseId'])),
+    results: value.results?.map((row: any) => pick(row, ['scenarioId','caseId','discoveryStatus','syncStatus','testRailStatusId'])),
+    executionPlan: {standardScenarios: value.executionPlan?.standardScenarios?.map((row: any) => pick(row, ['scenarioId','title']))},
+  };
+  if (file.endsWith('results.json')) return {
+    ...pick(value, ['summary','total','passed','failed']),
+    results: value.results?.map((row: any) => pick(row, ['title','status'])),
+    cases: value.cases?.map((row: any) => pick(row, ['title','status'])),
+  };
+  if (file.endsWith('preview-scenarios.json')) return Array.isArray(value) ? value.map(row => pick(row, ['title'])) : pick(value, ['title']);
+  return {...pick(value, ['id','status','appSlug','targetAppSlug','createdAt','completedAt','summary','currentCaseTitle','currentCase']),
+    params: pick(value.params, ['appSlug','projectSlug','targetAppSlug','huTitle','scenarioTitle','title'])};
+});
+const INDEX_FILE = path.join(process.cwd(), '.artifacts', 'execution-list-index.json');
+const refreshExecutionList = createRefreshingSnapshot(rebuildExecutionSummaries, EXECUTION_LIST_CACHE_MS);
+let seed: Promise<ExecutionSummaryListItem[] | null> | undefined;
+let rebuilt = false;
+let startupRefresh: Promise<void> | undefined;
+
+export async function listExecutionSummaries(): Promise<ExecutionSummaryListItem[]> {
+  seed ??= fs.promises.readFile(INDEX_FILE, 'utf8').then(text => {
+    const value = JSON.parse(text);
+    return value.version === 1 && Array.isArray(value.items)
+      && value.items.every((row: any) => row && typeof row.launchId === 'string') ? value.items : null;
+  }).catch(() => null);
+  const persisted = await seed;
+  if (persisted && !rebuilt) {
+    startupRefresh ??= refreshExecutionList().then(() => { rebuilt = true; }).catch(() => { startupRefresh = undefined; });
+    return persisted;
+  }
+  const items = await refreshExecutionList();
+  rebuilt = true;
+  return items;
+}
 
 export type ExecutionScenarioSummary = {
   scenarioId: string;
@@ -542,14 +582,10 @@ export function buildExecutionSummary(launchId: string): ExecutionSummary | null
 }
 
 /** Lists all executions (compact), newest first. */
-export function listExecutionSummaries(): ExecutionSummaryListItem[] {
-  if (executionListCache && Date.now() - executionListCache.createdAt < EXECUTION_LIST_CACHE_MS) {
-    return executionListCache.items;
-  }
+async function rebuildExecutionSummaries(): Promise<ExecutionSummaryListItem[]> {
   let dirs: string[];
   try {
-    dirs = fs
-      .readdirSync(LAUNCH_ARTIFACTS_DIR, { withFileTypes: true })
+    dirs = (await fs.promises.readdir(LAUNCH_ARTIFACTS_DIR, { withFileTypes: true }))
       .filter((e) => e.isDirectory())
       .map((e) => e.name);
   } catch {
@@ -558,9 +594,9 @@ export function listExecutionSummaries(): ExecutionSummaryListItem[] {
 
   const items: ExecutionSummaryListItem[] = [];
   const manifestJobIds = new Set<string>();
-  for (const launchId of dirs) {
-    const m = readManifest(launchId);
-    if (!m) continue;
+  await forEachArtifact(dirs, async (launchId) => {
+    const m = await readListJson<ManifestShape>(path.join(LAUNCH_ARTIFACTS_DIR, launchId, 'launch-manifest.json'));
+    if (!m) return;
     if (m.jobId) manifestJobIds.add(m.jobId);
     const scenarios = buildScenarioSummaries(m);
     items.push({
@@ -569,37 +605,46 @@ export function listExecutionSummaries(): ExecutionSummaryListItem[] {
       completedAt: m.completedAt,
       status: m.status,
       huKey: m.jira?.key,
-      huTitle: m.jira?.title,
+      huTitle: m.jira?.title ?? scenarios.find(s => s.result === 'passed' && s.title?.trim())?.title
+        ?? scenarios.find(s => s.title?.trim())?.title,
       appSlug: m.appSlug,
       testRunId: m.testRail?.runId,
       scenarioCount: m.summary?.total ?? scenarios.length,
       passed: m.summary?.passed ?? scenarios.filter((s) => s.result === "passed").length,
       failed: m.summary?.failed ?? scenarios.filter((s) => s.result === "failed").length,
     });
-  }
+  });
 
   // Discovery/spec executions also persist a complete job artifact, but do not always create a
   // scenario-launch manifest. Include those terminal jobs so execution history survives a server
   // restart. A matching launch manifest remains the canonical row when both artifacts exist.
   let previewJobIds: string[] = [];
   try {
-    previewJobIds = fs
-      .readdirSync(PREVIEW_RUN_ARTIFACTS_DIR, { withFileTypes: true })
+    previewJobIds = (await fs.promises.readdir(PREVIEW_RUN_ARTIFACTS_DIR, { withFileTypes: true }))
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name);
   } catch {
     /* preview-run artifacts are optional */
   }
 
-  for (const jobId of previewJobIds) {
-    if (manifestJobIds.has(jobId)) continue;
-    const run = readPreviewRun(jobId);
-    if (!run || !isTerminalPreviewStatus(run.status)) continue;
+  await forEachArtifact(previewJobIds, async (jobId) => {
+    if (manifestJobIds.has(jobId)) return;
+    const run = await readListJson<PreviewRunShape>(path.join(PREVIEW_RUN_ARTIFACTS_DIR, jobId, 'job.json'));
+    if (!run || !isTerminalPreviewStatus(run.status)) return;
     const appSlug = run.appSlug ?? run.targetAppSlug;
-    if (!appSlug) continue;
+    if (!appSlug) return;
 
-    const counts = previewRunCounts(jobId);
-    const title = previewRunTitle(jobId);
+    const results = await readListJson<PreviewResultsShape>(path.join(PREVIEW_RUN_ARTIFACTS_DIR, jobId, 'results.json'));
+    const rows = results?.results ?? results?.cases ?? [];
+    const passed = results?.summary?.passed ?? results?.passed ?? rows.filter(row => row.status === 'passed').length;
+    const failed = results?.summary?.failed ?? results?.failed ?? rows.filter(row => row.status === 'failed').length;
+    const counts = { passed, failed, scenarioCount: results?.summary?.total ?? results?.total ?? (rows.length || passed + failed) };
+    let title = results?.results?.find(row => row.title?.trim())?.title
+      ?? results?.cases?.find(row => row.title?.trim())?.title;
+    if (!title) {
+      const preview = await readListJson<PreviewScenarioShape>(path.join(PREVIEW_RUN_ARTIFACTS_DIR, jobId, 'preview-scenarios.json'));
+      title = Array.isArray(preview) ? preview.find(row => row.title?.trim())?.title : preview?.title;
+    }
     const status = run.status === "done"
       ? (counts.failed > 0 ? "completed_with_failures" : "completed")
       : run.status;
@@ -614,26 +659,27 @@ export function listExecutionSummaries(): ExecutionSummaryListItem[] {
       passed: counts.passed,
       failed: counts.failed,
     });
-  }
+  });
 
   // Keep terminal job summaries visible after process restarts even when their detailed preview
   // artifact was rotated or removed. The JobStore archive intentionally contains only safe,
   // compact metadata and aggregate counts.
   try {
-    const historyFiles = fs.readdirSync(RUN_HISTORY_DIR).filter((name) => name.endsWith(".json"));
-    for (const name of historyFiles) {
+    const historyFiles = (await fs.promises.readdir(RUN_HISTORY_DIR)).filter((name) => name.endsWith(".json"));
+    await forEachArtifact(historyFiles, async (name) => {
       let job: Record<string, any>;
       try {
-        job = JSON.parse(fs.readFileSync(path.join(RUN_HISTORY_DIR, name), "utf-8"));
+        job = (await readListJson<Record<string, any>>(path.join(RUN_HISTORY_DIR, name)))!;
+        if (!job) return;
       } catch {
-        continue;
+        return;
       }
-      if (typeof job.id !== "string" || !job.id || manifestJobIds.has(job.id) || items.some((item) => item.launchId === job.id)) continue;
-      if (!isTerminalPreviewStatus(job.status)) continue;
+      if (typeof job.id !== "string" || !job.id || manifestJobIds.has(job.id) || items.some((item) => item.launchId === job.id)) return;
+      if (!isTerminalPreviewStatus(job.status)) return;
       const params = job.params && typeof job.params === "object" ? job.params : {};
       const summary = job.summary && typeof job.summary === "object" ? job.summary : {};
       const appSlug = params.appSlug ?? params.projectSlug ?? params.targetAppSlug;
-      if (typeof appSlug !== "string" || !appSlug.trim()) continue;
+      if (typeof appSlug !== "string" || !appSlug.trim()) return;
       const passed = nonNegativeCount(summary.passed);
       const failed = nonNegativeCount(summary.failed);
       const scenarioCount = nonNegativeCount(summary.totalCases ?? summary.scenarioCount ?? summary.totalStories) || passed + failed;
@@ -653,13 +699,84 @@ export function listExecutionSummaries(): ExecutionSummaryListItem[] {
         passed,
         failed,
       });
-    }
+    });
   } catch {
     /* durable job history is optional */
   }
 
   items.sort((a, b) => Date.parse(b.completedAt ?? b.createdAt ?? "") - Date.parse(a.completedAt ?? a.createdAt ?? ""));
-  executionListCache = { createdAt: Date.now(), items };
+  // This is a derived compact index; source manifests, recordings and specs stay untouched.
+  const temp = `${INDEX_FILE}.${randomUUID()}.tmp`;
+  try {
+    await fs.promises.mkdir(path.dirname(INDEX_FILE), {recursive:true});
+    await fs.promises.writeFile(temp, JSON.stringify({version:1,items}), 'utf8');
+    await fs.promises.rename(temp, INDEX_FILE);
+  } catch {
+    await fs.promises.rm(temp, {force:true}).catch(() => undefined);
+  }
+  return items;
+}
+
+export type CaseExecutionResult = {
+  caseId: number;
+  result: "passed" | "failed";
+  launchId: string;
+  executedAt: string;
+  appSlug?: string;
+  huKey?: string;
+};
+
+let caseResultsCache: { createdAt: number; items: CaseExecutionResult[] } | null = null;
+
+/**
+ * One decided result per TestRail case per launch, read from the launch manifests.
+ *
+ * Results are matched to cases by `caseId` first: a launch can record the published case
+ * under one scenario id (`L-<launch>-001`) and its result under another (`PREVIEW-001`),
+ * so matching only by scenario id would leave real results as "pending". Scenario-id
+ * matching remains the fallback for results written without a case id.
+ */
+export function listCaseExecutionResults(): CaseExecutionResult[] {
+  if (caseResultsCache && Date.now() - caseResultsCache.createdAt < EXECUTION_LIST_CACHE_MS) {
+    return caseResultsCache.items;
+  }
+  let dirs: string[];
+  try {
+    dirs = fs
+      .readdirSync(LAUNCH_ARTIFACTS_DIR, { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name);
+  } catch {
+    dirs = [];
+  }
+
+  const items: CaseExecutionResult[] = [];
+  for (const launchId of dirs) {
+    const m = readManifest(launchId);
+    if (!m) continue;
+    const executedAt = m.completedAt ?? m.createdAt;
+    if (!executedAt) continue;
+
+    const byCase = new Map<number, "passed" | "failed">();
+    const resultById = new Map<string, NonNullable<ManifestShape["results"]>[number]>();
+    for (const r of m.results ?? []) {
+      if (r.scenarioId) resultById.set(r.scenarioId, r);
+      const result = toResult(r.discoveryStatus);
+      // Later entries win: a rerun inside the same launch replaces the earlier outcome.
+      if (typeof r.caseId === "number" && result !== "pending") byCase.set(r.caseId, result);
+    }
+    for (const pc of m.publishedCases ?? []) {
+      if (typeof pc.caseId !== "number" || byCase.has(pc.caseId)) continue;
+      const ids = [pc.scenarioId, pc.executionScenarioId, pc.launchScenarioId, pc.testrailCustomScenarioId].filter(Boolean) as string[];
+      const result = toResult(ids.map((id) => resultById.get(id)).find(Boolean)?.discoveryStatus);
+      if (result !== "pending") byCase.set(pc.caseId, result);
+    }
+    for (const [caseId, result] of byCase) {
+      items.push({ caseId, result, launchId, executedAt, appSlug: m.appSlug, huKey: m.jira?.key });
+    }
+  }
+
+  caseResultsCache = { createdAt: Date.now(), items };
   return items;
 }
 

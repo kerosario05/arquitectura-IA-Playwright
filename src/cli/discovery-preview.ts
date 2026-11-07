@@ -3,7 +3,8 @@ import fs from "node:fs/promises";
 import { config, requireTestRailConfig } from "../config/env";
 import { TestRailClient } from "../clients/testrail.client";
 import { runCaseDiscoveryWorkflow } from "../discovery/case-discovery-workflow";
-import { resolveAppProfile, ensureAppStructure } from "../automations/app-profile";
+import { shouldVerifyPortalSpecAfterCleanup } from "../discovery/portal-request-cleanup";
+import { resolveAppProfile, ensureAppStructure, loadPromotedAppConfigSync } from "../automations/app-profile";
 import { resolveWebBaseUrl, resolveRuntimeWebBaseUrl } from "./runtime-web-config";
 export { resolveWebBaseUrl, resolveRuntimeWebBaseUrl } from "./runtime-web-config";
 import type { McpRouteProfile } from "../scenarios/scenario-types";
@@ -891,6 +892,14 @@ async function runPreviewCase(
 
   console.log(`\n[discovery:preview] starting ${vc.displayId}: ${vc.title}`);
   console.log(`[discovery:preview] appSlug=${appSlug} outputDir=${outputDir}`);
+  const verifyPortalSpecAfterRequestCleanup = shouldVerifyPortalSpecAfterCleanup(
+    appSlug,
+    loadPromotedAppConfigSync({ appSlug })?.requestCancellation?.enabled === true,
+    args.autoPromote,
+  );
+  if (verifyPortalSpecAfterRequestCleanup) {
+    console.log("[portal-request-cancellation] automaticCleanupEnabled=true specVerificationWillFollow=true");
+  }
 
   let workflowResult: any;
 
@@ -921,6 +930,22 @@ async function runPreviewCase(
         provenance: "recording_dataset",
         valueRole: String(requirement.valueRole ?? "action_input"),
       })) ?? [];
+    const promotionDatasetValues = vc.promotionDatasetValues;
+    const promotionRuntimeEntries = promotionDatasetValues
+      ? Object.entries(promotionDatasetValues).map(([key, value]) => {
+          const requirement = vc.recordingExecutionContract?.runtimeInputRequirements
+            .find((candidate) => candidate.valueKey === key);
+          return {
+            key,
+            value,
+            source: "explicit_runtime_input",
+            sensitive: requirement?.sensitive === true,
+            verified: true,
+            provenance: "confirmed_case_runtime",
+            valueRole: String(requirement?.valueRole ?? "action_input"),
+          };
+        })
+      : [];
     let scenarioSuggested: Record<string, string> | undefined;
     const vcDataReq = (vc as any).dataRequirements as any;
     if (Array.isArray(vcDataReq)) {
@@ -953,6 +978,9 @@ async function runPreviewCase(
         requirePromotionApproval: false,
         overwrite: args.overwrite,
         autoPom: args.autoPom,
+        // For Portal Comercial only, an explicit project setting enables the ordered
+        // Discovery -> request cleanup (same authenticated context) -> promoted-spec replay.
+        verifyPromotedSpec: verifyPortalSpecAfterRequestCleanup,
         // Recording replay is driven by its canonical runtime contract. It must not
         // fall through to the global AI auto-repair setting after a locator miss.
         autoRepair: !(vc.recordingId || vc.automationType === "recorded_session"),
@@ -963,6 +991,7 @@ async function runPreviewCase(
         scenarioDataOverrides: scenarioOverrides,
         scenarioSuggestedData: scenarioSuggested,
         runtimeEntries: recordingRuntimeEntries,
+        promotionRuntimeEntries: promotionRuntimeEntries.length > 0 ? promotionRuntimeEntries : undefined,
       } as any);
 
       const signals = getPreBusinessFailureSignals(workflowResult);

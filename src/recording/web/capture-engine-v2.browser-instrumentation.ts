@@ -22,8 +22,9 @@ import { CANDIDATE_STRUCTURAL_IDENTITY_SOURCE } from "../capture-engine-v2.struc
 import { STRUCTURAL_OWNER_IDENTITY_SOURCE } from "../structural-owner-identity";
 import { ACTIONABILITY_CONTRACT_SOURCE } from "../actionability-contract";
 import { CLASSIFY_NATIVE_ROLE_IDENTITY_SOURCE } from "../capture-engine-v2.native-role-identity";
-import { GENERIC_UNRESOLVED_LABELS, isGenericUnresolvedLabel } from "../trace-normalizer";
+import { GENERIC_UNRESOLVED_LABELS, isGenericUnresolvedLabel, isPlaceholderPrompt } from "../trace-normalizer";
 import { CAPTURE_NATIVE_SELECTION_SOURCE } from "../native-selection-capture";
+import { detectSelectionTriggerEvidence, resolveSelectionFieldOwnerLabel } from "../selection-trigger-evidence";
 
 export function buildCaptureScriptV2Content(captureInstanceId: string): string {
   return String.raw`
@@ -43,6 +44,8 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
   var currentSessionRawValue = "";
   var pendingRawInput = null;
   var captureNativeSelection = ${CAPTURE_NATIVE_SELECTION_SOURCE};
+  var detectSelectionTriggerEvidence = ${detectSelectionTriggerEvidence.toString()};
+  var resolveSelectionFieldOwnerLabel = ${resolveSelectionFieldOwnerLabel.toString()};
   var pointerInteractionCounter = 0;
   var pendingPointerInteractionId = null;
   // Keep browser-to-Node binding calls observable until their exposed-binding promises settle.
@@ -77,6 +80,383 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     pending.catch(function () {}).then(function () { pendingBindingCalls.delete(pending); });
   }
 
+  function sendFileUpload(message) {
+    if (!window.__qaRecordFileUpload) return Promise.reject(new Error("file_upload_binding_unavailable"));
+    var pending;
+    try { pending = Promise.resolve(window.__qaRecordFileUpload(message)); }
+    catch (e) { return Promise.reject(e); }
+    pendingBindingCalls.add(pending);
+    pending.catch(function () {}).then(function () { pendingBindingCalls.delete(pending); });
+    return pending;
+  }
+
+  function sendValueTransfer(message) {
+    if (!window.__qaRecordValueTransfer) return Promise.reject(new Error("value_transfer_binding_unavailable"));
+    var pending;
+    try { pending = Promise.resolve(window.__qaRecordValueTransfer(message)); }
+    catch (e) { return Promise.reject(e); }
+    pendingBindingCalls.add(pending);
+    pending.catch(function () {}).then(function () { pendingBindingCalls.delete(pending); });
+    return pending;
+  }
+
+  function valueOwnerDescriptor(el) {
+    if (!el || el.nodeType !== 1) return undefined;
+    var all = Array.prototype.slice.call(document.querySelectorAll("*"));
+    var attributes = {
+      id: el.id || undefined,
+      name: el.getAttribute("name") || undefined,
+      testId: el.getAttribute("data-testid") || el.getAttribute("data-test-id") || undefined,
+      ariaLabel: el.getAttribute("aria-label") || undefined
+    };
+    var counts = {
+      domId: attributes.id ? all.filter(function (candidate) { return candidate.id === attributes.id; }).length : undefined,
+      name: attributes.name ? all.filter(function (candidate) { return candidate.getAttribute("name") === attributes.name; }).length : undefined,
+      testId: attributes.testId ? all.filter(function (candidate) { return (candidate.getAttribute("data-testid") || candidate.getAttribute("data-test-id")) === attributes.testId; }).length : undefined,
+      ariaLabel: attributes.ariaLabel ? all.filter(function (candidate) { return candidate.getAttribute("aria-label") === attributes.ariaLabel; }).length : undefined
+    };
+    var hasUniqueStableIdentity = Object.keys(counts).some(function (key) { return counts[key] === 1; });
+    if (!hasUniqueStableIdentity) return undefined;
+    var label = attributes.ariaLabel || el.getAttribute("aria-labelledby") && document.getElementById(el.getAttribute("aria-labelledby"))?.textContent
+      || el.getAttribute("name") || attributes.testId || attributes.id || "texto visible";
+    return {
+      label: String(label).replace(/\s+/g, " ").trim().slice(0, 120),
+      tagName: (el.tagName || "").toLowerCase(),
+      inputType: (el.tagName || "").toLowerCase() === "input" ? (el.getAttribute("type") || "text").toLowerCase() : undefined,
+      id: attributes.id,
+      name: attributes.name,
+      testId: attributes.testId,
+      ariaLabel: attributes.ariaLabel,
+      locatorMatchCounts: counts
+    };
+  }
+
+  // An id that carries a number run is usually generated per page load (pv_id_17, ember123, uuid): not identity.
+  function isStableDomId(id) {
+    return !!id && !/[0-9]{2,}/.test(id) && !/^[:_]?r[0-9a-z]+:?$/i.test(id);
+  }
+
+  // Structural CSS path from the nearest stable-id ancestor (or body) down to the element, tag + nth-of-type only.
+  // Returned only when it matches exactly this element; replay still requires it to resolve to a single element.
+  function structuralPathFor(el) {
+    var parts = [];
+    var node = el;
+    for (var depth = 0; node && node.nodeType === 1 && depth < 14; depth += 1, node = node.parentElement) {
+      var tag = (node.tagName || "").toLowerCase();
+      if (tag === "html") return undefined;
+      if (tag === "body") { parts.unshift("body"); break; }
+      if (isStableDomId(node.id) && document.querySelectorAll("#" + CSS.escape(node.id)).length === 1) {
+        parts.unshift("#" + CSS.escape(node.id));
+        break;
+      }
+      var sameTag = node.parentElement ? Array.prototype.filter.call(node.parentElement.children, function (child) { return child.tagName === node.tagName; }) : [];
+      parts.unshift(sameTag.length > 1 ? tag + ":nth-of-type(" + (sameTag.indexOf(node) + 1) + ")" : tag);
+    }
+    if (!parts.length || (parts[0] !== "body" && parts[0].charAt(0) !== "#")) return undefined;
+    var path = parts.join(" > ");
+    var found = document.querySelectorAll(path);
+    return found.length === 1 && found[0] === el ? path : undefined;
+  }
+
+  function stableSelectionOwner(el) {
+    var current = el && el.nodeType === 1 ? el : el && el.parentElement;
+    var innermost = current;
+    for (var depth = 0; current && current !== document.body && depth < 10; depth += 1, current = current.parentElement) {
+      if (isSensitiveNode(current)) continue;
+      var descriptor = valueOwnerDescriptor(current);
+      if (descriptor) return { element: current, descriptor: descriptor };
+    }
+    // No ancestor carries an id/name/test id/aria-label: identify the element by its position instead.
+    if (innermost && !isSensitiveNode(innermost)) {
+      var path = structuralPathFor(innermost);
+      if (path) {
+        return {
+          element: innermost,
+          descriptor: {
+            label: "texto visible",
+            tagName: (innermost.tagName || "").toLowerCase(),
+            structuralPath: path,
+            locatorMatchCounts: { structuralPath: 1 }
+          }
+        };
+      }
+    }
+    return undefined;
+  }
+
+  // "MPN-3302" -> "^MPN-\\d+$": the kind of value, so replay can refuse a different element holding another kind of text.
+  function valueShapeOf(text) {
+    if (!/^[A-Za-z0-9._\/-]+$/.test(text) || !/[0-9]/.test(text)) return "";
+    // Only letters, digits and . _ / - reach this point, so only . / - need escaping.
+    return "^" + text.replace(/[.\/-]/g, "\\$&").replace(/[0-9]+/g, "\\d+") + "$";
+  }
+
+  function exactEditableOwner(el) {
+    if (!el || el.nodeType !== 1) return undefined;
+    var tag = (el.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea") {
+      var inputType = tag === "input" ? (el.getAttribute("type") || "text").toLowerCase() : "";
+      if (["button", "submit", "checkbox", "radio", "reset", "image", "file", "password"].indexOf(inputType) !== -1) return undefined;
+      var direct = valueOwnerDescriptor(el);
+      return direct ? { element: el, descriptor: direct } : undefined;
+    }
+    var editable = el.isContentEditable || (el.getAttribute("role") || "").toLowerCase() === "textbox";
+    if (!editable) return undefined;
+    var descriptor = valueOwnerDescriptor(el);
+    return descriptor ? { element: el, descriptor: descriptor } : undefined;
+  }
+
+  // Text right after a selection, cut before its first digit (the volatile part), so replay can end the value
+  // there when the value changes length. Empty when nothing stable follows or it would be only whitespace.
+  function stableEndContext(fullText, endOffset) {
+    var following = String(fullText || "").slice(endOffset, endOffset + 16);
+    var firstDigit = following.search(/[0-9]/);
+    if (firstDigit >= 0) following = following.slice(0, firstDigit);
+    return following.replace(/\s+/g, "").length > 0 ? following : "";
+  }
+
+  function selectedValueSource(event) {
+    if (!event || event.isTrusted !== true) return undefined;
+    var target = event.target && event.target.nodeType === 1 ? event.target : event.target && event.target.parentElement;
+    if (!target) return undefined;
+    var tag = (target.tagName || "").toLowerCase();
+    var selection;
+    var owner = target;
+    if ((tag === "input" || tag === "textarea") && Number.isInteger(target.selectionStart) && Number.isInteger(target.selectionEnd)) {
+      var start = target.selectionStart;
+      var end = target.selectionEnd;
+      var currentValue = String(target.value || "");
+      if (start === end || end > currentValue.length) return undefined;
+      selection = { sourceKind: "input", startOffset: start, endOffset: end, endAtSourceEnd: end === currentValue.length };
+      var inputEndContext = stableEndContext(currentValue, end);
+      if (inputEndContext) selection.endContext = inputEndContext;
+    } else {
+      var browserSelection = window.getSelection && window.getSelection();
+      if (!browserSelection || browserSelection.rangeCount !== 1 || browserSelection.isCollapsed) return undefined;
+      var range = browserSelection.getRangeAt(0);
+      owner = range.commonAncestorContainer.nodeType === 1 ? range.commonAncestorContainer : range.commonAncestorContainer.parentElement;
+      var selectionText = range.toString();
+      if (!selectionText) return undefined;
+      // A triple click selects the whole block plus its line break, which widens the range past the element that
+      // really holds the value. When the trimmed selection is exactly one element's text, that element is the owner.
+      var trimmedSelection = selectionText.replace(/^\s+|\s+$/g, "");
+      var anchorElement = range.startContainer.nodeType === 1 ? range.startContainer : range.startContainer.parentElement;
+      var exactBlock = anchorElement && trimmedSelection && String(anchorElement.textContent || "").replace(/^\s+|\s+$/g, "") === trimmedSelection
+        ? stableSelectionOwner(anchorElement) : undefined;
+      var startOffset;
+      var endOffset;
+      var ownerText;
+      if (exactBlock && String(exactBlock.element.textContent || "").replace(/^\s+|\s+$/g, "") === trimmedSelection) {
+        owner = exactBlock.element;
+        ownerText = String(owner.textContent || "");
+        startOffset = ownerText.indexOf(trimmedSelection);
+        endOffset = startOffset + trimmedSelection.length;
+        selectionText = trimmedSelection;
+      } else {
+        var stableOwner = stableSelectionOwner(owner);
+        if (!stableOwner || !stableOwner.element.contains(range.commonAncestorContainer)) return undefined;
+        owner = stableOwner.element;
+        var prefixRange = document.createRange();
+        prefixRange.selectNodeContents(owner);
+        try { prefixRange.setEnd(range.startContainer, range.startOffset); } catch (_error) { return undefined; }
+        var endRange = document.createRange();
+        endRange.selectNodeContents(owner);
+        try { endRange.setEnd(range.endContainer, range.endOffset); } catch (_error) { return undefined; }
+        startOffset = prefixRange.toString().length;
+        endOffset = endRange.toString().length;
+        ownerText = String(owner.textContent || "");
+      }
+      if (startOffset < 0 || endOffset <= startOffset || ownerText.slice(startOffset, endOffset) !== selectionText) return undefined;
+      selection = { sourceKind: "text", startOffset: startOffset, endOffset: endOffset, endAtSourceEnd: endOffset === ownerText.length };
+      var textEndContext = stableEndContext(ownerText, endOffset);
+      if (textEndContext) selection.endContext = textEndContext;
+    }
+    if (isSensitiveNode(owner)) return undefined;
+    var stable = selection.sourceKind === "input"
+      ? exactEditableOwner(owner)
+      : stableSelectionOwner(owner);
+    if (!stable) return undefined;
+    var copiedText = selection.sourceKind === "input"
+      ? String(owner.value || "").slice(selection.startOffset, selection.endOffset)
+      : String(owner.textContent || "").slice(selection.startOffset, selection.endOffset);
+    if (!copiedText || copiedText.length > 512 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(copiedText)) return undefined;
+    var copiedShape = valueShapeOf(copiedText.replace(/^\s+|\s+$/g, ""));
+    if (copiedShape) selection.valueShape = copiedShape;
+    return { text: copiedText, owner: stable.descriptor, selection: selection };
+  }
+
+  function pastedValueDestination(event) {
+    if (!event || event.isTrusted !== true || !event.clipboardData) return undefined;
+    var target = event.target && event.target.nodeType === 1 ? event.target : event.target && event.target.parentElement;
+    if (!target || !isEditableNode(target) || isSensitiveNode(target)) return undefined;
+    var text = "";
+    try { text = (event.clipboardData.getData("text/plain") || "").replace(/[\r\n]+$/, ""); } catch (_error) { return undefined; }
+    if (!text || text.length > 512 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(text)) return undefined;
+    var stable = exactEditableOwner(target);
+    return stable ? { text: text, destination: stable.descriptor } : undefined;
+  }
+
+  function describeFileInput(el) {
+    var labels = el && el.labels ? Array.prototype.map.call(el.labels, function (item) { return (item.innerText || item.textContent || "").replace(/\\s+/g, " ").trim(); }).filter(Boolean) : [];
+    var labelledBy = (el && el.getAttribute && el.getAttribute("aria-labelledby") || "").split(/\\s+/).filter(Boolean)
+      .map(function (id) { var owner = document.getElementById(id); return owner ? (owner.innerText || owner.textContent || "").replace(/\\s+/g, " ").trim() : ""; }).filter(Boolean);
+    var ariaLabel = el && el.getAttribute ? (el.getAttribute("aria-label") || "").trim() : "";
+    var label = ariaLabel || labels[0] || labelledBy.join(" ") || (el && el.name) || "Archivo";
+    var inputRoot = el && typeof el.getRootNode === "function" ? el.getRootNode() : document;
+    var fileInputs = Array.prototype.slice.call((inputRoot && inputRoot.querySelectorAll ? inputRoot : document).querySelectorAll('input[type="file"]'));
+    if (el && fileInputs.indexOf(el) < 0) fileInputs.push(el);
+    var matches = function (predicate) { return fileInputs.filter(predicate).length; };
+    return {
+      label: String(label).slice(0, 120),
+      associatedField: String(label).slice(0, 120),
+      id: el && el.id || undefined,
+      name: el && el.name || undefined,
+      testId: el && el.getAttribute && el.getAttribute("data-testid") || undefined,
+      ariaLabel: ariaLabel || undefined,
+      inputType: "file",
+      multiple: Boolean(el && el.multiple),
+      uniqueFileInput: fileInputs.length === 1,
+      locatorMatchCounts: {
+        domId: el && el.id ? matches(function (candidate) { return candidate.id === el.id; }) : undefined,
+        name: el && el.name ? matches(function (candidate) { return candidate.name === el.name; }) : undefined,
+        testId: el && el.getAttribute && el.getAttribute("data-testid") ? matches(function (candidate) { return candidate.getAttribute("data-testid") === el.getAttribute("data-testid"); }) : undefined,
+        ariaLabel: ariaLabel ? matches(function (candidate) { return candidate.getAttribute("aria-label") === ariaLabel; }) : undefined,
+      },
+    };
+  }
+
+  function bytesToBase64(bytes) {
+    var binary = "";
+    for (var i = 0; i < bytes.length; i += 1) binary += String.fromCharCode(bytes[i]);
+    return btoa(binary);
+  }
+
+  var fileUploadGroupCounter = 0;
+  var fileUploadLastSignature = typeof WeakMap === "function" ? new WeakMap() : undefined;
+  var fileUploadObservedInputs = typeof WeakSet === "function" ? new WeakSet() : undefined;
+
+  function isFileInput(el) {
+    return Boolean(el && (el.tagName || "").toLowerCase() === "input"
+      && (el.getAttribute("type") || "").toLowerCase() === "file");
+  }
+
+  function fileInputFromEvent(event) {
+    var input = event && event.target;
+    if (isFileInput(input)) return input;
+    // PrimeVue/custom upload controls can retarget a composed event to their host.
+    // Resolve the actual file input from the event path before applying the same
+    // trusted-file policy and reading the selected bytes.
+    if (event && typeof event.composedPath === "function") {
+      var path = event.composedPath();
+      for (var pathIndex = 0; pathIndex < path.length; pathIndex += 1) {
+        if (isFileInput(path[pathIndex])) return path[pathIndex];
+      }
+    }
+    return undefined;
+  }
+
+  function observeFileInputs(root) {
+    if (!root) return;
+    if (isFileInput(root)) attachFileInputListeners(root);
+    if (!root.querySelectorAll) return;
+    var inputs = root.querySelectorAll('input[type="file"]');
+    for (var index = 0; index < inputs.length; index += 1) attachFileInputListeners(inputs[index]);
+  }
+
+  function captureFileInputEvent(event, directInput) {
+    var input = directInput || fileInputFromEvent(event);
+    // Files delivered through the recorder-owned chooser fire untrusted events; the recorder flags that window itself.
+    if ((!event || (!event.isTrusted && window.__qaRecorderV2FileDelivery !== true)) || !isFileInput(input)
+      || !input.files || input.files.length === 0) return;
+    var files = Array.prototype.slice.call(input.files);
+    var signature = files.map(function (file) {
+      return [file.name, file.size, file.lastModified, file.type].join(":");
+    }).join("|");
+    var now = Date.now();
+    var previous = fileUploadLastSignature && fileUploadLastSignature.get(input);
+    // Chromium can emit both input and change for one selection. Keep one
+    // durable upload group while still allowing a later replacement selection.
+    if (previous && previous.signature === signature && now - previous.at < 2_000) return;
+    fileUploadLastSignature && fileUploadLastSignature.set(input, { signature: signature, at: now });
+    var groupId = "upload-" + Date.now().toString(36) + "-" + (++fileUploadGroupCounter).toString(36);
+    var target = describeFileInput(input);
+    (async function () {
+      try {
+        await sendFileUpload({ phase: "group_start", groupId: groupId, fileCount: files.length, target: target });
+        for (var fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+          var file = files[fileIndex];
+          await sendFileUpload({ phase: "file_start", groupId: groupId, fileIndex: fileIndex, filename: file.name, contentType: file.type || "application/octet-stream", size: file.size });
+          var chunkSize = 256 * 1024;
+          for (var offset = 0, chunkIndex = 0; offset < file.size; offset += chunkSize, chunkIndex += 1) {
+            var bytes = new Uint8Array(await file.slice(offset, Math.min(offset + chunkSize, file.size)).arrayBuffer());
+            await sendFileUpload({ phase: "file_chunk", groupId: groupId, fileIndex: fileIndex, chunkIndex: chunkIndex, data: bytesToBase64(bytes) });
+          }
+          await sendFileUpload({ phase: "file_end", groupId: groupId, fileIndex: fileIndex });
+        }
+        await sendFileUpload({ phase: "group_end", groupId: groupId });
+      } catch (_error) {
+        sendFileUpload({ phase: "group_error", groupId: groupId, reason: "file_capture_failed" }).catch(function () {});
+      }
+    })();
+  }
+
+  function attachFileInputListeners(input) {
+    if (!isFileInput(input) || (fileUploadObservedInputs && fileUploadObservedInputs.has(input))) return;
+    fileUploadObservedInputs && fileUploadObservedInputs.add(input);
+    input.addEventListener("input", function (event) { captureFileInputEvent(event, input); }, true);
+    input.addEventListener("change", function (event) { captureFileInputEvent(event, input); }, true);
+  }
+
+  // The Portal creates the file input only while opening its native chooser and
+  // removes it again afterwards. Observe the transient node and attach directly;
+  // this also catches non-composed events that never reach document listeners.
+  observeFileInputs(document);
+  if (typeof MutationObserver === "function") {
+    new MutationObserver(function (records) {
+      records.forEach(function (record) {
+        for (var index = 0; index < record.addedNodes.length; index += 1) observeFileInputs(record.addedNodes[index]);
+      });
+    }).observe(document, { childList: true, subtree: true });
+  }
+  // Some upload wrappers create the input detached, call click(), and only then
+  // attach/remove it around the native dialog. The mutation observer cannot see
+  // that detached node, so bind before the browser opens the chooser as well.
+  try {
+    var nativeInputClick = window.HTMLInputElement && window.HTMLInputElement.prototype.click;
+    if (nativeInputClick) {
+      window.HTMLInputElement.prototype.click = function () {
+        if (isFileInput(this)) attachFileInputListeners(this);
+        return nativeInputClick.apply(this, arguments);
+      };
+    }
+    var nativeShowPicker = window.HTMLInputElement && window.HTMLInputElement.prototype.showPicker;
+    if (nativeShowPicker) {
+      window.HTMLInputElement.prototype.showPicker = function () {
+        if (isFileInput(this)) attachFileInputListeners(this);
+        return nativeShowPicker.apply(this, arguments);
+      };
+    }
+  } catch (_error) {
+    // A hardened page may expose read-only input prototypes; delegated capture remains active.
+  }
+  document.addEventListener("input", function (event) { captureFileInputEvent(event); }, true);
+  document.addEventListener("change", function (event) { captureFileInputEvent(event); }, true);
+
+  document.addEventListener("copy", function (event) {
+    var source = selectedValueSource(event);
+    if (!source) {
+      // Text was copied but cannot be linked to a stable owner; still tell the recorder a selection just happened.
+      if (event && event.isTrusted === true) sendValueTransfer({ phase: "copy_seen", text: "" }).catch(function () {});
+      return;
+    }
+    sendValueTransfer({ phase: "copy", text: source.text, owner: source.owner, selection: source.selection });
+  }, true);
+  document.addEventListener("paste", function (event) {
+    var destination = pastedValueDestination(event);
+    if (!destination) return;
+    sendValueTransfer({ phase: "paste", text: destination.text, destination: destination.destination });
+  }, true);
+
   window.__qaRecorderV2Flush = async function () {
     while (pendingBindingCalls.size > 0) {
       await Promise.allSettled(Array.from(pendingBindingCalls));
@@ -87,6 +467,75 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     if (!el || typeof el.getBoundingClientRect !== "function") return false;
     var rect = el.getBoundingClientRect();
     return rect.width > 0 && rect.height > 0;
+  }
+
+  // A click on a leaf whose text repeats across sibling items (the same price on several insurance cards) says
+  // nothing about WHICH item was chosen. The item's own name is what a person reads ("PRESTAMO CONSUMO HUMANO"),
+  // so use the first text inside the same item that is unique on the whole page. The search never leaves the
+  // item: it stops before any container that also holds another element with the clicked text.
+  function distinguishingCardTitle(el, name) {
+    var tag = (el.tagName || "").toLowerCase();
+    var norm = function (value) { return String(value || "").replace(/\s+/g, " ").trim(); };
+    var wanted = norm(name);
+    if (!tag || !wanted) return undefined;
+    var sameText = Array.prototype.slice.call(document.querySelectorAll(tag), 0, 4000).filter(function (node) {
+      return isVisible(node) && norm(ownVisibleText(node)) === wanted;
+    });
+    if (sameText.length < 2) return undefined;
+    var textCounts = {};
+    Array.prototype.slice.call(document.querySelectorAll("body *"), 0, 6000).forEach(function (node) {
+      if (node.children.length === 0 && isVisible(node)) {
+        var text = norm(ownVisibleText(node));
+        if (text) textCounts[text] = (textCounts[text] || 0) + 1;
+      }
+    });
+    var container = el.parentElement;
+    for (var level = 0; container && level < 6; level++, container = container.parentElement) {
+      var holdsAnotherSameText = sameText.some(function (node) { return node !== el && container.contains(node); });
+      if (holdsAnotherSameText) return undefined;
+      var leaves = Array.prototype.slice.call(container.querySelectorAll("*"), 0, 300).filter(function (node) {
+        return node !== el && node.children.length === 0 && isVisible(node);
+      });
+      for (var i = 0; i < leaves.length; i++) {
+        var title = norm(ownVisibleText(leaves[i]));
+        if (title.length >= 3 && title.length <= 80 && /[A-Za-zÀ-ÿ]{3,}/.test(title) && textCounts[title] === 1) {
+          return { text: title, tag: (leaves[i].tagName || "").toLowerCase() };
+        }
+      }
+    }
+    return undefined;
+  }
+
+  // The clicked element's own text is unique on the page and it sits inside one of several sibling items of the same
+  // shape (a card among cards): it is the title of the item that was chosen.
+  function isTitleOfRepeatedItem(el, name) {
+    var tag = (el.tagName || "").toLowerCase();
+    var wanted = String(name || "").replace(/\s+/g, " ").trim();
+    if (!tag || !wanted) return false;
+    var sameText = Array.prototype.slice.call(document.querySelectorAll(tag), 0, 4000).filter(function (node) {
+      return isVisible(node) && String(ownVisibleText(node) || "").replace(/\s+/g, " ").trim() === wanted;
+    });
+    if (sameText.length !== 1) return false;
+    // Sibling items share a shape, not necessarily identical classes (a carousel adds "first/last/active" state
+    // classes): compare the tag and the tags of the children and grandchildren.
+    var shapeOf = function (node) {
+      var parts = [node.tagName];
+      Array.prototype.forEach.call(node.children, function (child) {
+        parts.push(child.tagName + "(" + Array.prototype.map.call(child.children, function (grand) { return grand.tagName; }).join(",") + ")");
+      });
+      return parts.join("|");
+    };
+    var item = el.parentElement;
+    for (var level = 0; item && level < 6; level++, item = item.parentElement) {
+      var holder = item.parentElement;
+      if (!holder) continue;
+      var itemShape = shapeOf(item);
+      var siblings = Array.prototype.filter.call(holder.children, function (child) {
+        return isVisible(child) && shapeOf(child) === itemShape;
+      });
+      if (siblings.length >= 2 && String(item.textContent || "").length <= 400) return true;
+    }
+    return false;
   }
 
   function observedOptionsForClick(event) {
@@ -183,7 +632,19 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
       var pressedLabel = ((keyElement.getAttribute && (keyElement.getAttribute("aria-label") || keyElement.getAttribute("value"))) || keyElement.innerText || keyElement.textContent || "").trim();
       if (Array.from(pressedLabel).length !== 1 || /\s/.test(pressedLabel) || keyLabels.indexOf(pressedLabel) < 0) continue;
       var fieldLabel;
-      var labelRoot = node.parentElement;
+      // Bind the keyboard to one explicitly labelled receiver, never to an individual key.
+      var receiverAmbiguous = false;
+      var receiverRoot = node.parentElement;
+      for (var receiverDepth = 0; receiverRoot && receiverDepth < 5 && !fieldLabel; receiverDepth++, receiverRoot = receiverRoot.parentElement) {
+        var receivers = Array.prototype.slice.call(receiverRoot.querySelectorAll('input:not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="checkbox"]):not([type="radio"]),textarea,[role="textbox"],[contenteditable="true"]'))
+          .filter(function (candidate) { return !node.contains(candidate) && isVisible(candidate); });
+        if (receivers.length > 1) { receiverAmbiguous = true; break; }
+        if (receivers.length === 1) {
+          var receiverLabel = explicitAccessibleName(receivers[0]);
+          if (receiverLabel && receiverLabel.length <= 120 && keyLabels.indexOf(receiverLabel) < 0 && !isPlaceholderPrompt(receiverLabel)) fieldLabel = receiverLabel;
+        }
+      }
+      var labelRoot = receiverAmbiguous ? undefined : node.parentElement;
       for (var labelDepth = 0; labelRoot && labelDepth < 5 && !fieldLabel; labelDepth++, labelRoot = labelRoot.parentElement) {
         var headings = Array.prototype.slice.call(labelRoot.querySelectorAll('h1,h2,h3,h4,h5,h6,[role="heading"],label'))
           .filter(function (candidate) { return !node.contains(candidate) && isVisible(candidate); })
@@ -209,7 +670,7 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
       // Prefer the full alphabetic keyboard over one of its 10-key rows. A standalone
       // numeric keypad remains supported when it is itself a compact group.
       if (keyLabels.length >= 20) return evidence;
-      if (buttons.length <= 12) numericKeypadFallback = evidence;
+      if (buttons.length <= 12 && (!numericKeypadFallback || (!numericKeypadFallback.fieldLabel && evidence.fieldLabel))) numericKeypadFallback = evidence;
     }
     return numericKeypadFallback;
   }
@@ -233,6 +694,7 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
   // button caption cannot suppress a stronger grid/header relation during browser capture.
   var GENERIC_UNRESOLVED_LABELS = new Set(${JSON.stringify(Array.from(GENERIC_UNRESOLVED_LABELS))});
   var isGenericUnresolvedLabel = ${isGenericUnresolvedLabel.toString()};
+  var isPlaceholderPrompt = ${isPlaceholderPrompt.toString()};
   window.__qaStructuralIdentityDiagnostic = function (kind, payload) {
     send({ type: "structural_identity_diagnostic", diagnosticKind: kind, payload: payload });
   };
@@ -385,6 +847,105 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
       }
     }
     try { send({ type: "capture_trace", stage: "associated_field_depth_diagnostic", trusted: true, diagnostic: { found: false, levels: levelDiagnostics } }); } catch (e) { /* never blocks capture */ }
+    return undefined;
+  }
+
+  // A selector owner's field label may be captured only from an explicit field-owner/grid
+  // relation, or from a bounded group containing exactly this one interactive control and one
+  // short visible label. This avoids borrowing a neighboring label in a form with several fields.
+  var SELECTION_OWNER_SELECTOR = "input,textarea,select,button,a,[role],[aria-haspopup],[aria-controls]";
+  function computeUniqueSelectionOwnerField(el) {
+    var explicitFieldOwner = el.getAttribute && el.getAttribute("data-field-owner");
+    var gridHeader = gridHeaderContext(el);
+    var node = el;
+    for (var depth = 0; depth < MAX_FIELD_CONTAINER_DEPTH && node && node.parentElement; depth++) {
+      node = node.parentElement;
+      var controls = Array.prototype.slice.call(node.querySelectorAll ? node.querySelectorAll(SELECTION_OWNER_SELECTOR) : [])
+        .filter(function (candidate) { return isVisible(candidate); });
+      var labels = [];
+      var children = node.children ? Array.prototype.slice.call(node.children) : [];
+      for (var childIndex = 0; childIndex < children.length; childIndex++) {
+        var child = children[childIndex];
+        if (child === el || (child.contains && child.contains(el))) continue;
+        var tag = (child.tagName || "").toLowerCase();
+        if (["input", "textarea", "select", "button", "a", "svg", "path"].indexOf(tag) !== -1) continue;
+        var label = child.textContent ? child.textContent.trim().replace(/\s+/g, " ") : "";
+        if (label && label.length <= MAX_FIELD_LABEL_LENGTH && isVisible(child)) labels.push(label);
+      }
+      var resolved = resolveSelectionFieldOwnerLabel({
+        explicitFieldOwner: explicitFieldOwner,
+        gridHeaderContext: gridHeader,
+        interactiveControlCount: controls.length,
+        ownerIsOnlyControl: controls.length === 1 && controls[0] === el,
+        visibleLabelCandidates: labels,
+      });
+      if (resolved) return resolved;
+      if (controls.length === 1 && controls[0] === el && labels.length > 1) return undefined;
+    }
+    return undefined;
+  }
+
+  function selectionTriggerEvidenceFor(el) {
+    var tag = (el.tagName || "").toLowerCase();
+    var role = (el.getAttribute && el.getAttribute("role")) || "";
+    var controlledRoles = [];
+    var controls = (el.getAttribute && el.getAttribute("aria-controls")) || "";
+    controls.split(/\s+/).filter(Boolean).forEach(function (id) {
+      var controlled = document.getElementById(id);
+      if (controlled) controlledRoles.push((controlled.getAttribute("role") || "").toLowerCase());
+    });
+    return detectSelectionTriggerEvidence({
+      tag: tag,
+      role: role,
+      ariaHasPopup: el.getAttribute && el.getAttribute("aria-haspopup"),
+      controlledRoles: controlledRoles,
+    });
+  }
+
+  // Choice controls (radio/checkbox/switch) such as a yes/no pair repeat the SAME accessible name
+  // on every question of a form ("No" x9), so their own name cannot identify which one was
+  // recorded. The only durable identity is the question text that precedes the group. This is
+  // computed ONLY for those roles and ONLY when the name is shared by other visible controls of
+  // the same role; named buttons/links keep carrying no associatedField (see the regression note
+  // at the associatedField call site).
+  var GROUP_CHOICE_ROLES = ["radio", "checkbox", "switch", "menuitemradio"];
+  var MAX_GROUP_QUESTION_LENGTH = 240;
+  var MAX_GROUP_QUESTION_DEPTH = 5;
+
+  function choiceControlName(node) {
+    var aria = node.getAttribute ? (node.getAttribute("aria-label") || "") : "";
+    return (aria || node.textContent || "").trim();
+  }
+
+  function computeChoiceGroupQuestion(el, ownName) {
+    var role = ((el.getAttribute && el.getAttribute("role")) || "").toLowerCase();
+    if (GROUP_CHOICE_ROLES.indexOf(role) === -1 || !ownName) return undefined;
+    var sameNamed = 0;
+    try {
+      Array.prototype.forEach.call(document.querySelectorAll('[role="' + role + '"]'), function (candidate) {
+        if (choiceControlName(candidate) === ownName && isVisible(candidate)) sameNamed++;
+      });
+    } catch (e) { return undefined; }
+    if (sameNamed < 2) return undefined;
+    var node = el;
+    var longQuestion;
+    for (var depth = 0; depth < MAX_GROUP_QUESTION_DEPTH && node && node.parentElement; depth++) {
+      node = node.parentElement;
+      var children = node.children ? Array.prototype.slice.call(node.children) : [];
+      for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        if (child === el || (child.contains && child.contains(el))) continue;
+        var childTag = (child.tagName || "").toLowerCase();
+        if (["input", "textarea", "select", "button", "a", "svg", "path"].indexOf(childTag) !== -1) continue;
+        if (child.querySelector && child.querySelector('[role="' + role + '"]')) continue;
+        if (((child.getAttribute && child.getAttribute("role")) || "").toLowerCase() === role) continue;
+        var text = child.textContent ? child.textContent.trim().replace(/\s+/g, " ") : "";
+        if (text && text.length <= MAX_GROUP_QUESTION_LENGTH && isVisible(child)) return text;
+        // A long question is still the group's identity: keep its leading words as a fallback.
+        if (text.length > MAX_GROUP_QUESTION_LENGTH && !longQuestion && isVisible(child)) longQuestion = text.slice(0, MAX_GROUP_QUESTION_LENGTH).replace(/\s+\S*$/, "");
+      }
+      if (longQuestion) return longQuestion;
+    }
     return undefined;
   }
 
@@ -708,6 +1269,7 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     var strongName = nativeRoleIdentity.displayName || "";
     var explicitRole = (el.getAttribute && el.getAttribute("role") || "").toLowerCase();
     var nativeTag = (el.tagName || "").toLowerCase();
+    var selectionTriggerEvidence = selectionTriggerEvidenceFor(el);
     // A generic caption on a button (for example an empty-cell prompt) is not a durable
     // accessible identity. Let the existing structural header/field logic scope it; the real
     // observed click remains in the trace, while runtime uniqueness is still checked later.
@@ -725,8 +1287,16 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     // strong own name ever attempts, in order: a certified grid column relation, the
     // data-field-owner hint, or the generic structural ancestor walk -- a grid header always
     // outranks the generic walk since it is certified by column-index alignment, not proximity.
+    var choiceGroupQuestion = strongName ? computeChoiceGroupQuestion(el, strongName) : undefined;
+    // A dropdown whose own name is only its empty-state prompt ("Seleccione una opción") belongs to
+    // the field whose label sits next to it; keep the prompt as the name but record that label.
+    var selectionOwnerField = selectionTriggerEvidence ? computeUniqueSelectionOwnerField(el) : undefined;
+    var promptOwnerField = (strongName && (selectionTriggerEvidence || explicitRole === "combobox" || nativeTag === "select") && isPlaceholderPrompt(strongName))
+      ? (gridHeaderContext(el) || computeAssociatedField(el))
+      : undefined;
+    if (promptOwnerField && isPlaceholderPrompt(promptOwnerField)) promptOwnerField = undefined;
     var associatedField = strongName
-      ? undefined
+      ? (choiceGroupQuestion || selectionOwnerField || promptOwnerField)
       : (gridHeaderContext(el) || (el.getAttribute && el.getAttribute("data-field-owner")) || computeAssociatedField(el) || undefined);
     // placeholder/title are real identity ONLY when nothing stronger applies at all -- a grid
     // editor's placeholder ("Indicar...", a phone-format mask) must never win over its own
@@ -737,6 +1307,19 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
     // content to structural/runtime evidence so a click cannot become a whole-screen sentence.
     var accessibleName = strongName || weakName;
     if (accessibleName && accessibleName.length > 120) accessibleName = "";
+    var promotedCardTitle;
+    // A choice inside a group (Sí/No radio, option) already has its identity: its own text plus the group question.
+    // Promoting a "title" there swaps the choice ("No") for the group question.
+    var isGroupChoice = Boolean(choiceGroupQuestion)
+      || Boolean(el.closest && el.closest('[role="radio"],[role="checkbox"],[role="option"],[role="switch"],[role="tab"],[role="menuitemradio"],[role="menuitemcheckbox"]'));
+    if (accessibleName && originalTarget && el === originalTarget && !el.id && !isEditableNode(el) && !isGroupChoice) {
+      try { promotedCardTitle = distinguishingCardTitle(el, accessibleName); } catch (titleError) { promotedCardTitle = undefined; }
+      if (promotedCardTitle) accessibleName = promotedCardTitle.text;
+    }
+    var repeatedItemTitle = false;
+    if (!promotedCardTitle && !isGroupChoice && accessibleName && originalTarget && el === originalTarget && !isEditableNode(el)) {
+      try { repeatedItemTitle = isTitleOfRepeatedItem(el, accessibleName); } catch (itemError) { repeatedItemTitle = false; }
+    }
     // DIAGNOSE-ONLY (gate #1/#3 boundary rollout): booleans/counts only, bounded to shallow
     // composedPath depths so a deep DOM never turns one click into a log flood.
     if (trustedInteraction === true && depth < 4) {
@@ -1051,9 +1634,12 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
       visible: isVisible(el),
       technicalRefs: technicalRefs.length > 0 ? technicalRefs : undefined,
       accessibleName: accessibleName ? accessibleName.slice(0, 80) : undefined,
+      promotedCardTitle: promotedCardTitle,
+      repeatedItemTitle: repeatedItemTitle,
       technicalRoleName: nativeRoleIdentity.technicalRoleName ? nativeRoleIdentity.technicalRoleName.slice(0, 80) : undefined,
       roleTechnicalIdentityEligible: nativeRoleIdentity.roleTechnicalIdentityEligible,
       associatedField: associatedField,
+      selectionTriggerEvidence: selectionTriggerEvidence,
       trustedClick: trustedInteraction === true,
       frameworkActionable: frameworkActionable,
       frameworkIdentitySufficient: frameworkIdentitySufficient,
@@ -1134,6 +1720,7 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
           scopeIdentity: semanticScopeAlternatives[0].scopeIdentity,
           captureMatchCount: 1,
           runtimeResolutionRequired: true,
+          ...(candidates[0].repeatedItemTitle ? { promotedTitle: true } : {}),
         };
       }
       // Recorder intent is a capture candidate, not a capture-time certificate. When the
@@ -1145,14 +1732,39 @@ export function buildCaptureScriptV2Content(captureInstanceId: string): string {
       if (candidates.length > 0 && !candidates[0].playwrightRecorderEvidence && originalTarget) {
         var recorderSemanticValue = semanticDisplayValueOf(originalTarget);
         var recorderNormalizedValue = normalizeSemanticValue(recorderSemanticValue.value);
+        // The step is named by the item's own unique title (see distinguishingCardTitle), so the replay evidence is
+        // that title too: it resolves by text on the whole page without needing a position.
+        var recorderPromotedTitle = candidates[0].promotedCardTitle;
+        if (recorderPromotedTitle && normalizeSemanticValue(recorderPromotedTitle.text)) {
+          recorderNormalizedValue = normalizeSemanticValue(recorderPromotedTitle.text);
+        } else {
+          recorderPromotedTitle = undefined;
+        }
         if (recorderNormalizedValue && !isEditableNode(originalTarget)) {
-          var recorderStructuralScope = candidates[0].structuralIdentity && candidates[0].structuralIdentity.scopeIdentity;
+          var recorderStructuralScope = recorderPromotedTitle ? undefined : (candidates[0].structuralIdentity && candidates[0].structuralIdentity.scopeIdentity);
+          // Same visible text on several elements of the same tag (the same price on several cards): without a
+          // scope, text alone cannot say which one was clicked. Keep its position among them (what Playwright's
+          // recorder emits as nth()); replay applies it only when the live count is the same.
+          var recorderTextOrdinal;
+          if (!recorderStructuralScope && !recorderPromotedTitle) {
+            try {
+              var ordinalTag = (originalTarget.tagName || "").toLowerCase();
+              var ordinalPool = Array.prototype.slice.call(document.querySelectorAll(ordinalTag), 0, 4000);
+              var ordinalMatches = ordinalPool.filter(function (node) {
+                return isVisible(node) && normalizeSemanticValue(semanticDisplayValueOf(node).value) === recorderNormalizedValue;
+              });
+              var ordinalIndex = ordinalMatches.indexOf(originalTarget);
+              if (ordinalMatches.length > 1 && ordinalIndex >= 0) recorderTextOrdinal = { index: ordinalIndex, count: ordinalMatches.length };
+            } catch (ordinalError) { /* ordinal is optional evidence */ }
+          }
           candidates[0].playwrightRecorderEvidence = {
             kind: recorderSemanticValue.source === "accessible_name" && candidates[0].role ? "role" : "text",
             ...(candidates[0].role ? { role: candidates[0].role } : {}),
             normalizedName: recorderNormalizedValue,
-            targetTag: (originalTarget.tagName || "").toLowerCase(),
+            targetTag: recorderPromotedTitle ? recorderPromotedTitle.tag : (originalTarget.tagName || "").toLowerCase(),
             ...(recorderStructuralScope ? { scopeIdentity: recorderStructuralScope } : {}),
+            ...(recorderTextOrdinal ? { textMatchOrdinal: recorderTextOrdinal } : {}),
+            ...(recorderPromotedTitle || candidates[0].repeatedItemTitle ? { promotedTitle: true } : {}),
             runtimeResolutionRequired: true,
           };
         }

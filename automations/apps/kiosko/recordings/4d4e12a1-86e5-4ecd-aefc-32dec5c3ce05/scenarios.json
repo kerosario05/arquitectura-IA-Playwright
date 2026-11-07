@@ -1,0 +1,580 @@
+[
+  {
+    "scenarioId": "REC-4D4E12A1-01",
+    "title": "Login",
+    "description": "Recorrido observado para completar \"Login\". Se registraron 10 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://172.27.4.50/",
+        "description": "Navegar a https://172.27.4.50/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Explora nuestros productos"
+        },
+        "description": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-5",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Tarjetas"
+        },
+        "description": "Presionar \"Tarjetas\"",
+        "interactionId": "interaction-8",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Tarjeta de Crédito"
+        },
+        "description": "Presionar \"Tarjeta de Crédito\"",
+        "interactionId": "interaction-11",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Tarjeta Crédito Visa Clásica"
+        },
+        "description": "Presionar \"Tarjeta Crédito Visa Clásica\"",
+        "interactionId": "interaction-14",
+        "pageKey": "tab-1"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Presionar \"Explora nuestros productos\"",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "renderedStep": "Presionar \"Explora nuestros productos\"",
+        "interactionId": "interaction-5",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-catalog",
+        "stateScope": "dc2446075abc",
+        "stepNumber": 2
+      },
+      {
+        "content": "Presionar \"Tarjetas\"",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "renderedStep": "Presionar \"Tarjetas\"",
+        "interactionId": "interaction-8",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "962b4393ca35",
+        "screenAfterRef": "962b4393ca35",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=cards",
+        "stateScope": "962b4393ca35",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Tarjeta de Crédito\"",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "renderedStep": "Presionar \"Tarjeta de Crédito\"",
+        "interactionId": "interaction-11",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "3cf76be5e38a",
+        "screenAfterRef": "3cf76be5e38a",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "stateScope": "3cf76be5e38a",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Tarjeta Crédito Visa Clásica\"",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "renderedStep": "Presionar \"Tarjeta Crédito Visa Clásica\"",
+        "interactionId": "interaction-14",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "748be9d19a07",
+        "screenAfterRef": "748be9d19a07",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "routeAfter": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+        "stateScope": "748be9d19a07",
+        "stepNumber": 5
+      }
+    ],
+    "requiredData": [],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Explora nuestros productos\"",
+        "strategy": "role",
+        "value": "button|Explora nuestros productos"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Presionar \"Tarjetas\"",
+        "strategy": "role",
+        "value": "button|Tarjetas"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Tarjeta de Crédito\"",
+        "strategy": "role",
+        "value": "button|Tarjeta de Crédito"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Presionar \"Tarjeta Crédito Visa Clásica\"",
+        "strategy": "role",
+        "value": "button|Tarjeta Crédito Visa Clásica"
+      }
+    ],
+    "sourceRecordingId": "4d4e12a1-86e5-4ecd-aefc-32dec5c3ce05",
+    "hasUncertainSteps": false,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": true,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 5,
+    "functionalActionCount": 4,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Login",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "pageKey": "tab-1",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://172.27.4.50/"
+      },
+      {
+        "id": "interaction-2",
+        "controlIdentity": "b0e37d93476d",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-2"
+        ],
+        "technicalTargetRefs": [],
+        "pageKey": "tab-1",
+        "stateScope": "b0e37d93476d",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "b0e37d93476d",
+        "screenAfterRef": "b0e37d93476d",
+        "routeBefore": "https://172.27.4.50/"
+      },
+      {
+        "id": "interaction-5",
+        "controlIdentity": "dc2446075abc|Explora nuestros productos|role|button|Explora nuestros productos",
+        "action": "click",
+        "pageKey": "tab-1",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Explora nuestros productos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Explora nuestros productos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Explora nuestros productos"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",1]],\"descendantEntries\":[[\"circle\",1],[\"div\",3],[\"h3\",1],[\"p\",1],[\"path\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"div\\\",3],[\\\"h3\\\",1],[\\\"p\\\",1],[\\\"path\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "stateScope": "dc2446075abc",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "dc2446075abc",
+        "screenAfterRef": "dc2446075abc",
+        "routeBefore": "https://172.27.4.50/",
+        "routeAfter": "https://172.27.4.50/product-catalog",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-8",
+        "controlIdentity": "962b4393ca35|Tarjetas|role|button|Tarjetas",
+        "semanticField": "Tarjetas",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "tarjetas",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Tarjetas"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjetas",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",1],[\\\"rect\\\",1],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Tarjetas\"",
+        "stateScope": "962b4393ca35",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "962b4393ca35",
+        "screenAfterRef": "962b4393ca35",
+        "routeBefore": "https://172.27.4.50/product-catalog",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=cards",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-11",
+        "controlIdentity": "3cf76be5e38a|Tarjeta de Crédito|role|button|Tarjeta de Crédito",
+        "semanticField": "Tarjeta de Crédito",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "tarjeta_de_credito",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Tarjeta de Crédito"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjeta de Crédito",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"div\",2]],\"descendantEntries\":[[\"div\",6],[\"h3\",1],[\"line\",1],[\"path\",1],[\"rect\",1],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"div\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"div\\\",2]],\\\"descendantEntries\\\":[[\\\"div\\\",6],[\\\"h3\\\",1],[\\\"line\\\",1],[\\\"path\\\",1],[\\\"rect\\\",1],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Tarjeta de Crédito",
+          "targetTag": "h3",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(img[alt=\"Banco Santa Cruz\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "description": "Ingresar en \"Tarjeta de Crédito\"",
+        "stateScope": "3cf76be5e38a",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "3cf76be5e38a",
+        "screenAfterRef": "3cf76be5e38a",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards",
+        "routeAfter": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-14",
+        "controlIdentity": "748be9d19a07|Tarjeta Crédito Visa Clásica|role|button|Tarjeta Crédito Visa Clásica",
+        "action": "click",
+        "pageKey": "tab-1",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Tarjeta Crédito Visa Clásica"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Tarjeta Crédito Visa Clásica",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Tarjeta Crédito Visa Clásica"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "root"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Tarjeta Crédito Visa Clásica",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Tarjeta Crédito Visa Clásica\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "stateScope": "748be9d19a07",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "748be9d19a07",
+        "screenAfterRef": "748be9d19a07",
+        "routeBefore": "https://172.27.4.50/product-subcategory?category=cards&subcategory=credit",
+        "routeAfter": "https://172.27.4.50/product-extended?product=tarjeta-credito-visa-clasica",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": true,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": true,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [],
+    "runtimeDataset": {
+      "scenarioId": "REC-4D4E12A1-01",
+      "requirements": [],
+      "resolvedValues": {},
+      "missingValues": []
+    },
+    "mutationOpportunities": [],
+    "testRailCaseId": 56644,
+    "testRailDestination": {
+      "projectId": "56",
+      "suiteId": "1731",
+      "sectionId": "4755"
+    },
+    "promotedSpec": {
+      "appSlug": "kiosko",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\kiosko\\sections\\api-tests\\cases\\preview-001-login\\case.spec.ts",
+      "specHash": "36679c4979703f87d840d623199b0aeb63e0a31527df0cf3622043f7577a5ac7",
+      "automationId": "preview-001-login",
+      "sectionSlug": "api-tests",
+      "generatedAt": "2026-10-29T16:55:48.801Z"
+    }
+  }
+]

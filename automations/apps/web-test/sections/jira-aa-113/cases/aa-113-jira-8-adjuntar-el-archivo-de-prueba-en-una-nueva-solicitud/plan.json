@@ -1,0 +1,227 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-27T18:05:45.646Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-113:jira:8",
+    "title": "Adjuntar el archivo de prueba en una nueva solicitud"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [usuario_negocios]",
+      "valueKey": "usuario_negocios",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [contrasena_negocios]",
+      "valueKey": "contrasena_negocios",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Solicitudes\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Solicitudes",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Nueva solicitud\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Nueva solicitud",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "uploadFile",
+      "description": "Adjuntar el archivo de prueba en \"Seleccionar documento\"",
+      "valueKey": "archivo_prueba",
+      "target": {
+        "strategy": "label",
+        "value": "Seleccionar documento",
+        "metadata": {
+          "resolvedTargetName": "Seleccionar documento",
+          "validationStatus": "observed_file_input"
+        }
+      }
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Presionar \"Cargar documento\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Cargar documento",
+        "exact": true
+      }
+    },
+    {
+      "index": 10,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Gestión Documental\"",
+      "target": {
+        "strategy": "text",
+        "value": "Gestión Documental"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "usuario_negocios",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena_negocios",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "archivo_prueba",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Adjuntar el archivo de prueba en una nueva solicitud",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "usuario_negocios",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "contrasena_negocios",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Nueva solicitud"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "uploadFile",
+        "valueKey": "archivo_prueba",
+        "technicalTargetRefs": [
+          "label:Seleccionar documento"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Cargar documento"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Gestión Documental\"",
+        "technicalTargetRefs": [
+          "text:Gestión Documental"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-10",
+        "requirement": "Validar que se muestre \"Gestión Documental\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 10,
+        "target": "Gestión Documental",
+        "evidence": [
+          "live-step-10"
+        ],
+        "details": {
+          "observedText": "Gestión Documental"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Se muestra \"Gestión Documental\"."
+  }
+}

@@ -70,6 +70,20 @@ test("1/structuredCredentialAuthority. only the steps owning a structured creden
   assert.equal(set.has(3), false, "a non-fill step is never marked");
 });
 
+test("1a/recordedLoginWithoutObservedGate. a complete recorded credential login still owns auth authority; anything less fails closed", () => {
+  const plan = [
+    { index: 1, valueKey: "usuario", action: "fill" },
+    { index: 2, valueKey: "contrasena", action: "fill" },
+    { index: 3, action: "press" },
+    { index: 13, valueKey: "monto", action: "fill" },
+  ];
+  assert.deepEqual([...resolveAuthGateFillScenarioStepIndices(RECORDING_LIKE_STEPS, undefined, plan)].sort((a, b) => a - b), [1, 2]);
+  assert.deepEqual([...resolveAuthGateFillScenarioStepIndices(RECORDING_LIKE_STEPS, { gateDetected: false, required: false }, plan)].sort((a, b) => a - b), [1, 2]);
+  assert.equal(resolveAuthGateFillScenarioStepIndices(RECORDING_LIKE_STEPS, undefined, plan.filter((step) => step.action !== "press")).size, 0, "no recorded submit");
+  assert.equal(resolveAuthGateFillScenarioStepIndices(RECORDING_LIKE_STEPS, undefined, plan.filter((step) => step.valueKey !== "contrasena")).size, 0, "no password credential");
+  assert.equal(resolveAuthGateFillScenarioStepIndices(RECORDING_LIKE_STEPS, undefined, plan.filter((step) => step.valueKey !== "usuario")).size, 0, "no identity credential");
+});
+
 test("2/businessFill. a business fill (no credential role) is never an auth-gate credential field", () => {
   const auth: SpecExecutionContractAuth = { gateDetected: true, required: false };
   const set = resolveAuthGateFillScenarioStepIndices(RECORDING_LIKE_STEPS, auth, CREDENTIAL_PLAN_STEPS);

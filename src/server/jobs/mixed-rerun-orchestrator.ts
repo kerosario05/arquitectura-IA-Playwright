@@ -65,6 +65,7 @@ export type MixedRerunInput = {
   rerunMode: string;
   reuseScenarios: ReuseExistingPromotedSpecScenario[];
   fallbackScenarios: McpScenario[];
+  specDatasetValuesByScenario?: Record<string, Record<string, string>>;
 };
 
 type CaseProgress = {
@@ -352,6 +353,7 @@ export async function startMixedRerun(
       executionMode: "reuse_existing_promoted_spec",
       ...(parentTestRunId ? { testRunId: parentTestRunId } : {}),
       executionContext: { evidenceRunId: parentJobId, suppressEvidenceConsolidation: true },
+      ...(parentParams.serviceBindings ? { serviceBindings: parentParams.serviceBindings } : {}),
     },
     { parentJobId },
   );
@@ -384,6 +386,7 @@ export async function startMixedRerun(
     "scenario-preview",
     {
       scenarios: fallbackScenarios,
+      specDatasetValuesByScenario: input.specDatasetValuesByScenario,
       appSlug,
       targetAppSlug: input.targetAppSlug,
       targetAppName: input.targetAppName,
@@ -397,8 +400,12 @@ export async function startMixedRerun(
       publishToTestRail: false,
       createTestRun: false,
       reportResults: false,
+      ...(parentParams.specDatasetValuesByScenario && typeof parentParams.specDatasetValuesByScenario === "object"
+        ? { specDatasetValuesByScenario: parentParams.specDatasetValuesByScenario }
+        : {}),
       options: input.options ?? { overwrite: true, autoPromote: true, autoPom: true, rerunActive: true, headed: false },
       executionContext: { evidenceRunId: parentJobId, suppressEvidenceConsolidation: true },
+      ...(parentParams.serviceBindings ? { serviceBindings: parentParams.serviceBindings } : {}),
     },
     { parentJobId },
   );

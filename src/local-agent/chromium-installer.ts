@@ -123,44 +123,8 @@ export class ChromiumInstaller {
     }
   }
 
-  private async download(request: InstallRequest, zipPath: string, onProgress: (p: InstallProgress) => void): Promise<void> {
-    const url = new URL(request.url, `${this.serverUrl}/`).toString();
-    const response = await fetch(url, { headers: this.headers });
-    if (!response.ok || !response.body) throw new Error(`descarga de Chromium falló: HTTP ${response.status}`);
-
-    const totalBytes = Number(response.headers.get("content-length")) || request.sizeBytes || undefined;
-    const hash = createHash("sha256");
-    const out = fs.createWriteStream(zipPath);
-    let receivedBytes = 0;
-    let lastPercent = -1;
-    let lastReport = 0;
-
-    try {
-      for await (const chunk of response.body as unknown as AsyncIterable<Uint8Array>) {
-        hash.update(chunk);
-        receivedBytes += chunk.length;
-        if (!out.write(chunk)) await new Promise<void>((r) => out.once("drain", () => r()));
-        const percent = totalBytes ? Math.min(100, Math.floor((receivedBytes / totalBytes) * 100)) : undefined;
-        const now = Date.now();
-        if ((percent !== undefined && percent !== lastPercent) || now - lastReport > 500) {
-          lastPercent = percent ?? lastPercent;
-          lastReport = now;
-          onProgress({ phase: "download", receivedBytes, totalBytes, percent });
-        }
-      }
-    } finally {
-      await new Promise<void>((resolve, reject) => out.end((err?: Error | null) => (err ? reject(err) : resolve())));
-    }
-
-    if (totalBytes && receivedBytes !== totalBytes) {
-      throw new Error(`descarga incompleta: ${receivedBytes} de ${totalBytes} bytes`);
-    }
-    if (request.sha256) {
-      const actual = hash.digest("hex");
-      if (actual.toLowerCase() !== request.sha256.toLowerCase()) {
-        throw new Error("la descarga de Chromium no coincide con su sha256");
-      }
-    }
+  private download(request: InstallRequest, zipPath: string, onProgress: (p: InstallProgress) => void): Promise<void> {
+    return downloadVerified({ ...request, label: "Chromium", serverUrl: this.serverUrl, headers: this.headers, dest: zipPath, onProgress });
   }
 }
 
@@ -177,7 +141,60 @@ export function findChromeExe(dir: string): string | undefined {
   return undefined;
 }
 
-function run(file: string, args: string[]): Promise<void> {
+
+/**
+ * Descarga del servidor de QA Lab a `dest` comprobando tamaño y sha256 (Chromium, Appium).
+ * Informa avance como mucho cada 500 ms o por punto porcentual.
+ */
+export async function downloadVerified(options: {
+  url: string;
+  serverUrl: string;
+  headers?: Record<string, string>;
+  dest: string;
+  sha256?: string;
+  sizeBytes?: number;
+  label: string;
+  onProgress: (p: InstallProgress) => void;
+}): Promise<void> {
+  const url = new URL(options.url, `${options.serverUrl}/`).toString();
+  const response = await fetch(url, { headers: options.headers });
+  if (!response.ok || !response.body) throw new Error(`descarga de ${options.label} falló: HTTP ${response.status}`);
+
+  const totalBytes = Number(response.headers.get("content-length")) || options.sizeBytes || undefined;
+  const hash = createHash("sha256");
+  const out = fs.createWriteStream(options.dest);
+  let receivedBytes = 0;
+  let lastPercent = -1;
+  let lastReport = 0;
+
+  try {
+    for await (const chunk of response.body as unknown as AsyncIterable<Uint8Array>) {
+      hash.update(chunk);
+      receivedBytes += chunk.length;
+      if (!out.write(chunk)) await new Promise<void>((r) => out.once("drain", () => r()));
+      const percent = totalBytes ? Math.min(100, Math.floor((receivedBytes / totalBytes) * 100)) : undefined;
+      const now = Date.now();
+      if ((percent !== undefined && percent !== lastPercent) || now - lastReport > 500) {
+        lastPercent = percent ?? lastPercent;
+        lastReport = now;
+        options.onProgress({ phase: "download", receivedBytes, totalBytes, percent });
+      }
+    }
+  } finally {
+    await new Promise<void>((resolve, reject) => out.end((err?: Error | null) => (err ? reject(err) : resolve())));
+  }
+
+  if (totalBytes && receivedBytes !== totalBytes) {
+    throw new Error(`descarga incompleta: ${receivedBytes} de ${totalBytes} bytes`);
+  }
+  if (options.sha256) {
+    const actual = hash.digest("hex");
+    if (actual.toLowerCase() !== options.sha256.toLowerCase()) {
+      throw new Error(`la descarga de ${options.label} no coincide con su sha256`);
+    }
+  }
+}
+export function run(file: string, args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
     execFile(file, args, { windowsHide: true, maxBuffer: 16 * 1024 * 1024 }, (err, _stdout, stderr) => {
       if (err) reject(new Error(`${path.basename(file)} falló: ${String(stderr || err.message).trim().slice(0, 500)}`));

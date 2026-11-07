@@ -76,6 +76,8 @@ export type CaseDiscoveryWorkflowOptions = {
   executionMode?: string;
   executionSource?: string;
   runtimeEntries?: DataContextEntry[];
+  /** Spec-only overrides (for example, a fresh identifier) layered over Discovery's runtime entries. */
+  promotionRuntimeEntries?: DataContextEntry[];
   adaptiveContext?: {
     targetScreen?: string;
     knownSteps?: string[];
@@ -184,6 +186,27 @@ function attachCanonicalScenarioLineage(scenario: TestScenario): TestScenario {
       ...(requirement.dependsOn ? { dependsOn: [...requirement.dependsOn] } : {}),
     })),
   };
+}
+
+function getPortalRequestIdentityEvidence(scenario: TestScenario) {
+  const rawSteps = Array.isArray((scenario as any).steps) ? (scenario as any).steps : [];
+  const steps = rawSteps.flatMap((step: unknown) => {
+    if (typeof step === "string") return [{ action: step }];
+    if (!step || typeof step !== "object") return [];
+    const value = step as Record<string, unknown>;
+    const action = String(value.action ?? value.description ?? value.humanStep ?? "");
+    return action ? [{ action, ...(typeof value.valueKey === "string" ? { valueKey: value.valueKey } : {}) }] : [];
+  });
+  const rawRecordedActions = (scenario as any).recordingExecutionContract?.actions;
+  const recordedActions = Array.isArray(rawRecordedActions)
+    ? rawRecordedActions.map((action: any) => ({
+        humanStep: typeof action?.humanStep === "string" ? action.humanStep : undefined,
+        semanticField: typeof action?.semanticField === "string" ? action.semanticField : undefined,
+        valueKey: typeof action?.valueKey === "string" ? action.valueKey : undefined,
+        value: action?.value,
+      }))
+    : [];
+  return { steps, recordedActions };
 }
 
 export function resolvePromotionOutcome(input: {
@@ -396,6 +419,13 @@ function extractAuthoredFieldTarget(text: string | undefined): string | undefine
   // Fill instructions may contain a changing value first and the field label last.
   const match = text.match(/\b(?:en|in|into)\s+["“]([^"”]+)["”]\s*$/i);
   return match?.[1]?.trim() || undefined;
+}
+
+function extractSelectionOptionValue(text: string | undefined): string | undefined {
+  const match = text?.trim().match(/^(?:select|seleccionar|seleccione|choose|pick)\s+["“‘]([^"”’]+)["”’]\s+(?:en|in|from|de)\b/i);
+  const value = match?.[1]?.trim();
+  if (!value || /^\[[^\]]+\]$/.test(value) || /^\{\{.+\}\}$/.test(value) || /^\$\{.+\}$/.test(value)) return undefined;
+  return value;
 }
 
 function positiveRecordedVisibility(text: string | undefined): boolean {
@@ -1036,7 +1066,23 @@ export function buildPromotionSourceScenario(
   const expectedResultRequirementRefs = (scenario as TestScenario & { expectedResultRequirementRefs?: string[] }).expectedResultRequirementRefs;
   const recordingExecutionContract = (scenario as TestScenario & { recordingExecutionContract?: import("../scenarios/scenario-types").RecordingExecutionContract }).recordingExecutionContract;
   const recordingNegativeOracle = (scenario as TestScenario & { negativeOracle?: import("../scenarios/scenario-types").NegativeScenarioOracle }).negativeOracle;
-  const rawExpected = typeof scenario.raw?.custom_expected === "string" ? scenario.raw.custom_expected : "";
+  const rawExpectedCandidate = typeof scenario.raw?.custom_expected === "string" ? scenario.raw.custom_expected : "";
+  const legacyNavigationExpected = "La aplicación de destino carga correctamente";
+  const isLegacyNavigationPlaceholder = (value: string): boolean => Boolean(
+    recordingExecutionContract
+    && normalizeOracleText(value) === normalizeOracleText(legacyNavigationExpected),
+  );
+  const rawExpected = isLegacyNavigationPlaceholder(rawExpectedCandidate) ? "" : rawExpectedCandidate;
+  const scenarioExpectedResult = typeof (scenario as TestScenario & { expectedResult?: unknown }).expectedResult === "string"
+    ? (scenario as TestScenario & { expectedResult: string }).expectedResult
+    : "";
+  const legacyExpectedResultConsumption = caseResult.partialDiagnostics?.expectedResultConsumption
+    ?.filter((entry) => isLegacyNavigationPlaceholder(entry.originalText ?? "")) ?? [];
+  if (isLegacyNavigationPlaceholder(rawExpectedCandidate)
+    || isLegacyNavigationPlaceholder(scenarioExpectedResult)
+    || legacyExpectedResultConsumption.length > 0) {
+    console.log("[promotion-oracle] legacyNavigationPlaceholderSuppressed=true source=recording_execution_contract");
+  }
   const terminalRecordingAction = [...(recordingExecutionContract?.actions ?? [])].reverse().find((action) =>
     action.actionType !== "system_observation" && action.actionType !== "navigation"
   );
@@ -1104,6 +1150,20 @@ export function buildPromotionSourceScenario(
         // for repeated actions is paired by occurrence order below.
         const recordedHumanStep = normalizeOracleText(action.humanStep ?? "");
         const exactHumanStepMatch = Boolean(recordedHumanStep && recordedHumanStep === normalizedAction);
+        // A field-only match cannot transfer an option target to a different choice in that
+        // field. Discovery may author a concrete value that differs from an earlier recorded
+        // option; in that case the current Discovery certificate (or fail-closed unresolved
+        // target) must remain authoritative instead of replaying the stale option locator.
+        const authoredSelectionValue = extractSelectionOptionValue(scenarioStep.action);
+        const recordedSelectionValue = action.playwrightRecorderEvidence?.normalizedName?.trim()
+          || extractSelectionOptionValue(action.humanStep);
+        const selectionLineageMatches = !authoredSelectionValue
+          || exactHumanStepMatch
+          || Boolean(recordedSelectionValue
+            && normalizeOracleText(recordedSelectionValue) === normalizeOracleText(authoredSelectionValue));
+        if (authoredSelectionValue && recordedSelectionValue
+          && normalizeOracleText(recordedSelectionValue) !== normalizeOracleText(authoredSelectionValue)) return false;
+        if (!selectionLineageMatches && (action.actionType === "select" || action.actionType === "click")) return false;
         // Scenario projections can carry an identity copied from a later repeated label.
         // For an exact authored-step match, preserve occurrence order among the still-unclaimed
         // recording actions; using that stale identity here swaps two identical actions (for
@@ -1196,8 +1256,31 @@ export function buildPromotionSourceScenario(
     const filteredRefs = sourceRefs?.filter((ref) => !scopeRef || ref !== scopeRef);
     const sourceRef = recordingAction?.technicalTargetRef
       ?? (step as typeof step & { technicalTargetRef?: string }).technicalTargetRef;
-    const technicalTargetCandidates = recordingAction?.technicalTargetCandidates
+    const recordedCandidates = recordingAction?.technicalTargetCandidates
       ?? (step as typeof step & { technicalTargetCandidates?: Array<Record<string, unknown>> }).technicalTargetCandidates;
+    const discoveredStep = caseResult.steps.find((candidate) => candidate.index === step.index
+      && candidate.status === "found"
+      && normalizeOracleText(candidate.action ?? "") === normalizeOracleText(step.action));
+    const reconfirmedCandidates = discoveredStep?.technicalTargetCandidates?.filter((candidate) =>
+      candidate.validatedByInteraction === true
+      && typeof candidate.certificationTier === "number"
+      && candidate.certificationTier >= 1 && candidate.certificationTier <= 3);
+    // A successful, exact-index/action Discovery result is fresh authority for the control
+    // that was physically interacted with in this run. Prefer that validated candidate even
+    // when capture-time identity was marked deterministic: the recording may contain a
+    // structural owner with no executable locator candidates, which otherwise shadows the
+    // stronger live certificate in the shared materializer. Keep the recorded candidates as
+    // fallback evidence, and retain them unchanged when Discovery did not confirm this step.
+    const technicalTargetCandidates = reconfirmedCandidates?.length
+      ? [
+          ...reconfirmedCandidates.map((candidate) => ({
+            ...candidate,
+            certifiedFrom: "discovery",
+            reconfirmedByDiscovery: true,
+          })),
+          ...(recordedCandidates ?? []),
+        ]
+      : recordedCandidates;
     const scopeWasMistakenForTarget = evidenceNamesSourceTarget
       && Boolean(scopeRef)
       && sourceRef === scopeRef
@@ -1212,10 +1295,10 @@ export function buildPromotionSourceScenario(
   };
   const stepExpected = scenario.steps
     .map((step) => step.expected?.trim())
-    .filter((value): value is string => Boolean(value && value.length > 0));
+    .filter((value): value is string => Boolean(value && value.length > 0 && !isLegacyNavigationPlaceholder(value)));
   const expectedFromConsumption = caseResult.partialDiagnostics?.expectedResultConsumption
     ?.map((entry) => entry.originalText?.trim())
-    .filter((value): value is string => Boolean(value && value.length > 0)) ?? [];
+    .filter((value): value is string => Boolean(value && value.length > 0 && !isLegacyNavigationPlaceholder(value))) ?? [];
   const expectedResult = [terminalRecordedFeedbackCompleted ? "" : rawExpected.trim(), ...stepExpected, ...expectedFromConsumption]
     .filter((value) => value.length > 0)
     .join("\n");
@@ -1458,6 +1541,11 @@ export function buildPromotionSourceScenario(
     // (case-discovery.ts's fill success path) is the same-shaped fallback -- mirrors the
     // existing discoveryStepByIndex.get(step.index)?.assertionImportance merge pattern just
     // below, never a new field/schema.
+    expectedOutcomeKind: (() => {
+      const action = recordingActionByScenarioStepIndex.get(step.index);
+      return action?.expectedRouteBefore && action.expectedRouteAfter && action.expectedRouteBefore !== action.expectedRouteAfter
+        ? "route_transition" as const : undefined;
+    })(),
     technicalTargetCandidates: recordingLineageForStep(step).technicalTargetCandidates
       ?? (discoveryStepByIndex.get(step.index) as { technicalTargetCandidates?: Array<Record<string, unknown>> } | undefined)?.technicalTargetCandidates,
     // Same fallback shape as technicalTargetCandidates above, for the plain field-relation hint
@@ -1467,6 +1555,8 @@ export function buildPromotionSourceScenario(
     associatedField: step.associatedField
       ?? recordingActionByScenarioStepIndex.get(step.index)?.associatedField
       ?? (discoveryStepByIndex.get(step.index) as { associatedField?: string } | undefined)?.associatedField,
+    selectionQueryOwnerField: (step as typeof step & { selectionQueryOwnerField?: string }).selectionQueryOwnerField
+      ?? (discoveryStepByIndex.get(step.index) as { selectionQueryOwnerField?: string } | undefined)?.selectionQueryOwnerField,
     // FIRST_LOSS fix (this ticket): the SAME lineage `deterministic-spec-compiler.ts` needs to
     // recognize a selection-like recorded click (`isSelectionLikeRecordedRole` +
     // `hasUniqueControlLineage`) was already present on `step` (TestScenarioStep -- see
@@ -1616,11 +1706,18 @@ export function buildPromotionSourceScenario(
       // Same fallback merge as scenarioSteps above -- a field-scoped certified target Discovery's
       // own live fill execution already physically reconfirmed, when no Recording-sourced
       // authority already exists for this step.
-      technicalTargetCandidates: recordingLineageForStep(step).technicalTargetCandidates
+      expectedOutcomeKind: (() => {
+      const action = recordingActionByScenarioStepIndex.get(step.index);
+      return action?.expectedRouteBefore && action.expectedRouteAfter && action.expectedRouteBefore !== action.expectedRouteAfter
+        ? "route_transition" as const : undefined;
+    })(),
+    technicalTargetCandidates: recordingLineageForStep(step).technicalTargetCandidates
         ?? (discoveryStepByIndex.get(step.index) as { technicalTargetCandidates?: Array<Record<string, unknown>> } | undefined)?.technicalTargetCandidates,
       associatedField: step.associatedField
         ?? recordingActionByScenarioStepIndex.get(step.index)?.associatedField
         ?? (discoveryStepByIndex.get(step.index) as { associatedField?: string } | undefined)?.associatedField,
+      selectionQueryOwnerField: (step as typeof step & { selectionQueryOwnerField?: string }).selectionQueryOwnerField
+        ?? (discoveryStepByIndex.get(step.index) as { selectionQueryOwnerField?: string } | undefined)?.selectionQueryOwnerField,
       // FIRST_LOSS fix (this ticket): same as `scenarioSteps` above -- this is the actual
       // persisted `SpecGenerationSourceScenario` `deterministic-spec-compiler.ts`'s
       // `isSelectionLikeRecordedRole`/`hasUniqueControlLineage` lineage check reads through
@@ -2722,6 +2819,34 @@ export function toScenarioDataOverrides(runtimeEntries: DataContextEntry[] | und
   return overrides;
 }
 
+function mergeRuntimeEntriesForSpec(
+  discoveryEntries: DataContextEntry[] | undefined,
+  specOverrides: DataContextEntry[] | undefined,
+): DataContextEntry[] {
+  if (!specOverrides?.length) return discoveryEntries ?? [];
+
+  const overridesByKey = new Map<string, DataContextEntry>();
+  for (const entry of specOverrides) {
+    const key = entry.key.trim().toLowerCase();
+    if (!key || !entry.value.trim()) continue;
+    overridesByKey.set(key, entry);
+  }
+  if (overridesByKey.size === 0) return discoveryEntries ?? [];
+
+  const appliedKeys = new Set<string>();
+  const merged = (discoveryEntries ?? []).map((entry) => {
+    const key = entry.key.trim().toLowerCase();
+    const override = overridesByKey.get(key);
+    if (!override) return entry;
+    appliedKeys.add(key);
+    return override;
+  });
+  for (const [key, override] of overridesByKey) {
+    if (!appliedKeys.has(key)) merged.push(override);
+  }
+  return merged;
+}
+
 export function buildDiscoveryBrowserContextOptions(config: {
   app?: { ignoreHTTPSErrors?: unknown };
 }): { ignoreHTTPSErrors: boolean; hasTouch?: boolean } {
@@ -2748,10 +2873,16 @@ export async function runCaseDiscoveryWorkflow(
   }
   const workflowAppSlug = options.appProfile?.appSlug ?? activeConfig.app.appProfile;
   if (!workflowAppSlug) throw new Error("case_discovery_requires_resolved_app_slug");
+  let portalRequestCancellationEnabled = false;
   // ── [web:base-url] Fail-closed: appSlug → app_config → baseUrl must be preserved until navigation ──
   try {
     const { loadPromotedAppConfigSync: loadCfg } = await import("../automations/app-profile");
     const cfg: any = loadCfg({ appSlug: workflowAppSlug });
+    portalRequestCancellationEnabled = workflowAppSlug === "portal-comercial"
+      && cfg?.requestCancellation?.enabled === true;
+    if (workflowAppSlug === "portal-comercial") {
+      console.log(`[portal-request-cancellation] projectEnabled=${portalRequestCancellationEnabled} phase=configuration_loaded`);
+    }
     const projectConfig = await getProjectConfigurationBySlug(workflowAppSlug);
     const projectBaseUrl = projectConfig?.web?.baseUrl?.trim();
     const hasProjectWebConfig = Boolean(projectConfig?.web);
@@ -2909,6 +3040,7 @@ export async function runCaseDiscoveryWorkflow(
   let promotionStatus = "not_promoted";
   let promotionReason: string | undefined;
   let specGeneration: CaseDiscoveryWorkflowResult["specGeneration"] | undefined;
+  let discoveryInitialUrl: string | undefined;
   try {
     console.log(`[browser-launch] source=${browserLaunchSource} headless=${headless}`);
     const contextOptions = buildDiscoveryBrowserContextOptions(activeConfig);
@@ -3052,6 +3184,7 @@ export async function runCaseDiscoveryWorkflow(
         runtimeEntries: options.runtimeEntries,
         scenarioDataOverrides: toScenarioDataOverrides(options.runtimeEntries),
         beforeFinalStatusCalculation: (steps) => reconcileWorkflowAssertionsBeforeFinalStatus(scenario, steps),
+        onInitialNavigationCompleted: (url) => { discoveryInitialUrl = url; },
       });
     } finally {
       const navigationEvents = await navigationCausality.read().catch(() => []);
@@ -3510,7 +3643,7 @@ export async function runCaseDiscoveryWorkflow(
           jobId:options.runId ?? path.basename(outputDir),
           evidenceRefs:snapshotObservations.map(item=>item.snapshotPath).filter((ref):ref is string=>typeof ref==='string'),
         });
-        console.log(`[jira-knowledge-learning] status=${learning.status}`);
+        console.log(`[jira-knowledge-learning] status=${learning.status}${(learning as { reason?: string }).reason ? ` reason=${(learning as { reason?: string }).reason}` : ""}`);
       } catch {
         console.log('[jira-knowledge-learning] status=failed reason=knowledge_storage_unavailable');
       }
@@ -3566,6 +3699,131 @@ export async function runCaseDiscoveryWorkflow(
       promoted: false
     };
 
+    if (caseResult.status !== "discovered_passed" && caseResult.status !== "repaired_passed") {
+      if (workflowAppSlug !== "portal-comercial" || !portalRequestCancellationEnabled) {
+        console.log("[portal-request-cancellation] status=pre_discovery_cleanup_skipped reason=project_disabled");
+      } else {
+        const { cancelActivePortalRequestBeforeDiscovery, extractPortalActiveCaseRequestCode, isPortalActiveCaseBlockerEvidence, resolvePortalRequestIdentity } = await import("./portal-request-cleanup");
+        const identityEvidence = getPortalRequestIdentityEvidence(scenario);
+        const identity = resolvePortalRequestIdentity({
+          ...identityEvidence,
+          runtimeEntries,
+          testData: activeConfig.app.testData,
+          hasRuntimeContext: true,
+        });
+        let activeCaseModalVerified = false;
+        let blockedAtCreationRoute = false;
+        let preDiscoveryRequestCode: string | undefined;
+        try {
+          const snapshotPath = path.join(path.resolve(caseResult.evidenceDir || evidenceDir), "final-snapshot.json");
+          const snapshot = JSON.parse(await readFile(snapshotPath, "utf8"));
+          preDiscoveryRequestCode = extractPortalActiveCaseRequestCode(snapshot);
+          activeCaseModalVerified = isPortalActiveCaseBlockerEvidence(snapshot, preDiscoveryRequestCode);
+          blockedAtCreationRoute = /^\/requests\/create\/multiproduct\/?$/i.test(new URL(String(snapshot?.url)).pathname);
+        } catch {
+          activeCaseModalVerified = false;
+        }
+        const cleanup = await cancelActivePortalRequestBeforeDiscovery({
+          appSlug: workflowAppSlug,
+          enabled: portalRequestCancellationEnabled,
+          activeCaseModalVerified,
+          blockedAtCreationRoute,
+          requestCode: preDiscoveryRequestCode,
+          baseUrl: activeConfig.app.baseUrl,
+          identity,
+          requestContext: session.context.request,
+        });
+        if (cleanup.status === "cancelled") {
+          console.log(`[portal-request-cancellation] status=pre_discovery_cancelled_once target=${activeCaseModalVerified ? "visible_case_code_and_identity_match" : "case_check_code_and_identity_match"} discoveryRetried=false promotionSkipped=true`);
+          promotionStatus = "pre_discovery_cleanup_only";
+          promotionReason = "active_qa_request_cancelled; rerun_discovery_explicitly";
+          return {
+            caseResult,
+            promoted: false,
+            promotionStatus,
+            promotionReason,
+            appSlug: workflowAppSlug,
+            outputDir,
+            evidenceDir,
+            durationMs: Date.now() - startTime,
+          };
+        }
+        if (cleanup.status === "blocked") {
+          console.log(`[portal-request-cancellation] status=pre_discovery_cleanup_blocked reason=${cleanup.reason} cancellationAttempted=false`);
+        }
+      }
+    }
+
+    const discoveryPassed = caseResult.status === "discovered_passed" || caseResult.status === "repaired_passed";
+    if (options.autoPromote
+      && !options.promotionDryRun
+      && gate.allowed
+      && discoveryPassed
+      && caseResult.candidatePlan
+      && workflowAppSlug === "portal-comercial"
+      && portalRequestCancellationEnabled) {
+      const { cancelDiscoveredPortalRequestBeforeReplay, resolvePortalRequestIdentity } = await import("./portal-request-cleanup");
+      const authenticatedRequestContext = session?.context.request;
+      if (!authenticatedRequestContext) {
+        promotionReport.requestCancellation = { enabled: true, status: "blocked", reason: "authenticated_session_missing" };
+        promotionStatus = "request_cancellation_failed";
+        promotionReason = "portal_request_cancellation_failed:authenticated_session_missing";
+        await writeFile(promotionResultPath, JSON.stringify(promotionReport, null, 2), "utf-8");
+        return {
+          caseResult,
+          promoted: false,
+          promotionStatus,
+          promotionReason,
+          appSlug: workflowAppSlug,
+          outputDir,
+          evidenceDir,
+          durationMs: Date.now() - startTime,
+        };
+      }
+      const identityFallback = runtimeIdentity
+        ?? (!hasRuntimeContext ? process.env.Identity_Provider?.trim() : undefined);
+      const identity = resolvePortalRequestIdentity({
+        ...getPortalRequestIdentityEvidence(scenario),
+        runtimeEntries,
+        testData: activeConfig.app.testData,
+        fallback: identityFallback,
+        hasRuntimeContext,
+      });
+      const cleanup = await cancelDiscoveredPortalRequestBeforeReplay({
+        appSlug: workflowAppSlug,
+        enabled: portalRequestCancellationEnabled,
+        discoveryPassed,
+        baseUrl: activeConfig.app.baseUrl,
+        beforeUrl: discoveryInitialUrl ?? "",
+        afterUrl: page.url(),
+        identity,
+        requestContext: authenticatedRequestContext,
+      });
+      if (cleanup.status === "cancelled") {
+        promotionReport.requestCancellation = { enabled: true, status: "cancelled_before_spec_replay" };
+        console.log("[portal-request-cancellation] status=cancelled_before_spec_replay discoveryPassed=true authenticatedSession=reused");
+      } else if (cleanup.status === "blocked") {
+        promotionReport.requestCancellation = { enabled: true, status: "blocked", reason: cleanup.reason };
+        promotionStatus = "request_cancellation_failed";
+        promotionReason = `portal_request_cancellation_failed:${cleanup.reason}`;
+        console.log(`[portal-request-cancellation] status=blocked reason=${cleanup.reason} specReplayStarted=false`);
+        await writeFile(promotionResultPath, JSON.stringify(promotionReport, null, 2), "utf-8");
+        return {
+          caseResult,
+          promoted: false,
+          promotionStatus,
+          promotionReason,
+          appSlug: workflowAppSlug,
+          outputDir,
+          evidenceDir,
+          durationMs: Date.now() - startTime,
+        };
+      } else {
+        promotionReport.requestCancellation = { enabled: true, status: "skipped" };
+        console.log(`[portal-request-cancellation] status=skipped reason=${cleanup.reason} specReplayStarted=true`);
+      }
+    }
+
     if (!options.autoPromote) {
       promotionStatus = "not_promoted";
     } else if (options.promotionDryRun) {
@@ -3610,7 +3868,8 @@ export async function runCaseDiscoveryWorkflow(
           headed: options.headed,
           executionSource: browserLaunchSource,
           useDeterministicSpecCompiler: true,
-          runtimeEntries: options.runtimeEntries,
+          runtimeEntries: mergeRuntimeEntriesForSpec(options.runtimeEntries, options.promotionRuntimeEntries),
+          verificationRuntimeEntries: mergeRuntimeEntriesForSpec(options.runtimeEntries, options.promotionRuntimeEntries),
         },
         false,
         {

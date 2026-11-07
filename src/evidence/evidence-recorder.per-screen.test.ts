@@ -57,3 +57,65 @@ test("one image per screen: fills share the pre-submit image, final screen is ap
     fs.rmSync(outputRoot, { recursive: true, force: true });
   }
 });
+
+test("transparent or aria-hidden menu overlays do not force viewport-only evidence", async () => {
+  const outputRoot = fs.mkdtempSync(path.join(os.tmpdir(), "evidence-overlay-fullpage-"));
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    const recorder = new EvidenceRecorder(
+      { appSlug: "app", sectionSlug: "sec", scenarioId: "S2", scenarioTitle: "t", runId: "run", outputRoot },
+      { outputRoot, docxEnabled: false, fullPage: true, settleQuietMs: 100, settleTimeoutMs: 1000 },
+    );
+    await page.setContent('<div style="height:1800px">content</div><div class="p-menu-overlay" style="opacity:0;position:fixed;inset:0;width:100vw;height:100vh"></div>');
+    assert.equal(await (recorder as any).fullPageFor(page), true);
+    await page.locator(".p-menu-overlay").evaluate(element => (element as HTMLElement).style.opacity = "1");
+    assert.equal(await (recorder as any).fullPageFor(page), false);
+    await page.locator(".p-menu-overlay").evaluate(element => element.setAttribute("aria-hidden", "true"));
+    assert.equal(await (recorder as any).fullPageFor(page), true);
+  } finally {
+    await browser.close();
+    fs.rmSync(outputRoot, { recursive: true, force: true });
+  }
+});
+
+test("final evidence uses full-page capture even if a visible menu overlay remains", async () => {
+  const outputRoot = fs.mkdtempSync(path.join(os.tmpdir(), "evidence-final-fullpage-"));
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
+    await page.setContent('<h1>Result</h1><div style="height:1500px">below fold</div><div class="p-menu-overlay" style="position:fixed;inset:0;width:100vw;height:100vh"></div>');
+    const recorder = new EvidenceRecorder(
+      { appSlug: "app", sectionSlug: "sec", scenarioId: "S3", scenarioTitle: "t", runId: "run", outputRoot },
+      { outputRoot, docxEnabled: false, fullPage: true, settleQuietMs: 100, settleTimeoutMs: 1000 },
+    );
+    await recorder.captureInitialScreen(page, "full_discovery");
+    await recorder.captureStep(page, 1, 'Consultar');
+    const result = await recorder.finish(page);
+    const screenshot = fs.readFileSync(String(result.finalScreenEvidence?.path));
+    assert.ok(screenshot.readUInt32BE(20) > 600, `expected full-page height, got ${screenshot.readUInt32BE(20)}`);
+  } finally {
+    await browser.close();
+    fs.rmSync(outputRoot, { recursive: true, force: true });
+  }
+});
+
+
+test("a page that scrolls inside an inner container is captured whole and the viewport is restored", async () => {
+  const outputRoot = fs.mkdtempSync(path.join(os.tmpdir(), "evidence-inner-scroll-"));
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
+    await page.setContent('<body style="margin:0;height:100vh;overflow:hidden"><main style="height:100vh;overflow:auto"><div style="height:1800px">top</div><div id="banner">Cliente restringido</div></main></body>');
+    const recorder = new EvidenceRecorder(
+      { appSlug: "app", sectionSlug: "sec", scenarioId: "S4", scenarioTitle: "t", runId: "run", outputRoot },
+      { outputRoot, docxEnabled: false, fullPage: true, settleQuietMs: 100, settleTimeoutMs: 1000 },
+    );
+    const image = await (recorder as any).shot(page, {}) as Buffer;
+    assert.ok(image.readUInt32BE(20) > 1800, `expected the inner content height, got ${image.readUInt32BE(20)}`);
+    assert.deepEqual(page.viewportSize(), { width: 800, height: 600 });
+  } finally {
+    await browser.close();
+    fs.rmSync(outputRoot, { recursive: true, force: true });
+  }
+});

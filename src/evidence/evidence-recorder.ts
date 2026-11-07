@@ -7,6 +7,21 @@ import { loadEvidenceConfig, type EvidenceConfig, type EvidenceScenarioContext, 
 import { buildEvidencePaths, buildScreenshotFilename } from "./evidence-paths";
 import { generateEvidencePdf } from "./evidence-pdf-generator";
 
+// Text-built so no bundler helper reaches the page. Largest hidden overflow (px, capped) of the big scrolling container.
+const INNER_SCROLL_EXTRA_HEIGHT = new Function(`return function () {
+  var best = 0;
+  var all = document.querySelectorAll("body *");
+  for (var i = 0; i < all.length; i += 1) {
+    var element = all[i];
+    var style = window.getComputedStyle(element);
+    if (style.overflowY !== "auto" && style.overflowY !== "scroll" && style.overflowY !== "overlay") continue;
+    if (element.clientHeight < window.innerHeight * 0.5 || element.clientWidth < window.innerWidth * 0.5) continue;
+    var hidden = element.scrollHeight - element.clientHeight;
+    if (hidden > 24 && hidden > best) best = hidden;
+  }
+  return Math.min(best, 3000);
+}`)() as () => number;
+
 export function screenIdentityFromSignature(signature: string): { id: string; title: string } {
   const stableSignature = signature.split("|completeForms=")[0]?.split("|completeRows=")[0] || "unknown-screen";
   const [route = "", ...markerParts] = stableSignature.split("|");
@@ -21,6 +36,44 @@ export function screenIdentityFromSignature(signature: string): { id: string; ti
 }
 
 export class EvidenceRecorder {
+  // A full-page capture resizes the viewport, which makes transient overlays (popup menus,
+  // dropdown panels) close themselves and breaks the next step that targets them. While such an
+  // overlay is open, capture the viewport only.
+  private async fullPageFor(page: Page): Promise<boolean> {
+    if (!this.config.fullPage) return false;
+    const overlayOpen = await page.evaluate(() =>
+      // Also any open listbox/menu popup (a combobox list closes itself when the viewport is resized).
+      Array.from(document.querySelectorAll('.p-menu-overlay, .p-tieredmenu, .p-contextmenu, [role="listbox"], [role="menu"], [data-reka-popper-content-wrapper]'))
+        .some((el) => {
+          const box = (el as HTMLElement).getBoundingClientRect();
+          const style = window.getComputedStyle(el as HTMLElement);
+          return box.width > 0 && box.height > 0 && style.visibility !== "hidden"
+            && style.display !== "none" && Number(style.opacity || "1") > 0
+            && (el as HTMLElement).getAttribute("aria-hidden") !== "true";
+        })
+    ).catch(() => false);
+    return !overlayOpen;
+  }
+  // Many apps keep the document at viewport height and scroll their content inside an inner container, so a full-page
+  // capture shows only the first screen and anything a step produced below the fold (a result banner) is missing. For
+  // such a page the viewport is made tall enough for the container to show everything, then restored.
+  private async shot(page: Page, options: { path?: string }, finalCapture = false): Promise<Buffer> {
+    // The closing image is taken after the flow ended: no later step can be disturbed, so an open overlay is no reason
+    // to skip the full capture.
+    const fullPage = finalCapture ? this.config.fullPage : await this.fullPageFor(page);
+    const original = page.viewportSize();
+    const extra = fullPage && original ? await page.evaluate(INNER_SCROLL_EXTRA_HEIGHT).catch(() => 0) : 0;
+    if (!original || !(extra > 0)) {
+      return page.screenshot({ ...options, fullPage, timeout: this.config.captureTimeoutMs });
+    }
+    try {
+      await page.setViewportSize({ width: original.width, height: original.height + extra });
+      await page.waitForTimeout(250).catch(() => undefined);
+      return await page.screenshot({ ...options, fullPage, timeout: this.config.captureTimeoutMs });
+    } finally {
+      await page.setViewportSize(original).catch(() => undefined);
+    }
+  }
   private config: EvidenceConfig;
   private context: EvidenceScenarioContext;
   private steps: EvidenceStepRecord[] = [];
@@ -111,18 +164,18 @@ export class EvidenceRecorder {
         if (settle.settled) {
           visualSettled = true;
           screenshotPath = path.join(this.paths.screenshotsDir, "initial-screen.png");
-          await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
+          await this.shot(page, { path: screenshotPath });
         } else {
           reason = settle.loaderVisible ? "initial_loader_still_visible" : "initial_visual_settle_timeout";
           // Preserve what was actually visible before the first action, clearly marked
           // diagnostic. Never seed normal screen groups from this unsettled frame.
           screenshotPath = path.join(this.paths.screenshotsDir, "initial-unsettled.png");
-          await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
+          await this.shot(page, { path: screenshotPath });
           console.log(`[evidence:initial] diagnostic captured scenarioId=${this.context.scenarioId} settled=false waitedMs=${settle.waitedMs} loaderVisible=${settle.loaderVisible}`);
         }
       } else {
         screenshotPath = path.join(this.paths.screenshotsDir, "initial-load-failure.png");
-        await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
+        await this.shot(page, { path: screenshotPath });
       }
     } catch {
       screenshotPath = null;
@@ -200,19 +253,32 @@ export class EvidenceRecorder {
       const settle = await waitForVisualSettle(page, { timeoutMs: this.config.settleTimeoutMs, quietMs: this.config.settleQuietMs });
       if (!settle.settled) {
         // Evidence records what was actually visible, even when visual readiness cannot be
-        // certified. Keep this frame separate from stable checkpoint authority.
+        // certified. Keep the action attached to its source screen and retain the newly
+        // observed destination separately. Otherwise a click that starts a slow transition
+        // is mislabeled with only its post-click screen, hiding the state from which it ran.
         const screenshotPath = path.join(this.paths.screenshotsDir, `step-${String(stepIndex).padStart(3, "0")}-observed.png`);
-        await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
+        await this.shot(page, { path: screenshotPath });
         const identity = screenIdentityFromSignature(await readScreenSignature(page));
-        record.screenshotPath = screenshotPath;
         record.screenshotSettled = false;
-        record.screenId = identity.id;
-        record.screenTitle = identity.title;
+        const sourceScreen = this.screenState ? screenIdentityFromSignature(this.screenState.signature) : undefined;
+        const transitionedToDifferentScreen = Boolean(sourceScreen && sourceScreen.id !== identity.id);
+        if (transitionedToDifferentScreen && this.screenState) {
+          record.postActionScreenshotPath = screenshotPath;
+          record.postActionScreenId = identity.id;
+          record.postActionScreenTitle = identity.title;
+          await this.commitScreenGroup(this.screenState.image, "action_before_unsettled_transition", this.screenState.signature);
+        } else {
+          // Same-screen actions keep their observed frame; without a stable source frame,
+          // the post-action frame is the only honest evidence available.
+          record.screenshotPath = screenshotPath;
+          record.screenId = identity.id;
+          record.screenTitle = identity.title;
+        }
         this.pendingGroup = this.pendingGroup.filter(step => step !== record);
-        console.log(`[evidence:scenario] observed frame retained scenarioId=${this.context.scenarioId} step=${stepIndex} settled=false loaderVisible=${settle.loaderVisible}`);
+        console.log(`[evidence:scenario] observed frame retained scenarioId=${this.context.scenarioId} step=${stepIndex} settled=false transitioned=${transitionedToDifferentScreen} loaderVisible=${settle.loaderVisible} sourceScreen=${sourceScreen?.id ?? "unknown"} observedScreen=${identity.id}`);
         return record;
       }
-      const image = await page.screenshot({ fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
+      const image = await this.shot(page, {});
       const signature = await readScreenSignature(page);
       const currentScreen = screenIdentityFromSignature(signature);
       if (!record.screenId) {
@@ -285,7 +351,7 @@ export class EvidenceRecorder {
         this.screenState = undefined;
         return;
       }
-      const image = await page.screenshot({ fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
+      const image = await this.shot(page, {});
       const settledSignature = await readScreenSignature(page);
       if (this.pendingGroup.length > 0) {
         await this.commitScreenGroup(this.screenState.image, "screen_changed_before_action", this.screenState.signature);
@@ -336,7 +402,10 @@ export class EvidenceRecorder {
         const settle = await waitForVisualSettle(page, { timeoutMs: this.config.finalSettleTimeoutMs, quietMs: this.config.settleQuietMs });
         settledNote = `settled=${settle.settled} waitedMs=${settle.waitedMs} loaderVisible=${settle.loaderVisible}`;
         if (settle.settled) {
-          image = await page.screenshot({ fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
+          // Final evidence is captured after the flow ends, so no following action
+          // can be disrupted by full-page screenshot resizing. Always honor the
+          // configured full-page setting for the closing result image.
+          image = await this.shot(page, {}, true);
           finalSignature = await readScreenSignature(page);
           finalCaptured = true;
         } else {
@@ -549,7 +618,7 @@ export class EvidenceRecorder {
       // Capture screenshot
       const filename = buildScreenshotFilename(stepIndex, `detail_loaded_${target}`);
       const screenshotPath = path.join(this.paths.screenshotsDir, filename);
-      await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
+      await this.shot(page, { path: screenshotPath });
 
       const stats = await fs.promises.stat(screenshotPath);
       console.log(`[detail-screenshot] captured=true target="${target}" step=${stepIndex} path=${screenshotPath} size=${stats.size}`);
@@ -674,7 +743,7 @@ export class EvidenceRecorder {
 
           const settle = await waitForVisualSettle(page, { timeoutMs: this.config.finalSettleTimeoutMs, quietMs: this.config.settleQuietMs });
           if (!settle.settled) throw new Error(`fallback_visual_settle_failed:${settle.loaderVisible ? "loader_still_visible" : "timeout"}`);
-          await page.screenshot({ path: screenshotPath, fullPage: this.config.fullPage, timeout: this.config.captureTimeoutMs });
+          await this.shot(page, { path: screenshotPath });
           lastStep.screenshotPath = screenshotPath;
 
           const stats = await fs.promises.stat(screenshotPath);

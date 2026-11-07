@@ -1,0 +1,307 @@
+{
+  "version": 1,
+  "appSlug": "portal-comercial-dev",
+  "createdAt": "2026-11-06T19:31:49.356Z",
+  "updatedAt": "2026-11-07T22:32:43.670Z",
+  "items": [],
+  "jiraRoutes": [
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "portal-comercial-dev",
+      "id": "792e2c0825298cf842f22b633298285b3243fa6e406c7e5e8969bd14cfb7bae7",
+      "profileRevision": "2a50b1ee66989ea11fb0fa11684dc426732ef052c7ff79afff1022903ac3a395",
+      "sourceIssueKey": "AA-116",
+      "scenarioId": "AA-116:jira:1:edited-ff23e7133b432c2d",
+      "jobId": "cae28fe7-9c56-4336-b20c-1bfcac6edf57",
+      "validatedAt": "2026-11-06T23:06:12.561Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_5d765e4e632a7f7f_2"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_5d765e4e632a7f7f_3"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar Sesion",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Persona jurídica",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nuevo caso",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nuevo caso",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de identificacion",
+          "dataRef": "jira_edit_a024a07ed42dbdf4_7"
+        },
+        {
+          "action": "fill",
+          "field": "Numero de identificacion",
+          "dataRef": "jira_edit_5d765e4e632a7f7f_8"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar Se muestran la pantalla el mensaje de cliente existente",
+          "target": "Cliente existente — datos desactualizados Los datos del cliente requieren actualizacion antes de continuar."
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "portal-comercial-dev",
+      "id": "79524e56d7bfd342fa8a1c90c735d15c35689d9a63c68bf19163f3f4fa3070b6",
+      "profileRevision": "2a50b1ee66989ea11fb0fa11684dc426732ef052c7ff79afff1022903ac3a395",
+      "sourceIssueKey": "AA-116",
+      "scenarioId": "AA-116:jira:2:edited-16226ef5f975a3c0",
+      "jobId": "00d671df-22e6-4d7f-a207-28de59a5b137",
+      "validatedAt": "2026-11-06T23:06:38.989Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "jira_edit_16226ef5f975a3c0_1"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "jira_edit_16226ef5f975a3c0_2"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar Sesion",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "portal-comercial-dev",
+      "id": "cd97067d09d72a9c940c41606a6e0613d276e36efc3ee68d2aae0057f07d9dd1",
+      "profileRevision": "ff5cb3e23825280a7993b4fcddee5601d10cd33ea284196aa74768940a5a3de7",
+      "sourceIssueKey": "TR-57449",
+      "scenarioId": "C57449",
+      "jobId": "case-57449",
+      "validatedAt": "2026-11-07T22:28:46.170Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "auth.username"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "auth.password"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar Sesion",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Persona jurídica",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nuevo caso",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nuevo caso",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Tipo de identificacion",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Numero de identificacion",
+          "dataRef": "jira_edit_5d765e4e632a7f7f_8"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-27-26-405Z\\cases\\case-57449\\evidence\\step-0-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-27-26-405Z\\cases\\case-57449\\evidence\\step-2-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-27-26-405Z\\cases\\case-57449\\evidence\\step-3-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-27-26-405Z\\cases\\case-57449\\evidence\\step-4-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-27-26-405Z\\cases\\case-57449\\evidence\\step-5-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-27-26-405Z\\cases\\case-57449\\evidence\\step-6-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-27-26-405Z\\cases\\case-57449\\evidence\\step-7-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-27-26-405Z\\cases\\case-57449\\evidence\\step-8-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-27-26-405Z\\cases\\case-57449\\evidence\\step-9-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-27-26-405Z\\cases\\case-57449\\evidence\\step-10-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-27-26-405Z\\cases\\case-57449\\evidence\\step-11-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-27-26-405Z\\cases\\case-57449\\evidence\\final-snapshot.json"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "portal-comercial-dev",
+      "id": "2024eebffd83373f651d2b79fbe0c4cf9ec3a7b5801b5614c30b0e17cfc03330",
+      "profileRevision": "ff5cb3e23825280a7993b4fcddee5601d10cd33ea284196aa74768940a5a3de7",
+      "sourceIssueKey": "TR-57453",
+      "scenarioId": "C57453",
+      "jobId": "case-57453",
+      "validatedAt": "2026-11-07T22:32:43.663Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "auth.username"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "auth.password"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesion",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Persona jurídica",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nuevo caso",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nuevo Caso",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Tipo de identificación",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Número de identificación",
+          "dataRef": "rnc_cliente_activo"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-31-17-513Z\\cases\\case-57453\\evidence\\step-0-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-31-17-513Z\\cases\\case-57453\\evidence\\step-2-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-31-17-513Z\\cases\\case-57453\\evidence\\step-3-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-31-17-513Z\\cases\\case-57453\\evidence\\step-4-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-31-17-513Z\\cases\\case-57453\\evidence\\step-5-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-31-17-513Z\\cases\\case-57453\\evidence\\step-6-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-31-17-513Z\\cases\\case-57453\\evidence\\step-7-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-31-17-513Z\\cases\\case-57453\\evidence\\step-8-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-31-17-513Z\\cases\\case-57453\\evidence\\step-9-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-31-17-513Z\\cases\\case-57453\\evidence\\step-10-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-31-17-513Z\\cases\\case-57453\\evidence\\step-11-snapshot.json",
+        "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\discovery\\batch\\2026-11-07T22-31-17-513Z\\cases\\case-57453\\evidence\\final-snapshot.json"
+      ],
+      "observables": [
+        {
+          "requirement": "Cliente",
+          "target": "Cliente"
+        }
+      ]
+    }
+  ]
+}

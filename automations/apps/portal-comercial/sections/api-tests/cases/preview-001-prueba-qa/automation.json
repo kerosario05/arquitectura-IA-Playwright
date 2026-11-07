@@ -1,0 +1,136 @@
+{
+  "id": "preview-001-prueba-qa",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "prueba qa",
+  "planPath": "automations\\apps\\portal-comercial\\sections\\api-tests\\cases\\preview-001-prueba-qa\\plan.json",
+  "specPath": "automations\\apps\\portal-comercial\\sections\\api-tests\\cases\\preview-001-prueba-qa\\case.spec.ts",
+  "appSlug": "portal-comercial",
+  "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+  "status": "spec_failed",
+  "source": "discovery",
+  "appProfile": "portal-comercial",
+  "createdAt": "2026-11-01T04:08:58.299Z",
+  "updatedAt": "2026-11-01T04:08:58.299Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-01T03-39-20-947Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "failed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-01T03-39-20-947Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "skill": {
+        "name": null,
+        "version": null,
+        "hash": null,
+        "loaded": false
+      },
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 379211,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "skipped",
+        "structure": "passed",
+        "traceFidelity": "skipped",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "failed"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 1,
+      "specGenerationAttempts": 0,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "functionalExecution"
+      ],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "navigation_transition"
+      ],
+      "errors": [
+        "functional_execution_failed:exitCode=1",
+        "functional_execution_error:Error: Promoted click failed at step 5 target=\"css:[href=\"/requests/create/multiproduct\"]\". reason=structural_authority_not_unique_or_unresolved structuralFailureReason=owner_tag_not_present structuralFailureMatchCount=n/a suggestedFix=\"The recorded structural target and its exact accessible reference must resolve to one visible, enabled element.\""
+      ],
+      "warnings": [
+        "step_index_not_explicit_in_spec:82",
+        "step_index_not_explicit_in_spec:84",
+        "functional_execution_screenshots=2",
+        "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 5)."
+      ],
+      "finalSpec": {
+        "origin": "deterministic_compiler",
+        "generatedBy": "core",
+        "strategy": "deterministic_compiler",
+        "fallback": null
+      },
+      "runtimeGate": {
+        "decision": "block",
+        "promotionStatus": "blocked",
+        "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 5)."
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage",
+        "LoginPage",
+        "FormPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false,
+      "specPath": "automations\\apps\\portal-comercial\\sections\\api-tests\\cases\\preview-001-prueba-qa\\case.spec.ts",
+      "specHash": "17527d3bb797a6c96740d73ccb82957bb2aa01790846a9654446ef1d424cd033",
+      "specSource": "ai_candidate"
+    },
+    "overwritten": true,
+    "previousAutomationPath": "automations\\apps\\portal-comercial\\sections\\api-tests\\cases\\preview-001-prueba-qa\\plan.json",
+    "previousStatus": "spec_failed"
+  }
+}

@@ -87,7 +87,7 @@ function baseInput(specContent: string, executionContract?: any) {
     executionContract,
     availablePageObjects: [],
     observedEvidencePhrases: [],
-    promotedRuntimeMethodsAllowlist: ["fillPromotedField", "clickPromotedTarget", "pressPromotedTarget", "expectPromotedVisible", "finishEvidence"],
+    promotedRuntimeMethodsAllowlist: ["fillPromotedField", "clickPromotedTarget", "completeRecordedFilePickerClick", "pressPromotedTarget", "expectPromotedVisible", "finishEvidence"],
     mode: "deterministic" as const,
   };
 }
@@ -263,4 +263,33 @@ test("H/step6 (runtime_resolution_required) structurally validates without inven
 
   const result = structuralValidation(baseInput(compiled.source, contract));
   assert.deepEqual(result.semanticErrors.filter((e) => e.startsWith("runtime_")), []);
+});
+
+test("a captured same-field file-picker click may bind to its immediately following upload", () => {
+  const contract: any = contractWithSteps([
+    { scenarioStepIndex: 1, operation: "click" },
+    { scenarioStepIndex: 2, operation: "upload" },
+  ]);
+  contract.steps[0].recordingActionType = "click";
+  contract.steps[0].associatedField = "Seleccionar documento";
+  contract.steps[0].semanticRuntimeEvidence = { targetTag: "input", normalizedValue: "Seleccionar documento" };
+  contract.steps[1].recordingActionType = "upload";
+  contract.steps[1].associatedField = "Seleccionar documento";
+  contract.steps[1].fileAssets = [{ fileRef: "file-ref" }];
+  contract.steps[1].technicalTargetRefs = ["aria-label:Seleccionar documento"];
+  const content = [
+    "import { test } from '@playwright/test';",
+    "import { createPromotedSpecRuntime } from './runtime/promoted-spec-runtime';",
+    "test('delegated file picker', async ({ page }) => {",
+    "  const promotedRuntime = createPromotedSpecRuntime(page);",
+    "  await promotedRuntime.completeRecordedFilePickerClick({ stepIndex: 1, target: 'Seleccionar documento', uploadStepIndex: 2 });",
+    "  await promotedRuntime.uploadRecordedFiles({ stepIndex: 2, projectSlug: 'synthetic', technicalTargetRefs: ['aria-label:Seleccionar documento'], fileAssets: [{ fileRef: 'file-ref' }] });",
+    "});",
+  ].join("\n");
+  const result = structuralValidation(baseInput(content, contract));
+  assert.deepEqual(result.semanticErrors.filter((error) => error.startsWith("runtime_")), []);
+
+  contract.steps[1].associatedField = "Otro documento";
+  const mismatched = structuralValidation(baseInput(content, contract));
+  assert.ok(mismatched.semanticErrors.some((error) => error.startsWith("runtime_step_binding_unresolved:step=1")));
 });

@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-10-26T21:41:24.615Z",
+  "updatedAt": "2026-11-05T16:28:08.140Z",
   "automations": [
     {
       "id": "preview-001-login",
@@ -3311,6 +3311,126 @@
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-5-realizar-transferencia-entre-cuentas-propias-y-revisar-el-comprobante\\case.spec.ts",
       "promotedSpecHash": "99d4f2d03bee264d3c8b6f812aa2161850ac22faeac3cbb0c0ecbc18489eabc0"
+    },
+    {
+      "id": "aa-97-jira-10-edited-9b813e14b2c6f01f-confirmar-el-comprobante-de-una-transferencia-exitosa",
+      "externalId": "AA-97:jira:10:edited-9b813e14b2c6f01f",
+      "title": "Confirmar el comprobante de una transferencia exitosa",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-10-edited-9b813e14b2c6f01f-confirmar-el-comprobante-de-una-transferencia-exitosa\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-10-edited-9b813e14b2c6f01f-confirmar-el-comprobante-de-una-transferencia-exitosa\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-11-02T16:09:13.535Z",
+      "updatedAt": "2026-11-02T16:09:13.536Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      },
+      "caseId": 56951,
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-10-edited-9b813e14b2c6f01f-confirmar-el-comprobante-de-una-transferencia-exitosa\\case.spec.ts",
+      "promotedSpecHash": "1decc930d2a5246b49b62300d1b11bdf4408c66508f42b73b17384f15918429e"
+    },
+    {
+      "id": "aa-97-jira-3-edited-5192a81f2d8cb837-rechazo-de-credenciales-empresariales-no-validas",
+      "externalId": "AA-97:jira:3:edited-5192a81f2d8cb837",
+      "title": "Rechazo de credenciales empresariales no válidas",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-3-edited-5192a81f2d8cb837-rechazo-de-credenciales-empresariales-no-validas\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-3-edited-5192a81f2d8cb837-rechazo-de-credenciales-empresariales-no-validas\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-11-05T16:27:23.008Z",
+      "updatedAt": "2026-11-05T16:27:23.008Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      },
+      "caseId": 57312,
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-3-edited-5192a81f2d8cb837-rechazo-de-credenciales-empresariales-no-validas\\case.spec.ts",
+      "promotedSpecHash": "5d50fa75051910e620644617eae8c22b21586b9c06f5a4edf2c5b457154f4387"
     }
   ]
 }

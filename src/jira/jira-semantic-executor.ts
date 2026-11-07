@@ -1,3 +1,4 @@
+import { parseJiraWorkflowStep, type JiraWorkflowOperation } from "./jira-workflow";
 import type { Locator, Page } from "@playwright/test";
 import { settleJiraAction } from "./jira-action-settlement";
 import { createHash } from "node:crypto";
@@ -7,6 +8,7 @@ import { detectAuthGate } from "../discovery/auth-gate-detector";
 import { detectCredentialRole } from "../data/data-key-resolver";
 import { parseStepIntent } from "../discovery/step-intent-parser";
 import { resolveActionTarget, resolveFillTarget, resolveGridEditor, type TargetResolutionResult } from "../discovery/target-resolver";
+import { INSIDE_COLLAPSED_CONTAINER, REACHES_POINTER_AT_CENTER } from "../discovery/reachable-element";
 import { chooseJiraDomTarget, locatorForJiraDomCandidate } from "./jira-dom-target-ai";
 import type { ExecutionPlan, ExecutionPlanStep, PlanTarget } from "../types/execution-plan.types";
 import type { SpecGenerationSourceScenario, SpecGenerationObservableOracle } from "../automations/spec-generation-hybrid";
@@ -102,6 +104,7 @@ function isSensitiveRowBindingField(label: string, valueKey?: string): boolean {
 
 export type JiraImplicitLogin ={ username: string; password: string; /** Extra credential values keyed by role (see detectCredentialRole). */ fields?: Record<string, string> };
 export type JiraBrowserPort = {
+  executeWorkflow?(operation: JiraWorkflowOperation, value?: string): Promise<void>;
   baseUrl?: string;
   navigate(): Promise<void>;
   navigateTo?(url: string): Promise<void>;
@@ -118,6 +121,7 @@ export type JiraBrowserPort = {
   isLoginSelectorOption?(target: string): Promise<boolean>;
   assertPrecondition?(target: string): Promise<{ observedText: string }>;
   act(step: ExecutionPlanStep, target: string, value?: string, semanticContext?: string): Promise<PlanTarget>;
+  resolveFileRef?(fileRef: string): Promise<{ filename: string; contentType: string; bytes: Buffer }>;
   assertAbsent?(target: string): Promise<{ absent: true }>;
   /** A real download event must carry the expected file/content; page text never satisfies it. */
   assertDownload?(expected: JiraDownloadExpectation): Promise<{ kind: "download_content"; filename: string; bytes: number }>;
@@ -128,7 +132,8 @@ export type JiraBrowserPort = {
   assertFieldEmpty?(fieldLabel: string): Promise<{ kind: "field_empty"; fieldLabel: string }>;
   /** Exactly one data row of the named container must contain every previously entered value; throws JIRA_ROW_* otherwise. */
   assertRowMatch?(container: string, values: string[]): Promise<{ kind: "table_row_match"; container: string; matchedRows: 1; boundValueCount: number }>;
-  assert(target: string, authGate: boolean, screenDescriptor?: boolean, columnHeader?: boolean, headerScoped?: boolean): Promise<{ stage?: string; observedText?: string; assertionScope?: "header" }>;
+  /** `replayTarget`: visible text proven by AI-backed evidence, so the promoted spec repeats a deterministic check instead of re-asking the AI. */
+  assert(target: string, authGate: boolean, screenDescriptor?: boolean, columnHeader?: boolean, headerScoped?: boolean): Promise<{ stage?: string; observedText?: string; assertionScope?: "header"; replayTarget?: string }>;
 };
 
 type JiraNativeOption = { value: string; label: string };
@@ -950,6 +955,20 @@ export function jiraTargetDiagnosticField(error: unknown): { targetDiagnostic?: 
   return error instanceof JiraTargetFailureError ? { targetDiagnostic: error.diagnostic } : {};
 }
 
+// Diagnostic only: where an ambiguous candidate lives, never its text or any value.
+const DESCRIBE_AMBIGUOUS_CANDIDATE = new Function(`return function (element) {
+  var rect = element.getBoundingClientRect();
+  var chain = [];
+  var node = element.parentElement;
+  for (var depth = 0; node && depth < 6; depth += 1, node = node.parentElement) {
+    chain.push(node.tagName.toLowerCase() + (node.getAttribute("role") ? "[role=" + node.getAttribute("role") + "]" : "")
+      + (node.getAttribute("aria-hidden") === "true" ? "[aria-hidden]" : "") + (node.hasAttribute("inert") ? "[inert]" : ""));
+  }
+  var style = window.getComputedStyle(element);
+  return "box=" + Math.round(rect.left) + "," + Math.round(rect.top) + "," + Math.round(rect.width) + "x" + Math.round(rect.height)
+    + " opacity=" + style.opacity + " pointerEvents=" + style.pointerEvents + " ancestors=" + chain.join(">");
+}`)() as (element: Element) => string;
+
 export async function resolveJiraActionTarget(page: Page, snapshot: Awaited<ReturnType<typeof scanCurrentPage>>, target: string): Promise<TargetResolutionResult> {
   // Jira stories describe user-facing actions semantically. When the page exposes
   // one exact accessible action, prefer that identity over the shared fuzzy resolver
@@ -965,6 +984,30 @@ export async function resolveJiraActionTarget(page: Page, snapshot: Awaited<Retu
     for (let index = 0; index < await matches.count(); index += 1) {
       const locator = matches.nth(index);
       if (await locator.isVisible() && await locator.isEnabled()) exactActions.push({ locator, role });
+    }
+  }
+  // The same label in a folded submenu elsewhere in the navigation is not a second candidate: drop the matches that sit
+  // inside a collapsed container, but only when at least one match remains.
+  if (exactActions.length > 1) {
+    const reachable: typeof exactActions = [];
+    for (const action of exactActions) {
+      if (!await action.locator.evaluate(INSIDE_COLLAPSED_CONTAINER).catch(() => false)) reachable.push(action);
+    }
+    if (reachable.length >= 1 && reachable.length < exactActions.length) exactActions.splice(0, exactActions.length, ...reachable);
+  }
+  // Still several: keep only the ones the pointer would reach. Exactly one left decides; zero or several leave the
+  // ambiguity as it was (fail closed), so a control below the fold is never chosen over another by accident.
+  if (exactActions.length > 1) {
+    const reached: typeof exactActions = [];
+    for (const action of exactActions) {
+      if (await action.locator.evaluate(REACHES_POINTER_AT_CENTER).catch(() => false)) reached.push(action);
+    }
+    if (reached.length === 1) exactActions.splice(0, exactActions.length, ...reached);
+    else {
+      for (const [index, action] of exactActions.entries()) {
+        const where = await action.locator.evaluate(DESCRIBE_AMBIGUOUS_CANDIDATE).catch(() => "unavailable");
+        console.log(`[jira-ambiguity] candidate=${index} role=${action.role} reachedByPointer=${reached.includes(action)} ${where}`);
+      }
     }
   }
   if (exactActions.length === 1) {
@@ -1537,7 +1580,16 @@ function explicitAssertionTarget(step: string): string | undefined {
   return step.match(/["“]([^"”]+)["”]/)?.[1]?.trim();
 }
 
-function expectedResultIsCoveredByAssertion(expectedResult: string, assertion: string): boolean {
+/**
+ * A trailing "after <flow already executed>" clause restates the path that led to the outcome,
+ * not an additional outcome, so it must not make a paraphrase look like a second oracle.
+ */
+function stripTrailingFlowClause(expectedResult: string): string {
+  return expectedResult.replace(/[,]?\s+(?:despu[eé]s\s+de|tras|luego\s+de|una\s+vez\s+(?:que\s+)?)\s*[^"“”.]+[.]?\s*$/i, "").trim() || expectedResult;
+}
+
+export function expectedResultIsCoveredByAssertion(rawExpectedResult: string, assertion: string): boolean {
+  const expectedResult = stripTrailingFlowClause(rawExpectedResult);
   const target = explicitAssertionTarget(assertion);
   if (!target) return false;
   const negative = /\b(?:no\s+se\s+(?:muestre|muestra|presente|presenta|encuentre|encuentra)|no\s+aparezca|absent|not\s+visible)\b/i;
@@ -1546,7 +1598,7 @@ function expectedResultIsCoveredByAssertion(expectedResult: string, assertion: s
   // Expected results are often prose summaries of an already explicit screen
   // assertion. Compare their meaningful terms (including common Spanish verb
   // forms) so a paraphrase does not become a second, unexecutable oracle.
-  const stopWords = new Set("a al de del el la las lo los un una unos unas que se no en con por para y o es son esta estan como consulta consult indica indic informa inform muestra muestr sistema sistem durante permanece lista listas".split(" "));
+  const stopWordList = "a al de del el la las lo los un una unos unas que se no en con por para y o es son esta estan como consulta consult indica indic informa inform muestra muestr sistema sistem durante permanece lista listas".split(" ");
   const normalizeToken = (value: string) => {
     let token = value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es");
     token = token.replace(/^(?:encuentra|encontrada|encontrado|encontrar|encuentran|encuentre|encuentren)$/, "encontr");
@@ -1555,6 +1607,9 @@ function expectedResultIsCoveredByAssertion(expectedResult: string, assertion: s
     else if (token.length > 5 && /[aeo]$/.test(token)) token = token.slice(0, -1);
     return token.replace(/ue/g, "o");
   };
+  // Stop words go through the same normalization as the compared tokens, otherwise forms
+  // rewritten by it (e.g. "muestra" -> "mostr") never match their own entry.
+  const stopWords = new Set(stopWordList.map(normalizeToken));
   const terms = (value: string) => normalizeJiraOptionText(value.replace(/^(?:Validar|Verificar)\b\s*/i, "")).split(" ")
     .map(normalizeToken).filter(token => token.length > 1 && !stopWords.has(token));
   const targetTerms = terms(target);
@@ -1689,7 +1744,8 @@ export async function certifyJiraDurableTarget(page: Page, locator: Locator): Pr
   throw new Error("JIRA_DURABLE_TARGET_UNRESOLVED");
 }
 
-export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?: (observedStage?: string) => Promise<{ success: boolean }>): JiraBrowserPort {
+export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?: (observedStage?: string) => Promise<{ success: boolean }>,
+  resolveFileRef?: JiraBrowserPort["resolveFileRef"]): JiraBrowserPort {
   ensureJiraDownloadObserver(page);
   let previousActionWasClick = false;
   let lastFilledTarget: string | undefined;
@@ -1698,6 +1754,7 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
   const selectedValues = new Map<string, string>();
   return {
     baseUrl,
+    resolveFileRef,
     async navigate() { await settleJiraAction(page, () => page.goto(baseUrl, { waitUntil: "domcontentloaded" }), baseUrl); },
     async navigateTo(url) {
       const requested = new URL(url);
@@ -1786,6 +1843,19 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
     },
     async act(step, target, value, semanticContext) {
       return settleJiraAction(page, async (): Promise<PlanTarget> => {
+      if (step.action === "uploadFile") {
+        if (!value || !resolveFileRef) throw new Error("JIRA_FILE_FIXTURE_UNAVAILABLE");
+        const locator = page.getByLabel(target, { exact: true });
+        await locator.first().waitFor({ state: "attached", timeout: 10000 }).catch(() => undefined);
+        if (await locator.count() !== 1 || !await locator.evaluate(element => element instanceof HTMLInputElement && element.type === "file")) {
+          throw new Error("JIRA_FILE_INPUT_NOT_UNIQUELY_IDENTIFIED");
+        }
+        const asset = await resolveFileRef(value);
+        await locator.setInputFiles({ name: asset.filename, mimeType: asset.contentType, buffer: asset.bytes });
+        const selected = await locator.evaluate(element => (element as HTMLInputElement).files?.length === 1);
+        if (!selected) throw new Error("JIRA_FILE_UPLOAD_NOT_CONFIRMED");
+        return { strategy: "label", value: target, metadata: { resolvedTargetName: target, validationStatus: "observed_file_input" } };
+      }
       // Loading evidence belongs to the most recent click. Keep it across
       // assertions of that destination, and clear it when another action starts.
       lastClickLoadingObservations = [];
@@ -2388,18 +2458,20 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
         const semantic = await resolveJiraDomAssertion(page, target, { skipAiWhenNoTable: true, aiBudget }).catch(() => ({ supported: false, evidenceTexts: [] }));
         if (semantic.supported) {
           previousActionWasClick = false;
-          return { observedText: semantic.evidenceTexts.join(" · ") };
+          return { observedText: semantic.evidenceTexts.join(" · "), ...(semantic.evidenceTexts[0]?.trim() ? { replayTarget: semantic.evidenceTexts[0].trim() } : {}) };
         }
       }
       // The page may still be loading (spinner) when the first semantic check runs. Polls re-run the
       // deterministic and structural-table checks; the AI fallback is bounded to one call per assertion
       // (shared aiBudget), and an absent table for a pure table-presence assertion never reaches it.
       let semanticEvidence: string | undefined;
+      let semanticReplayTarget: string | undefined;
       await expect.poll(async () => {
         if (await observeAssertion()) return true;
         const semantic = await resolveJiraDomAssertion(page, target, { skipAiWhenNoTable: true, aiBudget }).catch(() => ({ supported: false, evidenceTexts: [] }));
         if (!semantic.supported) return false;
         semanticEvidence = semantic.evidenceTexts.join(" · ");
+        semanticReplayTarget = semantic.evidenceTexts[0]?.trim() || undefined;
         return true;
       }, { timeout: previousActionWasClick ? 90000 : 15000 }).toBe(true).catch(async () => {
         // Preserve the failed oracle; report a directly observed login rejection
@@ -2408,7 +2480,7 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
         throw new Error("JIRA_ASSERTION_NOT_SATISFIED");
       });
       previousActionWasClick = false;
-      return { observedText: semanticEvidence ?? observedText, ...(observedAssertionScope ? { assertionScope: observedAssertionScope } : {}) };
+      return { observedText: semanticEvidence ?? observedText, ...(semanticReplayTarget ? { replayTarget: semanticReplayTarget } : {}), ...(observedAssertionScope ? { assertionScope: observedAssertionScope } : {}) };
     },
   };
 }
@@ -2608,6 +2680,25 @@ export async function discoverJiraScenario(input: JiraScenarioInput, browser: Ji
         if (!authResult.success) throw new Error("JIRA_AUTHENTICATION_FAILED");
       }
     }
+    const workflowOperation = parseJiraWorkflowStep(text);
+    if (workflowOperation) {
+      if (!browser.executeWorkflow) throw new Error("JIRA_WORKFLOW_RUNTIME_UNAVAILABLE");
+      const field = input.inputRequirements?.find(item => item.stepIndex === sourceIndex && item.controlType === "file-set");
+      const value = field ? values[field.key] : undefined;
+      if (workflowOperation.kind === "documents" && !field) throw new Error("JIRA_DOCUMENT_REQUIREMENT_MISSING");
+      await browser.executeWorkflow(workflowOperation, value);
+      steps.push({ index: nextIndex++, action: "noop", description: text, jiraWorkflow: workflowOperation, ...(field ? { valueKey: field.key } : {}) });
+      if (field && value) entries.push({ key: field.key, value, sensitive: false, source: "explicit_runtime_input" });
+      lastFill = undefined;
+      if (workflowOperation.kind === "application") {
+        classicLoginPerformed = false;
+        authoredCredentialSubmitHandled = false;
+        filledAuthoredCredentialTargets.clear();
+        satisfiedLoginControls.clear();
+      }
+      await progress(sourceIndex, "passed");
+      continue;
+    }
     if (preSelected.has(offset)) { await progress(sourceIndex, "passed"); continue; }
     if (classicLoginPerformed && !authGate && intent?.type === "action_click" && intent.actionTarget
       && satisfiedLoginControls.has(normalizeLabel(intent.actionTarget)) && browser.isTargetVisible && !await browser.isTargetVisible(intent.actionTarget)) {
@@ -2721,7 +2812,7 @@ export async function discoverJiraScenario(input: JiraScenarioInput, browser: Ji
       }
       if (automaticCondition) await progress(sourceIndex,'condition_applies_observed');
       const assertionScope = texts[offset].headerScoped || observation.assertionScope === "header";
-      steps.push({ index, action: "assertVisible", description: text, target: { strategy: "text", value: target,
+      steps.push({ index, action: "assertVisible", description: text, target: { strategy: "text", value: observation.replayTarget || target,
         ...(assertionScope ? { assertionScope: "header" as const } : {}) } });
       oracles.push({ id: `jira-oracle-${index}`, requirement: text, type: authGate ? "auth_gate" : "literal_visible_text", backed: true,
         source: "discovery", stepIndex: index, target: observation.observedText || target, evidence: [`live-step-${index}`], details: { ...observation, ...(assertionScope ? { assertionScope: "header" } : {}) } });
@@ -2755,13 +2846,13 @@ export async function discoverJiraScenario(input: JiraScenarioInput, browser: Ji
       throw new Error(`JIRA_SETUP_OR_ACTION_POLICY_UNSUPPORTED:${intent.type}`);
     } else {
       const actions: Partial<Record<string, ExecutionPlanStep["action"]>> = { action_click: "click", action_submit: "click", action_fill: "fill", action_press: "press", action_select: "select" };
-      const action = actions[intent.type];
+      const field = input.inputRequirements?.find(requirement => requirement.stepIndex === sourceIndex && requirement.operation === (intent.type === "action_fill" ? "fill" : intent.type === "action_select" ? "select" : "") && requirement.label === intent.actionTarget);
+      const action = field?.controlType === "file" && intent.type === "action_fill" ? "uploadFile" : actions[intent.type];
       if (!action || !intent.actionTarget) throw new Error(`JIRA_UNSUPPORTED_INTENT:${intent.type}`);
       const intentionalClear = action === "fill" && intent.actionVerb === "clear";
-      const field = input.inputRequirements?.find(requirement => requirement.stepIndex === sourceIndex && requirement.operation === action && requirement.label === intent.actionTarget);
-      const valueKey = intentionalClear ? undefined : field?.key ?? intent.valueKey ?? (action === "fill" || action === "select" ? `jira_step_${offset + 1}` : undefined);
+      const valueKey = intentionalClear ? undefined : field?.key ?? intent.valueKey ?? (["fill", "select", "uploadFile"].includes(action) ? `jira_step_${offset + 1}` : undefined);
       const value = intentionalClear ? "" : valueKey ? values[valueKey] ?? intent.value : intent.value;
-      if ((action === "fill" || action === "select" || action === "press") && value === undefined) throw new JiraRequiredDataError([{key:valueKey ?? '',label:intent.actionTarget,stepIndex:sourceIndex}]);
+      if ((action === "fill" || action === "select" || action === "press" || action === "uploadFile") && value === undefined) throw new JiraRequiredDataError([{key:valueKey ?? '',label:intent.actionTarget,stepIndex:sourceIndex}]);
       // Never retain credential literals in plans, events or generated source.
       const description = intentionalClear ? `clear ${intent.actionTarget}` : action === "fill" || action === "select" ? `${action} [${valueKey}]` : text;
       const step: ExecutionPlanStep = { index, action, description, ...(valueKey ? { valueKey } : {}), ...(action === "press" || intentionalClear ? { value } : {}) };

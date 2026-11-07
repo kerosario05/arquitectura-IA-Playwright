@@ -171,6 +171,57 @@ test("recording replay consumes structured action authority instead of rendered 
   assert.equal(parsed.orderedSteps[0]?.technicalTargetCandidates?.[0]?.value, "#field-a");
 });
 
+test("recording replay routes a transient selection query through its recorded owner", () => {
+  const parsed = parseScenarioStepsForDiscovery({
+    ...scenario(),
+    steps: [{
+      index: 17,
+      action: 'Ingresar "emplead" en "2577 resultados están disponibles"',
+      dataHints: [],
+    }],
+    recordingExecutionContract: {
+      actions: [
+        {
+          actionType: "click",
+          humanStep: 'Presionar "Actividad económica"',
+          semanticField: "Actividad económica",
+          targetRef: "activity-owner",
+          stepIndex: 1,
+        },
+        {
+          actionType: "fill",
+          humanStep: 'Ingresar "emplead" en "2577 resultados están disponibles"',
+          semanticField: "2577 resultados están disponibles",
+          associatedField: "2577 resultados están disponibles",
+          targetRef: "transient-result-count",
+          valueKey: "actividad_economica_query",
+          value: "emplead",
+          runtimeValueSource: "dataset",
+          stepIndex: 2,
+        },
+        {
+          actionType: "click",
+          humanStep: 'Seleccionar "Empleados" en "Actividad económica"',
+          semanticField: "Actividad económica",
+          targetRef: "activity-option",
+          technicalTargetRef: "role:option|Empleados",
+          stepIndex: 3,
+        },
+      ],
+      runtimeInputRequirements: [],
+    },
+  });
+
+  const query = parsed.actionTargets.find((item) => item.recordingActionType === "fill");
+  assert.ok(query);
+  assert.equal(query.target, "Actividad económica");
+  assert.equal(query.associatedField, "Actividad económica");
+  assert.equal(query.selectionQueryOwnerField, "Actividad económica");
+  assert.equal(query.valueKey, "actividad_economica_query");
+  const orderedQuery = parsed.orderedSteps.find((step) => step.recordingActionType === "fill");
+  assert.equal(orderedQuery?.selectionQueryOwnerField, "Actividad económica");
+});
+
 /**
  * FIRST_LOSS: `parseScenarioStepsForDiscovery`'s recording-action tagging ternary had no branch
  * for `"press"` -- it fell through to the same default used for a real click ("action_click"),

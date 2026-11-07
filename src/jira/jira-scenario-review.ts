@@ -1,3 +1,5 @@
+import { parseJiraWorkflowStep, jiraWorkflowErrors } from "./jira-workflow";
+
 export type JiraConditionRequirement = {
   key: string;
   subject: string;
@@ -55,6 +57,7 @@ export function canonicalJiraConditionalVisibilityStep(step:string,requirement:J
 
 /** Whether the shared semantic parser can hand this step to live Discovery. */
 export function isJiraStepAutoResolvable(step: string): boolean {
+  if (parseJiraWorkflowStep(step)) return true;
   if (/^\s*(?:Solicitar|Request)\s+(?:el\s+|un\s+)?(?:c[oó]digo|code|token)(?:\s+de\s+seguridad)?\s+(?:por|v[ií]a|by|via)\s+(?:SMS|correo electr[oó]nico|email)[.]?$/i.test(step)) return true;
   const intents=parseStepIntent(step);
   return intents.length>0 && intents.every(intent=>[
@@ -71,7 +74,7 @@ export function prepareJiraScenarioReview<T extends ReviewScenario>(scenario: T)
 } {
   const steps = [...scenario.steps];
   const fields = scenario.inputRequirements?.map(field=>({...field}));
-  const errors: string[] = [];
+  const errors: string[] = jiraWorkflowErrors(steps);
   const issues: JiraReviewIssue[] = [];
   const skippedAssertionSteps: number[] = [];
   if (scenario.conditionRequirements?.some(requirement=>!requirement || typeof requirement.key!=='string' || !requirement.key.trim() || !Array.isArray(requirement.stepIndices))) {

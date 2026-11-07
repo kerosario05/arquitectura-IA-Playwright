@@ -47,6 +47,7 @@ export const CHROMIUM_ARGS = [
   "--remote-debugging-port=0",
   "--remote-debugging-address=127.0.0.1",
   "--no-startup-window",
+  "--start-maximized",
   "--disable-field-trial-config",
   "--disable-background-networking",
   "--disable-background-timer-throttling",

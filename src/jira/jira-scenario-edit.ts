@@ -58,9 +58,14 @@ export async function reviewEditedJiraScenarios(issue:JiraIssueSource,scenarios:
   const inputRequirements=changed?inputs.map(field=>{
    const text=draft.steps[field.stepIndex-1];
    const oldPositions=original.steps.flatMap((s,i)=>s===text?[i+1]:[]);
-   const old=oldPositions.length===1&&draft.steps.filter(s=>s===text).length===1
-    ?original.inputRequirements?.find(f=>f.stepIndex===oldPositions[0]&&f.operation===field.operation&&f.label===field.label):undefined;
-   return {...field,key:old?.key??`jira_edit_${revision}_${field.stepIndex}`};
+   const sameField=(f:{operation:string;label:string})=>f.operation===field.operation&&f.label===field.label;
+   const unchangedStep=oldPositions.length===1&&draft.steps.filter(s=>s===text).length===1
+    ?original.inputRequirements?.find(f=>f.stepIndex===oldPositions[0]&&sameField(f)):undefined;
+   // Rewording the verb of a step keeps its value when the same field label is unique before and after the edit.
+   const oldByLabel=original.inputRequirements?.filter(sameField)??[];
+   const old=unchangedStep??(oldByLabel.length===1&&inputs.filter(sameField).length===1?oldByLabel[0]:undefined);
+   // An unchanged step keeps its observed control type: wording like "Ingresar el archivo..." does not imply a file input by itself.
+   return {...field,...(old?.controlType==='file'?{controlType:old.controlType}:{}),key:old?.key??`jira_edit_${revision}_${field.stepIndex}`};
   }):deriveJiraInputRequirements(draft.steps,original.inputRequirements);
   const reviewConfiguration=changed?{conditions:original.reviewConfiguration?.conditions}:original.reviewConfiguration;
   const conditionRequirements=jiraSourceConditions({...draft,inputRequirements},issue);

@@ -14,7 +14,7 @@ export const jiraScenarioRepairOutputSchema = {
           key:{type:'string'}, label:{type:'string'}, stepIndex:{type:'integer',minimum:1},
           operation:{type:'string',enum:['fill','select']},
           required:{type:'boolean'}, editable:{type:'boolean'}, sensitive:{type:'boolean'},
-          controlType:{type:'string',enum:['text','password','select','number']},source:{type:'string',enum:['jira_step']},
+          controlType:{type:'string',enum:['text','password','select','number','date','file','file-set']},source:{type:'string',enum:['jira_step']},
           dataCondition:{type:['string','null'],enum:['valid','invalid','expired',null]},
         }}},
       unresolvedUiRequirements: {type:'array',items:{type:'object',additionalProperties:false,

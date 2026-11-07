@@ -12,6 +12,7 @@ import type { McpRouteProfile, McpScenario } from "../../scenarios/scenario-type
 import type { PromotedAutomationIndexEntry } from "../../types/automation-promotion.types";
 import { defectChecklistStore } from "../services/defect-checklist-store";
 import { jobStore } from "./job-store";
+import { scheduleJob } from "./job-scheduler";
 import { buildRediscoveryProvenanceLine, startDiscoveryBatchRun, validatePromotedEntryForExecution } from "./discovery-batch-runner";
 import { loadAppConfig } from "../../automations/app-auto-resolver";
 import { buildMcpScenarioContractFromTestRailCase, evaluateCaseContractSufficiency, extractCaseContractMetadata } from "../../automations/case-contract-evaluator";
@@ -1171,7 +1172,7 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
     }));
     discoveryJobId = discoveryJob.id;
     jobStore.appendLog(discoveryJobId, `[launch-execution-plan] existingSpec=${existingCasePlan.existingSpec.length} mcpRequired=${existingCasePlan.mcpRequired.length} routeDiscovery=${routeDiscoveryScenarios.length}`);
-    startDiscoveryBatchRun(discoveryJobId);
+    scheduleJob(discoveryJob.id, () => startDiscoveryBatchRun(discoveryJob.id));
   } else if (routeDiscoveryCount > 0) {
     console.log(`[route-discovery] pending scenarios=${routeDiscoveryCount} reason=publication_failed_or_no_case_id`);
   }

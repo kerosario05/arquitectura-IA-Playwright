@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-adjuntar-documentos",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Adjuntar Documentos",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-28T16:00:52.874Z"
+}

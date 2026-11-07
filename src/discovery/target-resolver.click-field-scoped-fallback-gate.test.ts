@@ -92,12 +92,12 @@ test("6a/resolvedSelectionSkipsFieldScope. a verified selection does not start t
   assert.match(fn, /if \(opts\.associatedField\?\.trim\(\) && opts\.actionType !== "action_select"\) \{[\s\S]*?const diagnosticScope = await tryFieldScopedStructuralFallback/);
 });
 
-test("7/fillUntouched. resolveFillTarget's own wrapper source is completely unmodified by this fix", () => {
+test("7/fillScope. resolveFillTarget retains editable compatibility and its existing dialog scope", () => {
   const fillStart = source.indexOf("export async function resolveFillTarget(");
   const fillEnd = source.indexOf("\nexport function validateFillResolutionContract", fillStart);
   const fillFn = source.slice(fillStart, fillEnd);
   assert.match(fillFn, /const fieldScopedFallbackEligible = result\.status === "not_found"/);
-  assert.match(fillFn, /tryFieldScopedStructuralFallback\(page, gridContext\.associatedField \?\? target, "editable", "fill"\)/);
+  assert.match(fillFn, /tryFieldScopedStructuralFallback\(\s*page,\s*gridContext\.associatedField \?\? target,\s*"editable",\s*"fill",\s*undefined,\s*fallbackScope,?\s*\)/);
 });
 
 test("8/multiproject. no app/business hardcode was introduced by this fix", () => {

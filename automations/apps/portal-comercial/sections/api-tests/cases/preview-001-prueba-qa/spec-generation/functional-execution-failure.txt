@@ -1,0 +1,32 @@
+1) automations\apps\portal-comercial\sections\api-tests\cases\preview-001-prueba-qa\.candidate-validation-42500-1793505994049.spec.ts:14:5 › prueba qa
+Error: Promoted click failed at step 5 target="css:[href="/requests/create/multiproduct"]". reason=structural_authority_not_unique_or_unresolved structuralFailureReason=owner_tag_not_present structuralFailureMatchCount=n/a suggestedFix="The recorded structural target and its exact accessible reference must resolve to one visible, enabled element."
+at ..\..\src\automations\runtime\promoted-spec-runtime.ts:3917
+3915 |       ?? semanticFallback?.strategy;
+3916 |     if (!resolvedLocator) {
+> 3917 |       throw new Error(
+|             ^
+3918 |         `Promoted click failed at step ${options.stepIndex} target="${options.target}". ` +
+3919 |         `reason=structural_authority_not_unique_or_unresolved ` +
+3920 |         `structuralFailureReason=${structuralFailureReason ?? "unknown"} ` +
+at PromotedSpecRuntime.clickPromotedTargetViaStructuralAuthority (C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\src\automations\runtime\promoted-spec-runtime.ts:3917:13)
+at PromotedSpecRuntime.clickPromotedTarget (C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\src\automations\runtime\promoted-spec-runtime.ts:4041:7)
+at Proxy.<anonymous> (C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\src\automations\runtime\promoted-spec-runtime.ts:6586:26)
+at C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\automations\apps\portal-comercial\sections\api-tests\cases\preview-001-prueba-qa\.candidate-validation-42500-1793505994049.spec.ts:55:5
+attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--0efe2-500-1793505994049-prueba-qa\test-failed-1.png
+────────────────────────────────────────────────────────────────────────────────────────────────
+attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--0efe2-500-1793505994049-prueba-qa\video.webm
+────────────────────────────────────────────────────────────────────────────────────────────────
+Error Context: test-results\apps\portal-comercial-sections--0efe2-500-1793505994049-prueba-qa\error-context.md
+attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--0efe2-500-1793505994049-prueba-qa\trace.zip
+Usage:
+npx playwright show-trace test-results\apps\portal-comercial-sections--0efe2-500-1793505994049-prueba-qa\trace.zip
+────────────────────────────────────────────────────────────────────────────────────────────────
+1 failed
+automations\apps\portal-comercial\sections\api-tests\cases\preview-001-prueba-qa\.candidate-validation-42500-1793505994049.spec.ts:14:5 › prueba qa
+(node:39196) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:39196) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)

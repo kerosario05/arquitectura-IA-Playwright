@@ -3,10 +3,12 @@ import { buildExecutionSummary, listExecutionSummaries } from "../services/execu
 import { filterByProjectAccess } from "../middleware/route-policy";
 
 const router = Router();
+// Warm the derived index without blocking API startup or health/jobs requests.
+void listExecutionSummaries().catch(() => undefined);
 
 // GET /api/executions — list all finished executions (compact), newest first.
-router.get("/api/executions", (req: Request, res: Response) => {
-  const filtered = filterByProjectAccess(req.principal, listExecutionSummaries(),
+router.get("/api/executions", async (req: Request, res: Response) => {
+  const filtered = filterByProjectAccess(req.principal, await listExecutionSummaries(),
     (execution) => (execution as { appSlug?: string }).appSlug ?? null);
   const requestedLimit = Number(req.query.limit);
   const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(100, Math.floor(requestedLimit))) : 40;

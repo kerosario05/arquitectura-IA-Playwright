@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
+import { chromium } from "@playwright/test";
 import { createPromotedSpecRuntime } from "./promoted-spec-runtime";
 
 /**
@@ -26,6 +27,7 @@ type StubLocator = {
   count: () => Promise<number>;
   isVisible: () => Promise<boolean>;
   isEnabled: () => Promise<boolean>;
+  waitFor: () => Promise<void>;
   click: () => Promise<void>;
 };
 
@@ -46,6 +48,7 @@ function buildStructuralStubPage(options: { finalCount: number; finalVisible?: b
         count: async () => (isFinal ? options.finalCount : 1),
         isVisible: async () => options.finalVisible ?? true,
         isEnabled: async () => options.finalEnabled ?? true,
+        waitFor: async () => {},
         click: async () => { clicks.push(selector); },
       };
     },
@@ -150,6 +153,141 @@ test("3b/STRUCTURAL_FAILURE_REASON_TRANSPORT: zero matches carries structural_ma
     }),
     /structuralFailureReason=structural_match_not_unique/,
   );
+});
+
+test("3d/RECORDED_ROLE_COMPATIBILITY: a changed DOM attribute may use the exact captured role/name when it remains unique and actionable", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<main><a href="/new" onclick="this.dataset.clicked=\'yes\'; return false"><span>Solicitud multiproducto</span></a></main>');
+    const structuralTarget = {
+      ...STRUCTURAL_TARGET,
+      locatorCandidates: [{ strategy: "css", value: '[href="/requests/create/multiproduct"]', confidence: 0.85 }],
+      structuralContext: {
+        ...STRUCTURAL_TARGET.structuralContext,
+        stableDirectAttributes: { href: "/requests/create/multiproduct" },
+        semanticShape: ["span"],
+      },
+    };
+    const runtime = createPromotedSpecRuntime(page as any, { enabled: false });
+
+    await (runtime as any).clickPromotedTargetViaStructuralAuthority({
+      stepIndex: 5,
+      target: 'css:[href="/requests/create/multiproduct"]',
+      actionIntent: "click",
+      expectedEffect: "none",
+      structuralTarget,
+      structuralSemanticFallbackRefs: ["role:link|Solicitud multiproducto"],
+    });
+
+    assert.equal(await page.locator("a").getAttribute("data-clicked"), "yes");
+    await runtime.finishEvidence();
+  } finally {
+    await browser.close();
+  }
+});
+
+test("3e/RECORDED_ROLE_COMPATIBILITY_FAIL_CLOSED: duplicate captured accessible targets are not clicked", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<main><a href="/new"><span>Solicitud multiproducto</span></a><a href="/other"><span>Solicitud multiproducto</span></a></main>');
+    const structuralTarget = {
+      ...STRUCTURAL_TARGET,
+      locatorCandidates: [{ strategy: "css", value: '[href="/requests/create/multiproduct"]', confidence: 0.85 }],
+      structuralContext: {
+        ...STRUCTURAL_TARGET.structuralContext,
+        stableDirectAttributes: { href: "/requests/create/multiproduct" },
+        semanticShape: ["span"],
+      },
+    };
+    const runtime = createPromotedSpecRuntime(page as any, { enabled: false });
+
+    await assert.rejects(
+      (runtime as any).clickPromotedTargetViaStructuralAuthority({
+        stepIndex: 5,
+        target: 'css:[href="/requests/create/multiproduct"]',
+        actionIntent: "click",
+        expectedEffect: "none",
+        structuralTarget,
+        structuralSemanticFallbackRefs: ["role:link|Solicitud multiproducto"],
+      }),
+      /structural_authority_not_unique_or_unresolved/,
+    );
+    assert.equal(await page.locator("a[data-clicked]").count(), 0);
+  } finally {
+    await browser.close();
+  }
+});
+
+test("3f/RECORDED_ROLE_COMPATIBILITY_DOES_NOT_RESOLVE_STRUCTURAL_AMBIGUITY: a unique role ref cannot override multiple exact structural owners", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<main><a href="/requests/create/multiproduct"><span>Solicitud multiproducto</span></a><a href="/requests/create/multiproduct"><span>Other link</span></a></main>');
+    const structuralTarget = {
+      ...STRUCTURAL_TARGET,
+      locatorCandidates: [{ strategy: "css", value: '[href="/requests/create/multiproduct"]', confidence: 0.85 }],
+      structuralContext: {
+        ...STRUCTURAL_TARGET.structuralContext,
+        stableDirectAttributes: { href: "/requests/create/multiproduct" },
+        semanticShape: ["span"],
+      },
+    };
+    const runtime = createPromotedSpecRuntime(page as any, { enabled: false });
+
+    await assert.rejects(
+      (runtime as any).clickPromotedTargetViaStructuralAuthority({
+        stepIndex: 5,
+        target: 'css:[href="/requests/create/multiproduct"]',
+        actionIntent: "click",
+        expectedEffect: "none",
+        structuralTarget,
+        structuralSemanticFallbackRefs: ["role:link|Solicitud multiproducto"],
+      }),
+      /structuralFailureReason=action_owner_ambiguous/,
+    );
+    assert.equal(await page.locator("a[data-clicked]").count(), 0);
+  } finally {
+    await browser.close();
+  }
+});
+
+test("3c/STALE_SCOPE_RUNTIME_HANDOFF: a promoted click uses the unique certified target when its capture-time scope now points elsewhere", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<main><section id="stale-scope"><a href="#other"><span>Other</span></a></section><nav><a href="#target" onclick="this.dataset.clicked=\'yes\'"><span>Target</span></a></nav></main>');
+    const structuralTarget = {
+      ...STRUCTURAL_TARGET,
+      locatorCandidates: [{ strategy: "css", value: 'a[href="#target"]', confidence: 0.9 }],
+      certificationTier: 1,
+      structuralContext: {
+        ...STRUCTURAL_TARGET.structuralContext,
+        stableDirectAttributes: { href: "#target" },
+        semanticShape: ["span"],
+        targetFingerprint: "captured-link",
+        captureScopeUnique: true,
+        captureTargetMatchCount: 1,
+        scopeIdentity: { strategy: "id", value: "stale-scope" },
+        landmarkAncestor: { tag: "main" },
+      },
+    };
+    const runtime = createPromotedSpecRuntime(page as any, { enabled: false });
+
+    await (runtime as any).clickPromotedTargetViaStructuralAuthority({
+      stepIndex: 4,
+      target: 'a[href="#target"]',
+      actionIntent: "click",
+      expectedEffect: "none",
+      structuralTarget,
+    });
+
+    await runtime.finishEvidence();
+    assert.equal(await page.locator('nav a[href="#target"]').getAttribute("data-clicked"), "yes");
+  } finally {
+    await browser.close();
+  }
 });
 
 test("4/dispatch: clickPromotedTarget's own source routes options.structuralTarget to the structural-authority path BEFORE the legacy native/callback machinery, and only when present", () => {

@@ -1,0 +1,62 @@
+{
+  "version": "1.0",
+  "recordingId": "1ce1b8a7-41f3-4e9f-a81a-d37ee4fe5a4d",
+  "projectSlug": "fenix",
+  "appSlug": "fenix",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "CONSULTA",
+    "normalizedGoal": "CONSULTA",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [],
+  "semanticComponents": [],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    }
+  ],
+  "datasets": [],
+  "technicalObservations": [],
+  "editingSessions": [],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "pageKey": "tab-1",
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://qa1.santacruz.do/onlinebanking",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    }
+  ],
+  "gridMetadata": {
+    "detected": false,
+    "grids": 0,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace"
+}

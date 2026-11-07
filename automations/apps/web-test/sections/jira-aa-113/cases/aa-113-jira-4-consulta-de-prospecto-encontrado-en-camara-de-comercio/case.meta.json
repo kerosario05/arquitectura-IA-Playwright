@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "AA-113:jira:4",
+  "title": "Consulta de prospecto encontrado en Cámara de Comercio",
+  "generatedAt": "2026-10-27T12:37:20.428Z",
+  "executionEngine": "jira_semantic"
+}

@@ -1,6 +1,164 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { canToleratePostActionLoadingTimeout, resolvePostActionSynchronization } from "./post-action-synchronization";
+import { canToleratePostActionLoadingTimeout, hasCrossFieldLookupRefreshEffect, hasNewVisibleApplicationError, matchesObservedActionSurface, matchesObservedRecordedDestination, resolvePostActionSynchronization } from "./post-action-synchronization";
+
+test("cross-field lookup recognizes existing state-candidate changes while preserving the no-effect gate", () => {
+  const noEffect = hasCrossFieldLookupRefreshEffect({
+    responseObserved: false,
+    nextTargetBecameVisible: false,
+    stateCandidateMutations: [],
+  });
+  assert.equal(noEffect, false);
+  assert.deepEqual(resolvePostActionSynchronization({
+    actionNetworkObserved: true,
+    actionNetworkResponse: true,
+    authenticationBoundaryStillActive: true,
+    nextTargetReady: true,
+    loadingSettled: true,
+    crossFieldLookupRefreshObserved: noEffect,
+  }), { completed: false }, "a resolvable successor alone remains blocked when lookup produced no observed effect");
+
+  assert.equal(hasCrossFieldLookupRefreshEffect({
+    responseObserved: false,
+    stateCandidateMutations: [{ fingerprintBefore: "" }],
+  }), false, "a newly appearing candidate without a before-state is not causal evidence");
+
+  const dependentStateChanged = hasCrossFieldLookupRefreshEffect({
+    responseObserved: false,
+    nextTargetBecameVisible: false,
+    structuredStateMutation: false,
+    stateCandidateMutations: [{ fingerprintBefore: "value:10:before" }],
+  });
+  assert.equal(dependentStateChanged, true);
+  assert.deepEqual(resolvePostActionSynchronization({
+    authenticationBoundaryStillActive: true,
+    nextTargetReady: true,
+    loadingSettled: true,
+    crossFieldLookupRefreshObserved: dependentStateChanged,
+  }).signal, "cross_field_lookup_refresh", "the recorded lookup completes once the observed form state changes and its successor is ready");
+});
+
+test("an existing unchanged application alert does not fail an unrelated same-surface selection", () => {
+  const before = [{ role: "alert", visible: true, text: "Error al consultar servicio externo" }];
+  assert.equal(hasNewVisibleApplicationError({ before, after: [...before], sameSurface: true }, () => false), false);
+  assert.deepEqual(resolvePostActionSynchronization({
+    applicationError: hasNewVisibleApplicationError({ before, after: before, sameSurface: true }, () => false),
+    targetSelectionStateChanged: true,
+  }).signal, "target_selection_state_changed");
+});
+
+test("new, changed, newly visible and new-surface application errors remain blocking", () => {
+  const old = { role: "alert", visible: true, text: "Error anterior" };
+  const changed = { ...old, text: "Error nuevo" };
+  for (const input of [
+    { before: [], after: [old], sameSurface: true },
+    { before: [old], after: [changed], sameSurface: true },
+    { before: [{ ...old, visible: false }], after: [old], sameSurface: true },
+    { before: [old], after: [old], sameSurface: false },
+  ]) assert.equal(hasNewVisibleApplicationError(input, () => false), true);
+});
+
+test("credential rejection detection and hidden-error exclusion remain intact", () => {
+  const rejection = { text: "Access denied", visible: true };
+  const detect = (text: string) => text === "Access denied";
+  assert.equal(hasNewVisibleApplicationError({ before: [], after: [rejection], sameSurface: true }, detect), true);
+  assert.equal(hasNewVisibleApplicationError({ before: [], after: [{ ...rejection, visible: false }], sameSurface: true }, detect), false);
+});
+
+test("configured non-blocking application-error fragments are ignored without masking other or auth errors", () => {
+  const knownTestWarning = {
+    role: "alert",
+    visible: true,
+    text: "Error al consultar el buró de crédito. No se pudo obtener los datos de la persona en TransUnion Buro Report.",
+  };
+  const unrelatedError = { role: "alert", visible: true, text: "Error al guardar la solicitud" };
+  const credentialError = { role: "alert", visible: true, text: "Error: usuario o contraseña incorrectos" };
+  const input = { before: [], sameSurface: true };
+  const configuredFragments = ["error al consultar el buro de credito", "transunion buro report"];
+
+  assert.equal(hasNewVisibleApplicationError({ ...input, after: [knownTestWarning] }, () => false, configuredFragments), false);
+  assert.equal(hasNewVisibleApplicationError({ ...input, after: [unrelatedError] }, () => false, configuredFragments), true);
+  assert.equal(hasNewVisibleApplicationError({ ...input, after: [credentialError] }, (text) => /incorrectos/i.test(text), configuredFragments), true);
+});
+
+test("observed route transition authorizes a later same-tab recorded step despite a runtime-created entity id", () => {
+  assert.equal(matchesObservedActionSurface({
+    previousActionSucceeded: true,
+    sameBrowserPage: true,
+    previousUrlBefore: "https://app.test/requests/create",
+    previousUrlAfter: "https://app.test/requests/9007/edit",
+    currentUrl: "https://app.test/requests/9007/edit",
+    expectedRouteBefore: "https://app.test/requests/8421/edit",
+  }), true);
+});
+
+test("observed route authority can survive an intervening same-tab action without navigation", () => {
+  assert.equal(matchesObservedActionSurface({
+    previousActionSucceeded: true,
+    sameBrowserPage: true,
+    previousUrlBefore: "https://app.test/requests/create",
+    previousUrlAfter: "https://app.test/requests/9007/edit",
+    currentUrl: "https://app.test/requests/9007/edit",
+    expectedRouteBefore: "https://app.test/requests/8421/edit",
+  }), true);
+});
+
+test("observed route authority fails closed on another tab, an inexact route or a missing transition", () => {
+  const base = {
+    previousActionSucceeded: true,
+    sameBrowserPage: true,
+    previousUrlBefore: "https://app.test/requests/create",
+    previousUrlAfter: "https://app.test/requests/9007/edit",
+    currentUrl: "https://app.test/requests/9007/edit",
+    expectedRouteBefore: "https://app.test/requests/8421/edit",
+  };
+  assert.equal(matchesObservedActionSurface({ ...base, sameBrowserPage: false }), false);
+  assert.equal(matchesObservedActionSurface({ ...base, currentUrl: "https://app.test/requests/9010/edit" }), false);
+  assert.equal(matchesObservedActionSurface({ ...base, previousActionSucceeded: false }), false);
+  assert.equal(matchesObservedActionSurface({ ...base, previousUrlAfter: base.previousUrlBefore }), false);
+});
+
+test("a same-tab observed transition with the next recorded target visible accepts a runtime-created destination", () => {
+  const reached = matchesObservedRecordedDestination({
+    sameBrowserPage: true,
+    routeChanged: true,
+    applicationError: false,
+    nextTargetVisible: true,
+    previousUrl: "https://app.test/requests/create",
+    currentUrl: "https://app.test/requests/9007/edit",
+    expectedRouteAfter: "https://app.test/requests/8421/edit",
+    nextExpectedRouteBefore: "https://app.test/requests/8421/edit",
+  });
+  assert.equal(reached, true);
+  assert.equal(resolvePostActionSynchronization({
+    actionNetworkObserved: true,
+    actionNetworkResponse: true,
+    routeChanged: true,
+    nextTargetAvailable: true,
+    recordedPostActionSurfaceRequired: true,
+    recordedPostActionSurfaceReached: reached,
+  }).completed, true, "the observed route evidence crosses the post-action synchronization boundary");
+});
+
+test("an observed destination does not bypass route lineage, target visibility, application errors, origin, or tab boundaries", () => {
+  const base = {
+    sameBrowserPage: true,
+    routeChanged: true,
+    applicationError: false,
+    nextTargetVisible: true,
+    previousUrl: "https://app.test/requests/create",
+    currentUrl: "https://app.test/requests/9007/edit",
+    expectedRouteAfter: "https://app.test/requests/8421/edit",
+    nextExpectedRouteBefore: "https://app.test/requests/8421/edit",
+  };
+  assert.equal(matchesObservedRecordedDestination({ ...base, sameBrowserPage: false }), false);
+  assert.equal(matchesObservedRecordedDestination({ ...base, routeChanged: false }), false);
+  assert.equal(matchesObservedRecordedDestination({ ...base, applicationError: true }), false);
+  assert.equal(matchesObservedRecordedDestination({ ...base, nextTargetVisible: false }), false);
+  assert.equal(matchesObservedRecordedDestination({ ...base, nextExpectedRouteBefore: "https://app.test/requests/8422/edit" }), false);
+  assert.equal(matchesObservedRecordedDestination({ ...base, currentUrl: "https://other.test/requests/9007/edit" }), false);
+  assert.equal(matchesObservedRecordedDestination({ ...base, expectedRouteAfter: "https://other.test/requests/8421/edit" }), false);
+});
 
 test("loading timeout is tolerated after an observed terminal download only when no request or postcondition remains", () => {
   const base = {
@@ -100,6 +258,16 @@ test("6/authGateBranchUnaffected. nextTargetAvailable alone (no transition neede
     resolvePostActionSynchronization({ authGateChanged: true, nextTargetAvailable: true, nextTargetBecameVisible: false }),
     { completed: true, signal: "auth_gate_changed" },
   );
+});
+
+test("a changing authentication gate does not finish while its action request is pending", () => {
+  const pending = { authenticationRequestPending: true, authGateChanged: true, nextTargetAvailable: true,
+    nextTargetBecameVisible: true, actionNetworkObserved: true, actionNetworkResponse: false, loadingSettled: false };
+  assert.deepEqual(resolvePostActionSynchronization(pending), { completed: false });
+  assert.deepEqual(resolvePostActionSynchronization({ ...pending, authenticationRequestPending: false,
+    actionNetworkResponse: true, loadingSettled: true }), { completed: true, signal: "network_response" });
+  assert.deepEqual(resolvePostActionSynchronization({ ...pending, applicationError: true }),
+    { completed: true, signal: "application_error" });
 });
 
 test("pending action with no transition reaches bounded timeout state", () => {
@@ -733,6 +901,19 @@ test("24/selectionCompletionUnaffectedByNextOwnerBlocking. a blocked next-owner 
   );
 });
 
+test("selection change completes an in-place auth-stage choice while the auth screen stays open", () => {
+  assert.deepEqual(
+    resolvePostActionSynchronization({
+      authenticationBoundaryStillActive: true,
+      actionNetworkObserved: true,
+      actionNetworkResponse: true,
+      loadingSettled: true,
+      targetSelectionStateChanged: true,
+    }),
+    { completed: true, signal: "target_selection_state_changed" },
+  );
+});
+
 test("25/selectionCompletionRespectsRecordedSurfaceGuard. an unmet recorded post-action surface still blocks completion even with a selection-state transition observed", () => {
   assert.deepEqual(
     resolvePostActionSynchronization({
@@ -898,6 +1079,23 @@ test("36/recordedSameSurfaceActionRespectsStructuredNextOwnerReadiness", () => {
       routeChanged: false,
       nextTargetRequiresRuntimeResolution: true,
       nextTargetReady: false,
+    }),
+    { completed: false },
+  );
+});
+
+test("36a/recordedSameSurfaceActionWaitsForAnUnrenderedKnownSuccessorEvenIfResolverPreflightSaysReady", () => {
+  assert.deepEqual(
+    resolvePostActionSynchronization({
+      recordedSameSurfaceAction: true,
+      clickCausalEffectDetected: false,
+      actionNetworkObserved: false,
+      loadingSettled: true,
+      routeChanged: false,
+      nextTargetKnown: true,
+      nextTargetAvailable: false,
+      nextTargetRequiresRuntimeResolution: true,
+      nextTargetReady: true,
     }),
     { completed: false },
   );

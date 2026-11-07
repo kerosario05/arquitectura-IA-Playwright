@@ -1,0 +1,162 @@
+{
+  "recordingId": "0796abf1-ea09-4fbb-b5d0-ecc3210f92c5",
+  "projectSlug": "jira-regression-lab",
+  "appSlug": "jira-regression-lab",
+  "platform": "web",
+  "baseUrl": "http://127.0.0.1:4173",
+  "label": "exploracion northstar",
+  "recordingGoal": {
+    "declaredGoal": "Crear una solicitud, aprobarla en la segunda aplicacion y adjuntar documentos",
+    "normalizedGoal": "Crear una solicitud, aprobarla en la segunda aplicacion y adjuntar documentos",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-10-28T01:47:35.919Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 4475,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "fingerprint": "",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "seq": 0
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "9a0424e878a9",
+      "url": "http://127.0.0.1:4173",
+      "pageKey": "tab-1",
+      "seq": 1
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "9a0424e878a9",
+      "title": "Iniciar sesión",
+      "fingerprint": "e98c9adaac88b785b23d7730e314ddb87394ad916215e0fc849201f82fa7bcd4",
+      "url": "http://127.0.0.1:4173/",
+      "firstSeenAt": 4536,
+      "controls": [
+        {
+          "label": "Empresarial",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Empresarial",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Personal",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Personal",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "RNC",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "login-rnc",
+            "name": "login-rnc",
+            "type": "text"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "login-rnc",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Usuario",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "login-user",
+            "name": "login-user",
+            "type": "text"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "login-user",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "login-password",
+            "name": "login-password",
+            "type": "password"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "login-password",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "submit"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Iniciar sesión",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Iniciar sesión"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 4,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-10-28T01:47:47.503Z",
+  "durationMs": 11584
+}

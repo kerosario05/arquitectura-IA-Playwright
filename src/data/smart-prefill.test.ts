@@ -86,3 +86,19 @@ test("locale-aware phone generation uses a reserved regional shape", async () =>
   const value = String(result.fields[0].value);
   assert.match(value, /^(809|829|849)-\d{3}-\d{4}$/);
 });
+
+test("confirmed password is restored while temporary secrets stay unresolved", async () => {
+ const result=await resolveSmartPrefill({
+  seed:"restore",requirements:[
+   text("edited_password",{sensitive:true,fieldCapability:{kind:"password"} as any}),
+   text("auth.otp",{sensitive:true}),
+  ],
+  confirmedReplayValues:{
+   edited_password:{value:"synthetic-password",source:"confirmed_replay",verified:true},
+   "auth.otp":{value:"synthetic-code",source:"confirmed_replay",verified:true},
+  },
+ });
+ assert.equal(result.fields[0].value,"synthetic-password");
+ assert.equal(result.fields[0].source,"confirmed_replay");
+ assert.equal(result.fields[1].value,undefined);
+});

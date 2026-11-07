@@ -42,7 +42,7 @@ function shell(content, title = 'Resumen') {
   const nav = state.profile === 'Personal'
     ? [['dashboard','▦','Resumen'], ['accounts','◫','Mis cuentas'], ['transfer','⇄','Transferencias'], ['payments','▣','Pagos'], ['statements','▤','Movimientos'], ['personal-loan','⌂','Solicitar préstamo'], ['audit','◷','Seguridad']]
     : [
-    ['dashboard','▦','Resumen'], ['accounts','◫','Cuentas'], ['transfer','⇄','Transferencias'], ['beneficiaries','♧','Beneficiarios'], ['payments','▣','Pagos'], ['statements','▤','Estados de cuenta'], ['payroll','▥','Pagos masivos'], ['admin','⚙','Administración'], ['audit','◷','Auditoría'],
+    ['dashboard','▦','Resumen'], ['accounts','◫','Cuentas'], ['transfer','⇄','Transferencias'], ['beneficiaries','♧','Beneficiarios'], ['payments','▣','Pagos'], ['statements','▤','Estados de cuenta'], ['payroll','▥','Pagos masivos'], ['admin','⚙','Administración'], ['audit','◷','Auditoría'], ['requests','▤','Solicitudes'],
   ];
   return `<div class="shell"><aside class="sidebar"><div class="brand"><div class="brand-mark">N</div><div><strong>Northstar</strong><small>Portal ${state.profile.toLowerCase()}</small></div></div><div class="nav-group"><div class="nav-caption">${state.profile === 'Personal' ? 'Mis productos' : 'Operaciones'}</div>${nav.slice(0,state.profile === 'Personal' ? nav.length : 7).map(([id,icon,label]) => `<button class="nav-link" data-page="${id}" aria-current="${state.page === id ? 'page' : 'false'}"><span class="nav-icon">${icon}</span><span>${label}</span></button>`).join('')}</div>${state.profile !== 'Personal' ? `<div class="nav-group"><div class="nav-caption">Administración y control</div>${nav.slice(7).map(([id,icon,label]) => `<button class="nav-link" data-page="${id}" aria-current="${state.page === id ? 'page' : 'false'}"><span class="nav-icon">${icon}</span><span>${label}</span></button>`).join('')}</div>` : ''}<div class="sidebar-bottom"><strong>Espacio de pruebas</strong><br>Datos ficticios · sin conexión bancaria<br>Entorno: REGRESSION-LAB</div></aside><main class="main"><header class="topbar"><div class="crumb">Northstar <span aria-hidden="true">/</span> ${esc(title)}</div><div class="top-actions"><button class="icon-button" data-action="search" aria-label="Buscar en el portal">⌕</button><button class="icon-button" data-action="notifications" aria-label="Notificaciones">♧<span class="badge">3</span></button><button class="user-pill" data-action="user-menu"><span class="avatar">QD</span><span><strong>QA Demo</strong><br><small>Cliente ${state.profile.toLowerCase()}</small></span>⌄</button></div>${state.notifications ? `<div class="notification-pop"><strong>Centro de notificaciones</strong><p class="activity-meta">3 eventos requieren revisión.</p><div class="activity"><span class="activity-name">Transferencia en proceso</span><span class="tag amber">Pendiente</span></div><div class="activity"><span class="activity-name">Nuevo estado de cuenta</span><span class="activity-meta">Hoy</span></div></div>` : ''}</header><section class="content">${state.loading ? spinner() : content}</section></main>${state.toast ? `<div class="toast" role="status">${esc(state.toast)}</div>` : ''}${state.beneficiaryDialog ? beneficiaryDialog() : ''}</div>`;
 }
@@ -187,9 +187,10 @@ function render() {
     case 'payroll': html = payrollPage(); break;
     case 'admin': html = adminPage(); break;
     case 'audit': html = auditPage(); break;
+    case 'requests': html = requestsPage(); break;
     default: html = state.authenticated ? dashboard() : loginPage();
   }
-  root.innerHTML = html; bind();
+  root.innerHTML = html; bind(); bindRequests();
 }
 function bind() {
   root.querySelectorAll('[data-page]').forEach((button) => button.addEventListener('click', (event) => { event.preventDefault(); const page = button.getAttribute('data-page'); if (page === 'transfer') { state.transferStep = 1; state.transfer = null; } if (page === 'personal-loan' && state.page === 'personal-loan-success') { state.personalStage=0; state.personalAnswers={}; state.otpSent=false; } setPage(page); }));

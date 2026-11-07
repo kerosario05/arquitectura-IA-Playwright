@@ -112,31 +112,46 @@ function buildEvidenceDocumentScenario(sc: EvidenceScenarioRecord): EvidenceDocu
   // final assertion. Keep it so a screen group does not become a text-only page.
   // Recording retains its existing behavior of excluding validation screenshots.
   const seenFuncPaths = new Set<string>();
-  const functionalScreenshots: CandidateImage[] = sc.steps
-    .filter(step => {
-      if (!step.screenshotPath || !isImageFile(step.screenshotPath)) return false;
-      if (!fs.existsSync(step.screenshotPath)) return false;
-      if (sc.evidenceKind !== "jira_semantic" && /^\s*validar\b/i.test(step.stepText)) return false;
-      if (sc.evidenceKind === "jira_semantic" && /^\s*project entry\s*$/i.test(step.stepText)
-        && sc.steps.some(later => later.index > step.index && later.screenshotPath && later.screenTitle === step.screenTitle)) return false;
-      const resolvedPath = path.resolve(step.screenshotPath);
+  const functionalScreenshots: CandidateImage[] = [];
+  for (const step of sc.steps) {
+    const isValidation = /^\s*validar\b/i.test(step.stepText);
+    const omitProjectEntry = sc.evidenceKind === "jira_semantic"
+      && /^\s*project entry\s*$/i.test(step.stepText)
+      && sc.steps.some(later => later.index > step.index && later.screenshotPath && later.screenTitle === step.screenTitle);
+    const addImage = (image: CandidateImage) => {
+      const resolvedPath = path.resolve(image.path);
       if (seenFuncPaths.has(resolvedPath)) {
         console.log(`[evidence-docx] skippedDuplicateImage scenario=${sc.scenarioId} step=${step.stepIndex ?? "?"} reason=same_step_screenshot`);
-        return false;
+        return;
       }
       seenFuncPaths.add(resolvedPath);
-      return true;
-    })
-    .map(step => {
+      functionalScreenshots.push({ ...image, path: resolvedPath });
+    };
+
+    if (step.screenshotPath && isImageFile(step.screenshotPath) && fs.existsSync(step.screenshotPath)
+      && (sc.evidenceKind === "jira_semantic" || !isValidation) && !omitProjectEntry) {
       const observedOwner = step.screenId ? step : sc.steps.find(candidate => candidate.screenId && candidate.screenshotPath === step.screenshotPath) ?? step;
-      return {
-        path: path.resolve(step.screenshotPath!),
+      addImage({
+        path: step.screenshotPath,
         stepText: observedOwner.stepText,
         stepIndex: observedOwner.stepIndex,
         screenId: observedOwner.screenId,
         screenTitle: observedOwner.screenTitle,
-      };
-    });
+      });
+    }
+
+    // A slow transition has two useful states: the screen from which the action ran and
+    // the frame observed after it. Keep both in chronological order without inventing a
+    // second executed action or treating the unsettled frame as a stable checkpoint.
+    if (step.postActionScreenshotPath && isImageFile(step.postActionScreenshotPath) && fs.existsSync(step.postActionScreenshotPath)) {
+      addImage({
+        path: step.postActionScreenshotPath,
+        stepText: `Estado observado después de ${describeEvidenceStep(step)}`,
+        screenId: step.postActionScreenId,
+        screenTitle: step.postActionScreenTitle,
+      });
+    }
+  }
 
   // If no functional screenshots, use last screenshot as fallback
   let images: CandidateImage[] = functionalScreenshots;
@@ -505,7 +520,16 @@ export function buildEvidenceDocumentScreens(
       const matchingScreens = screens
         .map((screen, index) => ({ screen, index }))
         .filter(({ screen }) => screen.id === image.screenId || screen.id.startsWith(`${image.screenId}#`));
-      screenIndex = matchingScreens[0]?.index ?? -1;
+      screenIndex = matchingScreens.at(-1)?.index ?? -1;
+      if (screenIndex < 0) {
+        screens.push({
+          id: image.screenId,
+          title: image.screenTitle?.trim() || `Pantalla ${screens.length + 1}`,
+          steps: [],
+          images: [],
+        });
+        screenIndex = screens.length - 1;
+      }
     }
     if (screenIndex < 0) screenIndex = screens.length > 0 ? screens.length - 1 : 0;
     if (!screens[screenIndex]) {

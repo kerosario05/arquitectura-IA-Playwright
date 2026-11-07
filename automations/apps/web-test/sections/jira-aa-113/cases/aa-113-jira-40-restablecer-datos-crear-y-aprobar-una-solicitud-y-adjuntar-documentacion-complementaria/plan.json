@@ -1,0 +1,724 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-27T22:45:34.947Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-113:jira:40",
+    "title": "Restablecer datos, crear y aprobar una solicitud y adjuntar documentación complementaria"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"Datos de demostración\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Datos de demostración",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Presionar \"Restablecer datos de demostración\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Restablecer datos de demostración",
+        "exact": true
+      }
+    },
+    {
+      "index": 5,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Datos de demostración restablecidos.\"",
+      "target": {
+        "strategy": "text",
+        "value": "Datos de demostración restablecidos."
+      }
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "fill [usuario_negocios_ac22]",
+      "valueKey": "usuario_negocios_ac22",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 7,
+      "action": "fill",
+      "description": "fill [contrasena_negocios_ac22]",
+      "valueKey": "contrasena_negocios_ac22",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Presionar \"Solicitudes\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Solicitudes",
+        "exact": true
+      }
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar \"Nueva solicitud\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Nueva solicitud",
+        "exact": true
+      }
+    },
+    {
+      "index": 11,
+      "action": "fill",
+      "description": "fill [rnc_camara_comercio_ac22]",
+      "valueKey": "rnc_camara_comercio_ac22",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"idNumero\"]"
+      }
+    },
+    {
+      "index": 12,
+      "action": "click",
+      "description": "Presionar \"consultar el RNC\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Consultar",
+        "exact": true
+      }
+    },
+    {
+      "index": 13,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto.\"",
+      "target": {
+        "strategy": "text",
+        "value": "Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+      }
+    },
+    {
+      "index": 14,
+      "action": "uploadFile",
+      "description": "Adjuntar el archivo de prueba en \"Seleccionar documento\"",
+      "valueKey": "jira_step_13",
+      "target": {
+        "strategy": "label",
+        "value": "Seleccionar documento",
+        "metadata": {
+          "resolvedTargetName": "Seleccionar documento",
+          "validationStatus": "observed_file_input"
+        }
+      }
+    },
+    {
+      "index": 15,
+      "action": "click",
+      "description": "Presionar \"Cargar documento\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Cargar documento",
+        "exact": true
+      }
+    },
+    {
+      "index": 16,
+      "action": "click",
+      "description": "Presionar \"Guardar como borrador\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Guardar borrador",
+        "exact": true
+      }
+    },
+    {
+      "index": 17,
+      "action": "noop",
+      "description": "Capturar el valor de \"Número de solicitud\" como \"solicitudId\"",
+      "jiraWorkflow": {
+        "kind": "capture",
+        "field": "Número de solicitud",
+        "variable": "solicitudId"
+      }
+    },
+    {
+      "index": 18,
+      "action": "click",
+      "description": "Presionar \"Enviar a Revisión Legal\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Enviar a Debida Diligencia",
+        "exact": true
+      }
+    },
+    {
+      "index": 19,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Solicitud enviada a Revisión Legal.\"",
+      "target": {
+        "strategy": "text",
+        "value": "Solicitud enviada a Revisión Legal."
+      }
+    },
+    {
+      "index": 20,
+      "action": "noop",
+      "description": "Cambiar a la aplicación \"Aprobaciones\"",
+      "jiraWorkflow": {
+        "kind": "application",
+        "alias": "Aprobaciones"
+      }
+    },
+    {
+      "index": 21,
+      "action": "fill",
+      "description": "fill [usuario_aprobaciones_ac22]",
+      "valueKey": "usuario_aprobaciones_ac22",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 22,
+      "action": "fill",
+      "description": "fill [contrasena_aprobaciones_ac22]",
+      "valueKey": "contrasena_aprobaciones_ac22",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 23,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 24,
+      "action": "noop",
+      "description": "Ingresar el valor capturado \"solicitudId\" en \"Buscar solicitud\"",
+      "jiraWorkflow": {
+        "kind": "fillCaptured",
+        "field": "Buscar solicitud",
+        "variable": "solicitudId"
+      }
+    },
+    {
+      "index": 25,
+      "action": "noop",
+      "description": "Presionar \"Aprobar\" en la fila del valor capturado \"solicitudId\" en \"Solicitudes pendientes de aprobación\"",
+      "jiraWorkflow": {
+        "kind": "clickCapturedRow",
+        "action": "Aprobar",
+        "variable": "solicitudId",
+        "container": "Solicitudes pendientes de aprobación"
+      }
+    },
+    {
+      "index": 26,
+      "action": "click",
+      "description": "Presionar \"Confirmar aprobación\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"m-ok\"]"
+      }
+    },
+    {
+      "index": 27,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Solicitud aprobada.\"",
+      "target": {
+        "strategy": "text",
+        "value": "Solicitud aprobada."
+      }
+    },
+    {
+      "index": 28,
+      "action": "noop",
+      "description": "Cambiar a la aplicación \"principal\"",
+      "jiraWorkflow": {
+        "kind": "application",
+        "alias": "principal"
+      }
+    },
+    {
+      "index": 29,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Aprobada\"",
+      "target": {
+        "strategy": "text",
+        "value": "Aprobada"
+      }
+    },
+    {
+      "index": 30,
+      "action": "noop",
+      "description": "Adjuntar los documentos requeridos en \"Documentación complementaria\"",
+      "jiraWorkflow": {
+        "kind": "documents",
+        "container": "Documentación complementaria",
+        "optional": false
+      },
+      "valueKey": "jira_documents_29"
+    },
+    {
+      "index": 31,
+      "action": "click",
+      "description": "Presionar \"Guardar documentación complementaria\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Guardar documentación complementaria",
+        "exact": true
+      }
+    },
+    {
+      "index": 32,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Documentación complementaria guardada.\"",
+      "target": {
+        "strategy": "text",
+        "value": "Documentación complementaria guardada."
+      }
+    },
+    {
+      "index": 33,
+      "action": "assertVisible",
+      "description": "Validar Se muestran los resultados de restablecimiento, consulta de Cámara de Comercio, envío a Revisión Legal, aprobación y guardado de documentación complementaria. La solicitud capturada se aprueba en Aprobaciones y en el portal principal se muestra \"Aprobada\" antes de guardar la documentación complementaria.",
+      "target": {
+        "strategy": "text",
+        "value": "Aprobada"
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "usuario_negocios_ac22",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena_negocios_ac22",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "rnc_camara_comercio_ac22",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_step_13",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario_aprobaciones_ac22",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena_aprobaciones_ac22",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_documents_29",
+      "required": true,
+      "resolved": true,
+      "sensitive": false
+    }
+  ],
+  "sourceScenario": {
+    "title": "Restablecer datos, crear y aprobar una solicitud y adjuntar documentación complementaria",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Datos de demostración"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Restablecer datos de demostración"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Datos de demostración restablecidos.\"",
+        "technicalTargetRefs": [
+          "text:Datos de demostración restablecidos."
+        ]
+      },
+      {
+        "index": 6,
+        "action": "fill",
+        "valueKey": "usuario_negocios_ac22",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "fill",
+        "valueKey": "contrasena_negocios_ac22",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Nueva solicitud"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "fill",
+        "valueKey": "rnc_camara_comercio_ac22",
+        "technicalTargetRefs": [
+          "css:[id=\"idNumero\"]"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Consultar"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto.\"",
+        "technicalTargetRefs": [
+          "text:Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+        ]
+      },
+      {
+        "index": 14,
+        "action": "uploadFile",
+        "valueKey": "jira_step_13",
+        "technicalTargetRefs": [
+          "label:Seleccionar documento"
+        ]
+      },
+      {
+        "index": 15,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Cargar documento"
+        ]
+      },
+      {
+        "index": 16,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Guardar borrador"
+        ]
+      },
+      {
+        "index": 17,
+        "action": "noop"
+      },
+      {
+        "index": 18,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Enviar a Debida Diligencia"
+        ]
+      },
+      {
+        "index": 19,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Solicitud enviada a Revisión Legal.\"",
+        "technicalTargetRefs": [
+          "text:Solicitud enviada a Revisión Legal."
+        ]
+      },
+      {
+        "index": 20,
+        "action": "noop"
+      },
+      {
+        "index": 21,
+        "action": "fill",
+        "valueKey": "usuario_aprobaciones_ac22",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 22,
+        "action": "fill",
+        "valueKey": "contrasena_aprobaciones_ac22",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 23,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 24,
+        "action": "noop"
+      },
+      {
+        "index": 25,
+        "action": "noop"
+      },
+      {
+        "index": 26,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"m-ok\"]"
+        ]
+      },
+      {
+        "index": 27,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Solicitud aprobada.\"",
+        "technicalTargetRefs": [
+          "text:Solicitud aprobada."
+        ]
+      },
+      {
+        "index": 28,
+        "action": "noop"
+      },
+      {
+        "index": 29,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Aprobada\"",
+        "technicalTargetRefs": [
+          "text:Aprobada"
+        ]
+      },
+      {
+        "index": 30,
+        "action": "noop",
+        "valueKey": "jira_documents_29"
+      },
+      {
+        "index": 31,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Guardar documentación complementaria"
+        ]
+      },
+      {
+        "index": 32,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Documentación complementaria guardada.\"",
+        "technicalTargetRefs": [
+          "text:Documentación complementaria guardada."
+        ]
+      },
+      {
+        "index": 33,
+        "action": "assertVisible",
+        "description": "Validar Se muestran los resultados de restablecimiento, consulta de Cámara de Comercio, envío a Revisión Legal, aprobación y guardado de documentación complementaria. La solicitud capturada se aprueba en Aprobaciones y en el portal principal se muestra \"Aprobada\" antes de guardar la documentación complementaria.",
+        "technicalTargetRefs": [
+          "text:Aprobada"
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-5",
+        "requirement": "Validar que se muestre \"Datos de demostración restablecidos.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 5,
+        "target": "Datos de demostración restablecidos.",
+        "evidence": [
+          "live-step-5"
+        ],
+        "details": {
+          "observedText": "Datos de demostración restablecidos."
+        }
+      },
+      {
+        "id": "jira-oracle-13",
+        "requirement": "Validar que se muestre \"Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 13,
+        "target": "Datos de Cámara de Comercio\nRegistro encontrado. Datos autocompletados; se creará como Nuevo Prospecto.",
+        "evidence": [
+          "live-step-13"
+        ],
+        "details": {
+          "observedText": "Datos de Cámara de Comercio\nRegistro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+        }
+      },
+      {
+        "id": "jira-oracle-19",
+        "requirement": "Validar que se muestre \"Solicitud enviada a Revisión Legal.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 19,
+        "target": "Bitácora\n\nEventos registrados en la solicitud.\n\nEnviada a Revisión Legal\nMaría Pérez\n27/10/2026, 06:45 p. m.\nProspecto creado en B2000\nPRO-44101\nMaría Pérez\n27/10/2026, 06:45 p. m.\nDepuración en listas (Bizagi)\nSin coincidencias\nMaría Pérez\n27/10/2026, 06:45 p. m.\nSolicitud creada\nMaría Pérez\n27/10/2026, 06:45 p. m.",
+        "evidence": [
+          "live-step-19"
+        ],
+        "details": {
+          "observedText": "Bitácora\n\nEventos registrados en la solicitud.\n\nEnviada a Revisión Legal\nMaría Pérez\n27/10/2026, 06:45 p. m.\nProspecto creado en B2000\nPRO-44101\nMaría Pérez\n27/10/2026, 06:45 p. m.\nDepuración en listas (Bizagi)\nSin coincidencias\nMaría Pérez\n27/10/2026, 06:45 p. m.\nSolicitud creada\nMaría Pérez\n27/10/2026, 06:45 p. m."
+        }
+      },
+      {
+        "id": "jira-oracle-27",
+        "requirement": "Validar que se muestre \"Solicitud aprobada.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 27,
+        "target": "Solicitud aprobada.",
+        "evidence": [
+          "live-step-27"
+        ],
+        "details": {
+          "observedText": "Solicitud aprobada."
+        }
+      },
+      {
+        "id": "jira-oracle-29",
+        "requirement": "Validar que se muestre \"Aprobada\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 29,
+        "target": "SERVICIOS TURISTICOS PUNTA SRL\n\nSOL-2026-0007 · RNC 131777888\n\nNúmero de solicitud\nSOL-2026-0007\nAprobada\nRev. Legal Aprobada",
+        "evidence": [
+          "live-step-29"
+        ],
+        "details": {
+          "observedText": "SERVICIOS TURISTICOS PUNTA SRL\n\nSOL-2026-0007 · RNC 131777888\n\nNúmero de solicitud\nSOL-2026-0007\nAprobada\nRev. Legal Aprobada"
+        }
+      },
+      {
+        "id": "jira-oracle-32",
+        "requirement": "Validar que se muestre \"Documentación complementaria guardada.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 32,
+        "target": "Documentación complementaria guardada.",
+        "evidence": [
+          "live-step-32"
+        ],
+        "details": {
+          "observedText": "Documentación complementaria guardada."
+        }
+      },
+      {
+        "id": "jira-oracle-33",
+        "requirement": "Validar Se muestran los resultados de restablecimiento, consulta de Cámara de Comercio, envío a Revisión Legal, aprobación y guardado de documentación complementaria. La solicitud capturada se aprueba en Aprobaciones y en el portal principal se muestra \"Aprobada\" antes de guardar la documentación complementaria.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 33,
+        "target": "SERVICIOS TURISTICOS PUNTA SRL\n\nSOL-2026-0007 · RNC 131777888\n\nNúmero de solicitud\nSOL-2026-0007\nAprobada\nRev. Legal Aprobada",
+        "evidence": [
+          "live-step-33"
+        ],
+        "details": {
+          "observedText": "SERVICIOS TURISTICOS PUNTA SRL\n\nSOL-2026-0007 · RNC 131777888\n\nNúmero de solicitud\nSOL-2026-0007\nAprobada\nRev. Legal Aprobada"
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Se muestran los resultados de restablecimiento, consulta de Cámara de Comercio, envío a Revisión Legal, aprobación y guardado de documentación complementaria. La solicitud capturada se aprueba en Aprobaciones y en el portal principal se muestra \"Aprobada\" antes de guardar la documentación complementaria."
+  }
+}

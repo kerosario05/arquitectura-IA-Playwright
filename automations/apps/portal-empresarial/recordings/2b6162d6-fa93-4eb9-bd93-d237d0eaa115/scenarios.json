@@ -164,7 +164,7 @@
           "event-10"
         ],
         "stepTemplate": "Ingresar [contrasena] en \"Contraseña*\"",
-        "renderedStep": "Ingresar \"••••••\" en \"Contraseña*\"",
+        "renderedStep": "Ingresar \"â€¢â€¢â€¢â€¢â€¢â€¢\" en \"Contraseña*\"",
         "valueKey": "contrasena",
         "interactionId": "interaction-10",
         "sensitive": true,
@@ -1185,7 +1185,7 @@
       "oracleReadiness": true,
       "reviewReadiness": true,
       "publicationContentReadiness": true,
-      "executionReadiness": false,
+      "executionReadiness": true,
       "publicationReadiness": true,
       "missingInputs": [],
       "datasetAuthorityMismatches": [],
@@ -1409,7 +1409,7 @@
         "needsReview": true
       }
     ],
-    "testRailCaseId": 48975,
+    "testRailCaseId": 57127,
     "testRailDestination": {
       "projectId": "56",
       "suiteId": "1731",

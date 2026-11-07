@@ -27,6 +27,17 @@ test("generic code binding rejects ambiguity and does not consume an authorizati
   assert.equal(credentialRoleKeyForField("Código de producto", runtimeEntries), undefined);
 });
 
+test("binds the explicit SMS access code while keeping a transfer SMS token separate", () => {
+  const runtimeEntries = [
+    { key: "codigo_acceso_sms", value: "654321" },
+    { key: "token_transferencia_sms", value: "authorization-token" },
+  ];
+  const valueKey = credentialRoleKeyForField("Código", runtimeEntries);
+  assert.equal(valueKey, "auth.otp");
+  assert.equal(resolveDataKey(valueKey!, { runtimeEntries }).value, "654321");
+  assert.equal(resolveDataKey("token_transferencia_sms", { runtimeEntries }).value, "authorization-token");
+});
+
 /**
  * FIRST_LOSS: Recording V2 already produces `sensitive=true`/`valueKey=<recorded-field-derived
  * key>` correctly, without ever persisting the real literal (RecordedEvent/CanonicalInteraction/

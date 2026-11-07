@@ -68,3 +68,12 @@ test("parent launch retains the matching Jira child failure step, code, phase an
   });
   assert.equal(parseJiraSemanticChildOutcome([failure], "AA-1:jira:2"), undefined);
 });
+
+test("parent receives a passed Jira Discovery outcome with spec generation explicitly skipped", () => {
+  const passedDiscoveryOnly = JSON.stringify({ executionEngine: "jira_semantic", type: "case_finished",
+    scenarioId: "AA-1:jira:1", status: "passed", specGenerationStatus: "skipped", specGenerationInvoked: false,
+    automationReady: false, promotionAllowed: false });
+  assert.deepEqual(parseJiraSemanticChildOutcome([passedDiscoveryOnly], "AA-1:jira:1"), {
+    status: "passed", specGenerationStatus: "skipped",
+  });
+});

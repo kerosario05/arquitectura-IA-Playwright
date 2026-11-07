@@ -455,6 +455,9 @@ function isFocusOnlyEvent(event: RecordedEvent, next?: RecordedEvent): boolean {
   // never depends on any app-specific field or button name.
   const tapLabel = event.target?.label?.trim();
   if (tapLabel && !isGenericUnresolvedLabel(tapLabel)) return false;
+  // A button is an explicit action even without a name: an unnamed search button next to a field
+  // shares the generic "control" sentinel with the following fill and must not vanish as focus.
+  if (event.target?.role?.toLowerCase() === "button") return false;
   const currentKey = event.target?.locators?.[0]?.value ?? event.target?.label;
   const nextKey = next.target?.locators?.[0]?.value ?? next.target?.label;
   return Boolean(currentKey && nextKey && currentKey === nextKey);
@@ -481,6 +484,7 @@ function isDynamicEditorInternalEvent(event: RecordedEvent, next?: RecordedEvent
 export function classifySemanticEvent(event: RecordedEvent, next?: RecordedEvent): SemanticEvent["classification"] {
   if (event.kind === "screen_change") return "SCREEN_TECHNICAL_TRANSITION";
   if (event.kind === "note") return "TECHNICAL_NOISE";
+  if (event.kind === "navigate" || event.kind === "file_upload") return "FUNCTIONAL_ACTION";
   if (isNonActionableContainerTap(event)) return "TECHNICAL_NOISE";
   if (isFocusOnlyEvent(event, next)) return "FOCUS_ONLY";
   if (isDynamicEditorInternalEvent(event, next)) return "DYNAMIC_EDITOR_INTERNAL";
@@ -801,7 +805,14 @@ export function buildSemanticRecordingModel(
     }
 
     const role = target?.role?.toLowerCase();
-    const valueKey = fieldResolution?.valueKey;
+    // A value the user copied from selected text and pasted here: it has no dataset of its own (the run supplies it).
+    // An application-derived fill that merely depends on an earlier event, with no copy evidence on that event, is
+    // still a derived oracle and keeps its dataset.
+    const dependencySource = event.dependsOnEventRef
+      ? events[Number(/^event-(\d+)$/.exec(event.dependsOnEventRef)?.[1]) - 1]
+      : undefined;
+    const runtimeTransferredValue = event.kind === "fill" && event.valueSource === "application" && Boolean(dependencySource?.valueSelection);
+    const valueKey = runtimeTransferredValue ? undefined : fieldResolution?.valueKey;
     if (event.kind === "fill" && fieldResolution) {
       const sensitive = isSensitiveRecordedEvent(event);
       const applicationDerived = event.valueSource === "application";
@@ -821,7 +832,7 @@ export function buildSemanticRecordingModel(
       const dependency = event.dependsOnEventRef
         ? semanticEvents.find((candidate) => candidate.eventRef === event.dependsOnEventRef)?.valueKey
         : undefined;
-      datasets.set(datasetKey.valueKey, {
+      if (!runtimeTransferredValue) datasets.set(datasetKey.valueKey, {
         valueKey: datasetKey.valueKey,
         semanticField: fieldResolution.semanticField,
         valueRole: applicationDerived ? "runtime_derived_oracle" : sensitive ? "secure_input" : "action_input",

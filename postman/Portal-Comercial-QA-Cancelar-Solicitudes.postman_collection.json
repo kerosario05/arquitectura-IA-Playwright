@@ -1,0 +1,398 @@
+{
+  "info": {
+    "name": "Portal Comercial QA - Consultar y cancelar solicitudes",
+    "description": "Colección secuencial y protegida. PREVIEW es el modo predeterminado. Configura la autorización heredada desde la petición QA que ya funciona. No contiene cédulas, IDs ni credenciales. La transición autorizada por defecto solo cubre model.status=compliance; otros estados se omiten hasta validar su transición.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00 - Inicializar y validar entorno QA",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/api/proxy/api/Requests?Type={{requestType}}&Page=1&Items=1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "proxy", "api", "Requests"],
+          "query": [
+            { "key": "Type", "value": "{{requestType}}" },
+            { "key": "Page", "value": "1" },
+            { "key": "Items", "value": "1" }
+          ]
+        },
+        "description": "La colección siempre inicia aquí. Valida host QA exacto, cédula y respuesta de lectura; reinicia variables temporales antes del preview/lote."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const base = String(pm.environment.get('baseUrl') || '').replace(/\\/$/, '');",
+              "const cedula = String(pm.environment.get('cedula') || '').replace(/\\D/g, '');",
+              "if (base !== 'https://srvqacgowb01.local.bsc.com:5000') { pm.execution.setNextRequest(null); throw new Error('Bloqueado: esta colección solo permite el host QA Portal Comercial confirmado.'); }",
+              "if (cedula.length !== 11) { pm.execution.setNextRequest(null); throw new Error('Configura una cédula QA de 11 dígitos en el entorno.'); }",
+              "pm.environment.set('page', '1'); pm.environment.set('refreshPage', '1'); pm.environment.set('verifyPage', '1');",
+              "for (const key of ['solicitudesEncontradas', 'solicitudesOmitidas', 'solicitudesCanceladas', 'solicitudesFallidas', 'currentIndex', 'currentId', 'cancelPayload']) pm.collectionVariables.unset(key);",
+              "pm.collectionVariables.set('solicitudesEncontradas', '[]'); pm.collectionVariables.set('solicitudesOmitidas', '[]'); pm.collectionVariables.set('solicitudesCanceladas', '[]'); pm.collectionVariables.set('solicitudesFallidas', '[]');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code !== 200) { pm.collectionVariables.set('solicitudesFallidas', JSON.stringify([{ id: '', reason: 'qa_preflight_http_' + pm.response.code }])); pm.execution.setNextRequest(null); }",
+              "else { pm.test('Preflight QA HTTP 200', () => pm.response.to.have.status(200)); pm.execution.setNextRequest('01 - Buscar solicitudes y previsualizar'); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 - Buscar solicitudes y previsualizar",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/api/proxy/api/Requests?Type={{requestType}}&CustomIdentifierContains=&SubType=&SubStatus=&CreatedByContains=&UpdatedByContains=&Page={{page}}&Items={{items}}&RawIncludes=DataByType",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "proxy", "api", "Requests"],
+          "query": [
+            { "key": "Type", "value": "{{requestType}}" },
+            { "key": "CustomIdentifierContains", "value": "" },
+            { "key": "SubType", "value": "" },
+            { "key": "SubStatus", "value": "" },
+            { "key": "CreatedByContains", "value": "" },
+            { "key": "UpdatedByContains", "value": "" },
+            { "key": "Page", "value": "{{page}}" },
+            { "key": "Items", "value": "{{items}}" },
+            { "key": "RawIncludes", "value": "DataByType" }
+          ]
+        },
+        "description": "Recorre todas las páginas, compara la cédula localmente y conserva solo IDs/estados. En PREVIEW no cancela. Para procesar, después de revisar el resumen cambia modoEjecucion a CANCELAR, confirmarCancelacion a SI y confirma exactamente la lista de IDs en confirmarIds."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const page = Number(pm.environment.get('page') || '1');",
+              "if (page === 1) {",
+              "  for (const key of ['solicitudesEncontradas', 'solicitudesOmitidas', 'solicitudesCanceladas', 'solicitudesFallidas', 'currentIndex']) pm.collectionVariables.unset(key);",
+              "  pm.collectionVariables.unset('cancelPayload');",
+              "  pm.collectionVariables.set('solicitudesEncontradas', '[]');",
+              "  pm.collectionVariables.set('solicitudesOmitidas', '[]');",
+              "  pm.collectionVariables.set('solicitudesCanceladas', '[]');",
+              "  pm.collectionVariables.set('solicitudesFallidas', '[]');",
+              "  pm.environment.set('page', '1');",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const add = (key, value) => { const list = JSON.parse(pm.collectionVariables.get(key) || '[]'); list.push(value); pm.collectionVariables.set(key, JSON.stringify(list)); };",
+              "const stopToSummary = () => pm.execution.setNextRequest('05 - Resumen');",
+              "pm.test('GET de búsqueda responde HTTP 200', () => pm.response.to.have.status(200));",
+              "if (pm.response.code !== 200) {",
+              "  add('solicitudesFallidas', { id: '', reason: 'search_http_' + pm.response.code });",
+              "  stopToSummary();",
+              "} else {",
+              "  const body = pm.response.json();",
+              "  if (!Array.isArray(body.items)) {",
+              "    add('solicitudesFallidas', { id: '', reason: 'items_not_array' });",
+              "    stopToSummary();",
+              "  } else {",
+              "    const cedula = String(pm.environment.get('cedula') || '').replace(/\\D/g, '');",
+              "    const active = new Set(String(pm.environment.get('activeStatuses') || 'Draft,InProgress').split(',').map(x => x.trim().toLowerCase()).filter(Boolean));",
+              "    if (cedula.length !== 11) {",
+              "      add('solicitudesFallidas', { id: '', reason: 'cedula_must_have_11_digits' });",
+              "      stopToSummary();",
+              "    } else {",
+              "      const found = JSON.parse(pm.collectionVariables.get('solicitudesEncontradas') || '[]');",
+              "      const omitted = JSON.parse(pm.collectionVariables.get('solicitudesOmitidas') || '[]');",
+              "      const known = new Set([...found, ...omitted].map(x => String(x.id)));",
+              "      for (const item of body.items) {",
+              "        const id = String(item.id ?? '');",
+              "        if (!id || known.has(id)) continue;",
+              "        const identification = String(item.dataByType?.model?.customer?.personalInfo?.identification || '').replace(/\\D/g, '');",
+              "        if (identification !== cedula) continue;",
+              "        const record = { id, status: String(item.status || ''), subStatus: String(item.subStatus || ''), modelStatus: String(item.dataByType?.model?.status || '') };",
+              "        known.add(id);",
+              "        if (String(item.type || '') !== String(pm.environment.get('requestType') || 'MultiProdNatural')) { omitted.push({ id, reason: 'unexpected_type' }); continue; }",
+              "        if (!active.has(record.status.toLowerCase()) || record.subStatus.toLowerCase() === 'cancelled') { omitted.push({ id, reason: 'not_active_or_already_cancelled', status: record.status, subStatus: record.subStatus }); continue; }",
+              "        found.push(record);",
+              "      }",
+              "      pm.collectionVariables.set('solicitudesEncontradas', JSON.stringify(found));",
+              "      pm.collectionVariables.set('solicitudesOmitidas', JSON.stringify(omitted));",
+              "      const page = Number(body.page || pm.environment.get('page') || '1');",
+              "      const totalPages = Number(body.totalPages || 1);",
+              "      if (page < totalPages) {",
+              "        pm.environment.set('page', String(page + 1));",
+              "        pm.execution.setNextRequest('01 - Buscar solicitudes y previsualizar');",
+              "      } else {",
+              "        pm.environment.set('page', '1');",
+              "        const ids = found.map(x => String(x.id)).sort();",
+              "        console.log('PREVIEW solicitudes activas coincidentes (sin datos personales):', JSON.stringify(found));",
+              "        if (String(pm.environment.get('modoEjecucion') || 'PREVIEW').toUpperCase() !== 'CANCELAR') { stopToSummary(); }",
+              "        else {",
+              "          const confirmed = String(pm.environment.get('confirmarIds') || '').split(',').map(x => x.trim()).filter(Boolean).sort();",
+              "          const same = ids.length > 0 && ids.length === confirmed.length && ids.every((id, index) => id === confirmed[index]);",
+              "          if (pm.environment.get('confirmarCancelacion') !== 'SI' || !same) {",
+              "            add('solicitudesFallidas', { id: '', reason: 'explicit_id_confirmation_missing_or_mismatched' });",
+              "            console.error('Cancelación detenida: confirmarIds debe coincidir exactamente con la lista revisada.');",
+              "            stopToSummary();",
+              "          } else {",
+              "            pm.collectionVariables.set('currentIndex', '0');",
+              "            pm.collectionVariables.set('currentId', ids[0]);",
+              "            pm.environment.set('refreshPage', '1');",
+              "            pm.execution.setNextRequest('02 - Recargar solicitud actual');",
+              "          }",
+              "        }",
+              "      }",
+              "    }",
+              "  }",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Recargar solicitud actual",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/api/proxy/api/Requests?Type={{requestType}}&CustomIdentifierContains=&SubType=&SubStatus=&CreatedByContains=&UpdatedByContains=&Page={{refreshPage}}&Items={{items}}&RawIncludes=DataByType",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "proxy", "api", "Requests"],
+          "query": [
+            { "key": "Type", "value": "{{requestType}}" },
+            { "key": "CustomIdentifierContains", "value": "" },
+            { "key": "SubType", "value": "" },
+            { "key": "SubStatus", "value": "" },
+            { "key": "CreatedByContains", "value": "" },
+            { "key": "UpdatedByContains", "value": "" },
+            { "key": "Page", "value": "{{refreshPage}}" },
+            { "key": "Items", "value": "{{items}}" },
+            { "key": "RawIncludes", "value": "DataByType" }
+          ]
+        },
+        "description": "Vuelve a consultar el registro completo justo antes del PUT. Solo permite la etapa configurada en cancelTransitionsJSON (por defecto compliance, la única transición confirmada). Etapas no configuradas se omiten sin modificarlas."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const add = (key, value) => { const list = JSON.parse(pm.collectionVariables.get(key) || '[]'); list.push(value); pm.collectionVariables.set(key, JSON.stringify(list)); };",
+              "const nextOrSummary = () => {",
+              "  const records = JSON.parse(pm.collectionVariables.get('solicitudesEncontradas') || '[]');",
+              "  const index = Number(pm.collectionVariables.get('currentIndex') || '0') + 1;",
+              "  pm.collectionVariables.unset('cancelPayload');",
+              "  if (index < records.length) { pm.collectionVariables.set('currentIndex', String(index)); pm.collectionVariables.set('currentId', String(records[index].id)); pm.environment.set('refreshPage', '1'); pm.execution.setNextRequest('02 - Recargar solicitud actual'); }",
+              "  else pm.execution.setNextRequest('05 - Resumen');",
+              "};",
+              "pm.test('GET actualizado responde HTTP 200', () => pm.response.to.have.status(200));",
+              "if (pm.response.code !== 200) { add('solicitudesFallidas', { id: pm.collectionVariables.get('currentId'), reason: 'refresh_http_' + pm.response.code }); pm.execution.setNextRequest('05 - Resumen'); }",
+              "else {",
+              "  const body = pm.response.json();",
+              "  if (!Array.isArray(body.items)) { add('solicitudesFallidas', { id: pm.collectionVariables.get('currentId'), reason: 'refresh_items_not_array' }); pm.execution.setNextRequest('05 - Resumen'); }",
+              "  else {",
+              "    const id = String(pm.collectionVariables.get('currentId') || '');",
+              "    const item = body.items.find(x => String(x.id) === id);",
+              "    if (!item) {",
+              "      const page = Number(body.page || pm.environment.get('refreshPage') || '1');",
+              "      if (page < Number(body.totalPages || 1)) { pm.environment.set('refreshPage', String(page + 1)); pm.execution.setNextRequest('02 - Recargar solicitud actual'); }",
+              "      else { add('solicitudesFallidas', { id, reason: 'record_not_found_during_refresh' }); pm.execution.setNextRequest('05 - Resumen'); }",
+              "    } else {",
+              "      const cedula = String(pm.environment.get('cedula') || '').replace(/\\D/g, '');",
+              "      const actual = String(item.dataByType?.model?.customer?.personalInfo?.identification || '').replace(/\\D/g, '');",
+              "      const model = item.dataByType?.model;",
+              "      const stage = String(model?.status || '');",
+              "      const stageKey = stage.toLowerCase();",
+              "      const transitions = JSON.parse(pm.environment.get('cancelTransitionsJSON') || '{}');",
+              "      const transition = transitions[stageKey];",
+              "      const active = new Set(String(pm.environment.get('activeStatuses') || 'Draft,InProgress').split(',').map(x => x.trim().toLowerCase()).filter(Boolean));",
+              "      if (actual !== cedula || String(item.type || '') !== String(pm.environment.get('requestType') || 'MultiProdNatural')) { add('solicitudesFallidas', { id, reason: 'identity_or_type_changed' }); pm.execution.setNextRequest('05 - Resumen'); }",
+              "      else if (!active.has(String(item.status || '').toLowerCase()) || String(item.subStatus || '').toLowerCase() === 'cancelled') { add('solicitudesOmitidas', { id, reason: 'no_longer_active' }); nextOrSummary(); }",
+              "      else if (!item.dataByType || typeof item.dataByType !== 'object' || !model || typeof model.status !== 'string') { add('solicitudesFallidas', { id, reason: 'full_dataByType_or_model_status_missing' }); pm.execution.setNextRequest('05 - Resumen'); }",
+              "      else if (!transition || String(transition.to || '').toLowerCase() !== 'cancelled') { add('solicitudesOmitidas', { id, reason: 'unvalidated_model_stage', modelStatus: stage }); nextOrSummary(); }",
+              "      else if (!Array.isArray(model.statusTimeline) || model.statusTimeline.length === 0 || String(model.statusTimeline[model.statusTimeline.length - 1]?.to || '').toLowerCase() !== stageKey) { add('solicitudesFallidas', { id, reason: 'status_timeline_does_not_match_current_stage' }); pm.execution.setNextRequest('05 - Resumen'); }",
+              "      else if (String(item.subType || '').toLowerCase() !== 'request') { add('solicitudesFallidas', { id, reason: 'unexpected_subtype' }); pm.execution.setNextRequest('05 - Resumen'); }",
+              "      else {",
+              "        const dataByType = JSON.parse(JSON.stringify(item.dataByType));",
+              "        const originalStage = dataByType.model.status;",
+              "        dataByType.model.status = 'cancelled';",
+              "        dataByType.model.statusTimeline.push({ from: originalStage, to: 'cancelled', at: new Date().toISOString(), reason: String(transition.reason || 'CANCEL') });",
+              "        const payload = { type: item.type, id: item.id, dataByType, changeSubStatus: 'cancelled', changeSubType: 'request' };",
+              "        pm.collectionVariables.set('cancelPayload', JSON.stringify(payload));",
+              "        pm.collectionVariables.set('currentId', id);",
+              "        pm.execution.setNextRequest('03 - Cancelar solicitud actual');",
+              "      }",
+              "    }",
+              "  }",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Cancelar solicitud actual",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{{cancelPayload}}", "options": { "raw": { "language": "json" } } },
+        "url": {
+          "raw": "{{baseUrl}}/api/proxy/api/Requests/CustomData",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "proxy", "api", "Requests", "CustomData"]
+        },
+        "description": "PUT secuencial. El payload se prepara a partir del GET completo actualizado; no hay un body con datos reales guardado en la colección."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.environment.get('modoEjecucion') !== 'CANCELAR' || pm.environment.get('confirmarCancelacion') !== 'SI') throw new Error('Cancelación bloqueada: requiere modoEjecucion=CANCELAR y confirmarCancelacion=SI.');",
+              "const currentId = String(pm.collectionVariables.get('currentId') || '');",
+              "const confirmed = String(pm.environment.get('confirmarIds') || '').split(',').map(x => x.trim());",
+              "if (!currentId || !confirmed.includes(currentId)) throw new Error('El ID actual no figura en confirmarIds.');",
+              "const payload = JSON.parse(pm.collectionVariables.get('cancelPayload') || 'null');",
+              "if (!payload || String(payload.id) !== currentId || !payload.dataByType?.model) throw new Error('Payload completo ausente o ID inconsistente.');",
+              "pm.request.body.update(JSON.stringify(payload));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const add = (key, value) => { const list = JSON.parse(pm.collectionVariables.get(key) || '[]'); list.push(value); pm.collectionVariables.set(key, JSON.stringify(list)); };",
+              "pm.test('PUT responde HTTP 200', () => pm.response.to.have.status(200));",
+              "if (pm.response.code !== 200) { add('solicitudesFallidas', { id: pm.collectionVariables.get('currentId'), reason: 'put_http_' + pm.response.code }); pm.collectionVariables.unset('cancelPayload'); pm.execution.setNextRequest('05 - Resumen'); }",
+              "else {",
+              "  let response = {}; try { response = pm.response.json(); } catch (_) {}",
+              "  const id = String(pm.collectionVariables.get('currentId') || '');",
+              "  if (response.id !== undefined && String(response.id) !== id) { add('solicitudesFallidas', { id, reason: 'put_response_id_mismatch' }); pm.collectionVariables.unset('cancelPayload'); pm.execution.setNextRequest('05 - Resumen'); }",
+              "  else if (response.status !== undefined && String(response.status).toLowerCase() !== 'canceled') { add('solicitudesFallidas', { id, reason: 'put_response_unexpected_status' }); pm.collectionVariables.unset('cancelPayload'); pm.execution.setNextRequest('05 - Resumen'); }",
+              "  else { pm.environment.set('verifyPage', '1'); pm.execution.setNextRequest('04 - Verificar cancelación persistida'); }",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Verificar cancelación persistida",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/api/proxy/api/Requests?Type={{requestType}}&CustomIdentifierContains=&SubType=&SubStatus=&CreatedByContains=&UpdatedByContains=&Page={{verifyPage}}&Items={{items}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "proxy", "api", "Requests"],
+          "query": [
+            { "key": "Type", "value": "{{requestType}}" },
+            { "key": "CustomIdentifierContains", "value": "" },
+            { "key": "SubType", "value": "" },
+            { "key": "SubStatus", "value": "" },
+            { "key": "CreatedByContains", "value": "" },
+            { "key": "UpdatedByContains", "value": "" },
+            { "key": "Page", "value": "{{verifyPage}}" },
+            { "key": "Items", "value": "{{items}}" }
+          ]
+        },
+        "description": "Consulta nuevamente sin RawIncludes y solo acepta status=Canceled y subStatus=cancelled. Ante discrepancia detiene el lote."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const add = (key, value) => { const list = JSON.parse(pm.collectionVariables.get(key) || '[]'); list.push(value); pm.collectionVariables.set(key, JSON.stringify(list)); };",
+              "pm.test('GET de verificación responde HTTP 200', () => pm.response.to.have.status(200));",
+              "if (pm.response.code !== 200) { add('solicitudesFallidas', { id: pm.collectionVariables.get('currentId'), reason: 'verify_http_' + pm.response.code }); pm.execution.setNextRequest('05 - Resumen'); }",
+              "else {",
+              "  const body = pm.response.json();",
+              "  const id = String(pm.collectionVariables.get('currentId') || '');",
+              "  const item = Array.isArray(body.items) ? body.items.find(x => String(x.id) === id) : undefined;",
+              "  if (item && String(item.status) === 'Canceled' && String(item.subStatus).toLowerCase() === 'cancelled') {",
+              "    add('solicitudesCanceladas', { id, status: item.status, subStatus: item.subStatus });",
+              "    pm.collectionVariables.unset('cancelPayload');",
+              "    const records = JSON.parse(pm.collectionVariables.get('solicitudesEncontradas') || '[]');",
+              "    const index = Number(pm.collectionVariables.get('currentIndex') || '0') + 1;",
+              "    if (index < records.length) { pm.collectionVariables.set('currentIndex', String(index)); pm.collectionVariables.set('currentId', String(records[index].id)); pm.environment.set('refreshPage', '1'); pm.execution.setNextRequest('02 - Recargar solicitud actual'); }",
+              "    else pm.execution.setNextRequest('05 - Resumen');",
+              "  } else if (item) {",
+              "    add('solicitudesFallidas', { id, reason: 'persisted_status_mismatch' }); pm.collectionVariables.unset('cancelPayload'); pm.execution.setNextRequest('05 - Resumen');",
+              "  } else {",
+              "    const page = Number(body.page || pm.environment.get('verifyPage') || '1');",
+              "    if (page < Number(body.totalPages || 1)) { pm.environment.set('verifyPage', String(page + 1)); pm.execution.setNextRequest('04 - Verificar cancelación persistida'); }",
+              "    else { add('solicitudesFallidas', { id, reason: 'record_missing_after_put' }); pm.collectionVariables.unset('cancelPayload'); pm.execution.setNextRequest('05 - Resumen'); }",
+              "  }",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Resumen",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Accept", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/api/proxy/api/Requests?Type={{requestType}}&Page=1&Items=1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "proxy", "api", "Requests"],
+          "query": [
+            { "key": "Type", "value": "{{requestType}}" },
+            { "key": "Page", "value": "1" },
+            { "key": "Items", "value": "1" }
+          ]
+        },
+        "description": "Petición final de lectura mínima; imprime solo IDs/estados y limpia el payload transitorio."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const read = key => JSON.parse(pm.collectionVariables.get(key) || '[]');",
+              "const found = read('solicitudesEncontradas'); const omitted = read('solicitudesOmitidas');",
+              "console.log('RESUMEN QA Portal Comercial', JSON.stringify({ encontradas: found.length + omitted.length, candidatasActivas: found.map(x => ({ id: x.id, status: x.status, subStatus: x.subStatus, modelStatus: x.modelStatus })), canceladas: read('solicitudesCanceladas'), omitidas: omitted, fallidas: read('solicitudesFallidas') }));",
+              "pm.collectionVariables.unset('cancelPayload');",
+              "pm.environment.set('confirmarCancelacion', 'NO');",
+              "pm.environment.set('modoEjecucion', 'PREVIEW');",
+              "pm.execution.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "solicitudesEncontradas", "value": "[]" },
+    { "key": "solicitudesOmitidas", "value": "[]" },
+    { "key": "solicitudesCanceladas", "value": "[]" },
+    { "key": "solicitudesFallidas", "value": "[]" },
+    { "key": "currentIndex", "value": "0" },
+    { "key": "currentId", "value": "" },
+    { "key": "cancelPayload", "value": "" }
+  ]
+}

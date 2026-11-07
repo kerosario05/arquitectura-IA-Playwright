@@ -1,0 +1,193 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-11-02T16:36:25.598Z",
+  "entries": [
+    {
+      "key": "usuario",
+      "source": "unknown",
+      "fieldName": "Usuario",
+      "stepIndex": 2,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena",
+      "source": "unknown",
+      "fieldName": "Contraseña",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "numero_de_identificacion",
+      "source": "unknown",
+      "fieldName": "Número de identificación",
+      "stepIndex": 6,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "fecha_de_expiracion",
+      "source": "unknown",
+      "fieldName": "Fecha de expiración",
+      "stepIndex": 10,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contacto",
+      "source": "unknown",
+      "fieldName": "Contacto",
+      "stepIndex": 15,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "nombre_de_la_empresa_actividad_independi",
+      "source": "unknown",
+      "fieldName": "Nombre de la empresa / Actividad independiente",
+      "stepIndex": 22,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "departamento_area",
+      "source": "unknown",
+      "fieldName": "Departamento / Área",
+      "stepIndex": 23,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "puesto_que_ocupa",
+      "source": "unknown",
+      "fieldName": "Puesto que ocupa",
+      "stepIndex": 24,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "salario",
+      "source": "unknown",
+      "fieldName": "Salario",
+      "stepIndex": 27,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "fecha_de_ingreso",
+      "source": "unknown",
+      "fieldName": "Fecha de ingreso",
+      "stepIndex": 29,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "telefono",
+      "source": "unknown",
+      "fieldName": "Teléfono",
+      "stepIndex": 30,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "extension",
+      "source": "unknown",
+      "fieldName": "Extensión",
+      "stepIndex": 31,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "calle_avenida_autopista",
+      "source": "unknown",
+      "fieldName": "Calle / Avenida / Autopista",
+      "stepIndex": 32,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "nombre_edificio",
+      "source": "unknown",
+      "fieldName": "Nombre edificio",
+      "stepIndex": 33,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "numero_casa_edificio",
+      "source": "unknown",
+      "fieldName": "Número casa / edificio",
+      "stepIndex": 34,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "numero_apartamento",
+      "source": "unknown",
+      "fieldName": "Número apartamento",
+      "stepIndex": 35,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "monto_solicitado",
+      "source": "unknown",
+      "fieldName": "Monto solicitado",
+      "stepIndex": 46,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

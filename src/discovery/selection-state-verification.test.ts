@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { verifySelectionState, hasCausalSelectionTransition, shouldPromoteStatefulControlToClickableAncestor } from "./selection-state-verification";
+import { verifySelectionState, hasCausalSelectionTransition, hasCausalSelectionClassTransition, shouldPromoteStatefulControlToClickableAncestor } from "./selection-state-verification";
 
 test("recorded check and uncheck keep the resolved control as the click target", () => {
   assert.equal(shouldPromoteStatefulControlToClickableAncestor("check"), false);
@@ -62,4 +62,10 @@ test("5/valueAppearingIsCausalUnlessAlreadySelected. a select's value going from
 
 test("6/noAfterStateNeverCausal. missing after-state is never treated as a transition", () => {
   assert.equal(hasCausalSelectionTransition({ checked: false }, undefined), false);
+});
+
+test("selected class added on the already-resolved owner is a causal state change", () => {
+  assert.equal(hasCausalSelectionClassTransition(["token-media"], ["token-media", "active"]), true);
+  assert.equal(hasCausalSelectionClassTransition(["token-media", "active"], ["token-media", "active"]), false);
+  assert.equal(hasCausalSelectionClassTransition(["token-media"], ["token-media", "hover"]), false);
 });

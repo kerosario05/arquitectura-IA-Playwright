@@ -451,7 +451,10 @@ const PROJECT_DELETE_TABLE_ORDER = [
   "ProjectConfigurationHistory",
   "ProjectJiraConfiguration",
   "ProjectTestRailConfiguration",
+  "ProjectRepositoryConfiguration",
   "ProjectOtpConfiguration",
+  "ProjectServiceConfiguration",
+  "ServiceBinding",
   "ProjectKnowledge",
   "WebProjectConfiguration",
   "MobileProjectConfiguration",
@@ -462,6 +465,11 @@ const PROJECT_DELETE_TABLE_ORDER = [
 ] as const;
 
 const OPTIONAL_PROJECT_DELETE_TABLES = new Set<string>([
+  // Absent on SQL Server installs that have not run sql/schema/009 / 010 yet.
+  "ProjectServiceConfiguration",
+  "ServiceBinding",
+  // Absent on SQL Server installs that have not run sql/schema/011 yet.
+  "ProjectRepositoryConfiguration",
   "ProjectCaseInputRequirement",
   "ProjectCaseRuntimeValue",
   "ProjectGenerationConfig",

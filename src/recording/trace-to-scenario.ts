@@ -2,6 +2,7 @@ import type { MobileStep, MobileStepTarget, MobileLocatorStrategy } from "../mob
 import type {
   RecordedLocator,
   RecordedEvent,
+  RecordedFileAssetRef,
   RecordedEditingSession,
   RecordedScreen,
   SessionTrace,
@@ -17,7 +18,7 @@ import type { RecordingAiScenarioProposal } from "./ai-scenario-contract";
 import type { SelectorOptionInventory } from "./semantic-recording";
 import type { ConditionalAction } from "../discovery/step-intent-parser";
 import { isSelectionListRecoveryControlLabel } from "../scenarios/selection-list-recovery";
-import { buildCanonicalInteractions, enrichRecordedScenarioContract, evaluateRecordingReadiness, hasExecutionAuthority, hasReusableStructuralClickIdentity, isMaskActivation, isTransientStatusTap, materializedSemanticSignature, reconcileRecordedScenarioOptionOwnerLineage, validateInteractionStateSequence, type CanonicalInteraction, type EntityActionBlock, type MutationOpportunity, type RecordingReadiness, type RuntimeInputRequirement, type ScenarioMutationProposal } from "./canonical-recording-contract";
+import { isValueSelectionTap, buildCanonicalInteractions, enrichRecordedScenarioContract, evaluateRecordingReadiness, hasExecutionAuthority, hasReusableStructuralClickIdentity, isMaskActivation, isTransientStatusTap, materializedSemanticSignature, reconcileRecordedScenarioOptionOwnerLineage, sanitizeRecordedNavigationUrl, validateInteractionStateSequence, type CanonicalInteraction, type EntityActionBlock, type MutationOpportunity, type RecordingReadiness, type RuntimeInputRequirement, type ScenarioMutationProposal } from "./canonical-recording-contract";
 
 /**
  * Builds executable scenarios from a recorded walkthrough — deterministically.
@@ -31,10 +32,19 @@ import { buildCanonicalInteractions, enrichRecordedScenarioContract, evaluateRec
 
 /** A step in the web execution plan (`plan.json`), which the promoter turns into a spec. */
 export type RecordedWebStep = {
-  action: "navigate" | "click" | "fill" | "select" | "assert" | "wait";
+  action: "navigate" | "switchTab" | "click" | "fill" | "select" | "upload" | "assert" | "wait";
   target?: { strategy: string; value: string };
   value?: string;
   valueKey?: string;
+  fileAssets?: RecordedFileAssetRef[];
+  /** Runtime-selected, project-scoped file set for this captured file input. */
+  fileSetValueKey?: string;
+  technicalTargetRefs?: string[];
+  recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "tab_switch" | "upload" | "system_observation";
+  navigationUrl?: string;
+  pageKey?: string;
+  opensNewPage?: boolean;
+  runtimeDerivedSourceEventRef?: string;
   segmentPosition?: number;
   playwrightRecorderEvidence?: import("./structural-owner-identity").PlaywrightRecorderEvidence;
   description: string;
@@ -62,7 +72,16 @@ export type RecordedScenarioStep = {
   classification?: "FUNCTIONAL_ACTION" | "FUNCTIONAL_ASSERTION" | "TECHNICAL_NOISE" | "FOCUS_ONLY" | "DYNAMIC_EDITOR_INTERNAL" | "SCREEN_TECHNICAL_TRANSITION";
   entityScope?: string;
   interactionId?: string;
+  recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "tab_switch" | "upload" | "system_observation";
+  fileAssets?: RecordedFileAssetRef[];
+  fileSetValueKey?: string;
+  technicalTargetRefs?: string[];
+  navigationUrl?: string;
+  pageKey?: string;
+  opensNewPage?: boolean;
+  runtimeDerivedSourceEventRef?: string;
   sourceEventRefs?: string[];
+  controlType?: string;
   /** Backend-owned display number. Consumers must not prepend a second number. */
   stepNumber?: number;
   /** Setup/navigation rows are visible but excluded from functionalActionCount. */
@@ -133,6 +152,7 @@ export type RecordedDataField = {
   needsReview?: boolean;
   reviewReason?: string;
   formatHint?: string;
+  controlType?: string;
   constraints?: RecordedValueConstraint[];
   allowedValues?: string[];
   entityScope?: string;
@@ -197,6 +217,8 @@ export type RecordedScenario = {
   scenarioSpecificSteps?: RecordedScenarioStep[];
   quality?: RecordingScenarioQuality;
   canonicalInteractions?: CanonicalInteraction[];
+  /** Interaction ids a reviewer deleted from this scenario; re-applied on every hydration. */
+  excludedInteractionIds?: string[];
   entityActionBlocks?: EntityActionBlock[];
   runtimeInputRequirements?: RuntimeInputRequirement[];
   /** Exact, selector-scoped option inventories observed while recording this scenario. */
@@ -246,6 +268,35 @@ export type RecordedScenario = {
 };
 
 /**
+ * A tap on a <label> makes the browser dispatch a second click on the control it labels (radio/checkbox).
+ * Both reach the trace with the same visible name. The label tap is the user's real gesture (custom-styled radios
+ * hide the input, so the input is not clickable on replay); the control click is the browser's synthetic
+ * activation. The label tap stays the single replay authority; the synthetic control click is the one returned
+ * here (as `event-<n>` refs).
+ */
+export function labelActivationTapRefs(events: readonly RecordedEvent[]): Set<string> {
+  const normalizedLabel = (value: string | undefined) =>
+    value?.trim().normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase();
+  const refs = new Set<string>();
+  for (let index = 0; index < events.length; index += 1) {
+    const labelTap = events[index];
+    if (labelTap.kind !== "tap" || labelTap.target?.tag?.toLocaleLowerCase() !== "label") continue;
+    const nextIndex = events.findIndex((event, position) => position > index && event.kind !== "note" && event.kind !== "launch");
+    const next = nextIndex >= 0 ? events[nextIndex] : undefined;
+    const nextRole = next?.target?.role?.toLocaleLowerCase();
+    const sameLabelControl = next?.kind === "tap"
+      && next.target?.tag?.toLocaleLowerCase() === "input"
+      && (nextRole === "radio" || nextRole === "checkbox")
+      && Boolean(normalizedLabel(labelTap.target.label))
+      && normalizedLabel(labelTap.target.label) === normalizedLabel(next.target?.label)
+      && (next.pageKey ?? undefined) === (labelTap.pageKey ?? undefined)
+      && next.t - labelTap.t >= 0 && next.t - labelTap.t <= 2000;
+    if (sameLabelControl) refs.add(`event-${nextIndex + 1}`);
+  }
+  return refs;
+}
+
+/**
  * Removes the duplicate replay authority for a native select's opening tap while preserving
  * the raw event and the value-bearing selection. Used both at derivation and hydration, since
  * hydration rebuilds canonical interactions from the normalized source trace.
@@ -273,6 +324,7 @@ export function projectNativeSelectionOpeningTaps(
       && Boolean(nativeSelection.clickedOption?.value);
     if (sameNativeControl) openingTapRefs.add(`event-${index + 1}`);
   }
+  for (const ref of labelActivationTapRefs(events)) openingTapRefs.add(ref);
   return interactions.map((interaction) =>
     openingTapRefs.has(interaction.sourceEventRefs[0] ?? "")
       && (interaction.action === "click" || interaction.action === "select")
@@ -843,6 +895,13 @@ export function filterGoalScopedSuggestions(
   };
 }
 
+/** "(pestaña tab-1)": where a transported value was copied from, so the step shows its origin. Empty when unknown. */
+function copiedValueSourceSuffix(events: readonly RecordedEvent[], sourceEventRef: string | undefined): string {
+  const index = Number(/^event-(\d+)$/.exec(sourceEventRef ?? "")?.[1]);
+  const pageKey = Number.isInteger(index) ? events[index - 1]?.pageKey : undefined;
+  return pageKey ? ` (pestaña ${pageKey})` : "";
+}
+
 /**
  * Converts the normalized walkthrough into one happy-path scenario.
  *
@@ -984,6 +1043,28 @@ export function buildHappyPathScenario(
 
   for (const [eventIndex, event] of eventsWithSelectionTargets.entries()) {
     if (event.kind === "note" || event.kind === "launch") continue;
+    if (event.kind === "tab_switch" && !isMobile && event.pageKey) {
+      const interactionId = `interaction-${eventIndex + 1}`;
+      const destination = sanitizeRecordedNavigationUrl(event.url);
+      const description = `Cambiar a la pestaña "${destination ?? event.pageKey}"`;
+      webSteps.push({
+        action: "switchTab",
+        pageKey: event.pageKey,
+        recordingActionType: "tab_switch",
+        description,
+        interactionId,
+      });
+      testRailSteps.push({
+        content: description,
+        recordingActionType: "tab_switch",
+        pageKey: event.pageKey,
+        expected: `La pestaña ${destination ?? event.pageKey} queda activa`,
+        classification: "FUNCTIONAL_ACTION",
+        interactionId,
+        sourceEventRefs: [`event-${eventIndex + 1}`],
+      });
+      continue;
+    }
     const canonical = canonicalByEvent.get(`event-${eventIndex + 1}`);
     if (canonical
       && (canonical.action === "check" || canonical.action === "uncheck")
@@ -996,8 +1077,9 @@ export function buildHappyPathScenario(
     // Recording Stop is the boundary. A state transition can end one screen and open the
     // next one; it is not a reason to discard later user actions. Only evidence explicitly
     // classified as technical-only is omitted from the executable projection.
-    if (canonical?.technicalOnly && event.kind !== "screen_change") continue;
-    if (isMaskActivation(events, eventIndex)) continue;
+    if (canonical?.technicalOnly && event.kind !== "screen_change" && event.kind !== "file_upload"
+      && !(event.kind === "navigate" && canonical.executionAuthority === true)) continue;
+    if (isMaskActivation(events, eventIndex) || isValueSelectionTap(events, eventIndex)) continue;
     if (event.kind === "tap" && isTransientStatusTap(event.target)) continue;
     const nextMeaningful = events.slice(eventIndex + 1).find((candidate) => candidate.kind === "tap" || candidate.kind === "fill");
     const classification = classifySemanticEvent(event, nextMeaningful);
@@ -1050,6 +1132,44 @@ export function buildHappyPathScenario(
           classification: "FUNCTIONAL_ACTION",
         });
       }
+      continue;
+    }
+
+    // URL navigation has no control target. Handle it before the target-required
+    // click/fill projection below so an address entered in the live recorder is not lost.
+    if (event.kind === "navigate" && !isMobile && event.url) {
+      const navigation = canonicalByEvent.get(`event-${eventIndex + 1}`);
+      if (navigation?.executionAuthority !== true || !navigation.navigationUrl) continue;
+      const interactionId = navigation.id;
+      const destination = navigation.navigationUrl;
+      const description = event.opensNewPage === true
+        ? `Abrir una pestaña nueva y navegar al link "${destination}"`
+        : `Navegar al link "${destination}"`;
+      webSteps.push({
+        action: "navigate",
+        target: { strategy: "url", value: navigation.navigationUrl },
+        value: navigation.navigationUrl,
+        navigationUrl: navigation.navigationUrl,
+        ...(event.pageKey ? { pageKey: event.pageKey } : {}),
+        ...(event.opensNewPage === true ? { opensNewPage: true } : {}),
+        recordingActionType: "navigation",
+        description,
+        interactionId,
+      });
+      testRailSteps.push({
+        content: description,
+        recordingActionType: "navigation",
+        navigationUrl: navigation.navigationUrl,
+        ...(event.pageKey ? { pageKey: event.pageKey } : {}),
+        ...(event.opensNewPage === true ? { opensNewPage: true } : {}),
+        // The navigation action itself is verified through its resolved URL. Do not invent a
+        // generic expected result here: it becomes an unsupported required oracle and blocks
+        // promotion even when every recorded action, including the final one, was discovered.
+        expected: "",
+        classification: "FUNCTIONAL_ACTION",
+        interactionId,
+        sourceEventRefs: [`event-${eventIndex + 1}`],
+      });
       continue;
     }
 
@@ -1201,6 +1321,77 @@ export function buildHappyPathScenario(
       hasUncertainSteps = true;
       continue;
     }
+    if (event.kind === "file_upload") {
+      const assets = event.fileAssets ?? [];
+      const fileSetValueKey = `recorded_upload_${event.seq}`;
+      const fieldLabel = event.target?.associatedField?.trim() || event.target?.label?.trim() || "campo de archivo";
+      const locator = targetLocatorsForPlan[0];
+      const canonicalUpload = canonicalByEvent.get(`event-${eventIndex + 1}`);
+      const technicalTargetRefs = canonicalUpload?.executionAuthority === true
+        ? [...canonicalUpload.technicalTargetRefs]
+        : targetLocatorsForPlan.filter((candidate) => !candidate.ambiguous).map((candidate) => `${candidate.strategy}:${candidate.value}`);
+      const description = assets.length === 1
+        ? `Adjuntar ${quoteHumanValue(assets[0].filename)} en "${fieldLabel}"`
+        : assets.length > 1 ? `Adjuntar ${assets.length} archivos en "${fieldLabel}"`
+          : `Adjuntar uno o más documentos en "${fieldLabel}"`;
+      const interactionId = `interaction-${eventIndex + 1}`;
+      if (assets.length === 0 || technicalTargetRefs.length === 0) hasUncertainSteps = true;
+      if (!locator || locator.ambiguous) hasUncertainSteps = true;
+      const initialFileSet = Object.fromEntries(assets.map((asset, index) => [
+        assets.slice(0, index).some((previous) => previous.filename === asset.filename)
+          ? `${asset.filename} (${index + 1})`
+          : asset.filename,
+        asset.fileRef,
+      ]));
+      if (!requiredData.some((field) => field.key === fileSetValueKey)) requiredData.push({
+        key: fileSetValueKey,
+        label: fieldLabel,
+        stepIndex: isMobile ? mobileSteps.length : webSteps.length,
+        ...(assets.length ? { exampleValue: JSON.stringify(initialFileSet) } : {}),
+        sensitive: false,
+        valueRole: "action_input",
+        source: assets.length ? "RECORDED_CONFIRMED" : "OBSERVED",
+        controlType: "file-set",
+        technicalTargetRefs,
+        sourceEventRefs: [`event-${eventIndex + 1}`],
+      });
+      if (!isMobile) {
+        webSteps.push({
+          action: "upload",
+          ...(locator ? { target: { strategy: locator.strategy, value: locator.value } } : {}),
+          fileAssets: assets.map((asset) => ({ ...asset })),
+          fileSetValueKey,
+          technicalTargetRefs,
+          recordingActionType: "upload",
+          description,
+          interactionId,
+        });
+      }
+      if (locator) {
+        stepTargets.push({
+          stepIndex: isMobile ? mobileSteps.length : webSteps.length - 1,
+          description,
+          strategy: locator.strategy,
+          value: locator.value,
+          ambiguous: locator.ambiguous,
+        });
+      }
+      testRailSteps.push({
+        content: description,
+        stepTemplate: description,
+        renderedStep: description,
+        sourceEventRefs: [`event-${eventIndex + 1}`],
+        interactionId,
+        recordingActionType: "upload",
+        fileAssets: assets.map((asset) => ({ ...asset })),
+        fileSetValueKey,
+        technicalTargetRefs,
+        expected: "",
+        classification: "FUNCTIONAL_ACTION",
+        resolutionState: locator && !locator.ambiguous && technicalTargetRefs.length ? "certified" : "runtime_resolution_required",
+      });
+      continue;
+    }
     if (!targetLocatorsForPlan.length) {
       // A recorder may still have a confirmed value when the technical locator was lost during
       // a DOM replacement. Keep the human/TestRail evidence and its dataset binding, but do not
@@ -1334,9 +1525,12 @@ export function buildHappyPathScenario(
         const label = resolution.displayLabel;
         const stepIndex = testRailSteps.length;
         const sensitive = isSensitiveRecordedEvent(event);
-        const valueKey = uniqueValueKeyFor(event, resolution.valueKey, requiredData);
-        const stepTemplate = describeFillTemplate(label, valueKey);
-        requiredData.push({
+        const runtimeDerivedSourceEventRef = event.valueSource === "application" ? event.dependsOnEventRef : undefined;
+        const valueKey = runtimeDerivedSourceEventRef ? undefined : uniqueValueKeyFor(event, resolution.valueKey, requiredData);
+        const stepTemplate = runtimeDerivedSourceEventRef
+          ? `Ingresar el valor copiado${copiedValueSourceSuffix(trace.events, runtimeDerivedSourceEventRef)} en "${label}"`
+          : describeFillTemplate(label, valueKey!);
+        if (valueKey) requiredData.push({
           key: valueKey,
           label,
            ...(entityScopeForTarget(event.target) ? { entityScope: entityScopeForTarget(event.target) } : {}),
@@ -1359,9 +1553,11 @@ export function buildHappyPathScenario(
            ...(entityScopeForTarget(event.target) ? { entityScope: entityScopeForTarget(event.target) } : {}),
           sourceEventRefs: [`event-${eventIndex + 1}`],
           stepTemplate,
-          renderedStep: describeFillRendered(event, label, stepTemplate, trace, editingSessionsByRef.get(event.target?.editingSessionRef ?? ""), confirmedCompoundSelectionBefore(events, eventIndex, event.target)),
-          valueKey,
+          renderedStep: runtimeDerivedSourceEventRef ? stepTemplate : describeFillRendered(event, label, stepTemplate, trace, editingSessionsByRef.get(event.target?.editingSessionRef ?? ""), confirmedCompoundSelectionBefore(events, eventIndex, event.target)),
+          ...(valueKey ? { valueKey } : {}),
           interactionId: `interaction-${eventIndex + 1}`,
+          ...(runtimeDerivedSourceEventRef ? { recordingActionType: "fill" as const, runtimeDerivedSourceEventRef } : {}),
+          technicalTargetRefs: canonicalByEvent.get(`event-${eventIndex + 1}`)?.technicalTargetRefs ?? [],
           sensitive,
           // Filling is an action, not an oracle. The control's state is retained in Technical
           // Knowledge; a functional TestRail step must not carry a tautological expectation.
@@ -1373,8 +1569,10 @@ export function buildHappyPathScenario(
         if (!isMobile) {
           webSteps.push({
             action: "fill",
-            valueKey,
+            ...(valueKey ? { valueKey } : {}),
             description: stepTemplate,
+            ...(runtimeDerivedSourceEventRef ? { recordingActionType: "fill" as const, runtimeDerivedSourceEventRef } : {}),
+            technicalTargetRefs: canonicalByEvent.get(`event-${eventIndex + 1}`)?.technicalTargetRefs ?? [],
             ...(entityScopeForTarget(event.target) ? { entityScope: entityScopeForTarget(event.target) } : {}),
             interactionId: `interaction-${eventIndex + 1}`,
           });
@@ -1563,11 +1761,16 @@ export function buildHappyPathScenario(
       const stepIndex = isMobile ? mobileSteps.length : webSteps.length;
       const sensitive = isSensitiveRecordedEvent(event);
       const applicationDerived = event.valueSource === "application";
-      const valueKey = uniqueValueKeyFor(event, resolution.valueKey, requiredData);
-      const stepTemplate = describeFillTemplate(label, valueKey);
+      const runtimeDerivedSourceEventRef = applicationDerived ? event.dependsOnEventRef : undefined;
+      const valueKey = runtimeDerivedSourceEventRef ? undefined : uniqueValueKeyFor(event, resolution.valueKey, requiredData);
+      const stepTemplate = runtimeDerivedSourceEventRef
+        ? `Ingresar el valor copiado${copiedValueSourceSuffix(trace.events, runtimeDerivedSourceEventRef)} en "${label}"`
+        : describeFillTemplate(label, valueKey!);
       const compoundSelectionValue = confirmedCompoundSelectionBefore(events, eventIndex, event.target);
-      const renderedStep = describeFillRendered(event, label, stepTemplate, trace, editingSessionsByRef.get(event.target?.editingSessionRef ?? ""), compoundSelectionValue);
-      requiredData.push({
+      const renderedStep = runtimeDerivedSourceEventRef
+        ? stepTemplate
+        : describeFillRendered(event, label, stepTemplate, trace, editingSessionsByRef.get(event.target?.editingSessionRef ?? ""), compoundSelectionValue);
+      if (valueKey) requiredData.push({
         key: valueKey,
         label,
          ...(entityScopeForTarget(event.target) ? { entityScope: entityScopeForTarget(event.target) } : {}),
@@ -1588,7 +1791,7 @@ export function buildHappyPathScenario(
       if (isMobile) {
         const t = toMobileTarget(event);
         if (!t) continue;
-        mobileSteps.push({ action: "fill", target: t, value: recordedLogicalValue(event, editingSessionsByRef.get(event.target?.editingSessionRef ?? ""), compoundSelectionValue) ?? "", description: stepTemplate });
+        mobileSteps.push({ action: "fill", target: t, value: runtimeDerivedSourceEventRef ? "" : recordedLogicalValue(event, editingSessionsByRef.get(event.target?.editingSessionRef ?? ""), compoundSelectionValue) ?? "", description: stepTemplate });
         stepTargets.push({ stepIndex: mobileSteps.length - 1, description: stepTemplate, ...t, ambiguous: best.ambiguous });
       } else {
         webSteps.push({
@@ -1597,7 +1800,9 @@ export function buildHappyPathScenario(
           // Web execution must bind through the semantic key. The human materialization lives
           // only on the review/TestRail step and never becomes a literal in a generated spec.
           value: undefined,
-          valueKey,
+          ...(valueKey ? { valueKey } : {}),
+          ...(runtimeDerivedSourceEventRef ? { recordingActionType: "fill" as const, runtimeDerivedSourceEventRef } : {}),
+          technicalTargetRefs: canonical?.technicalTargetRefs ?? event.target?.locators?.map((locator) => `${locator.strategy}:${locator.value}`) ?? [],
           description: stepTemplate,
            ...(entityScopeForTarget(event.target) ? { entityScope: entityScopeForTarget(event.target) } : {}),
           interactionId: `interaction-${eventIndex + 1}`,
@@ -1616,8 +1821,10 @@ export function buildHappyPathScenario(
         sourceEventRefs: [`event-${eventIndex + 1}`],
         stepTemplate,
         renderedStep,
-        valueKey,
+        ...(valueKey ? { valueKey } : {}),
         interactionId: `interaction-${eventIndex + 1}`,
+        ...(runtimeDerivedSourceEventRef ? { recordingActionType: "fill" as const, runtimeDerivedSourceEventRef } : {}),
+        technicalTargetRefs: canonical?.technicalTargetRefs ?? event.target?.locators?.map((locator) => `${locator.strategy}:${locator.value}`) ?? [],
         sensitive,
         expected: "",
         classification: "FUNCTIONAL_ACTION",
@@ -1625,10 +1832,6 @@ export function buildHappyPathScenario(
       continue;
     }
 
-    if (event.kind === "navigate" && !isMobile && event.url) {
-      webSteps.push({ action: "navigate", value: event.url, description: "Abrir la aplicación configurada del proyecto" });
-      testRailSteps.push({ content: "Abrir la aplicación configurada del proyecto", expected: "La página carga correctamente", classification: "FUNCTIONAL_ACTION" });
-    }
   }
 
   const lastScreen = trace.screens[trace.screens.length - 1];
@@ -1639,8 +1842,25 @@ export function buildHappyPathScenario(
     trace.label?.trim() ||
     (lastScreen ? `Recorrido ${trace.platform === "web" ? "web" : "móvil"} observado` : "Recorrido observado");
 
+  // Carry recorder page lineage into every human/executable projection using the source
+  // interaction id. This covers fills, clicks, selections, uploads and assertions uniformly,
+  // including older branches that predate multi-tab Recording; it does not infer a tab from URL.
+  const eventForInteraction = new Map(events.map((event, index) => [`interaction-${index + 1}`, event]));
+  const attachRecordedPageLineage = <T extends { interactionId?: string; pageKey?: string; opensNewPage?: boolean }>(steps: T[]): T[] =>
+    steps.map((step) => {
+      if (!step.interactionId) return step;
+      const sourceEvent = eventForInteraction.get(step.interactionId);
+      if (!sourceEvent?.pageKey && sourceEvent?.opensNewPage !== true) return step;
+      return {
+        ...step,
+        ...(sourceEvent.pageKey ? { pageKey: sourceEvent.pageKey } : {}),
+        ...(sourceEvent.opensNewPage === true ? { opensNewPage: true } : {}),
+      };
+    });
+  const stepsWithPageLineage = attachRecordedPageLineage(testRailSteps);
+  const webStepsWithPageLineage = attachRecordedPageLineage(webSteps);
   const executableCanonical = projectedCanonicalEvents.filter((interaction) => hasExecutionAuthority(interaction) && interaction.action !== "system_observation");
-  const ownedTestRailSteps = attachStateOwnership(testRailSteps, executableCanonical);
+  const ownedTestRailSteps = attachStateOwnership(stepsWithPageLineage, executableCanonical);
   const numberedTestRailSteps = numberScenarioSteps(ownedTestRailSteps);
   const stepMetrics = scenarioStepMetrics(numberedTestRailSteps);
   const stateValidation = validateInteractionStateSequence(executableCanonical);
@@ -1653,7 +1873,7 @@ export function buildHappyPathScenario(
     provenance: "observed",
     scope: "end_to_end",
     mobileSteps,
-    webSteps,
+    webSteps: webStepsWithPageLineage,
         testRailSteps: numberedTestRailSteps,
     requiredData,
     stepTargets,

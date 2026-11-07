@@ -1,0 +1,2094 @@
+{
+  "recordingId": "4abea656-6137-45e0-a713-4a792ee70535",
+  "projectSlug": "portal-comercial-dev",
+  "appSlug": "portal-comercial-dev",
+  "platform": "web",
+  "baseUrl": "https://next.portalcomercial.dev.bsc.com.do/",
+  "label": "Prueba",
+  "recordingGoal": {
+    "declaredGoal": "Prueba",
+    "normalizedGoal": "Prueba",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-11-06T19:32:01.470Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 4534,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "fingerprint": "",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/login",
+      "pageKey": "tab-1",
+      "seq": 0
+    },
+    {
+      "t": 4999,
+      "kind": "navigate",
+      "screenKey": "15ce316eba2d",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/login",
+      "pageKey": "tab-1",
+      "seq": 1
+    },
+    {
+      "t": 5048,
+      "kind": "navigate",
+      "screenKey": "15ce316eba2d",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/login",
+      "pageKey": "tab-1",
+      "seq": 2
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "45f8e7320f7d",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/",
+      "pageKey": "tab-1",
+      "seq": 3
+    },
+    {
+      "t": 5113,
+      "kind": "navigate",
+      "screenKey": "45f8e7320f7d",
+      "fingerprint": "d0571e7068b249c97cc2911825c4a317e1dbd06621f808504932e1294d082905",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/login",
+      "pageKey": "tab-1",
+      "seq": 4
+    },
+    {
+      "t": 8536,
+      "kind": "fill",
+      "screenKey": "45f8e7320f7d",
+      "fingerprint": "d0571e7068b249c97cc2911825c4a317e1dbd06621f808504932e1294d082905",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/login",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Usuario",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#username",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "username",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "radames",
+        "sensitive": false
+      },
+      "value": "radames",
+      "valueSource": "user",
+      "seq": 5
+    },
+    {
+      "t": 12984,
+      "kind": "fill",
+      "screenKey": "45f8e7320f7d",
+      "fingerprint": "d0571e7068b249c97cc2911825c4a317e1dbd06621f808504932e1294d082905",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/login",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "password",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena",
+      "valueSource": "user",
+      "seq": 6
+    },
+    {
+      "t": 12990,
+      "kind": "press",
+      "screenKey": "45f8e7320f7d",
+      "fingerprint": "d0571e7068b249c97cc2911825c4a317e1dbd06621f808504932e1294d082905",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/login",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Contraseña",
+        "role": "textbox",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "password",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "note": "Enter",
+      "seq": 7
+    },
+    {
+      "t": 13961,
+      "kind": "navigate",
+      "screenKey": "45f8e7320f7d",
+      "fingerprint": "d0571e7068b249c97cc2911825c4a317e1dbd06621f808504932e1294d082905",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/",
+      "pageKey": "tab-1",
+      "seq": 8
+    },
+    {
+      "t": 25216,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "20a681cf9918",
+      "fingerprint": "6209c540a60183d8382fb948c8758e5242e0bef6f845f7d14e2821a1dd03e642",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Persona jurídica",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Persona jurídica\"",
+      "observationType": "pointer",
+      "seq": 9
+    },
+    {
+      "t": 26191,
+      "interactionId": "pointer-1",
+      "kind": "tap",
+      "screenKey": "20a681cf9918",
+      "fingerprint": "6209c540a60183d8382fb948c8758e5242e0bef6f845f7d14e2821a1dd03e642",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Persona jurídica",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Persona jurídica",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#reka-accordion-trigger-v-1-5",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "reka-accordion-trigger-v-1-5",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#reka-accordion-trigger-v-1-5",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "reka-accordion-trigger-v-1-5"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",3]],\"descendantEntries\":[[\"span\",4]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "dashboard-sidebar-layout"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"reka-accordion-trigger-v-1-5\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",3]],\\\"descendantEntries\\\":[[\\\"span\\\",4]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 10
+    },
+    {
+      "t": 27140,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "20a681cf9918",
+      "fingerprint": "6209c540a60183d8382fb948c8758e5242e0bef6f845f7d14e2821a1dd03e642",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Nueva solicitud",
+        "role": "link",
+        "tag": "a",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Nueva solicitud\"",
+      "observationType": "pointer",
+      "seq": 11
+    },
+    {
+      "t": 27976,
+      "interactionId": "pointer-2",
+      "kind": "tap",
+      "screenKey": "20a681cf9918",
+      "fingerprint": "6209c540a60183d8382fb948c8758e5242e0bef6f845f7d14e2821a1dd03e642",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Nueva solicitud",
+        "role": "link",
+        "tag": "a",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "link|Nueva solicitud",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Nueva solicitud",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "/solicitud-persona-juridica"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "reka-collapsible-content-v-1-6"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"/solicitud-persona-juridica\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 12
+    },
+    {
+      "t": 27982,
+      "kind": "navigate",
+      "screenKey": "20a681cf9918",
+      "fingerprint": "6209c540a60183d8382fb948c8758e5242e0bef6f845f7d14e2821a1dd03e642",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/",
+      "pageKey": "tab-1",
+      "seq": 13
+    },
+    {
+      "t": 27988,
+      "kind": "navigate",
+      "screenKey": "20a681cf9918",
+      "fingerprint": "6209c540a60183d8382fb948c8758e5242e0bef6f845f7d14e2821a1dd03e642",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica",
+      "pageKey": "tab-1",
+      "seq": 14
+    },
+    {
+      "t": 37419,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "4d1ca9072954",
+      "fingerprint": "6dcb7ec0e07c914f7eed1b2b050172feca1bc3e214d0b221603d4450f623fd4a",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Request ID: 2396",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Request ID: 2396",
+          "targetTag": "div",
+          "promotedTitle": true,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Request ID: 2396\"",
+      "observationType": "pointer",
+      "seq": 15
+    },
+    {
+      "t": 38055,
+      "interactionId": "pointer-3",
+      "kind": "tap",
+      "screenKey": "4d1ca9072954",
+      "fingerprint": "6dcb7ec0e07c914f7eed1b2b050172feca1bc3e214d0b221603d4450f623fd4a",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Request ID: 2396",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Recuperar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Recuperar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 11,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "dashboard-panel-v-1-22"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 11
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Request ID: 2396",
+          "targetTag": "div",
+          "promotedTitle": true,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 16
+    },
+    {
+      "t": 38254,
+      "kind": "navigate",
+      "screenKey": "4d1ca9072954",
+      "fingerprint": "6dcb7ec0e07c914f7eed1b2b050172feca1bc3e214d0b221603d4450f623fd4a",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica",
+      "pageKey": "tab-1",
+      "seq": 17
+    },
+    {
+      "t": 38275,
+      "kind": "navigate",
+      "screenKey": "4d1ca9072954",
+      "fingerprint": "6dcb7ec0e07c914f7eed1b2b050172feca1bc3e214d0b221603d4450f623fd4a",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+      "pageKey": "tab-1",
+      "seq": 18
+    },
+    {
+      "t": 57064,
+      "interactionId": "pointer-4",
+      "kind": "note",
+      "screenKey": "e076027ef0e2",
+      "fingerprint": "2c046ac6dbcee5f8c8dd0847acca17de89f2ff3222cf076131fc3a3c6fdfe6eb",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Añadir ó actualizar relacionado",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Añadir ó actualizar relacionado",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "section:has(button[aria-labelledby=\"reka-stepper-item-title-v-1-30\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Añadir ó actualizar relacionado\"",
+      "observationType": "pointer",
+      "seq": 19
+    },
+    {
+      "t": 57557,
+      "interactionId": "pointer-4",
+      "kind": "tap",
+      "screenKey": "e076027ef0e2",
+      "fingerprint": "2c046ac6dbcee5f8c8dd0847acca17de89f2ff3222cf076131fc3a3c6fdfe6eb",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Añadir ó actualizar relacionado",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Añadir ó actualizar relacionado",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Añadir ó actualizar relacionado",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 4,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "dashboard-panel-v-1-27"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 4
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Añadir ó actualizar relacionado",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(button[aria-labelledby=\"reka-stepper-item-title-v-1-30\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(div[aria-label=\"progreso\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "dashboard-panel-v-1-27"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(div[role=\"separator\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Añadir ó actualizar relacionado",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "section:has(button[aria-labelledby=\"reka-stepper-item-title-v-1-30\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 20
+    },
+    {
+      "t": 60932,
+      "interactionId": "pointer-5",
+      "kind": "note",
+      "screenKey": "e076027ef0e2",
+      "fingerprint": "2c046ac6dbcee5f8c8dd0847acca17de89f2ff3222cf076131fc3a3c6fdfe6eb",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "M & R HOLISTIC KAIZEN101854236 · Prospecto principalSolicitantePendiente de crea",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"M & R HOLISTIC KAIZEN101854236 · Prospecto principalSolicitantePendiente de crea\"",
+      "observationType": "pointer",
+      "seq": 21
+    },
+    {
+      "t": 61153,
+      "interactionId": "pointer-5",
+      "kind": "tap",
+      "screenKey": "e076027ef0e2",
+      "fingerprint": "2c046ac6dbcee5f8c8dd0847acca17de89f2ff3222cf076131fc3a3c6fdfe6eb",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "M & R HOLISTIC KAIZEN101854236 · Prospecto principalSolicitantePendiente de crea",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div",
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2],[\"span\",3]],\"descendantEntries\":[[\"div\",2],[\"p\",2],[\"span\",7]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 22
+    },
+    {
+      "t": 63014,
+      "interactionId": "pointer-6",
+      "kind": "note",
+      "screenKey": "e076027ef0e2",
+      "fingerprint": "2c046ac6dbcee5f8c8dd0847acca17de89f2ff3222cf076131fc3a3c6fdfe6eb",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Confirmar",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Confirmar",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Confirmar\"",
+      "observationType": "pointer",
+      "seq": 23
+    },
+    {
+      "t": 63145,
+      "interactionId": "pointer-6",
+      "kind": "tap",
+      "screenKey": "e076027ef0e2",
+      "fingerprint": "2c046ac6dbcee5f8c8dd0847acca17de89f2ff3222cf076131fc3a3c6fdfe6eb",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Confirmar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Confirmar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Confirmar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 4
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Confirmar",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 24
+    },
+    {
+      "t": 68618,
+      "interactionId": "pointer-7",
+      "kind": "note",
+      "screenKey": "e076027ef0e2",
+      "fingerprint": "630b120be8e729d31db7eeb42b26aeec86bb5f1487abbe60a678339270ce2232",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Actualizar Relacionado",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Actualizar Relacionado",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(h2[id=\"reka-dialog-title-v-1-353\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Actualizar Relacionado\"",
+      "observationType": "pointer",
+      "seq": 25
+    },
+    {
+      "t": 68908,
+      "interactionId": "pointer-7",
+      "kind": "tap",
+      "screenKey": "e076027ef0e2",
+      "fingerprint": "630b120be8e729d31db7eeb42b26aeec86bb5f1487abbe60a678339270ce2232",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Actualizar Relacionado",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Actualizar Relacionado",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Actualizar Relacionado",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Actualizar Relacionado",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(h2[id=\"reka-dialog-title-v-1-353\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Actualizar Relacionado",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(h2[id=\"reka-dialog-title-v-1-353\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 26
+    },
+    {
+      "t": 76301,
+      "interactionId": "pointer-8",
+      "kind": "note",
+      "screenKey": "e076027ef0e2",
+      "fingerprint": "2c046ac6dbcee5f8c8dd0847acca17de89f2ff3222cf076131fc3a3c6fdfe6eb",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Volver",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Volver\"",
+      "observationType": "pointer",
+      "seq": 27
+    },
+    {
+      "t": 76634,
+      "interactionId": "pointer-8",
+      "kind": "tap",
+      "screenKey": "e076027ef0e2",
+      "fingerprint": "2c046ac6dbcee5f8c8dd0847acca17de89f2ff3222cf076131fc3a3c6fdfe6eb",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Volver",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Volver",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Volver",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 28
+    },
+    {
+      "t": 85241,
+      "kind": "navigate",
+      "screenKey": "e076027ef0e2",
+      "fingerprint": "2c046ac6dbcee5f8c8dd0847acca17de89f2ff3222cf076131fc3a3c6fdfe6eb",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+      "pageKey": "tab-1",
+      "seq": 29
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "15ce316eba2d",
+      "title": "15ce316eba2d",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/login",
+      "firstSeenAt": 4798,
+      "controls": [],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "45f8e7320f7d",
+      "title": "Banco Santa Cruz - Portal Comercial",
+      "fingerprint": "d0571e7068b249c97cc2911825c4a317e1dbd06621f808504932e1294d082905",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/login",
+      "firstSeenAt": 5069,
+      "controls": [
+        {
+          "label": "Cambiar a modo oscuro",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Cambiar a modo oscuro"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cambiar a modo oscuro",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Usuario",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingresa tu usuario",
+          "attributes": {
+            "id": "username",
+            "name": "username",
+            "type": "text",
+            "placeholder": "Ingresa tu usuario"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "username",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingresa tu contraseña",
+          "attributes": {
+            "id": "password",
+            "name": "password",
+            "type": "password",
+            "placeholder": "Ingresa tu contraseña"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "password",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Mostrar contraseña",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Mostrar contraseña"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Mostrar contraseña",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Mantener la sesión iniciada",
+          "role": "checkbox",
+          "tag": "button",
+          "attributes": {
+            "id": "remember-me",
+            "type": "button",
+            "aria-label": "Mantener la sesión iniciada",
+            "role": "checkbox"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "remember-me",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "submit"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Iniciar sesión",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Banco Santa Cruz - Portal Comercial"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 3,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "20a681cf9918",
+      "title": "Inicio",
+      "fingerprint": "6209c540a60183d8382fb948c8758e5242e0bef6f845f7d14e2821a1dd03e642",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/",
+      "firstSeenAt": 14255,
+      "controls": [
+        {
+          "label": "Portal",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Portal Comercial",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Buscar…",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Buscar…   ⌘ Ctrl k",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Documentos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-1",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Persona física",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-3",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-3",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Persona jurídica",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-5",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-5",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Jornadas",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-7",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-7",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Empleados",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-9",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-9",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Servicios",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-11",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-11",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Gestión Documental",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Gestión Documental",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Autorización",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-13",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-13",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Logs",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-15",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-15",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Acerca de",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Acerca de",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cambiar a modo oscuro",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Cambiar a modo oscuro"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cambiar a modo oscuro",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "R",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-dropdown-menu-trigger-v-1-17",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-dropdown-menu-trigger-v-1-17",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Colapsar barra lateral",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Colapsar barra lateral"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Colapsar barra lateral",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Documentos en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Empleados en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Empleados en curso",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Inicio",
+        "Archivo",
+        "Documentos"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "4d1ca9072954",
+      "title": "Solicitud Persona Juridica",
+      "fingerprint": "6dcb7ec0e07c914f7eed1b2b050172feca1bc3e214d0b221603d4450f623fd4a",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica",
+      "firstSeenAt": 28088,
+      "controls": [
+        {
+          "label": "Portal",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Portal Comercial",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Buscar…",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Buscar…   ⌘ Ctrl k",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Documentos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-1",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Persona física",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-3",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-3",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Persona jurídica",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-5",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-5",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nueva solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Jornadas",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-7",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-7",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Empleados",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-9",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-9",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Servicios",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-11",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-11",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Gestión Documental",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Gestión Documental",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Autorización",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-13",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-13",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Logs",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-15",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-15",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Acerca de",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Acerca de",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cambiar a modo oscuro",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Cambiar a modo oscuro"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cambiar a modo oscuro",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "R",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-dropdown-menu-trigger-v-1-17",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-dropdown-menu-trigger-v-1-17",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Colapsar barra lateral",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Colapsar barra lateral"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Colapsar barra lateral",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nuevo caso",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-dropdown-menu-trigger-v-1-25",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-dropdown-menu-trigger-v-1-25",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Actualizar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Actualizar ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Buscar por numero de solicitud",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Buscar por numero de solicitud",
+          "attributes": {
+            "type": "text",
+            "placeholder": "Buscar por numero de solicitud"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Buscar por numero de solicitud",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Solicitud Persona Juridica",
+        "Solicitudes en curso"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 2,
+        "rows": 12,
+        "cells": 77,
+        "headers": [
+          "Solicitud",
+          "Solicitante",
+          "Tipo",
+          "Estado",
+          "Creado por",
+          "Actualizado por",
+          "Acciones"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Acciones",
+            "field": "Acciones"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Acciones",
+          "field": "Acciones"
+        }
+      ]
+    },
+    {
+      "screenKey": "e076027ef0e2",
+      "title": "Solicitud Persona Juridica Reanudar caso",
+      "fingerprint": "2c046ac6dbcee5f8c8dd0847acca17de89f2ff3222cf076131fc3a3c6fdfe6eb",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+      "firstSeenAt": 38514,
+      "controls": [
+        {
+          "label": "Portal",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Portal Comercial",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Buscar…",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Buscar…   ⌘ Ctrl k",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Documentos",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-1",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Persona física",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-3",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-3",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Persona jurídica",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-5",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-5",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nueva solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Jornadas",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-7",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-7",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Empleados",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-9",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-9",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Servicios",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-11",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-11",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Gestión Documental",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Gestión Documental",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Autorización",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-13",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-13",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Logs",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-accordion-trigger-v-1-15",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-accordion-trigger-v-1-15",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Acerca de",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Acerca de",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cambiar a modo oscuro",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Cambiar a modo oscuro"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cambiar a modo oscuro",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "R",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "reka-dropdown-menu-trigger-v-1-17",
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "reka-dropdown-menu-trigger-v-1-17",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Colapsar barra lateral",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-label": "Colapsar barra lateral"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Colapsar barra lateral",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitud Persona Juridica",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Solicitud Persona Juridica",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Identificacion Comercial",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-labelledby": "reka-stepper-item-title-v-1-30"
+          },
+          "containerContext": "progreso",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Identificacion Comercial",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Extraccion y Vinculados",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button",
+            "aria-labelledby": "reka-stepper-item-title-v-1-32"
+          },
+          "containerContext": "progreso",
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Extraccion y Vinculados",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Solicitud Persona Juridica Reanudar caso",
+        "Reanudar caso Persona Juridica",
+        "Informacion de Registro"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 2,
+        "rows": 5,
+        "cells": 32,
+        "headers": [
+          "Estado Core",
+          "Nombre / Razon Social",
+          "Identificacion",
+          "Posicion",
+          "Cargo",
+          "Acciones",
+          "Estado Civil"
+        ],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-11-06T19:33:29.788Z",
+  "durationMs": 88318
+}

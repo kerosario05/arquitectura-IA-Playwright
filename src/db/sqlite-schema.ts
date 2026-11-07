@@ -179,6 +179,55 @@ CREATE TABLE IF NOT EXISTS ProjectTestRailConfiguration (
   updatedAt              TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR})
 );
 
+-- Catalog services a project enabled (Catálogo de servicios) and its settings for each.
+-- The services themselves are code (src/service-catalog); only per-project settings live here.
+CREATE TABLE IF NOT EXISTS ProjectServiceConfiguration (
+  projectId     TEXT    NOT NULL COLLATE NOCASE
+                        REFERENCES Projects(id) ON DELETE CASCADE,
+  serviceKey    TEXT    NOT NULL COLLATE NOCASE,
+  enabled       INTEGER NOT NULL DEFAULT 1,
+  settingsJson  TEXT    NOT NULL DEFAULT '{}',
+  createdAt     TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt     TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  PRIMARY KEY (projectId, serviceKey)
+);
+
+-- Which catalog service fills which scenario field (valueKey). scenarioId '' = the general
+-- form of the owner (recording, test-design story or case); a scenario row overrides it.
+-- serviceKey NULL on a scenario row = "this scenario types the value by hand".
+CREATE TABLE IF NOT EXISTS ServiceBinding (
+  id              TEXT    PRIMARY KEY COLLATE NOCASE DEFAULT (${UUID_DEFAULT_EXPR}),
+  projectId       TEXT    NOT NULL COLLATE NOCASE
+                          REFERENCES Projects(id) ON DELETE CASCADE,
+  ownerType       TEXT    NOT NULL,   -- recording | test_design_story | case
+  ownerId         TEXT    NOT NULL COLLATE NOCASE,
+  scenarioId      TEXT    NOT NULL DEFAULT '' COLLATE NOCASE,
+  targetValueKey  TEXT    NOT NULL,
+  serviceKey      TEXT    COLLATE NOCASE,
+  paramsJson      TEXT    NOT NULL DEFAULT '{}',
+  updatedBy       TEXT,
+  createdAt       TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt       TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  UNIQUE (projectId, ownerType, ownerId, scenarioId, targetValueKey)
+);
+
+CREATE INDEX IF NOT EXISTS IX_ServiceBinding_owner ON ServiceBinding (projectId, ownerType, ownerId);
+
+-- Git repository holding the project's test-plan-<HU>.md files (Planificación de pruebas).
+CREATE TABLE IF NOT EXISTS ProjectRepositoryConfiguration (
+  projectId              TEXT    PRIMARY KEY COLLATE NOCASE
+                                 REFERENCES Projects(id) ON DELETE CASCADE,
+  repoUrl                TEXT    NOT NULL,
+  defaultBranch          TEXT    NOT NULL,
+  specsPath              TEXT    NOT NULL,
+  filePattern            TEXT    NOT NULL,
+  protectedBranchesJson  TEXT    NOT NULL DEFAULT '[]',
+  credentialSecretRef    TEXT,                    -- env:VAR; NULL = machine git credentials
+  enabled                INTEGER NOT NULL DEFAULT 1,
+  createdAt              TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt              TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR})
+);
+
 CREATE TABLE IF NOT EXISTS ProjectKnowledge (
   projectId     TEXT    PRIMARY KEY COLLATE NOCASE
                         REFERENCES Projects(id) ON DELETE CASCADE,
@@ -364,4 +413,30 @@ CREATE TABLE IF NOT EXISTS TestDesignPublishedCaseLink (
 );
 CREATE INDEX IF NOT EXISTS IX_TestDesignPublishedCaseLink_project
   ON TestDesignPublishedCaseLink (projectSlug, testRailProjectId, issueKey);
+
+
+-- QA review of a test-plan-<HU>.md (Planificación de pruebas). Append-only: one row per
+-- "aceptar como válido" or per commit of changes. No foreign keys.
+CREATE TABLE IF NOT EXISTS TestPlanReview (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  projectSlug    TEXT    NOT NULL COLLATE NOCASE,
+  branch         TEXT    NOT NULL,
+  issueKey       TEXT    NOT NULL COLLATE NOCASE,
+  filePath       TEXT    NOT NULL,
+  outcome        TEXT    NOT NULL,   -- accepted | committed
+  headSha        TEXT    NOT NULL,   -- branch head the reviewer looked at
+  blobSha        TEXT    NOT NULL,   -- file content considered valid (the new blob when committed)
+  commitSha      TEXT,               -- commit pushed by the reviewer (committed only)
+  scenarioCount  INTEGER NOT NULL DEFAULT 0,
+  editedCount    INTEGER NOT NULL DEFAULT 0,
+  addedCount     INTEGER NOT NULL DEFAULT 0,
+  removedCount   INTEGER NOT NULL DEFAULT 0,
+  note           TEXT,
+  userId         TEXT    COLLATE NOCASE,
+  userName       TEXT,
+  reviewedAt     TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR})
+);
+
+CREATE INDEX IF NOT EXISTS IX_TestPlanReview_file ON TestPlanReview (projectSlug, filePath, reviewedAt);
+CREATE INDEX IF NOT EXISTS IX_TestPlanReview_time ON TestPlanReview (reviewedAt);
 `;

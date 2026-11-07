@@ -3,6 +3,8 @@ import fs from "node:fs/promises";
 import { config, requireTestRailConfig } from "../config/env";
 import { TestRailClient } from "../clients/testrail.client";
 import { runCaseDiscoveryWorkflow } from "../discovery/case-discovery-workflow";
+import { normalizeTestRailCases } from "../testrail/testrail-normalizer";
+import { buildDiscoveryLiveCaseFinishedEvent, buildDiscoveryLiveCaseStartedEvent } from "../discovery/live-progress-events";
 import { getCaseAutomationStatus } from "../cases/case-automation-status";
 import { runCaseExecutionQueue } from "../runner/case-execution-queue";
 import type { CaseDiscoveryWorkflowOptions, CaseDiscoveryWorkflowResult } from "../discovery/case-discovery-workflow";
@@ -74,7 +76,11 @@ export type BatchCaseState =
 export type BatchCaseResultEntry = {
   caseId: number;
   title: string;
+  /** Transient display-only labels for LiveExecution; omitted from persisted results. */
+  liveSteps?: string[];
   contextMaterialized?: boolean;
+  /** Outcome of the discovery itself, kept apart from `status` (which promotion can turn into `not_promoted`). */
+  discoveryStatus?: string;
   selected: boolean;
   activeAtSelection?: boolean;
   skipReason?: string;
@@ -148,6 +154,11 @@ export type BatchResult = {
   };
   aiRepairBatchSummary?: import("../ai/repair/ai-repair-metrics").AiRepairBatchSummary;
 };
+
+function omitLiveSteps(entry: BatchCaseResultEntry): BatchCaseResultEntry {
+  const { liveSteps: _liveSteps, ...persisted } = entry;
+  return persisted;
+}
 
 export function parseBatchArgs(argv: string[]): BatchCliArgs {
   const args: BatchCliArgs = {
@@ -501,7 +512,6 @@ export async function selectCases(
   const entries: BatchCaseResultEntry[] = [];
   for (const tc of rawCases) {
     const status = statusMap.get(tc.id) ?? "not_automated";
-
     if (args.mode === "not-automated" && status !== "not_automated") {
       entries.push({
         caseId: tc.id,
@@ -530,6 +540,7 @@ export async function selectCases(
     entries.push({
       caseId: tc.id,
       title: tc.title,
+      liveSteps: normalizeTestRailCases([tc])[0]?.steps.map((step) => step.action) ?? [],
       selected: true,
       activeAtSelection: status === "active",
       status: "selected",
@@ -588,7 +599,7 @@ export async function executeBatch(
       batchId,
       timestamp: new Date().toISOString(),
       args: serializeArgs(args),
-      cases: entries,
+      cases: entries.map(omitLiveSteps),
       skippedCases: entries.filter((e) => !e.selected && e.skipReason).map((e) => ({ caseId: e.caseId, reason: e.skipReason! })),
       rerunActiveCases: args.rerunActive
         ? entries.filter((e) => e.selected && e.activeAtSelection).map((e) => ({ caseId: e.caseId }))
@@ -625,6 +636,14 @@ export async function executeBatch(
   async function runSingleCase(entry: BatchCaseResultEntry, _ctx: QueueItemContext): Promise<BatchCaseResultEntry> {
     const caseStartTime = Date.now();
     console.log(`[discovery:batch] Running case C${entry.caseId} - ${entry.title}`);
+    const caseIndex = selected.findIndex((candidate) => candidate.caseId === entry.caseId) + 1;
+    console.log(JSON.stringify(buildDiscoveryLiveCaseStartedEvent({
+      caseId: entry.caseId,
+      title: entry.title,
+      index: caseIndex,
+      total: selected.length,
+      steps: entry.liveSteps ?? [],
+    })));
 
     const caseOutputDir = path.join(batchDir, "cases", `case-${entry.caseId}`);
     const workflowOptions: CaseDiscoveryWorkflowOptions = {
@@ -685,6 +704,7 @@ export async function executeBatch(
       caseId: entry.caseId,
       title: entry.title,
       contextMaterialized: workflowResult.contextMaterialized === true ? true : undefined,
+      discoveryStatus: cr.status,
       selected: true,
       status: state,
       promoted: workflowResult.promoted,
@@ -712,6 +732,13 @@ export async function executeBatch(
       promotionEligible: cr.finalStatusReconciliation?.promotionEligible,
       discoveryResult: cr
     };
+
+    console.log(JSON.stringify(buildDiscoveryLiveCaseFinishedEvent({
+      caseId: entry.caseId,
+      title: entry.title,
+      passed: cr.status === "discovered_passed" || cr.status === "repaired_passed",
+      failedAtStep: cr.failedAtStep,
+    })));
 
     console.log(`[discovery:batch] Case C${entry.caseId} finished: ${state} (${durationMs}ms)`);
     return resultEntry;
@@ -800,7 +827,7 @@ export async function executeBatch(
     batchId,
     timestamp: new Date().toISOString(),
     args: serializeArgs(args),
-    cases: allResults,
+    cases: allResults.map(omitLiveSteps),
     skippedCases,
     rerunActiveCases,
     summary: {
@@ -824,6 +851,7 @@ export async function executeBatch(
 
   return batchResult;
 }
+
 
 export async function resolveBatchAppProfile(args: BatchCliArgs): Promise<{ appProfile: AppProfile; baseDir: string }> {
   const ids = resolveTestRailSelectionIds(args);

@@ -301,4 +301,5 @@ export const ACTION_RUNTIME_METHOD_BY_OPERATION: Partial<Record<string, string>>
   fill: "fillPromotedField",
   select: "selectPromotedItem",
   press: "pressPromotedTarget",
+  select_tab: "selectRecordedPage",
 };

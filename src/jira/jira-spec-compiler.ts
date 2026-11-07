@@ -39,6 +39,8 @@ function targetLiteral(target: ExecutionPlanStep["target"]): string | undefined 
 
 export function compileJiraSpec(input: JiraSpecCompileInput): JiraSpecCompileResult {
   const unsupported: string[] = [];
+  const hasWorkflow = input.plan.steps.some(step => step.jiraWorkflow);
+  const workflowPath = portableImport(input.specPath, path.resolve("src/jira/jira-workflow-runtime.ts"));
   const runtimePath = portableImport(input.specPath, path.resolve("src/jira/jira-spec-runtime.ts"));
   const authPath = input.sourceScenario.auth?.required
     ? portableImport(input.specPath, path.resolve("automations/apps", input.appSlug, "flows/auth.flow.ts"))
@@ -59,7 +61,8 @@ export function compileJiraSpec(input: JiraSpecCompileInput): JiraSpecCompileRes
   );
   const lines = [
     `import { test, expect } from "@playwright/test";`,
-    `import { settleJiraAction, assertJiraSpecAbsentText, assertJiraSpecHeaderText, awaitJiraSpecPostLoginTransition, assertJiraSpecAuthGate, assertJiraSpecDownloadContent, assertJiraSpecFieldValidation, assertJiraSpecFieldEnabled, assertJiraSpecFieldEmpty, assertJiraSpecRowMatch, assertJiraSpecTableBoundDownload, assertJiraSpecVisibleText, clickJiraSpecTarget, completeJiraSpecAccessCodeGate, fillJiraSpecSegmentedCode, navigateJiraSpecRoute, performJiraSpecSelection, reportJiraSpecStepComplete, reportJiraSpecStepStart, resolveJiraSpecAuthTestData, resolveJiraSpecTarget, resolveJiraSpecValue } from ${quote(runtimePath)};`,
+    `import { settleJiraAction, assertJiraSpecAbsentText, assertJiraSpecHeaderText, awaitJiraSpecPostLoginTransition, assertJiraSpecAuthGate, assertJiraSpecDownloadContent, assertJiraSpecFieldValidation, assertJiraSpecFieldEnabled, assertJiraSpecFieldEmpty, assertJiraSpecRowMatch, assertJiraSpecTableBoundDownload, assertJiraSpecVisibleText, attachJiraSpecFile, clickJiraSpecTarget, completeJiraSpecAccessCodeGate, fillJiraSpecSegmentedCode, navigateJiraSpecRoute, performJiraSpecSelection, reportJiraSpecStepComplete, reportJiraSpecStepStart, resolveJiraSpecAuthTestData, resolveJiraSpecTarget, resolveJiraSpecValue } from ${quote(runtimePath)};`,
+    ...(hasWorkflow ? [`import { createJiraWorkflowSession } from ${quote(workflowPath)};`] : []),
     ...(authPath ? [`import { AuthFlow, setAuthFlowTestData } from ${quote(authPath)};`] : []),
     "",
     `test(${quote(input.plan.scenario.title)}, async ({ page }, testInfo) => {`,
@@ -67,8 +70,9 @@ export function compileJiraSpec(input: JiraSpecCompileInput): JiraSpecCompileRes
     `  const appSlug = ${quote(input.appSlug)};`,
     `  const sectionSlug = ${quote(input.sectionSlug)};`,
     `  const automationId = ${quote(input.automationId)};`,
-    `  const baseUrl = process.env.APP_BASE_URL;`,
+    `  let baseUrl = process.env.APP_BASE_URL;`,
     `  if (!baseUrl) throw new Error("JIRA_SPEC_BASE_URL_MISSING");`,
+    ...(hasWorkflow ? [`  const workflow = await createJiraWorkflowSession(page, appSlug);`, `  try {`] : []),
     ...(authPath ? [`  const authTestData = await resolveJiraSpecAuthTestData(appSlug);`,
       `  setAuthFlowTestData(authTestData);`,
       `  const authFlow = new AuthFlow(page);`] : []),
@@ -107,7 +111,12 @@ export function compileJiraSpec(input: JiraSpecCompileInput): JiraSpecCompileRes
     const oracleAuthGate = authOracles.has(step.index);
     const fieldValidationOracle = (input.sourceScenario.observableOracles ?? []).find(oracle => oracle.type === "field_validation" && oracle.stepIndex === step.index);
     const fieldStateOracle = (input.sourceScenario.observableOracles ?? []).find(oracle => oracle.type === "field_state" && oracle.stepIndex === step.index);
-    if (step.action === "navigate") {
+    if (step.jiraWorkflow) {
+      if (step.jiraWorkflow.kind === "documents" && !step.valueKey) unsupported.push(`step_${step.index}:document_set_value_missing`);
+      const value = step.valueKey ? `await resolveJiraSpecValue(${quote(step.valueKey)}, appSlug, sectionSlug, automationId)` : 'undefined';
+      lines.push(`  await workflow.execute(${JSON.stringify(step.jiraWorkflow)}, ${value});`);
+      lines.push(`  page = workflow.page; baseUrl = workflow.baseUrl;`);
+    } else if (step.action === "navigate") {
       if (step.target === "APP_BASE_URL") lines.push(`  await settleJiraAction(page, () => page.goto(baseUrl, { waitUntil: "domcontentloaded" }), baseUrl);`);
       else if (step.target && typeof step.target === "object" && step.target.strategy === "url" && step.target.value) {
         lines.push(`  await settleJiraAction(page, () => navigateJiraSpecRoute(page, ${quote(step.target.value)}, baseUrl), baseUrl);`);
@@ -159,6 +168,10 @@ export function compileJiraSpec(input: JiraSpecCompileInput): JiraSpecCompileRes
         : step.target && typeof step.target === "object" ? step.target.value ?? step.target.name : undefined;
       if (!expected) unsupported.push(`step_${step.index}:assertion_expected_text_missing`);
       else lines.push(`  await assertJiraSpecVisibleText(page, ${quote(expected)}, ${step.timeoutMs ?? 15000}${step.description?.trim() ? `, ${quote(step.description.trim())}` : ""});`);
+    } else if (step.action === "uploadFile") {
+      if (!targetJson || !step.valueKey) { unsupported.push(`step_${step.index}:file_input_or_value_key_missing`); continue; }
+      lines.push(`  const fileRef${step.index} = await resolveJiraSpecValue(${quote(step.valueKey)}, appSlug, sectionSlug, automationId);`);
+      lines.push(`  await settleJiraAction(page, () => attachJiraSpecFile(page, ${targetJson}, fileRef${step.index}, appSlug));`);
     } else if (["click", "fill", "select", "press", "check", "uncheck", "waitFor"].includes(step.action)) {
       if (!targetJson) { unsupported.push(`step_${step.index}:target_missing`); continue; }
       const segmentedCode = step.action === "fill" && step.target && typeof step.target === "object"
@@ -213,6 +226,7 @@ export function compileJiraSpec(input: JiraSpecCompileInput): JiraSpecCompileRes
   if (authPath && !authEmitted && input.sourceScenario.auth?.insertionAfterStepIndex !== undefined) {
     unsupported.push(`auth_flow_insertion_step_not_emitted:${input.sourceScenario.auth.insertionAfterStepIndex}`);
   }
+  if (hasWorkflow) lines.push("  } finally { await workflow.close(); } ");
   lines.push("});", "");
   return { source: lines.join("\n"), unsupported };
 }

@@ -74,9 +74,18 @@ export async function persistClassicJiraDiscoveryRoute(input: {
  profileRevision: string; jobId: string; evidenceRefs: string[];
  sourceScenario?: JiraDiscoveredExecutionContract['sourceScenario'];
 }, persist: (route: JiraLearnedRoute) => Promise<void> = saveJiraRoute) {
- const keys = [...new Set(`${input.scenario.references ?? ''} ${input.scenario.raw?.refs ?? ''} ${input.scenario.source==='jira'?input.scenario.externalId:''}`.match(/\b[A-Z][A-Z0-9_]*-\d+\b/g) ?? [])];
- if (!input.appSlug || !input.plan || !['discovered_passed','repaired_passed'].includes(input.status)
-   || keys.length !== 1 || input.scenario.recordingId || input.scenario.recordingExecutionContract) return {status:'skipped' as const};
+ const found = [...new Set(`${input.scenario.references ?? ''} ${input.scenario.raw?.refs ?? ''} ${input.scenario.source==='jira'?input.scenario.externalId:''}`.match(/\b[A-Z][A-Z0-9_]*-\d+\b/g) ?? [])];
+ // A passed TestRail case with no Jira reference still teaches its route, under a stable key derived from its own case
+ // id (`TR-<id>`). Several Jira references stay ambiguous and teach nothing.
+ const keys = found.length === 0 && Number.isSafeInteger(input.scenario.caseId) && (input.scenario.caseId as number) > 0
+   ? [`TR-${input.scenario.caseId}`] : found;
+ const skipReason = !input.appSlug ? 'no_app_slug'
+   : !input.plan ? 'no_plan'
+   : !['discovered_passed','repaired_passed'].includes(input.status) ? `status_${input.status}`
+   : keys.length !== 1 ? (keys.length === 0 ? 'no_case_id_or_jira_key' : 'ambiguous_jira_keys')
+   : input.scenario.recordingId || input.scenario.recordingExecutionContract ? 'recording_origin'
+   : undefined;
+ if (skipReason || !input.appSlug || !input.plan) return {status:'skipped' as const, reason:skipReason ?? 'incomplete_input'};
  return persistValidatedJiraDiscoveryRoute({
   appSlug:input.appSlug, profileRevision:input.profileRevision,jobId:input.jobId,evidenceRefs:input.evidenceRefs,
   scenario:{scenarioId:input.scenario.externalId,sourceIssueKey:keys[0],title:input.scenario.title,

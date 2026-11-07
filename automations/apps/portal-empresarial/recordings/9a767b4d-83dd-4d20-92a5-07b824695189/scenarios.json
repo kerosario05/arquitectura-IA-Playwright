@@ -107,7 +107,7 @@
           "event-10"
         ],
         "stepTemplate": "Ingresar [contrasena] en \"Contraseña*\"",
-        "renderedStep": "Ingresar \"••••••\" en \"Contraseña*\"",
+        "renderedStep": "Ingresar \"â€¢â€¢â€¢â€¢â€¢â€¢\" en \"Contraseña*\"",
         "valueKey": "contrasena",
         "interactionId": "interaction-10",
         "sensitive": true,
@@ -616,7 +616,7 @@
         "needsReview": true
       }
     ],
-    "testRailCaseId": 48818,
+    "testRailCaseId": 57125,
     "testRailDestination": {
       "projectId": "56",
       "suiteId": "1731",

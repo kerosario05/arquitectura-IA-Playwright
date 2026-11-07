@@ -33,6 +33,11 @@ export type TechnicalClickObservation = {
   selectedValue?: string;
   selectedDisplay?: string;
   optionTechnicalEvidence?: CaptureTechnicalEvidence;
+  /**
+   * The opener is a combobox whose text box is editable. Typing into it is an edit, not a selection, so a session
+   * opened this way is dropped as soon as an edit is recorded (see cancelIfOpenedFromEditableControl).
+   */
+  fromEditableControl?: boolean;
 };
 
 export type SelectionObservationOutcome =
@@ -49,6 +54,7 @@ type PendingSelection = {
   identity: CaptureActionIdentity;
   sourceRefs?: CaptureSourceRefs;
   technicalActionSeq: number;
+  fromEditableControl?: boolean;
 };
 
 /**
@@ -61,8 +67,29 @@ function isComboboxOwner(owner: CaptureOwner): boolean {
   return owner.tag === "select" || owner.role === "combobox";
 }
 
+function isExplicitAriaPopupOwner(owner: CaptureOwner): boolean {
+  return owner.selectionTriggerEvidence === "aria_popup"
+    && owner.classification === "actionable"
+    && Boolean(owner.associatedField?.trim());
+}
+
 function isOptionOwner(owner: CaptureOwner): boolean {
   return owner.tag === "option" || owner.role === "option";
+}
+
+/**
+ * A custom dropdown's trigger is often a plain `div`/`span` with no ARIA role (the click landed on
+ * its wrapper rather than the inner combobox). It is still a selection opener when field-owner
+ * resolution already tied it to a named field and it is an actionable control: the session only
+ * projects if the VERY NEXT click is an option, and any other click cancels it, so a non-dropdown
+ * container cannot be mistaken for one. Buttons/links/inputs never qualify here.
+ */
+function isFieldOwnedContainerTrigger(owner: CaptureOwner): boolean {
+  const tag = owner.tag?.toLowerCase();
+  return (tag === "div" || tag === "span")
+    && owner.classification === "actionable"
+    && !owner.role
+    && Boolean(owner.associatedField?.trim());
 }
 
 function buildFunctionalSelect(pending: PendingSelection, optionEvent: TechnicalClickObservation): CaptureFunctionalAction {
@@ -84,8 +111,27 @@ function buildFunctionalSelect(pending: PendingSelection, optionEvent: Technical
   };
 }
 
+/**
+ * A click that resolved to no owner at all (the arrow icon of a custom dropdown has no role, no cursor
+ * pointer and no name) but sits inside a wrapper the field-owner resolution already tied to a named field.
+ * Only ever used when the VERY NEXT resolved click is an option: that pairing is what proves it was the opener.
+ */
+export type UnresolvedOpenerHint = {
+  documentContext: CaptureDocumentContext;
+  associatedField: string;
+  technicalActionSeq: number;
+  identity?: CaptureActionIdentity;
+  sourceRefs?: CaptureSourceRefs;
+};
+
 export class SelectionSessionManager {
   private pending: PendingSelection | null = null;
+  private unresolvedOpener: UnresolvedOpenerHint | null = null;
+
+  /** Remembers the latest unresolved click (or forgets it when that click names no field). */
+  noteUnresolvedClick(hint: UnresolvedOpenerHint | null): void {
+    this.unresolvedOpener = hint;
+  }
 
   /**
    * The single entry point: called by the bridge AFTER it has already appended the technical
@@ -97,8 +143,11 @@ export class SelectionSessionManager {
    */
   observeTechnicalClick(event: TechnicalClickObservation): SelectionObservationOutcome {
     const { owner, documentContext } = event;
+    // Any resolved click uses up the unresolved-opener hint: it only ever bridges to the very next click.
+    const unresolvedOpener = this.unresolvedOpener;
+    this.unresolvedOpener = null;
 
-    if (isComboboxOwner(owner)) {
+    if (isComboboxOwner(owner) || isExplicitAriaPopupOwner(owner) || isFieldOwnedContainerTrigger(owner)) {
       const reopened = this.pending !== null;
       this.pending = {
         documentContext,
@@ -106,11 +155,23 @@ export class SelectionSessionManager {
         identity: event.identity ?? {},
         sourceRefs: event.sourceRefs,
         technicalActionSeq: event.technicalActionSeq,
+        ...(event.fromEditableControl ? { fromEditableControl: true } : {}),
       };
       return { outcome: reopened ? "reopened" : "opened" };
     }
 
     if (isOptionOwner(owner)) {
+      if (!this.pending && unresolvedOpener && unresolvedOpener.documentContext.documentId === documentContext.documentId) {
+        // The opener click had no owner of its own, but it sat inside a named field and an option came next:
+        // the field is the owner. Only the field name is claimed; no technical identity is invented for it.
+        this.pending = {
+          documentContext: unresolvedOpener.documentContext,
+          owner: { tag: "div", classification: "actionable", associatedField: unresolvedOpener.associatedField },
+          identity: unresolvedOpener.identity ?? {},
+          sourceRefs: unresolvedOpener.sourceRefs,
+          technicalActionSeq: unresolvedOpener.technicalActionSeq,
+        };
+      }
       if (!this.pending) return { outcome: "orphan_option" };
       if (this.pending.documentContext.documentId !== documentContext.documentId) {
         // Never merge a selection across documents -- the stale pending session is discarded,
@@ -135,7 +196,13 @@ export class SelectionSessionManager {
     return { outcome: "ignored" };
   }
 
+  /** An edit was recorded: a list opened from an editable combobox was an autocomplete, not a plain selection. */
+  cancelIfOpenedFromEditableControl(): void {
+    if (this.pending?.fromEditableControl) this.pending = null;
+  }
+
   cancelSelectionSession(): void {
     this.pending = null;
+    this.unresolvedOpener = null;
   }
 }

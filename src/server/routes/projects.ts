@@ -16,7 +16,7 @@ import {
   type ProjectConfiguration,
 } from "../../db/project-reader";
 import { materializeProjectRuntime } from "../../db/project-materializer";
-import { inspectApk, ApkInspectorError } from "../../utils/apk-inspector";
+import { inspectApkFile, ApkInspectorError } from "../../utils/apk-inspector";
 import { getConnection } from "../../db/sql-connection";
 import {
   getByProjectAndCase,
@@ -25,13 +25,222 @@ import {
 } from "../../db/project-case-input-requirement-service";
 import { syncTestRailInputRequirements } from "../../testrail/testrail-input-requirements-sync";
 import { filterByProjectAccess } from "../middleware/route-policy";
+import { isJiraSpecGenerationEnabled } from "../services/spec-generation-policy";
 import multer from "multer";
 import fs from "fs";
 import path from "path";
 import { getProjectGenerationConfig, upsertProjectGenerationConfig } from "../../db/project-generation-config-service";
 import { createProjectDataCatalog, listProjectDataCatalogs, ProjectDataCatalogError, setProjectDataCatalogOptionActive, updateProjectDataCatalog } from "../../db/project-data-catalog-service";
+import {
+  deleteRepositoryConfig,
+  getRepositoryConfigBySlug,
+  publicRepositoryConfig,
+  upsertRepositoryConfig,
+} from "../../db/project-repository-config-service";
+import { normalizeRepositoryConfig, RepositoryConfigValidationError } from "../../test-planning/repository-config";
+import { GitCommandError, gitErrorStatus, testRepositoryAccess } from "../../test-planning/git-cli";
+import { loadPromotedAppConfigSync, savePromotedAppConfig } from "../../automations/app-profile";
+import {
+  createPortalRequestCancellationService,
+  getPortalCancellationEnvironment,
+  PortalCancellationError,
+} from "../services/portal-comercial-request-cancellation";
+import {
+  findNextDataCedulasCustomers,
+  listDataCedulasTnsAliases,
+  validateDataCedulasDatabase,
+} from "../services/data-cedulas-new-customer";
 
 export const projectsRouter = Router();
+
+const PORTAL_CANCELLATION_PROJECT = "portal-comercial";
+
+function getPortalCancellationAppConfig(slug: string) {
+  if (slug !== PORTAL_CANCELLATION_PROJECT) return null;
+  return loadPromotedAppConfigSync({ appSlug: PORTAL_CANCELLATION_PROJECT });
+}
+
+function sendPortalCancellationError(res: any, error: unknown) {
+  if (error instanceof PortalCancellationError) {
+    sendError(res, error.status, error.code, error.message);
+    return;
+  }
+  sendError(res, 500, "cancellation_internal_error", "No se pudo completar la operación de solicitudes QA.");
+}
+
+projectsRouter.get("/:slug/request-cancellation-config", (req, res) => {
+  const appConfig = getPortalCancellationAppConfig(req.params.slug);
+  if (!appConfig) {
+    sendError(res, 404, "request_cancellation_unavailable", "La cancelación QA no está disponible para este proyecto.");
+    return;
+  }
+  res.json({
+    enabled: appConfig.requestCancellation?.enabled === true,
+    configured: getPortalCancellationEnvironment().configured,
+  });
+});
+
+projectsRouter.put("/:slug/request-cancellation-config", async (req, res) => {
+  if (typeof req.body?.enabled !== "boolean") {
+    sendError(res, 400, "enabled_required", "Indica explícitamente si la cancelación QA queda habilitada.");
+    return;
+  }
+  const appConfig = getPortalCancellationAppConfig(req.params.slug);
+  if (!appConfig) {
+    sendError(res, 404, "request_cancellation_unavailable", "La cancelación QA no está disponible para este proyecto.");
+    return;
+  }
+  try {
+    const updated = {
+      ...appConfig,
+      requestCancellation: { enabled: req.body.enabled },
+      updatedAt: new Date().toISOString(),
+    };
+    await savePromotedAppConfig(updated);
+    res.json({ ok: true, enabled: updated.requestCancellation.enabled });
+  } catch {
+    sendError(res, 500, "request_cancellation_config_save_failed", "No se pudo guardar la configuración de cancelación QA.");
+  }
+});
+
+function getDataServicesAppConfig(slug: string) {
+  return loadPromotedAppConfigSync({ appSlug: slug });
+}
+
+projectsRouter.get("/:slug/data-services", (req, res) => {
+  const appConfig = getDataServicesAppConfig(req.params.slug);
+  if (!appConfig) {
+    sendError(res, 404, "data_services_unavailable", "Los servicios de datos no están disponibles para este proyecto.");
+    return;
+  }
+  const dataCedulas = appConfig.dataServices?.dataCedulas;
+  const recordingSpecGenerationEnabled = !["false", "0", "off", "no", "disabled"].includes(
+    (process.env.RECORDING_SPEC_GENERATION_ENABLED ?? "true").trim().toLowerCase(),
+  );
+  const jiraSpecGenerationEnabled = isJiraSpecGenerationEnabled();
+  res.json({
+    ok: true,
+    databases: listDataCedulasTnsAliases(),
+    services: {
+      dataCedulas: {
+        enabled: dataCedulas?.enabled === true,
+        database: dataCedulas?.database ?? "",
+      },
+      recordingSpecGenerationEnabled,
+      jiraSpecGenerationEnabled,
+    },
+  });
+});
+
+projectsRouter.put("/:slug/data-services/data-cedulas", async (req, res) => {
+  if (typeof req.body?.enabled !== "boolean") {
+    sendError(res, 400, "enabled_required", "Indica explícitamente si el servicio de cédulas queda habilitado.");
+    return;
+  }
+  const appConfig = getDataServicesAppConfig(req.params.slug);
+  if (!appConfig) {
+    sendError(res, 404, "data_services_unavailable", "Los servicios de datos no están disponibles para este proyecto.");
+    return;
+  }
+  try {
+    const database = req.body.enabled ? validateDataCedulasDatabase(req.body.database) : String(req.body.database ?? "").trim().toUpperCase();
+    const updated = {
+      ...appConfig,
+      dataServices: {
+        ...(appConfig.dataServices ?? {}),
+        dataCedulas: { enabled: req.body.enabled, database },
+      },
+      updatedAt: new Date().toISOString(),
+    };
+    await savePromotedAppConfig(updated);
+    res.json({ ok: true, enabled: updated.dataServices.dataCedulas.enabled, database: updated.dataServices.dataCedulas.database });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    sendError(res, 400, "data_services_config_invalid", message);
+  }
+});
+
+projectsRouter.post("/:slug/data-services/data-cedulas/generate", async (req, res) => {
+  const appConfig = getDataServicesAppConfig(req.params.slug);
+  const service = appConfig?.dataServices?.dataCedulas;
+  if (!service?.enabled) {
+    sendError(res, 409, "data_cedulas_disabled", "Habilita el servicio de cédulas para este proyecto antes de generar datos.");
+    return;
+  }
+  try {
+    const database = validateDataCedulasDatabase(service.database);
+    const rawCount = req.body?.count;
+    const count = rawCount === undefined ? 1 : Number(rawCount);
+    if (!Number.isSafeInteger(count) || count < 1 || count > 2) {
+      sendError(res, 400, "data_cedulas_invalid_count", "count debe ser 1 o 2.");
+      return;
+    }
+    const excludeCedulas = Array.isArray(req.body?.excludeCedulas)
+      ? req.body.excludeCedulas.filter((value: unknown): value is string => typeof value === "string").slice(0,100)
+      : [];
+    const result = await findNextDataCedulasCustomers(database, count, excludeCedulas);
+    if (!result) {
+      sendError(res, 404, "data_cedulas_not_found", "No se encontró una cédula nueva dentro del límite de búsqueda.");
+      return;
+    }
+    const cedulas = result.customers.map((customer) => customer.Cedula);
+    if (cedulas.length < count) {
+      sendError(res, 404, "data_cedulas_not_found", `No se encontraron ${count} cédulas nuevas dentro del límite de búsqueda.`);
+      return;
+    }
+    res.setHeader('X-Data-Cedulas-PLAFT', result.plaftStatus);
+    res.json({ ok: true, cedula: cedulas[0], cedulas });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[data-cedulas:${req.params.slug}] ${message}`);
+    sendError(res, 502, "data_cedulas_unavailable", message);
+  }
+});
+
+projectsRouter.post("/:slug/requests/cancellation-preview", async (req, res) => {
+  const appConfig = getPortalCancellationAppConfig(req.params.slug);
+  if (!appConfig) {
+    sendError(res, 404, "request_cancellation_unavailable", "La cancelación QA no está disponible para este proyecto.");
+    return;
+  }
+  try {
+    const service = createPortalRequestCancellationService({
+      ...getPortalCancellationEnvironment(),
+      enabled: appConfig.requestCancellation?.enabled === true,
+    });
+    res.json(await service.preview(req.body?.identification));
+  } catch (error) { sendPortalCancellationError(res, error); }
+});
+
+projectsRouter.post("/:slug/requests/cancel-all", async (req, res) => {
+  const appConfig = getPortalCancellationAppConfig(req.params.slug);
+  if (!appConfig) {
+    sendError(res, 404, "request_cancellation_unavailable", "La cancelación QA no está disponible para este proyecto.");
+    return;
+  }
+  try {
+    const service = createPortalRequestCancellationService({
+      ...getPortalCancellationEnvironment(),
+      enabled: appConfig.requestCancellation?.enabled === true,
+    });
+    res.json(await service.cancelAll(req.body?.identification, req.body?.confirmed));
+  } catch (error) { sendPortalCancellationError(res, error); }
+});
+
+projectsRouter.post("/:slug/requests/cancel", async (req, res) => {
+  const appConfig = getPortalCancellationAppConfig(req.params.slug);
+  if (!appConfig) {
+    sendError(res, 404, "request_cancellation_unavailable", "La cancelación QA no está disponible para este proyecto.");
+    return;
+  }
+  try {
+    const service = createPortalRequestCancellationService({
+      ...getPortalCancellationEnvironment(),
+      enabled: appConfig.requestCancellation?.enabled === true,
+    });
+    res.json(await service.cancel(req.body?.identification, req.body?.requestIds, req.body?.confirmed));
+  } catch (error) { sendPortalCancellationError(res, error); }
+});
 
 projectsRouter.get("/:projectSlug/data-catalogs", async (req, res, next) => {
   try { res.json({ catalogs: await listProjectDataCatalogs(req.params.projectSlug, req.query.includeInactive === "true") }); }
@@ -348,7 +557,7 @@ projectsRouter.post("/inspect-apk", apkInspectMiddleware, async (req: any, res) 
       return;
     }
 
-    const result = inspectApk(apkPath);
+    const result = await inspectApkFile(apkPath);
     res.json(result);
   } catch (err: any) {
     // cleanup uploaded file on failure to avoid orphan if inspection failed due to invalid apk
@@ -607,6 +816,71 @@ projectsRouter.put("/:slug/testrail", async (req, res, next) => {
     if (isValidationError(err)) { sendError(res, 400, "validation_error", msg); return; }
     if (/sharedConnection/i.test(msg)) { sendError(res, 400, "connection_error", msg); return; }
     next(err);
+  }
+});
+
+// --- Repositorio de planes de prueba (Planificación de pruebas) ---------------
+
+function sendRepositoryError(res: any, err: any, next: (err?: unknown) => void) {
+  if (err instanceof RepositoryConfigValidationError) {
+    res.status(400).json({ ok: false, error: "validation_error", message: err.message, field: err.field });
+    return;
+  }
+  if (err instanceof GitCommandError) {
+    sendError(res, gitErrorStatus(err), err.code, err.message);
+    return;
+  }
+  if (/project not found/i.test(err?.message || "")) {
+    sendError(res, 404, "project_not_found", err.message);
+    return;
+  }
+  next(err);
+}
+
+// GET /api/projects/:slug/repository
+projectsRouter.get("/:slug/repository", async (req, res, next) => {
+  try {
+    const config = await getRepositoryConfigBySlug(req.params.slug);
+    res.json({ repository: config ? publicRepositoryConfig(config) : null });
+  } catch (err) {
+    sendRepositoryError(res, err, next);
+  }
+});
+
+// PUT /api/projects/:slug/repository
+projectsRouter.put("/:slug/repository", async (req, res, next) => {
+  try {
+    const result = await upsertRepositoryConfig(req.params.slug, req.body ?? {});
+    res.json({ ok: true, action: result.action, repository: publicRepositoryConfig(result.config) });
+  } catch (err) {
+    sendRepositoryError(res, err, next);
+  }
+});
+
+// DELETE /api/projects/:slug/repository
+projectsRouter.delete("/:slug/repository", async (req, res, next) => {
+  try {
+    const removed = await deleteRepositoryConfig(req.params.slug);
+    res.json({ ok: true, removed });
+  } catch (err) {
+    sendRepositoryError(res, err, next);
+  }
+});
+
+// POST /api/projects/:slug/repository/test — body = unsaved form values, or empty to test the saved config.
+projectsRouter.post("/:slug/repository/test", async (req, res, next) => {
+  try {
+    const body = req.body ?? {};
+    const config = body.repoUrl
+      ? normalizeRepositoryConfig(body)
+      : await getRepositoryConfigBySlug(req.params.slug);
+    if (!config) {
+      sendError(res, 404, "repository_not_configured", "El proyecto no tiene un repositorio configurado.");
+      return;
+    }
+    res.json(await testRepositoryAccess(config));
+  } catch (err) {
+    sendRepositoryError(res, err, next);
   }
 });
 

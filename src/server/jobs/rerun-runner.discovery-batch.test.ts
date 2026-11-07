@@ -93,6 +93,45 @@ test("discovery-batch rerun mode all preserves the original case selection and m
   }
 });
 
+test("a multi-case job reruns ALL its cases (the batch result file only keeps the last one) and reuses the typed values", async () => {
+  const jobId = "hermetic-discovery-batch-rerun-multi";
+  const launchId = "hermetic-discovery-batch-launch-multi";
+  writeSourceArtifacts(jobId, launchId);
+  // The child run of the LAST case rewrote the result file: it names only that case.
+  fs.writeFileSync(path.join(RESULTS_DIR, `${jobId}.json`), JSON.stringify({
+    args: { app: "fixture-app", caseIds: [54905] },
+    cases: [{ caseId: 54905, selected: true, status: "exploration_failed" }],
+  }), "utf-8");
+  try {
+    const entries = { "54903": [{ key: "jira_edit_aaaaaaaaaaaaaaaa_2", value: "typed-1", source: "manual_runtime" }],
+      "54904": [{ key: "jira_edit_bbbbbbbbbbbbbbbb_2", value: "typed-2", source: "manual_runtime" }],
+      "54905": [{ key: "jira_edit_cccccccccccccccc_2", value: "typed-3", source: "manual_runtime" }],
+      "99999": [{ key: "other_case", value: "must-not-travel", source: "manual_runtime" }] };
+    const record: JobRecordLike = {
+      type: "discovery-batch",
+      params: { appSlug: "fixture-app", launchId, caseIds: [54903, 54904, 54905], runtimeEntriesByCase: entries },
+    };
+    const all = await prepareRerun(jobId, "all", undefined, async () => record);
+    assert.equal(all.ok, true, JSON.stringify(all));
+    if (all.ok && all.jobType === "discovery-batch") {
+      assert.deepEqual(all.discoveryParams.caseIds, [54903, 54904, 54905]);
+      const carried = all.discoveryParams.runtimeEntriesByCase as Record<string, unknown[]>;
+      assert.deepEqual(Object.keys(carried).sort(), ["54903", "54904", "54905"]);
+      assert.equal(JSON.stringify(carried).includes("must-not-travel"), false);
+    } else assert.fail("expected a prepared multi-case rerun");
+
+    // After an engine restart the job store holds no typed values: nothing is carried (and nothing is invented).
+    const restarted = await prepareRerun(jobId, "all", undefined, async () => ({
+      type: "discovery-batch",
+      params: { appSlug: "fixture-app", launchId, caseIds: [54903, 54904, 54905] },
+    }));
+    assert.equal(restarted.ok, true, JSON.stringify(restarted));
+    if (restarted.ok && restarted.jobType === "discovery-batch") assert.equal(restarted.discoveryParams.runtimeEntriesByCase, undefined);
+  } finally {
+    cleanup(jobId, launchId);
+  }
+});
+
 test("discovery-batch route dispatches the prepared case set back to the batch runner", () => {
   const source = fs.readFileSync(path.join(__dirname, "..", "routes", "runs.ts"), "utf8");
   const prepared = source.indexOf("if (prepared.jobType === \"discovery-batch\")");

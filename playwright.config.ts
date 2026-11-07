@@ -37,6 +37,11 @@ export default defineConfig({
     headless,
     screenshot: "only-on-failure",
     video: "retain-on-failure",
-    trace: "retain-on-failure"
+    // A full trace (DOM snapshots + a screenshot every ~50 ms) grows to tens of MB on a long replay and
+    // is zipped only when the test fails, which is when the user is waiting for the result.
+    // PLAYWRIGHT_TRACE_FULL=true restores it for deep debugging.
+    trace: process.env.PLAYWRIGHT_TRACE_FULL === "true"
+      ? "retain-on-failure"
+      : { mode: "retain-on-failure", snapshots: false, screenshots: false, sources: false }
   }
 });

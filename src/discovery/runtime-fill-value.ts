@@ -33,8 +33,16 @@ export function runtimeFillValuesMatch(expected: string, actual: string, format?
     const expectedSeparator = /^[+-]?\d+(?:\.\d+)?$/.test(expected.trim())
       ? "." : format.decimalSeparator ?? ".";
     const expectedNumber = decimalIdentity(expected, expectedSeparator);
-    return expectedNumber !== undefined
-      && expectedNumber === decimalIdentity(actual, format.decimalSeparator ?? ".");
+    if (expectedNumber === undefined) return false;
+    const actualSeparator = format.decimalSeparator ?? ".";
+    if (expectedNumber === decimalIdentity(actual, actualSeparator)) return true;
+    // A currency/unit mask can wrap the number ("$110,000.00 mensual", "RD$ 1,000.00"). Accept only a
+    // currency-symbol prefix and a whitespace-separated, digit-free unit suffix around ONE number;
+    // an adjacent suffix ("10.00suffix") or a second number stays a mismatch.
+    const decorated = actual.trim().match(
+      /^(?:[A-Z]{2,3}\s?)?[^\p{L}\d\s+-]{0,3}\s*([+-]?\d(?:[\d.,   ]*\d)?)(?:\s+\p{L}[^\d]*)?$/u,
+    );
+    return decorated !== null && expectedNumber === decimalIdentity(decorated[1], actualSeparator);
   }
   const isoDate = expectedNormalized.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   const localizedDate = actualNormalized.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})$/);

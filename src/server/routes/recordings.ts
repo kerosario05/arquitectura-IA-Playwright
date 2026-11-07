@@ -1,4 +1,6 @@
 import { Router } from "express";
+import multer from "multer";
+import { canAccessProject, hasPermission } from "../../auth/principal";
 import {
   beginDerivation, completeDerivation, failDerivation,
   getDerivationProgress, startBackgroundDerivation,
@@ -26,6 +28,7 @@ import {
   resolveRecordingTarget,
   startRecording,
   stopRecording,
+  uploadFilesToRecording,
 } from "../jobs/session-recording-runner";
 import {
   publishScenariosToTestRail,
@@ -40,25 +43,49 @@ import { toPublishableScenario } from "../../recording/scenario-to-testrail";
 import { materializeRecordedScenario, type RecordedScenario } from "../../recording/trace-to-scenario";
 import { buildSemanticRecordingModel, attachScenarioSuggestions } from "../../recording/semantic-recording";
 import { applyRuntimeDatasetValues, hydrateCanonicalInteractionsFromSemanticModel, toSharedMcpScenario, type RecordedScenarioMcpContract } from "../../recording/canonical-recording-contract";
-import { hydratePersistedScenarios } from "../../recording/persisted-scenario-hydration";
+import { hydratePersistedScenarios, reinsertRestoredStep } from "../../recording/persisted-scenario-hydration";
 import { jobStore } from "../jobs/job-store";
+import { scheduleJob } from "../jobs/job-scheduler";
 import { startScenarioPreviewRun, startReuseExistingPromotedSpecRun, type RecordingEvidenceSource, type ReuseExistingPromotedSpecScenario } from "../jobs/scenario-preview-runner";
 import { buildTestRailRunName } from "../services/testrail-run-reporter";
 import { resolveReplayAdmission } from "../services/replay-admission";
 import { resolveScenarioAutomationPlans, partitionScenariosForExecution, computeTestRailPublishCandidates, type ScenarioAutomationPlan, type TestRailCaseLookup, type TestRailDestination } from "../../automations/recording-automation-resolution";
 import { startMixedRerun } from "../jobs/mixed-rerun-orchestrator";
 import { clientIpOf } from "../local-agent/agent-endpoint";
+import { pairUserDevice } from "../local-agent/agent-device";
 import { localAgentRegistry, LocalAgentError } from "../local-agent/agent-registry";
 import type { SessionTrace } from "../../recording/session-trace.types";
+import { mergeRunServiceBindings, planExecutionServices, serviceBindingBlockedBody } from "../../service-catalog/execution-bindings";
+import type { RuntimeServiceBinding } from "../../service-catalog/runtime-service-values";
 
 export const recordingsRouter = Router();
+const liveRecordingUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { files: 5, fileSize: 25 * 1024 * 1024, fieldNameSize: 100 },
+});
 
 type RecordingBatchSelection = {
   recordingId: string;
   scenarioId: string;
   datasetValues?: Record<string, string | undefined>;
+  /** Values reserved for the first promoted spec; never used by Discovery. */
+  specDatasetValues?: Record<string, string | undefined>;
   dataOverrides?: Record<number, string>;
 };
+
+function stringRecord(value: unknown): Record<string, string> {
+  return value && typeof value === "object"
+    ? Object.fromEntries(Object.entries(value).filter((entry): entry is [string, string] => typeof entry[1] === "string"))
+    : {};
+}
+
+function scenarioSpecValueMap(value: unknown): Record<string, Record<string, string>> {
+  if (!value || typeof value !== "object") return {};
+  return Object.fromEntries(Object.entries(value).flatMap(([scenarioId, values]) => {
+    const record = stringRecord(values);
+    return Object.keys(record).length > 0 ? [[scenarioId, record]] : [];
+  }));
+}
 
 function buildRecordingDocumentSteps(scenario: RecordedScenario): Array<{ text: string; sourceStepIndexes: number[] }> {
   const result: Array<{ text: string; sourceStepIndexes: number[]; valueKey?: string }> = [];
@@ -169,6 +196,7 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
     const fallbackContracts: RecordedScenarioMcpContract[] = [];
     const reuseScenarios: ReuseExistingPromotedSpecScenario[] = [];
     const recordingDocumentSources: RecordingEvidenceSource[] = [];
+    const specDatasetValuesByScenario: Record<string, Record<string, string>> = {};
     const publishedCaseIdsByScenarioId = new Map<string, number>();
     const requestedIds: string[] = [];
     const destinationInput = body.testRailDestination && typeof body.testRailDestination === "object"
@@ -204,6 +232,7 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
     let publishToTestRailInvoked = false;
     const recordingAppSlugs = new Map<string, string>();
     const executableScenarioIdsByRecording = new Map<string, Set<string>>();
+    let batchServiceBindings: RuntimeServiceBinding[] = [];
 
     const lookupCase: TestRailCaseLookup = async (caseId) => {
       try {
@@ -248,6 +277,10 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
         for (const [key, value] of Object.entries(selection.datasetValues ?? {})) {
           if (typeof value === "string") values[key] = value;
         }
+        const specValues = stringRecord(selection.specDatasetValues);
+        if (Object.keys(specValues).length > 0) {
+          specDatasetValuesByScenario[`${recordingId}\u0000${selection.scenarioId}`] = specValues;
+        }
       }
       for (const selection of recordingSelections) {
         const scenario = chosen.find((candidate) => candidate.scenarioId === selection.scenarioId);
@@ -258,6 +291,22 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
           if (sameStep.length === 1 && typeof stepValue === "string" && values[field.key] === undefined) values[field.key] = stepValue;
         }
       }
+      // Catalog services bound to this recording (see the single-recording route below).
+      const groupServicePlan = await planExecutionServices({
+        projectSlug,
+        ownerType: "recording",
+        ownerId: recordingId,
+        scenarios: chosen.map((scenario) => ({ scenarioId: scenario.scenarioId, valueKeys: recordedScenarioValueKeys(scenario) })),
+        values,
+      });
+      const mergedServices = mergeRunServiceBindings(batchServiceBindings, groupServicePlan.bindings);
+      const serviceBlocks = [...groupServicePlan.blocked, ...mergedServices.conflicts];
+      if (serviceBlocks.length > 0) {
+        res.status(409).json(serviceBindingBlockedBody(serviceBlocks));
+        return;
+      }
+      batchServiceBindings = mergedServices.bindings;
+      Object.assign(values, groupServicePlan.placeholders);
       const admissionResult = evaluateRecordingExecutionAdmission({
         requested: ids,
         all,
@@ -338,10 +387,16 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
             title: scenario.title,
             // Values supplied with this very launch (sensitive ones are never persisted) must reach
             // the reused spec, on top of what the scenario already resolved.
-            runtimeValues: {
-              ...(scenario.runtimeDataset?.resolvedValues as Record<string, string> | undefined),
-              ...Object.fromEntries(Object.entries(values).filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1] !== "")),
-            },
+            runtimeValues: scenario.runtimeDataset?.resolvedValues,
+            ...(Object.keys(values).length > 0 || Object.keys(specDatasetValuesByScenario[`${recordingId}\u0000${scenario.scenarioId}`] ?? {}).length > 0
+              ? {
+                  runtimeValues: {
+                    ...(scenario.runtimeDataset?.resolvedValues as Record<string, string> | undefined),
+                    ...Object.fromEntries(Object.entries(values).filter((entry): entry is [string, string] => typeof entry[1] === "string" && entry[1] !== "")),
+                    ...(specDatasetValuesByScenario[`${recordingId}\u0000${scenario.scenarioId}`] ?? {}),
+                  },
+                }
+              : {}),
             ...recordingDocumentSources.find((source) => source.scenarioId === scenario.scenarioId),
           }];
         }));
@@ -419,7 +474,9 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
       recordingSelections,
       executionMode: "recording_batch",
       recordingDocumentSources,
+      ...(Object.keys(specDatasetValuesByScenario).length > 0 ? { specDatasetValuesByScenario } : {}),
       publishToTestRailInvoked,
+      ...(batchServiceBindings.length > 0 ? { serviceBindings: batchServiceBindings } : {}),
       ...(destination ? { testRailCaseIdsByScenarioId: Object.fromEntries(publishedCaseIdsByScenarioId) } : {}),
       ...(testRailRun ? { testRunId: testRailRun.id } : {}),
       ...(jiraKey ? { jiraKey, huKey: jiraKey } : {}),
@@ -450,7 +507,7 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
       jobStore.appendLog(parent.id, `[testrail-run] created id=${testRailRun.id} cases=${testRailCaseCount}`);
     }
     if (reuseScenarios.length > 0 && fallbackScenarios.length > 0) {
-      setImmediate(() => void startMixedRerun({
+      scheduleJob(parent.id, () => startMixedRerun({
         parentJobId: parent.id,
         appSlug,
         sectionSlug,
@@ -469,7 +526,7 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
         publicParent.params.sectionSlug = sectionSlug;
         publicParent.params.recordingSelections = recordingSelections;
       }
-      setImmediate(() => void startReuseExistingPromotedSpecRun(parent.id));
+      scheduleJob(parent.id, () => startReuseExistingPromotedSpecRun(parent.id));
     } else {
       const parentInternal = jobStore.getInternal(parent.id);
       if (parentInternal) {
@@ -478,7 +535,7 @@ recordingsRouter.post("/execute-batch", async (req, res) => {
         parentInternal.params.options = { overwrite: true, autoPromote: true, autoPom: true, headed: false };
         parentInternal.params.sectionSlug = sectionSlug;
       }
-      setImmediate(() => void startScenarioPreviewRun(parent.id));
+      scheduleJob(parent.id, () => startScenarioPreviewRun(parent.id));
     }
 
     res.status(202).json({
@@ -668,6 +725,14 @@ async function appSlugFor(projectSlug: string): Promise<string> {
   return target.appSlug;
 }
 
+/** Every field a recorded scenario may type: its declared data plus its runtime requirements. */
+function recordedScenarioValueKeys(scenario: RecordedScenario): string[] {
+  return [
+    ...scenario.requiredData.map((field) => field.key),
+    ...(scenario.runtimeInputRequirements ?? []).map((requirement) => requirement.valueKey),
+  ];
+}
+
 function readRecordingScenarios(appSlug: string, recordingId: string): RecordedScenario[] {
   return hydratePersistedScenarios(
     loadScenarios(appSlug, recordingId),
@@ -708,7 +773,15 @@ recordingsRouter.post("/start", async (req, res) => {
     // "agent": the Chromium on the caller's own PC. Paired by the IP the panel request came
     // from (the agent connects from the same PC), never by a client-supplied agent id alone.
     let localAgentId: string | undefined;
-    if (browserMode === "agent") {
+    let deviceSerial: string | undefined;
+    if (typeof body.deviceSerial === "string" && body.deviceSerial.trim()) {
+      // ANDROID on the caller's own PC: an emulator or phone of that PC's Android Studio.
+      ({ localAgentId, deviceSerial } = pairUserDevice(
+        { userId: req.principal?.userId ?? null, username: req.principal?.username ?? "" },
+        clientIpOf(req),
+        body.deviceSerial,
+      ));
+    } else if (browserMode === "agent") {
       const pairing = localAgentRegistry.findForUser(
         { userId: req.principal?.userId ?? null, username: req.principal?.username ?? "" },
         clientIpOf(req),
@@ -754,6 +827,7 @@ recordingsRouter.post("/start", async (req, res) => {
       // the existing headless Chromium + live stream; desktop opens that same recorder-owned
       // Page in a visible Chromium window. Omitted mode preserves legacy headless compatibility.
       localAgentId,
+      deviceSerial,
       headless: browserMode === "integrated"
         ? true
         : browserMode === "desktop"
@@ -822,6 +896,49 @@ recordingsRouter.post("/:recordingId/control", async (req, res) => {
   } catch (err) {
     handle(res, err);
   }
+});
+
+// POST /api/recordings/:recordingId/live-files — deliver browser-local selections to the active
+// recorder-owned file chooser. The browser's native dialog belongs to the server process, so the
+// integrated viewer supplies the bytes here; Capture V2 still observes the actual input change.
+recordingsRouter.post("/:recordingId/live-files", (req, res) => {
+  liveRecordingUpload.array("files", 5)(req, res, async (uploadError) => {
+    if (uploadError) {
+      const tooLarge = uploadError instanceof multer.MulterError && uploadError.code === "LIMIT_FILE_SIZE";
+      sendError(res, tooLarge ? 413 : 400, tooLarge ? "FILE_TOO_LARGE" : "INVALID_FILE_UPLOAD", tooLarge
+        ? "Cada documento debe pesar 25 MB o menos"
+        : "Selecciona hasta cinco documentos válidos");
+      return;
+    }
+    try {
+      const entry = getActiveRecording(req.params.recordingId);
+      if (!entry || entry.trace.status !== "recording") {
+        sendError(res, 404, "RECORDING_NOT_ACTIVE", "La grabación ya no está activa");
+        return;
+      }
+      const principal = req.principal;
+      if (!principal || !canAccessProject(principal, entry.trace.projectSlug)
+        || (principal.kind !== "service" && principal.userId !== entry.startedBy && !hasPermission(principal, "admin.users"))) {
+        sendError(res, 403, "RECORDING_CONTROL_FORBIDDEN", "Solo quien inició la grabación puede adjuntar archivos");
+        return;
+      }
+      const uploaded = (Array.isArray(req.files) ? req.files : []) as Express.Multer.File[];
+      const totalBytes = uploaded.reduce((total, file) => total + file.size, 0);
+      if (uploaded.length === 0 || totalBytes > 50 * 1024 * 1024) {
+        sendError(res, 400, "FILE_UPLOAD_LIMIT_EXCEEDED", "Selecciona entre uno y cinco documentos que no superen 50 MB en total");
+        return;
+      }
+      const files = uploaded.map((file) => {
+        const name = file.originalname.replace(/[\\/]+/g, "_").replace(/[\u0000-\u001f]/g, "").trim();
+        if (!name || name.length > 255) throw new RecordingError("INVALID_FILE_NAME", "El nombre de un documento no es válido");
+        return { name, mimeType: file.mimetype || "application/octet-stream", buffer: file.buffer };
+      });
+      await uploadFilesToRecording(req.params.recordingId, files);
+      res.json({ ok: true, files: files.map(({ name }) => name) });
+    } catch (err) {
+      handle(res, err);
+    }
+  });
 });
 
 // POST /api/recordings/:recordingId/derive — builds the scenarios and destroys the frames.
@@ -943,6 +1060,94 @@ recordingsRouter.put("/:recordingId/scenario-value", async (req, res) => {
     }
     const hydrated = hydratePersistedScenarios([current], buildSemanticRecordingModel(trace), trace)[0];
     const updated = applyRuntimeDatasetValues(hydrated, { [valueKey]: body.value });
+    saveScenarios(appSlug, req.params.recordingId, scenarios.map((scenario) => scenario.scenarioId === scenarioId ? updated : scenario));
+    res.json({ ok: true, scenario: updated });
+  } catch (err) {
+    handle(res, err);
+  }
+});
+
+// Deletes one step from a scenario. The deletion is stored as an exclusion and re-applied on
+// every hydration, because canonical interactions are rebuilt from the trace on each load.
+recordingsRouter.post("/:recordingId/scenario-step/remove", async (req, res) => {
+  try {
+    const body = req.body ?? {};
+    const projectSlug = String(body.projectSlug ?? "").trim();
+    const scenarioId = String(body.scenarioId ?? "").trim();
+    const interactionId = String(body.interactionId ?? "").trim();
+    if (!projectSlug || !scenarioId || !interactionId) {
+      sendError(res, 400, "INVALID_STEP_COMMAND", "projectSlug, scenarioId e interactionId son obligatorios");
+      return;
+    }
+    const appSlug = await appSlugFor(projectSlug);
+    const trace = loadTrace(appSlug, req.params.recordingId);
+    if (!trace) {
+      sendError(res, 404, "RECORDING_NOT_FOUND", "La grabación indicada no existe");
+      return;
+    }
+    const scenarios = loadScenarios(appSlug, req.params.recordingId);
+    const current = scenarios.find((scenario) => scenario.scenarioId === scenarioId);
+    if (!current) {
+      sendError(res, 404, "SCENARIO_NOT_FOUND", "El escenario indicado no existe");
+      return;
+    }
+    if (!current.testRailSteps.some((step) => step.interactionId === interactionId)) {
+      sendError(res, 404, "STEP_NOT_FOUND", "El paso indicado no existe en el escenario");
+      return;
+    }
+    const excludedInteractionIds = [...new Set([...(current.excludedInteractionIds ?? []), interactionId])];
+    const semantic = loadSemanticRecording(appSlug, req.params.recordingId);
+    // A repeated click on the same control that is the one that produced the screen change is the
+    // click the app needed (the earlier one only started the work). Dropping it as a "duplicate"
+    // leaves a replay that never reaches the recorded route.
+    const live = hydratePersistedScenarios([current], semantic, trace)[0].canonicalInteractions ?? [];
+    const target = live.find((i) => i.id === interactionId);
+    if (target?.causedTransition === true && target.routeAfter && target.controlIdentity
+      && live.some((i) => i.id !== interactionId && !excludedInteractionIds.includes(i.id)
+        && i.controlIdentity === target.controlIdentity && i.routeBefore === target.routeBefore)) {
+      sendError(res, 409, "STEP_OWNS_TRANSITION", "Este clic repetido es el que cambió de pantalla; eliminarlo rompe la reproducción");
+      return;
+    }
+    const withExclusion = { ...current, excludedInteractionIds };
+    const updated = hydratePersistedScenarios([withExclusion], semantic, trace)[0];
+    saveScenarios(appSlug, req.params.recordingId, scenarios.map((scenario) => scenario.scenarioId === scenarioId ? updated : scenario));
+    res.json({ ok: true, scenario: updated });
+  } catch (err) {
+    handle(res, err);
+  }
+});
+
+// Undoes a step deletion: drops the exclusion and rehydrates, which rebuilds the step from the trace.
+recordingsRouter.post("/:recordingId/scenario-step/restore", async (req, res) => {
+  try {
+    const body = req.body ?? {};
+    const projectSlug = String(body.projectSlug ?? "").trim();
+    const scenarioId = String(body.scenarioId ?? "").trim();
+    const interactionId = String(body.interactionId ?? "").trim();
+    if (!projectSlug || !scenarioId || !interactionId) {
+      sendError(res, 400, "INVALID_STEP_COMMAND", "projectSlug, scenarioId e interactionId son obligatorios");
+      return;
+    }
+    const appSlug = await appSlugFor(projectSlug);
+    const trace = loadTrace(appSlug, req.params.recordingId);
+    if (!trace) {
+      sendError(res, 404, "RECORDING_NOT_FOUND", "La grabación indicada no existe");
+      return;
+    }
+    const scenarios = loadScenarios(appSlug, req.params.recordingId);
+    const current = scenarios.find((scenario) => scenario.scenarioId === scenarioId);
+    if (!current) {
+      sendError(res, 404, "SCENARIO_NOT_FOUND", "El escenario indicado no existe");
+      return;
+    }
+    if (!(current.excludedInteractionIds ?? []).includes(interactionId)) {
+      sendError(res, 404, "STEP_NOT_EXCLUDED", "El paso indicado no estaba eliminado");
+      return;
+    }
+    const excludedInteractionIds = (current.excludedInteractionIds ?? []).filter((id) => id !== interactionId);
+    const semantic = loadSemanticRecording(appSlug, req.params.recordingId);
+    const rehydrated = hydratePersistedScenarios([{ ...current, excludedInteractionIds }], semantic, trace)[0];
+    const updated = reinsertRestoredStep(rehydrated, interactionId);
     saveScenarios(appSlug, req.params.recordingId, scenarios.map((scenario) => scenario.scenarioId === scenarioId ? updated : scenario));
     res.json({ ok: true, scenario: updated });
   } catch (err) {
@@ -1089,6 +1294,13 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
     const values: Record<string, string | undefined> = body.datasetValues && typeof body.datasetValues === "object"
       ? Object.fromEntries(Object.entries(body.datasetValues).filter((entry): entry is [string, string] => typeof entry[1] === "string"))
       : {};
+    const directSpecValues = stringRecord(body.specDatasetValues);
+    const specValuesByScenario = scenarioSpecValueMap(body.scenarioSpecDatasetValues);
+    const specDatasetValuesByScenario: Record<string, Record<string, string>> = {};
+    for (const scenario of selected) {
+      const valuesForScenario = specValuesByScenario[scenario.scenarioId] ?? directSpecValues;
+      if (Object.keys(valuesForScenario).length > 0) specDatasetValuesByScenario[scenario.scenarioId] = valuesForScenario;
+    }
     // Legacy clients send per-scenario step-index overrides. Translate them into the single
     // dataset authority without allowing one scenario to leak values into another entity.
     // Applied before admission is evaluated below, so readiness reflects the SAME values any
@@ -1106,6 +1318,22 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
         }
       }
     }
+
+    // Catalog services (OTP...) bound to this recording's fields. A service that cannot run
+    // refuses the request here; a bound field the request left empty gets a placeholder so
+    // admission sees it filled -- the real value is fetched at the step that types it.
+    const servicePlan = await planExecutionServices({
+      projectSlug,
+      ownerType: "recording",
+      ownerId: req.params.recordingId,
+      scenarios: selected.map((scenario) => ({ scenarioId: scenario.scenarioId, valueKeys: recordedScenarioValueKeys(scenario) })),
+      values,
+    });
+    if (servicePlan.blocked.length > 0) {
+      res.status(409).json(serviceBindingBlockedBody(servicePlan.blocked));
+      return;
+    }
+    Object.assign(values, servicePlan.placeholders);
 
     // ADMISSION GATE — invariant: NO SIDE EFFECT BEFORE ADMISSION. Evaluate the CURRENT
     // authoritative execution readiness for every requested scenario BEFORE any external
@@ -1242,19 +1470,34 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
               if (value === undefined || value === null || String(value).trim() === "") return [];
               return [{ label: field.label, value: field.sensitive ? "[Protegido]" : String(value) }];
             }),
-            runtimeValues: scenario.runtimeDataset?.resolvedValues,
+            ...(Object.keys(specDatasetValuesByScenario[scenario.scenarioId] ?? {}).length > 0
+              ? {
+                  runtimeValues: {
+                    ...(scenario.runtimeDataset?.resolvedValues ?? {}),
+                    ...(specDatasetValuesByScenario[scenario.scenarioId] ?? {}),
+                  },
+                }
+              : { runtimeValues: scenario.runtimeDataset?.resolvedValues }),
           };
         });
+        // Fields a catalog service fills carry its placeholder too, or the spec's required
+        // PROMOTED_* check refuses to start before the runtime can fetch the real value.
+        if (Object.keys(servicePlan.placeholders).length > 0) {
+          for (const entry of reuseJobScenarios) {
+            entry.runtimeValues = { ...entry.runtimeValues, ...servicePlan.placeholders };
+          }
+        }
         fastPathResults = reuseJobScenarios.map((s) => ({ scenarioId: s.scenarioId, caseId: s.caseId, specPath: s.specPath, status: "skipped" as const }));
         const reuseJob = jobStore.create("scenario-preview", {
           appSlug,
           recordingId: req.params.recordingId,
           scenarios: reuseJobScenarios,
           executionMode: "reuse_existing_promoted_spec",
+          ...(servicePlan.bindings.length > 0 ? { serviceBindings: servicePlan.bindings } : {}),
         });
         reuseJobId = reuseJob.id;
         console.log(`[recordings:execute:fast-path] recording=${req.params.recordingId} jobId=${reuseJobId} scenarios=${reuseJobScenarios.length} publishInvoked=false generationInvoked=false headless=true`);
-        setImmediate(() => startReuseExistingPromotedSpecRun(reuseJob.id));
+        scheduleJob(reuseJob.id, () => startReuseExistingPromotedSpecRun(reuseJob.id));
         selected = selected.filter((scenario) => !reuseIds.has(scenario.scenarioId));
       }
       // Everything still reaching the job stage under this mode is, by construction, either
@@ -1293,11 +1536,13 @@ recordingsRouter.post("/:recordingId/execute", async (req, res) => {
       source: { projectKey: `REC-${req.params.recordingId}` },
       recordingId: req.params.recordingId,
       requestedScenarioIds,
+      ...(Object.keys(specDatasetValuesByScenario).length > 0 ? { specDatasetValuesByScenario } : {}),
       ...admission,
       rejectedScenarios: admission.requestedRejectedScenarios,
       options: effectiveJobOptions,
+      ...(servicePlan.bindings.length > 0 ? { serviceBindings: servicePlan.bindings } : {}),
     });
-    setImmediate(() => startScenarioPreviewRun(job.id));
+    scheduleJob(job.id, () => startScenarioPreviewRun(job.id));
     res.status(202).json({
       ok: true,
       jobId: job.id,

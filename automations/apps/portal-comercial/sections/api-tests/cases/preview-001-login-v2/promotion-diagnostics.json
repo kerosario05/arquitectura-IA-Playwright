@@ -1,0 +1,22 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "promoted",
+  "blockers": [],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage",
+    "LoginPage",
+    "FormPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\portal-comercial\\sections\\api-tests\\cases\\preview-001-login-v2\\case.spec.ts",
+  "specHash": "ef8c1a685e7e7c7458ca4b3b880930085c5f2701bb6fbcd9c7f118626425aed4",
+  "specSource": "generatedSpec"
+}

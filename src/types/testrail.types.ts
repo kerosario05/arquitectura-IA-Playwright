@@ -91,7 +91,10 @@ export type TestScenarioStep = {
    * `RecordingExecutionAction.actionType` transported verbatim -- the recording's own structured
    * action kind, never inferred from step/target text. Paired with `controlIdentity` above.
    */
-  recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation";
+  recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "tab_switch" | "upload" | "system_observation";
+  fileAssets?: import("../recording/session-trace.types").RecordedFileAssetRef[];
+  navigationUrl?: string;
+  runtimeDerivedSourceEventRef?: string;
   recordedSameSurfaceAction?: boolean;
 };
 

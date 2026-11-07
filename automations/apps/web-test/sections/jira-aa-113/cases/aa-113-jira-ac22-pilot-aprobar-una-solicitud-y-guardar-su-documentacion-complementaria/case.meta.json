@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "AA-113:jira:ac22-pilot",
+  "title": "Aprobar una solicitud y guardar su documentación complementaria",
+  "generatedAt": "2026-10-27T21:43:39.040Z",
+  "executionEngine": "jira_semantic"
+}

@@ -243,7 +243,10 @@ function isReplayCompatible(
   snapshot: PersistedConfirmedRuntimeValue,
   contractVersion?: string,
 ): boolean {
-  if (requirement.sensitive === true || requirement.fieldCapability.kind === "password") return false;
+  // A sensitive field (user name, password, identification) is restored only from a value this same project/case
+  // confirmed on an earlier launch; it is never generated or inferred.
+  if (requirement.sensitive === true && snapshot.verified !== true) return false;
+  if (requirement.fieldCapability.kind === "password" && snapshot.verified !== true) return false;
   if (snapshot.semanticType && requirement.semanticType && snapshot.semanticType !== requirement.semanticType) return false;
   if (snapshot.fieldKind && requirement.fieldCapability.kind && snapshot.fieldKind !== requirement.fieldCapability.kind) return false;
   if (snapshot.datasetIdentity && requirement.datasetIdentity && snapshot.datasetIdentity !== requirement.datasetIdentity) return false;
@@ -269,7 +272,8 @@ router.post("/api/runtime-inputs/scenario-autofill", (req: Request, res: Respons
     // SQL replay is opt-in until migration 004 is applied in the target DB.
     // The contract remains available with deterministic/configured resolution
     // when the additive table is not present in a local environment.
-    ...(process.env.RUNTIME_CONFIRMED_REPLAY_ENABLED?.toLowerCase() === "true"
+    // On by default now that launches save what was typed; set RUNTIME_CONFIRMED_REPLAY_ENABLED=false to opt out.
+    ...(process.env.RUNTIME_CONFIRMED_REPLAY_ENABLED?.toLowerCase() !== "false"
       ? { loadConfirmedRuntimeValues: getConfirmedRuntimeValues }
       : {}),
   }).then((result) => res.json(result)).catch(next);

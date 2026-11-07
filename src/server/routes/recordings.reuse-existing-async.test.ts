@@ -8,7 +8,7 @@ import path from "node:path";
  * fixtures / a real spec file, which is disproportionate for what is, here, a request-shape
  * change — this pins the exact contract the runtime tests
  * (scenario-preview-runner.reuse-existing-job.test.ts) then exercise: a job is created, the
- * run is dispatched via setImmediate (never awaited by the request), and the response is
+ * run is scheduled (never awaited by the request), and the response is
  * 202 with a jobId, not a 200 carrying a finished verification result.
  */
 const source = fs.readFileSync(path.join(__dirname, "recordings.ts"), "utf-8");
@@ -35,9 +35,9 @@ async function main(): Promise<void> {
     assert.ok(!source.includes('import { verifyPromotedSpec } from "../../automations/promote-plan"'));
   });
 
-  await test("the reuse branch creates a job and dispatches it via setImmediate before responding", () => {
+  await test("the reuse branch creates and schedules a job before responding", () => {
     assert.ok(source.includes('jobStore.create("scenario-preview"'));
-    assert.ok(source.includes("setImmediate(() => startReuseExistingPromotedSpecRun(reuseJob.id))"));
+    assert.ok(source.includes("scheduleJob(reuseJob.id, () => startReuseExistingPromotedSpecRun(reuseJob.id))"));
   });
 
   await test("the all-reuse response is 202 with a jobId, not a synchronous 200", () => {

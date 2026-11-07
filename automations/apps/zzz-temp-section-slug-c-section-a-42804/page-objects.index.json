@@ -1,0 +1,82 @@
+{
+  "version": "1.0",
+  "appSlug": "zzz-temp-section-slug-c-section-a-42804",
+  "pageObjects": [
+    {
+      "id": "po_framework_productlistpage",
+      "className": "ProductListPage",
+      "filePath": "automations/apps/zzz-temp-section-slug-c-section-a-42804/pages/productlist.page.ts",
+      "screenSignature": "screen:zzz-temp-section-slug-c-section-a-42804-product_list",
+      "methods": [
+        {
+          "name": "selectProduct",
+          "intent": "select_product",
+          "parameters": [
+            "productName"
+          ],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        },
+        {
+          "name": "selectFirstVisibleCard",
+          "intent": "select_first_visible_card",
+          "parameters": [],
+          "available": true,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-11-03T19:46:35.057Z",
+      "updatedAt": "2026-11-03T19:46:35.057Z"
+    },
+    {
+      "id": "po_framework_operationsmenupage",
+      "className": "OperationsMenuPage",
+      "filePath": "automations/apps/zzz-temp-section-slug-c-section-a-42804/pages/operationsmenu.page.ts",
+      "screenSignature": "screen:zzz-temp-section-slug-c-section-a-42804-operations_menu",
+      "methods": [
+        {
+          "name": "openModule",
+          "intent": "open_module",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": false,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        },
+        {
+          "name": "expectModuleVisible",
+          "intent": "expect_loaded",
+          "parameters": [
+            "moduleName"
+          ],
+          "available": false,
+          "status": "active",
+          "sensitive": false,
+          "confidence": 1,
+          "source": ""
+        }
+      ],
+      "confidence": 1,
+      "status": "active",
+      "sourcePlanIds": [],
+      "caseIds": [],
+      "createdAt": "2026-11-03T19:46:35.057Z",
+      "updatedAt": "2026-11-03T19:46:35.057Z"
+    }
+  ],
+  "componentCandidates": [],
+  "updatedAt": "2026-11-03T19:46:35.461Z"
+}

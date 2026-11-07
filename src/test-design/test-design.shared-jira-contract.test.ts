@@ -61,6 +61,38 @@ test("legacy label keys bind uniquely to the same canonical runtime fields", () 
   assert.deepEqual(designCaseRuntimeValues(scenario), { [requirements[0].key]: "fixture-user" });
 });
 
+test("Test Design preserves a project fixture reference for Jira launch without publishing its value to TestRail", async () => {
+  const uploadStep = 'Adjuntar el archivo de prueba en "Formulario"';
+  const fileRef = "a68b0fb1-201b-4d63-a343-b92adee67662";
+  const requirements = deriveJiraInputRequirements([uploadStep]);
+  const source = {
+    scenarioId: "FORM-1:jira:1", title: "Adjuntar formulario", steps: [uploadStep], preconditions: [],
+    expectedResult: "El formulario queda adjunto.", inputRequirements: requirements,
+    acceptanceCriteriaRefs: ["AC1"], validation: { valid: true, errors: [], warnings: [] },
+  } as unknown as ValidatedScenario;
+  const [generated] = mapJiraScenariosToTestDesign([source]);
+  generated.data = generated.data.map(datum => ({ ...datum, value: fileRef }));
+  const [saved] = markEditedScenarios([generated], [normalizeScenario(JSON.parse(JSON.stringify(generated)), 0)]);
+
+  assert.deepEqual(designCaseInputRequirements(saved), requirements);
+  assert.equal(saved.data[0].controlType, "file");
+  assert.deepEqual(designCaseRuntimeValues(saved), { [requirements[0].key]: fileRef });
+  const published = toCaseInput(saved, "QA-File", { requiredCustomFields: {}, caseOracle: "QA" });
+  assert.equal(JSON.stringify(published).includes(fileRef), false);
+
+  const writes: Array<{ projectSlug?: string; caseId?: number; requirements?: Array<{ controlType?: string }>; values?: Record<string, string> }> = [];
+  const dependencies = {
+    replace: async (projectSlug: string, caseId: number, fields: Array<{ controlType?: string }>) => { writes.push({ projectSlug, caseId, requirements: fields }); },
+    persist: async (input: { projectSlug: string; caseId: number; values: readonly { key: string; value: string | number | boolean }[] }) => {
+      writes.push({ projectSlug: input.projectSlug, caseId: input.caseId, values: Object.fromEntries(input.values.map(item => [item.key, String(item.value)])) });
+      return input.values.length;
+    },
+  };
+  await persistDesignCaseInputs("profile-a", 123, saved, dependencies);
+  assert.equal(writes[0].requirements?.[0]?.controlType, "file");
+  assert.deepEqual(writes[1].values, { [requirements[0].key]: fileRef });
+});
+
 test("Launcher and Design share the same valid generation cache with identical source/provider/knowledge", async () => {
   const issue = { key: "SYNC-7", summary: "Pagar con tarjeta", description: "Como cliente quiero pagar mis pedidos con tarjeta.",
     acceptanceCriteria: "1. Solo tarjetas vigentes.\n2. Se muestra el comprobante.", labels: [], components: [], status: "To Do", issueType: "Story" };

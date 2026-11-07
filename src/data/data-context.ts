@@ -2,6 +2,7 @@ import type { FullConfig } from "../types/env.types";
 
 export type DataContextEntry = {
   key: string;
+  fieldLabel?: string;
   value: string;
   source:
     | "explicit_runtime_input"

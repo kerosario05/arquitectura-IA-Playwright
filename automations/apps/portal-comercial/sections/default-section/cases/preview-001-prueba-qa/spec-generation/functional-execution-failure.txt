@@ -1,0 +1,31 @@
+1) automations\apps\portal-comercial\sections\default-section\cases\preview-001-prueba-qa\.candidate-validation-12608-1793554063652.spec.ts:14:5 › prueba qa
+Error: Promoted assertion failed at step 104 target="Cerrar". diagnostics={"currentUrl":"https://srvqacgowb01.local.bsc.com:5000/requests/11133/edit","actionIntent":"assertVisible","target":"Cerrar","stepIndex":104,"timeoutMs":15000,"retryAttempted":false,"screenshotPath":"C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\promoted-runtime\\step-104.png"} cause=PROMOTED_AS
+at ..\..\src\automations\runtime\promoted-spec-runtime.ts:6244
+6242 |         this.config.captureDiagnostics
+6243 |       );
+> 6244 |       throw new Error(
+|             ^
+6245 |         `Promoted assertion failed at step ${options.stepIndex} target="${options.target}". diagnostics=${JSON.stringify(diagnostics)} cause=${error instanceof Error ? error.message : String(error)}`
+6246 |       );
+6247 |     }
+at PromotedSpecRuntime.expectPromotedVisible (C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\src\automations\runtime\promoted-spec-runtime.ts:6244:13)
+at Proxy.<anonymous> (C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\src\automations\runtime\promoted-spec-runtime.ts:6674:26)
+at C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\automations\apps\portal-comercial\sections\default-section\cases\preview-001-prueba-qa\.candidate-validation-12608-1793554063652.spec.ts:1071:5
+attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--8811d-608-1793554063652-prueba-qa\test-failed-1.png
+────────────────────────────────────────────────────────────────────────────────────────────────
+attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--8811d-608-1793554063652-prueba-qa\video.webm
+────────────────────────────────────────────────────────────────────────────────────────────────
+Error Context: test-results\apps\portal-comercial-sections--8811d-608-1793554063652-prueba-qa\error-context.md
+attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--8811d-608-1793554063652-prueba-qa\trace.zip
+Usage:
+npx playwright show-trace test-results\apps\portal-comercial-sections--8811d-608-1793554063652-prueba-qa\trace.zip
+────────────────────────────────────────────────────────────────────────────────────────────────
+1 failed
+automations\apps\portal-comercial\sections\default-section\cases\preview-001-prueba-qa\.candidate-validation-12608-1793554063652.spec.ts:14:5 › prueba qa
+(node:34776) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:34776) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)

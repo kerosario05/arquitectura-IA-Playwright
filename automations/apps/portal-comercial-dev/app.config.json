@@ -1,0 +1,15 @@
+{
+  "name": "Portal Comercial DEV",
+  "baseUrl": "https://next.portalcomercial.dev.bsc.com.do/",
+  "loginMode": "no_login",
+  "testData": {},
+  "testDataAliases": {},
+  "missingInputBehavior": "fail",
+  "ignoreHTTPSErrors": true,
+  "lastUsedSource": {
+    "type": "request",
+    "sectionName": null,
+    "updatedAt": "2026-11-07T22:14:08.727Z"
+  },
+  "updatedAt": "2026-11-07T22:14:08.727Z"
+}

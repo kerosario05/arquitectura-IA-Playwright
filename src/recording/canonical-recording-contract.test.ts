@@ -201,6 +201,48 @@ function primary(): RecordedScenario {
   };
 }
 
+test("incomplete recorded numeric masks require QA data and preserve corrected values on hydration", () => {
+  const source = primary();
+  source.requiredData.push({ key: "contact", label: "Contact", stepIndex: 6,
+    exampleValue: "555-010-123_", sensitive: false, source: "RECORDED_CONFIRMED" });
+  const captured = source.requiredData.at(-1)!.exampleValue;
+  const pending = applyRuntimeDatasetValues(source, {});
+  const requirement = pending.runtimeInputRequirements?.find((input) => input.valueKey === "contact");
+  assert.equal(requirement?.value, null);
+  assert.equal(requirement?.resolved, false);
+  assert.equal(requirement?.editable, true);
+  assert.equal(pending.readiness?.dataReadiness, false);
+  assert.equal(pending.runtimeDataset?.resolvedValues.contact, undefined);
+  assert.equal(source.requiredData.at(-1)?.exampleValue, captured);
+  const handoff = toSharedMcpScenario(pending, "fixture");
+  assert.equal(handoff.mcpExecutable, false);
+  assert.equal(handoff.runtimeInputRequirements.find((input) => input.valueKey === "contact")?.resolved, false);
+
+  const corrected = applyRuntimeDatasetValues(pending, { contact: "555-010-1234" });
+  const hydrated = applyRuntimeDatasetValues(corrected, {});
+  const input = hydrated.runtimeInputRequirements?.find((input) => input.valueKey === "contact");
+  assert.equal(input?.value, "555-010-1234");
+  assert.equal(input?.resolved, true);
+  assert.equal(input?.authority, "explicit_qa_edit");
+  assert.equal(hydrated.requiredData.at(-1)?.exampleValue, captured);
+  assert.equal(toSharedMcpScenario(hydrated, "fixture").runtimeInputRequirements
+    .find((input) => input.valueKey === "contact")?.value, "555-010-1234");
+});
+
+test("numeric mask detection preserves ordinary values, secrets and explicit negative test data", () => {
+  const source = primary();
+  source.requiredData.push(
+    { key: "reference", label: "Reference", stepIndex: 6, exampleValue: "REF_123-4", sensitive: false },
+    { key: "secret", label: "Secret", stepIndex: 7, exampleValue: "123-456_", sensitive: true },
+    { key: "complete", label: "Complete", stepIndex: 8, exampleValue: "555-010-1234", sensitive: false },
+    { key: "negative", label: "Negative", stepIndex: 9, exampleValue: "555-010-123_", sensitive: false },
+  );
+  const edited = applyRuntimeDatasetValues(source, { negative: "555-010-123_" });
+  for (const key of ["reference", "secret", "complete", "negative"]) {
+    assert.equal(edited.runtimeInputRequirements?.find((input) => input.valueKey === key)?.resolved, true);
+  }
+});
+
 test("REPEAT_ENTITY inherits confirmed reusable inputs with explicit lineage", () => {
   const source = primary();
   const opportunity = detectMutationOpportunities(source, {

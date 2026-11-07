@@ -1,0 +1,760 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-27T21:42:31.859Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-113:jira:ac22-pilot",
+    "title": "Aprobar una solicitud y guardar su documentación complementaria"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "click",
+      "description": "Presionar \"Datos de demostración\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Datos de demostración",
+        "exact": true
+      }
+    },
+    {
+      "index": 4,
+      "action": "click",
+      "description": "Presionar \"Restablecer datos de demostración\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Restablecer datos de demostración",
+        "exact": true
+      }
+    },
+    {
+      "index": 5,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Datos de demostración restablecidos.\"",
+      "target": {
+        "strategy": "text",
+        "value": "Datos de demostración restablecidos."
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Datos de demostración\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Datos de demostración",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Restablecer datos de demostración\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Restablecer datos de demostración",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Datos de demostración restablecidos.\"",
+      "target": {
+        "strategy": "text",
+        "value": "Datos de demostración restablecidos."
+      }
+    },
+    {
+      "index": 9,
+      "action": "fill",
+      "description": "fill [usuario_portal]",
+      "valueKey": "usuario_portal",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 10,
+      "action": "fill",
+      "description": "fill [contrasena_portal]",
+      "valueKey": "contrasena_portal",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 11,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 12,
+      "action": "click",
+      "description": "Presionar \"Solicitudes\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Solicitudes",
+        "exact": true
+      }
+    },
+    {
+      "index": 13,
+      "action": "click",
+      "description": "Presionar \"Nueva solicitud\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Nueva solicitud",
+        "exact": true
+      }
+    },
+    {
+      "index": 14,
+      "action": "fill",
+      "description": "fill [rnc_prospecto]",
+      "valueKey": "rnc_prospecto",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"idNumero\"]"
+      }
+    },
+    {
+      "index": 15,
+      "action": "click",
+      "description": "Presionar \"consultar el RNC\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Consultar",
+        "exact": true
+      }
+    },
+    {
+      "index": 16,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto.\"",
+      "target": {
+        "strategy": "text",
+        "value": "Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+      }
+    },
+    {
+      "index": 17,
+      "action": "uploadFile",
+      "description": "Adjuntar el archivo de prueba en \"Seleccionar documento\"",
+      "valueKey": "jira_step_10",
+      "target": {
+        "strategy": "label",
+        "value": "Seleccionar documento",
+        "metadata": {
+          "resolvedTargetName": "Seleccionar documento",
+          "validationStatus": "observed_file_input"
+        }
+      }
+    },
+    {
+      "index": 18,
+      "action": "click",
+      "description": "Presionar \"Cargar documento\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Cargar documento",
+        "exact": true
+      }
+    },
+    {
+      "index": 19,
+      "action": "click",
+      "description": "Presionar \"guardar como borrador\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Guardar borrador",
+        "exact": true
+      }
+    },
+    {
+      "index": 20,
+      "action": "noop",
+      "description": "Capturar el valor de \"Número de solicitud\" como \"solicitudId\"",
+      "jiraWorkflow": {
+        "kind": "capture",
+        "field": "Número de solicitud",
+        "variable": "solicitudId"
+      }
+    },
+    {
+      "index": 21,
+      "action": "click",
+      "description": "Presionar \"enviar a Revisión Legal\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Enviar a Debida Diligencia",
+        "exact": true
+      }
+    },
+    {
+      "index": 22,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Solicitud enviada a Revisión Legal.\"",
+      "target": {
+        "strategy": "text",
+        "value": "Solicitud enviada a Revisión Legal."
+      }
+    },
+    {
+      "index": 23,
+      "action": "noop",
+      "description": "Cambiar a la aplicación \"Aprobaciones\"",
+      "jiraWorkflow": {
+        "kind": "application",
+        "alias": "Aprobaciones"
+      }
+    },
+    {
+      "index": 24,
+      "action": "fill",
+      "description": "fill [usuario_aprobaciones]",
+      "valueKey": "usuario_aprobaciones",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 25,
+      "action": "fill",
+      "description": "fill [contrasena_aprobaciones]",
+      "valueKey": "contrasena_aprobaciones",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 26,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Iniciar sesión",
+        "exact": true
+      }
+    },
+    {
+      "index": 27,
+      "action": "noop",
+      "description": "Ingresar el valor capturado \"solicitudId\" en \"Buscar solicitud\"",
+      "jiraWorkflow": {
+        "kind": "fillCaptured",
+        "field": "Buscar solicitud",
+        "variable": "solicitudId"
+      }
+    },
+    {
+      "index": 28,
+      "action": "noop",
+      "description": "Presionar \"Aprobar\" en la fila del valor capturado \"solicitudId\" en \"Solicitudes pendientes de aprobación\"",
+      "jiraWorkflow": {
+        "kind": "clickCapturedRow",
+        "action": "Aprobar",
+        "variable": "solicitudId",
+        "container": "Solicitudes pendientes de aprobación"
+      }
+    },
+    {
+      "index": 29,
+      "action": "click",
+      "description": "Presionar \"Confirmar aprobación\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"m-ok\"]"
+      }
+    },
+    {
+      "index": 30,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Solicitud aprobada.\"",
+      "target": {
+        "strategy": "text",
+        "value": "Solicitud aprobada."
+      }
+    },
+    {
+      "index": 31,
+      "action": "noop",
+      "description": "Cambiar a la aplicación \"principal\"",
+      "jiraWorkflow": {
+        "kind": "application",
+        "alias": "principal"
+      }
+    },
+    {
+      "index": 32,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Aprobada\"",
+      "target": {
+        "strategy": "text",
+        "value": "Aprobada"
+      }
+    },
+    {
+      "index": 33,
+      "action": "noop",
+      "description": "Adjuntar los documentos requeridos en \"Documentación complementaria\"",
+      "jiraWorkflow": {
+        "kind": "documents",
+        "container": "Documentación complementaria",
+        "optional": false
+      },
+      "valueKey": "jira_documents_25"
+    },
+    {
+      "index": 34,
+      "action": "click",
+      "description": "Presionar \"Guardar documentación complementaria\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Guardar documentación complementaria",
+        "exact": true
+      }
+    },
+    {
+      "index": 35,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Documentación complementaria guardada.\"",
+      "target": {
+        "strategy": "text",
+        "value": "Documentación complementaria guardada."
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "usuario_portal",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena_portal",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "rnc_prospecto",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_step_10",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "usuario_aprobaciones",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena_aprobaciones",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "jira_documents_25",
+      "required": true,
+      "resolved": true,
+      "sensitive": false
+    }
+  ],
+  "sourceScenario": {
+    "title": "Aprobar una solicitud y guardar su documentación complementaria",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Datos de demostración"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Restablecer datos de demostración"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Datos de demostración restablecidos.\"",
+        "technicalTargetRefs": [
+          "text:Datos de demostración restablecidos."
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Datos de demostración"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Restablecer datos de demostración"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Datos de demostración restablecidos.\"",
+        "technicalTargetRefs": [
+          "text:Datos de demostración restablecidos."
+        ]
+      },
+      {
+        "index": 9,
+        "action": "fill",
+        "valueKey": "usuario_portal",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "fill",
+        "valueKey": "contrasena_portal",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 11,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 12,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ]
+      },
+      {
+        "index": 13,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Nueva solicitud"
+        ]
+      },
+      {
+        "index": 14,
+        "action": "fill",
+        "valueKey": "rnc_prospecto",
+        "technicalTargetRefs": [
+          "css:[id=\"idNumero\"]"
+        ]
+      },
+      {
+        "index": 15,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Consultar"
+        ]
+      },
+      {
+        "index": 16,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto.\"",
+        "technicalTargetRefs": [
+          "text:Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+        ]
+      },
+      {
+        "index": 17,
+        "action": "uploadFile",
+        "valueKey": "jira_step_10",
+        "technicalTargetRefs": [
+          "label:Seleccionar documento"
+        ]
+      },
+      {
+        "index": 18,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Cargar documento"
+        ]
+      },
+      {
+        "index": 19,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Guardar borrador"
+        ]
+      },
+      {
+        "index": 20,
+        "action": "noop"
+      },
+      {
+        "index": 21,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Enviar a Debida Diligencia"
+        ]
+      },
+      {
+        "index": 22,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Solicitud enviada a Revisión Legal.\"",
+        "technicalTargetRefs": [
+          "text:Solicitud enviada a Revisión Legal."
+        ]
+      },
+      {
+        "index": 23,
+        "action": "noop"
+      },
+      {
+        "index": 24,
+        "action": "fill",
+        "valueKey": "usuario_aprobaciones",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 25,
+        "action": "fill",
+        "valueKey": "contrasena_aprobaciones",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 26,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ]
+      },
+      {
+        "index": 27,
+        "action": "noop"
+      },
+      {
+        "index": 28,
+        "action": "noop"
+      },
+      {
+        "index": 29,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"m-ok\"]"
+        ]
+      },
+      {
+        "index": 30,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Solicitud aprobada.\"",
+        "technicalTargetRefs": [
+          "text:Solicitud aprobada."
+        ]
+      },
+      {
+        "index": 31,
+        "action": "noop"
+      },
+      {
+        "index": 32,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Aprobada\"",
+        "technicalTargetRefs": [
+          "text:Aprobada"
+        ]
+      },
+      {
+        "index": 33,
+        "action": "noop",
+        "valueKey": "jira_documents_25"
+      },
+      {
+        "index": 34,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Guardar documentación complementaria"
+        ]
+      },
+      {
+        "index": 35,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Documentación complementaria guardada.\"",
+        "technicalTargetRefs": [
+          "text:Documentación complementaria guardada."
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-5",
+        "requirement": "Validar que se muestre \"Datos de demostración restablecidos.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 5,
+        "target": "Datos de demostración restablecidos.",
+        "evidence": [
+          "live-step-5"
+        ],
+        "details": {
+          "observedText": "Datos de demostración restablecidos."
+        }
+      },
+      {
+        "id": "jira-oracle-8",
+        "requirement": "Validar que se muestre \"Datos de demostración restablecidos.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 8,
+        "target": "Datos de demostración restablecidos.\nDatos de demostración restablecidos.",
+        "evidence": [
+          "live-step-8"
+        ],
+        "details": {
+          "observedText": "Datos de demostración restablecidos.\nDatos de demostración restablecidos."
+        }
+      },
+      {
+        "id": "jira-oracle-16",
+        "requirement": "Validar que se muestre \"Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 16,
+        "target": "Datos de Cámara de Comercio\nRegistro encontrado. Datos autocompletados; se creará como Nuevo Prospecto.",
+        "evidence": [
+          "live-step-16"
+        ],
+        "details": {
+          "observedText": "Datos de Cámara de Comercio\nRegistro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+        }
+      },
+      {
+        "id": "jira-oracle-22",
+        "requirement": "Validar que se muestre \"Solicitud enviada a Revisión Legal.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 22,
+        "target": "Bitácora\n\nEventos registrados en la solicitud.\n\nEnviada a Revisión Legal\nMaría Pérez\n27/10/2026, 05:42 p. m.\nProspecto creado en B2000\nPRO-44101\nMaría Pérez\n27/10/2026, 05:42 p. m.\nDepuración en listas (Bizagi)\nSin coincidencias\nMaría Pérez\n27/10/2026, 05:42 p. m.\nSolicitud creada\nMaría Pérez\n27/10/2026, 05:42 p. m.",
+        "evidence": [
+          "live-step-22"
+        ],
+        "details": {
+          "observedText": "Bitácora\n\nEventos registrados en la solicitud.\n\nEnviada a Revisión Legal\nMaría Pérez\n27/10/2026, 05:42 p. m.\nProspecto creado en B2000\nPRO-44101\nMaría Pérez\n27/10/2026, 05:42 p. m.\nDepuración en listas (Bizagi)\nSin coincidencias\nMaría Pérez\n27/10/2026, 05:42 p. m.\nSolicitud creada\nMaría Pérez\n27/10/2026, 05:42 p. m."
+        }
+      },
+      {
+        "id": "jira-oracle-30",
+        "requirement": "Validar que se muestre \"Solicitud aprobada.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 30,
+        "target": "Solicitud aprobada.",
+        "evidence": [
+          "live-step-30"
+        ],
+        "details": {
+          "observedText": "Solicitud aprobada."
+        }
+      },
+      {
+        "id": "jira-oracle-32",
+        "requirement": "Validar que se muestre \"Aprobada\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 32,
+        "target": "SERVICIOS TURISTICOS PUNTA SRL\n\nSOL-2026-0007 · RNC 131777888\n\nNúmero de solicitud\nSOL-2026-0007\nAprobada\nRev. Legal Aprobada",
+        "evidence": [
+          "live-step-32"
+        ],
+        "details": {
+          "observedText": "SERVICIOS TURISTICOS PUNTA SRL\n\nSOL-2026-0007 · RNC 131777888\n\nNúmero de solicitud\nSOL-2026-0007\nAprobada\nRev. Legal Aprobada"
+        }
+      },
+      {
+        "id": "jira-oracle-35",
+        "requirement": "Validar que se muestre \"Documentación complementaria guardada.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 35,
+        "target": "Documentación complementaria guardada.",
+        "evidence": [
+          "live-step-35"
+        ],
+        "details": {
+          "observedText": "Documentación complementaria guardada."
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Se muestra \"Documentación complementaria guardada.\""
+  }
+}

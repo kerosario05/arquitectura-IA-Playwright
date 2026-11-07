@@ -102,6 +102,7 @@ function scopedRecorderFakePage(matchCountInScope: number) {
     count: async () => matchCountInScope,
     isVisible: async () => matchCountInScope === 1,
     isEnabled: async () => matchCountInScope === 1,
+    evaluate: async () => "div",
   };
   const scope = {
     count: async () => 1,
@@ -132,6 +133,55 @@ const smsRecorderEvidence = {
   runtimeResolutionRequired: true as const,
 };
 
+function ambiguousAncestorRecorderPage(options: {
+  pageMatches: number;
+  insideCapturedScope: boolean;
+  tagName?: string;
+}) {
+  const scopeTarget = {
+    count: async () => 2,
+    isVisible: async () => false,
+    isEnabled: async () => false,
+  };
+  const scope = {
+    count: async () => 2,
+    getByRole: () => scopeTarget,
+    getByText: () => scopeTarget,
+    getByLabel: () => scopeTarget,
+    getByPlaceholder: () => scopeTarget,
+    getByTestId: () => scopeTarget,
+  };
+  const pageTarget = {
+    count: async () => options.pageMatches,
+    isVisible: async () => options.pageMatches === 1,
+    isEnabled: async () => options.pageMatches === 1,
+    evaluate: async (fn: (element: Element, selector?: string) => unknown, selector?: string) => {
+      if (fn.toString().includes("tagName")) return (options.tagName ?? "button").toLowerCase();
+      return options.insideCapturedScope;
+    },
+  };
+  return {
+    url: () => "https://example.test/requests/2/edit",
+    locator: (selector: string) => selector === 'div:has(button[aria-label="Añadir contacto"])' ? scope : notFoundLocator(),
+    getByRole: () => pageTarget,
+    getByTestId: () => pageTarget,
+    getByPlaceholder: () => pageTarget,
+    getByLabel: () => pageTarget,
+    getByText: () => pageTarget,
+    evaluate: async () => undefined,
+  } as any;
+}
+
+const addContactRecorderEvidence = {
+  kind: "role" as const,
+  role: "button",
+  normalizedName: "Añadir contacto",
+  targetTag: "button",
+  scopeIdentity: { strategy: "css" as const, value: 'div:has(button[aria-label="Añadir contacto"])' },
+  captureMatchCount: 1,
+  runtimeResolutionRequired: true as const,
+};
+
 test("4/recorderEvidenceScopedResolution. a click with no technicalTargetRefs but valid playwrightRecorderEvidence resolves scoped, never via the global contextual resolver", async () => {
   const result = await resolveActionTarget(scopedRecorderFakePage(1), fakeSnapshot(), "SMS", {
     playwrightRecorderEvidence: smsRecorderEvidence,
@@ -150,6 +200,29 @@ test("5/recorderEvidenceZeroMatchesFailsClosed. zero matches inside the recorded
 test("6/recorderEvidenceMultipleMatchesFailsClosed. two matches inside the recorded scope fails closed -- never nth()/first()/index authority", async () => {
   const result = await resolveActionTarget(scopedRecorderFakePage(2), fakeSnapshot(), "SMS", {
     playwrightRecorderEvidence: smsRecorderEvidence,
+  });
+  assert.notEqual(result.status, "resolved");
+});
+
+test("7/overlappingCapturedAncestors. a unique recorded control remains resolvable when its captured CSS scope matches overlapping ancestors", async () => {
+  const result = await resolveActionTarget(ambiguousAncestorRecorderPage({ pageMatches: 1, insideCapturedScope: true }), fakeSnapshot(), "Añadir contacto", {
+    playwrightRecorderEvidence: addContactRecorderEvidence,
+  });
+  assert.equal(result.status, "resolved");
+  assert.equal(result.locatorStrategy, "recorded:recorder-role-unique-in-captured-scope");
+  assert.equal((result as { matchReason?: string }).matchReason, "playwright_recorder_evidence_current_dom");
+});
+
+test("8/overlappingCapturedAncestorsOutside. a unique page-wide control is rejected when it is outside the captured scope", async () => {
+  const result = await resolveActionTarget(ambiguousAncestorRecorderPage({ pageMatches: 1, insideCapturedScope: false }), fakeSnapshot(), "Añadir contacto", {
+    playwrightRecorderEvidence: addContactRecorderEvidence,
+  });
+  assert.notEqual(result.status, "resolved");
+});
+
+test("9/overlappingCapturedAncestorsAmbiguous. duplicate page-wide recorded controls remain fail-closed", async () => {
+  const result = await resolveActionTarget(ambiguousAncestorRecorderPage({ pageMatches: 2, insideCapturedScope: true }), fakeSnapshot(), "Añadir contacto", {
+    playwrightRecorderEvidence: addContactRecorderEvidence,
   });
   assert.notEqual(result.status, "resolved");
 });

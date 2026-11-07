@@ -247,6 +247,7 @@ export class CaptureEngineV2ShadowBridge {
     const seq = this.nextSeq();
     const record: ShadowActionRecord = { seq, action };
     this.technicalActions.push(record);
+    if (action.actionType === "edit") this.selectionSessions.cancelIfOpenedFromEditableControl();
     this.emit(`[capture-v2] action seq=${seq} type=${action.actionType} ownerTag=${action.owner?.tag ?? "unknown"} ownerRole=${action.owner?.role ?? "unknown"}`);
     // Fired AFTER the push, so a caller reading technicalActions from inside the callback sees
     // this record already present -- never a race between "notified" and "actually stored".
@@ -564,6 +565,7 @@ export class CaptureEngineV2ShadowBridge {
 
     const resolution = resolveCaptureOwner({ composedPath: message.composedPath });
     if (resolution.status !== "resolved") {
+      this.selectionSessions.noteUnresolvedClick(null);
       this.diagnoseUnresolvedClickOwner(message.composedPath);
       this.diagnose("click", "click_owner_unresolved");
       // Preserve a trusted physical click as an explicitly unresolved technical action when
@@ -711,7 +713,7 @@ export class CaptureEngineV2ShadowBridge {
           semanticScopeAlternativeCount: semanticRuntimeEvidence?.scopeAlternatives.length ?? 0,
           browserRecorderFallbackUsed: !semanticDerivedRecorderEvidence && Boolean(playwrightRecorderEvidence),
         })}`);
-        this.pushAction({
+        const unresolvedSeq = this.pushAction({
           actionType: "click",
           interactionId: message.interactionId,
           identity: message.identity ?? {
@@ -724,6 +726,19 @@ export class CaptureEngineV2ShadowBridge {
           ...(semanticRuntimeEvidence ? { semanticRuntimeEvidence } : {}),
           ...(playwrightRecorderEvidence ? { playwrightRecorderEvidence } : {}),
         });
+        // A dropdown's arrow icon has no owner of its own, but its wrapper is already tied to a named field.
+        // Remember that field: if the very next click is an option, it names the select's owner.
+        const fieldWrapper = [...message.composedPath]
+          .sort((a, b) => a.pathDepth - b.pathDepth)
+          .find((candidate) => Boolean(candidate.associatedField?.trim()));
+        this.selectionSessions.noteUnresolvedClick(fieldWrapper?.associatedField?.trim()
+          ? {
+              documentContext,
+              associatedField: fieldWrapper.associatedField.trim(),
+              technicalActionSeq: unresolvedSeq,
+              identity: message.identity,
+            }
+          : null);
       }
       return;
     }
@@ -732,6 +747,22 @@ export class CaptureEngineV2ShadowBridge {
       // the editing-session flow (focus/edit_evidence/blur) is what represents it. Still the
       // same field being edited, so no commit is forced here -- forcing one would just split one
       // edit into two for no reason.
+      // A combobox whose text box is editable (a framework dropdown rendered as an input) still opens a list: let the
+      // selection session see it. Typing into it records an edit, which drops the session again (autocomplete).
+      if (resolution.owner.role?.toLowerCase() === "combobox" && resolution.owner.tag?.toLowerCase() !== "select") {
+        const opened = this.selectionSessions.observeTechnicalClick({
+          owner: resolution.owner,
+          documentContext: documentHandleOf(message),
+          // No technical click action exists for it (the edit path owns this control); -1 matches no recorded event.
+          technicalActionSeq: -1,
+          identity: message.identity,
+          selectedDisplay: resolution.owner.accessibleName,
+          fromEditableControl: true,
+        });
+        if (opened.outcome === "opened" || opened.outcome === "reopened") {
+          this.emit(`[capture-v2] selection_open ownerTag=${resolution.owner.tag ?? "unknown"} ownerRole=${resolution.owner.role ?? "unknown"} editable=true`);
+        }
+      }
       this.diagnose("click", "click_target_is_editable_owner");
       return;
     }

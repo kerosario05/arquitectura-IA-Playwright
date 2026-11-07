@@ -11,8 +11,8 @@ const transientFailure = {
   oracleEvaluationStarted: false,
 };
 
-test("pre-business post-auth navigation failure retries once", () => {
-  assert.equal(shouldRetryScenario({ ...transientFailure, attempt: 1 }), true);
+test("a transient pre-business failure is terminal after its first scenario attempt", () => {
+  assert.equal(shouldRetryScenario({ ...transientFailure, attempt: 1 }), false);
   assert.equal(shouldRetryScenario({ ...transientFailure, attempt: 2 }), false);
 });
 

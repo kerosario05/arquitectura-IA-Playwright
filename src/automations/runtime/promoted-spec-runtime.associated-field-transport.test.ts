@@ -30,6 +30,10 @@ import type { TestScenario } from "../../types/testrail.types";
  */
 
 const RUNTIME_SOURCE = fs.readFileSync(path.resolve(__dirname, "promoted-spec-runtime.ts"), "utf8");
+const SELECTION_RECOVERY_SOURCE = fs.readFileSync(
+  path.resolve(__dirname, "../../scenarios/selection-list-recovery.ts"),
+  "utf8",
+);
 
 function buildCaseResult(overrides: Partial<CaseDiscoveryResult> = {}): CaseDiscoveryResult {
   return {
@@ -105,6 +109,20 @@ test("2/COMPILER_EMISSION: the deterministic compiler emits associatedField into
   // The pre-existing runtime_deferred ref (firstStructuredEvidenceRef) is untouched by this
   // ticket -- same value with or without associatedField (see test 5's regression fixture).
   assert.match(result.source, /technicalTargetRefs: \['text:Presionar Synthetic Button'\]/);
+});
+
+test("2E/CHECKABLE_CAPTION_OWNER: the promoted runtime retries only through the shared field resolver and fails closed before callback fallback", () => {
+  const clickStart = RUNTIME_SOURCE.indexOf("async clickPromotedTarget(options: PromotedClickOptions)");
+  const clickEnd = RUNTIME_SOURCE.indexOf("\n  async fillPromotedField(", clickStart);
+  const clickSource = RUNTIME_SOURCE.slice(clickStart, clickEnd);
+
+  assert.match(RUNTIME_SOURCE, /checkableCaptionOwner\?: boolean/);
+  assert.match(clickSource, /options\.checkableCaptionOwner \? undefined : await resolveOrdinalSelectionOnPage/);
+  assert.match(clickSource, /!options\.checkableCaptionOwner && targetIdentity\?\.recordedTechnicalTargets\?\.length/);
+  assert.match(clickSource, /associatedField: options\.associatedField/);
+  assert.match(clickSource, /unique_checkable_control_in_caption_scope/);
+  assert.match(clickSource, /checkable_caption_owner_not_uniquely_resolved/);
+  assert.match(clickSource, /checkable_caption_owner_not_uniquely_resolved:[\s\S]*?if \(!nativeClickSucceeded\) \{\s*callbackAttempted = true/s);
 });
 
 test("2A/RECORDED_OPTION_LINEAGE: an exact recorded option inherits only its preceding same-control owner field and passes its exact role ref to the shared resolver", () => {
@@ -232,7 +250,8 @@ test("2D1/ENTITY_GRID_FILL: promoted fill activates and resolves the editor thro
   const fn = RUNTIME_SOURCE.slice(start, end);
   assert.match(fn, /resolveFillTarget\(/);
   assert.match(fn, /rowScope: entityRowScope \?\? rowScopeFromPromotedRef\(parsedTargetRefs\.rowRef\)/);
-  assert.match(fn, /entityScope: targetIdentity\.entityScope \?\? options\.entityScope/);
+  assert.match(fn, /const entityScope = targetIdentity\.entityScope\s+\?\? options\.entityScope\s+\?\? entityScopeFromValueKey\(targetIdentity\.valueKey \?\? options\.valueKey\)/);
+  assert.match(fn, /entityScope,\s+associatedField: resolvedField/);
   assert.match(fn, /gridFillResolution\?\.status === "resolved"/);
   assert.match(fn, /locatorStrategy\?\.startsWith\("grid_cell_"\)/);
   assert.match(fn, /gridCellFillResolved=true strategy=\$\{gridFillResolution\.locatorStrategy\}/);
@@ -242,14 +261,20 @@ test("2E/RECORDED_FIELD_SELECTION: compiled selection value and owner field reac
   const start = RUNTIME_SOURCE.indexOf("async selectPromotedItem(options: PromotedActionOptions)");
   const end = RUNTIME_SOURCE.indexOf("\n  async expectPromotedVisible(", start);
   const fn = RUNTIME_SOURCE.slice(start, end);
+  const nativeSelectionStart = RUNTIME_SOURCE.indexOf("export async function applyPromotedNativeSelection(");
+  const nativeSelectionEnd = RUNTIME_SOURCE.indexOf("\nasync function capturePromotedSelectionStateProbe(", nativeSelectionStart);
+  const nativeSelectionFn = RUNTIME_SOURCE.slice(nativeSelectionStart, nativeSelectionEnd);
   assert.match(fn, /options\.selectionValue\?\.trim\(\)/);
   assert.match(fn, /options\.selectionField\?\.trim\(\)/);
   assert.match(fn, /actionType: "action_select"/);
   assert.match(fn, /selectionValue: runtimeValue/);
   assert.match(fn, /associatedField: options\.associatedField\?\.trim\(\) \|\| selectionField/);
   assert.match(fn, /applyPromotedNativeSelection\(structuredResolution\.locator, runtimeValue\)/);
-  assert.match(RUNTIME_SOURCE, /matches\.length === 1 \? matches\[0\] : undefined/);
-  assert.match(RUNTIME_SOURCE, /locator\.selectOption\(match\.value\)/);
+  assert.match(RUNTIME_SOURCE, /findUniqueSelectionListRecoveryControl\(snapshot\.elements, selectionField\)/);
+  assert.match(SELECTION_RECOVERY_SOURCE, /return matches\.length === 1 \? matches\[0\] : undefined/);
+  assert.match(nativeSelectionFn, /resolveSelectionOption\(value, observed\.options, option => option\)\.chosen/);
+  assert.match(nativeSelectionFn, /await locator\.selectOption\(values\)/);
+  assert.match(nativeSelectionFn, /selectedOptions/);
   assert.match(fn, /structuredResolution\.selectionApplied/);
 });
 

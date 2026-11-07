@@ -114,7 +114,10 @@ export function extractFieldScopedDomEvidence(
   // unrelated sibling fields it also contains, never a positional/index guess.
   const MAX_CONTAINER_CLIMB = 12;
   const OWNER_TAGS = new Set(["input", "textarea", "select", "button"]);
-  const ACTIONABLE_ROLES = new Set(["button"]);
+  // Native/checkable controls are valid click owners too. Discovery's caption resolver can prove
+  // a checkbox/radio/switch through its exact field relation; excluding them here let the click
+  // execute but discarded the structural certificate needed by the spec compiler.
+  const ACTIONABLE_ROLES = new Set(["button", "checkbox", "radio", "switch"]);
   const EDITABLE_ROLES = new Set(["textbox", "combobox", "searchbox", "spinbutton"]);
   const NON_EDITABLE_INPUT_TYPES = new Set(["button", "submit", "checkbox", "radio", "hidden", "file", "image", "reset"]);
 
@@ -223,6 +226,7 @@ export function extractFieldScopedDomEvidence(
     if (tag === "input") {
       const type = (el.getAttribute("type") || "text").toLowerCase();
       if (type === "button" || type === "submit" || type === "reset") return true;
+      if (type === "checkbox" || type === "radio") return true;
     }
     if (role === "button") return true;
     if (isAriaDisclosureOwner(el)) return true;
@@ -382,6 +386,8 @@ export function extractFieldScopedDomEvidence(
 
   const target = normalizeFieldText(associatedField);
   if (!target) return undefined;
+  // Recorded names of long question labels are truncated: a long target is a prefix of the live text.
+  const isFieldText = (text: string): boolean => text === target || (target.length >= 100 && text.startsWith(target));
 
   // Diagnostics accumulated across every mechanism -- ids/counts/tags only, never DOM text or
   // dataset values. `ancestorTrace` is captured once, for the FIRST anchor any mechanism
@@ -414,7 +420,7 @@ export function extractFieldScopedDomEvidence(
     const tag = el.tagName.toLowerCase();
     return tag === "label" || tag === "legend";
   });
-  const semanticLabelMatchCount = labelsAndLegends.filter((el) => normalizeFieldText(el.textContent) === target).length;
+  const semanticLabelMatchCount = labelsAndLegends.filter((el) => isFieldText(normalizeFieldText(el.textContent))).length;
 
   let scope: FieldScopedDomElement | null = null;
   // Set only by the two "the label/fieldset itself already has a stable attribute" shortcuts
@@ -423,7 +429,7 @@ export function extractFieldScopedDomEvidence(
   let certificationAncestorOverride: FieldScopedDomElement | null = null;
 
   for (const labelEl of labelsAndLegends) {
-    if (normalizeFieldText(labelEl.textContent) !== target) continue;
+    if (!isFieldText(normalizeFieldText(labelEl.textContent))) continue;
     const tag = labelEl.tagName.toLowerCase();
 
     if (tag === "legend") {
@@ -464,7 +470,7 @@ export function extractFieldScopedDomEvidence(
       const labelledBy = el.getAttribute("aria-labelledby");
       if (!labelledBy) return false;
       const labelNode = root.getElementById(labelledBy);
-      return labelNode ? normalizeFieldText(labelNode.textContent) === target : false;
+      return labelNode ? isFieldText(normalizeFieldText(labelNode.textContent)) : false;
     });
     ariaRelationMatchCount = ariaOwners.length;
     for (const owner of ariaOwners) {
@@ -488,7 +494,7 @@ export function extractFieldScopedDomEvidence(
   // if leaf-filtering later rejects every match -- distinguishing "no such text anywhere"
   // (a normalization/whitespace/encoding problem) from "found, but never as a leaf" (a nested
   // wrapper problem).
-  const textMatchingNonOwners = walkAll(root.body, (el) => !isOwnerCandidate(el) && normalizeFieldText(el.textContent) === target);
+  const textMatchingNonOwners = walkAll(root.body, (el) => !isOwnerCandidate(el) && isFieldText(normalizeFieldText(el.textContent)));
   const textAnchorMatchCount = textMatchingNonOwners.length;
   const leafTextAnchors = textMatchingNonOwners.filter((el) => el.children.length === 0);
   const leafAnchorMatchCount = leafTextAnchors.length;

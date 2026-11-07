@@ -1,0 +1,27 @@
+1) automations\apps\portal-comercial\sections\api-tests\cases\preview-001-prestamos-personales-faciles\.candidate-validation-46620-1793764425311.spec.ts:14:5 › Prestamos Personales Faciles
+Error: structured_selection_control_unresolved: stepIndex=43 target="24 - PRESTAMOS PERSONALES FACILES" valueKey="none"
+at ..\..\src\automations\runtime\promoted-spec-runtime.ts:6253
+6251 |         });
+6252 |         if (!opener?.locator) {
+> 6253 |           throw new Error(
+|                 ^
+6254 |             `structured_selection_control_unresolved: stepIndex=${options.stepIndex} `
+6255 |             + `target="${options.target}" valueKey="${targetIdentity.valueKey ?? "none"}"`,
+6256 |           );
+at PromotedSpecRuntime.selectPromotedItem (C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\src\automations\runtime\promoted-spec-runtime.ts:6253:17)
+at Proxy.<anonymous> (C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\src\automations\runtime\promoted-spec-runtime.ts:6886:26)
+at C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\automations\apps\portal-comercial\sections\api-tests\cases\preview-001-prestamos-personales-faciles\.candidate-validation-46620-1793764425311.spec.ts:450:5
+attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--5c9a9-restamos-Personales-Faciles\test-failed-1.png
+────────────────────────────────────────────────────────────────────────────────────────────────
+attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--5c9a9-restamos-Personales-Faciles\video.webm
+────────────────────────────────────────────────────────────────────────────────────────────────
+Error Context: test-results\apps\portal-comercial-sections--5c9a9-restamos-Personales-Faciles\error-context.md
+attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--5c9a9-restamos-Personales-Faciles\trace.zip
+Usage:
+npx playwright show-trace test-results\apps\portal-comercial-sections--5c9a9-restamos-Personales-Faciles\trace.zip
+────────────────────────────────────────────────────────────────────────────────────────────────
+1 failed
+automations\apps\portal-comercial\sections\api-tests\cases\preview-001-prestamos-personales-faciles\.candidate-validation-46620-1793764425311.spec.ts:14:5 › Prestamos Personales Faciles

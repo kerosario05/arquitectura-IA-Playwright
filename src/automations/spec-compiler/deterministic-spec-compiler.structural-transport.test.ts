@@ -82,6 +82,20 @@ const TIER1_NO_OWNER_CERT = {
   certificationTier: 1,
 } as any;
 
+test("observed navigation is emitted directly with the structural click regardless of CSS/display-label differences", () => {
+  for (const expectedRouteTransition of [true, undefined]) {
+    const result = compileDeterministicSpec(contract([step({
+      scenarioStepIndex: 10,
+      target: { strategy: "text", value: "Create entity" },
+      certifiedTechnicalTarget: RICH_CERT_WITH_OWNER,
+      expectedRouteTransition,
+    })]));
+    assert.equal(result.unsupportedCapabilities.length, 0);
+    assert.match(result.source, expectedRouteTransition
+      ? /expectedEffect: 'navigation'/ : /expectedEffect: 'ui_change'/);
+  }
+});
+
 test("1/COMPILER_STRUCTURAL_TRANSPORT: a rich certified structural target (owner present) is emitted as structuralTarget with owner/attrs/descendants/semanticShape/landmark/ambiguity fields preserved", () => {
   const clickStep = step({
     scenarioStepIndex: 4,
@@ -93,7 +107,7 @@ test("1/COMPILER_STRUCTURAL_TRANSPORT: a rich certified structural target (owner
 
   assert.equal(result.unsupportedCapabilities.length, 0);
   assert.match(result.source, /structuralTarget: \{/);
-  const structuralTargetMatch = result.source.match(/structuralTarget: (\{[\s\S]*?\}),\n\s*action:/);
+  const structuralTargetMatch = result.source.match(/structuralTarget: (\{[\s\S]*?\}),\n\s*(?:structuralSemanticFallbackRefs: \[[^\]]*\],\n\s*)?previousStepReplays:/);
   assert.ok(structuralTargetMatch, "structuralTarget object literal must be present before the action callback");
   const emitted = JSON.parse(structuralTargetMatch![1]);
   assert.equal(emitted.structuralContext.owner.tag, "a");
@@ -119,6 +133,22 @@ test("2/COMPILER_STRUCTURAL_TRANSPORT: a Tier-1 certified target with NO owner d
   assert.match(result.source, /technicalTargetRefs: \['css:\[href="\/synthetic\/target"\]'\]/);
 });
 
+test("3/COMPILER_STRUCTURAL_SEMANTIC_COMPATIBILITY: transports only the exact captured ARIA ref matching the structural owner role", () => {
+  const clickStep = step({
+    scenarioStepIndex: 4,
+    operation: "click",
+    target: { strategy: "text", value: "Synthetic Target" },
+    technicalTargetRefs: ["role:link|Synthetic Target", "role:button|Unrelated control", "role:link"],
+    certifiedTechnicalTarget: RICH_CERT_WITH_OWNER,
+  });
+  const result = compileDeterministicSpec(contract([clickStep]));
+
+  assert.equal(result.unsupportedCapabilities.length, 0);
+  assert.match(result.source, /structuralSemanticFallbackRefs: \["role:link\|Synthetic Target"\]/);
+  assert.doesNotMatch(result.source, /structuralSemanticFallbackRefs: \[.*Unrelated control/);
+  assert.doesNotMatch(result.source, /structuralSemanticFallbackRefs: \["role:link"/);
+});
+
 test("5/RUNTIME_RESOLUTION_REQUIRED_UNCHANGED: a rich certified structural target (owner present) is NOT emitted as structuralTarget when resolutionState=runtime_resolution_required -- stays on the existing runtime_deferred path", () => {
   const clickStep = step({
     scenarioStepIndex: 6,
@@ -132,4 +162,25 @@ test("5/RUNTIME_RESOLUTION_REQUIRED_UNCHANGED: a rich certified structural targe
   assert.equal(result.unsupportedCapabilities.length, 0, "upstream explicitly deferred resolution -- not a compile-time failure");
   assert.doesNotMatch(result.source, /structuralTarget:/, "certified structural authority must never be fabricated for a step explicitly deferred to runtime resolution");
   assert.equal(result.bindings[0].runtimeResolutionRequired, true);
+});
+
+test("a fill certified only as a plain wrapper owner (role:div|descendant css) compiles to the field label, never to a bare wrapper locator", () => {
+  const wrapperCert = {
+    interactionEvidence: [], validatedByInteraction: false, certifiedFrom: "recording", targetType: "structural",
+    locatorCandidates: [{ strategy: "role", value: 'div|[data-pc-name="inputtext"][data-pc-section="root"]', confidence: 0.55 }],
+    structuralContext: { owner: { tag: "div" }, stableDescendants: [{ relation: "descendant", tag: "input", role: "textbox", stableAttributes: { "data-pc-name": "inputtext" } }] },
+    confidence: 0.55, certificationTier: 3,
+  } as any;
+  const result = compileDeterministicSpec(contract([step({
+    scenarioStepIndex: 21,
+    operation: "fill",
+    target: { strategy: "label", value: "Synthetic Company Name" },
+    associatedField: "Synthetic Company Name",
+    valueKey: "synthetic_company_name",
+    certifiedTechnicalTarget: wrapperCert,
+  } as any)]));
+  assert.equal(result.unsupportedCapabilities.length, 0);
+  assert.match(result.source, /target: 'Synthetic Company Name'/);
+  assert.doesNotMatch(result.source, /role:div\|/);
+  assert.match(result.source, /getByLabel\('Synthetic Company Name'\)/);
 });

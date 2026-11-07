@@ -34,7 +34,7 @@ async function main(): Promise<void> {
 
   await test("2. an all-reusable rerun dispatches startReuseExistingPromotedSpecRun and returns before the scenario-preview payload/dispatch block", () => {
     const reuseIdx = source.indexOf("if (prepared.allReusable)");
-    const dispatchIdx = source.indexOf("setImmediate(() => startReuseExistingPromotedSpecRun(reuseJob.id))");
+    const dispatchIdx = source.indexOf("scheduleJob(reuseJob.id, () => startReuseExistingPromotedSpecRun(reuseJob.id))");
     const returnIdx = source.indexOf("return;", dispatchIdx);
     const fallbackBuildPayloadIdx = source.indexOf("// 4. Build new job payload");
     assert.ok(reuseIdx !== -1 && dispatchIdx !== -1 && returnIdx !== -1 && fallbackBuildPayloadIdx !== -1);
@@ -45,13 +45,13 @@ async function main(): Promise<void> {
 
   await test("3. the reuse branch never calls startScenarioPreviewRun (no discovery/AI reachable from it)", () => {
     const reuseIdx = source.indexOf("if (prepared.allReusable)");
-    const returnIdx = source.indexOf("return;", source.indexOf("setImmediate(() => startReuseExistingPromotedSpecRun(reuseJob.id))"));
+    const returnIdx = source.indexOf("return;", source.indexOf("scheduleJob(reuseJob.id, () => startReuseExistingPromotedSpecRun(reuseJob.id))"));
     const reuseBlock = source.slice(reuseIdx, returnIdx);
     assert.ok(!reuseBlock.includes("startScenarioPreviewRun"));
   });
 
   await test("4. a non-all-reusable rerun (missing/stale spec) still falls through to the existing startScenarioPreviewRun fallback, unchanged", () => {
-    assert.ok(source.includes("setImmediate(() => startScenarioPreviewRun(newJob.id));"), "the pre-existing fallback dispatch must still exist for mixed/non-reusable reruns");
+    assert.ok(source.includes("scheduleJob(newJob.id, () => startScenarioPreviewRun(newJob.id));"), "the pre-existing fallback dispatch must still exist for mixed/non-reusable reruns");
   });
 
   await test("5. a mixed batch (some reusable, some not) is dispatched to the mixed-rerun orchestrator, not silently folded into the full scenario-preview fallback", () => {

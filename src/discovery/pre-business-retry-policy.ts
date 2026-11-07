@@ -1,4 +1,7 @@
-export const MAX_SCENARIO_ATTEMPTS = 2;
+// Scenario executions can mutate business state (for example, create a new request).
+// A failed first attempt must be reported to the user instead of replaying the scenario
+// in a fresh browser context and duplicating those side effects.
+export const MAX_SCENARIO_ATTEMPTS = 1;
 
 export type PreBusinessFailureSignals = {
   businessSurfaceReached: boolean;

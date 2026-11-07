@@ -1,3 +1,73 @@
+type ApplicationErrorElement = {
+  visible?: boolean;
+  role?: string;
+  text?: string;
+  label?: string;
+  name?: string;
+};
+
+/** An unchanged error on the same surface is not evidence that the latest action failed. */
+export function hasNewVisibleApplicationError(input: {
+  before: readonly ApplicationErrorElement[];
+  after: readonly ApplicationErrorElement[];
+  sameSurface: boolean;
+}, isCredentialRejection: (text: string) => boolean, nonBlockingTextFragments: readonly string[] = []): boolean {
+  const normalize = (text: string): string => text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+  const normalizedNonBlockingFragments = nonBlockingTextFragments
+    .map((fragment) => normalize(String(fragment ?? "")))
+    .filter(Boolean);
+  const errors = (elements: readonly ApplicationErrorElement[]) => elements.flatMap((element) => {
+    if (element.visible === false) return [];
+    const role = String(element.role ?? "").toLowerCase();
+    const text = String(element.text ?? element.label ?? element.name ?? "");
+    const credentialRejection = isCredentialRejection(text);
+    const error = (["alert", "status", "dialog", "alertdialog"].includes(role)
+      && /error|invalid|incorrect|failed|fall[oó]|inv[aá]lid/i.test(text)) || credentialRejection;
+    if (!error) return [];
+    const normalizedText = normalize(text);
+    const configuredNonBlocking = !credentialRejection
+      && normalizedNonBlockingFragments.some((fragment) => normalizedText.includes(fragment));
+    return configuredNonBlocking ? [] : [`${role}|${normalizedText}`];
+  });
+  const baseline = new Set(input.sameSurface ? errors(input.before) : []);
+  return errors(input.after).some((error) => !baseline.has(error));
+}
+
+/**
+ * A recorded cross-field lookup is complete when the click produced an observable
+ * response or a functional state change. `diffAssertionObservation` intentionally
+ * tracks a narrower set of state transitions than `diffStateCandidates`, so callers
+ * may pass the latter when it found a causal value/ARIA change in the existing UI.
+ */
+export function hasCrossFieldLookupRefreshEffect(input: {
+  responseObserved?: boolean;
+  nextTargetBecameVisible?: boolean;
+  formStateChanged?: boolean;
+  validationMutation?: boolean;
+  navigationMutation?: boolean;
+  structuredStateMutation?: boolean;
+  stateCandidateMutations?: readonly { fingerprintBefore?: string }[];
+  ownerSubtreeMutation?: boolean;
+  targetSelectionStateChanged?: boolean;
+  selectionApplied?: boolean;
+}): boolean {
+  return input.responseObserved === true
+    || input.nextTargetBecameVisible === true
+    || input.formStateChanged === true
+    || input.validationMutation === true
+    || input.navigationMutation === true
+    || input.structuredStateMutation === true
+    || (input.stateCandidateMutations ?? []).some((mutation) => Boolean(mutation.fingerprintBefore))
+    || input.ownerSubtreeMutation === true
+    || input.targetSelectionStateChanged === true
+    || input.selectionApplied === true;
+}
+
 export type PostActionSynchronizationInput = {
   actionNetworkObserved?: boolean;
   actionNetworkResponse?: boolean;
@@ -6,6 +76,8 @@ export type PostActionSynchronizationInput = {
   clickCausalEffectDetected?: boolean;
   applicationError?: boolean;
   authGateChanged?: boolean;
+  /** The current authentication action has an observed request without a terminal response. */
+  authenticationRequestPending?: boolean;
   /** A detected auth gate is still present after its submit action; generic progress is not completion. */
   authenticationBoundaryStillActive?: boolean;
   domMutation?: boolean;
@@ -57,6 +129,12 @@ export type PostActionSynchronizationInput = {
   recordedPostActionSurfaceRequired?: boolean;
   /** The observed surface has reached the recorded post-action authority. */
   recordedPostActionSurfaceReached?: boolean;
+  /**
+   * The exact recorded next-action owner independently proves the successor UI is ready even
+   * though this application kept the same URL. The caller must establish route-lineage,
+   * same-page, before/after visibility, causal-effect, resolver, and stability evidence first.
+   */
+  recordedPostActionSuccessorConfirmed?: boolean;
   /** The source recording explicitly captured this action on the same non-empty screen before and after. */
   recordedSameSurfaceAction?: boolean;
   /**
@@ -82,6 +160,8 @@ export type PostActionSynchronizationInput = {
    * signal that can no longer observe the transition.
    */
   selectionApplied?: boolean;
+  /** A recorded cross-field lookup produced a refresh and its recorded option owner is ready. */
+  crossFieldLookupRefreshObserved?: boolean;
   /** A browser download event observed while a terminal recorded click was dispatched. */
   terminalDownloadObserved?: boolean;
   /**
@@ -105,6 +185,42 @@ export type PostActionSynchronizationInput = {
    */
   ownerSubtreeMutation?: boolean;
 };
+
+/**
+ * A URL transition is authoritative when the app exposes it, but some SPAs render the recorded
+ * successor form without changing the address bar. In that case, allow the exact next recorded
+ * owner to stand in for the route only when its route lineage matches and it became actionable
+ * after this action. This does not accept text, network completion, or an unverified owner.
+ */
+export function hasRecordedSuccessorSurfaceProof(input: {
+  recordedPostActionSurfaceRequired: boolean;
+  recordedPostActionSurfaceReached: boolean;
+  successorRouteMatchesNextAction: boolean;
+  currentUrlStillOnRecordedPreActionSurface: boolean;
+  sameRecordedPage: boolean;
+  successorOwnerWasTextVisibleBefore: boolean;
+  successorOwnerReadyNow: boolean;
+  actionEffectObserved: boolean;
+  actionSettled: boolean;
+  applicationError: boolean;
+  stableSuccessorProbes: number;
+  requiredStableProbes: number;
+}): boolean {
+  return input.recordedPostActionSurfaceRequired
+    && !input.recordedPostActionSurfaceReached
+    && input.successorRouteMatchesNextAction
+    && input.currentUrlStillOnRecordedPreActionSurface
+    && input.sameRecordedPage
+    && !input.successorOwnerWasTextVisibleBefore
+    && input.successorOwnerReadyNow
+    && input.actionEffectObserved
+    && input.actionSettled
+    && !input.applicationError
+    && Number.isInteger(input.stableSuccessorProbes)
+    && Number.isInteger(input.requiredStableProbes)
+    && input.requiredStableProbes > 0
+    && input.stableSuccessorProbes >= input.requiredStableProbes;
+}
 
 /**
  * A stalled loader can be ignored only after an independent observer proves that the
@@ -134,8 +250,81 @@ export function canToleratePostActionLoadingTimeout(input: {
 
 export type PostActionSynchronizationResult = {
   completed: boolean;
-  signal?: "application_error" | "network_response" | "auth_gate_changed" | "next_target_visible" | "next_target_resolver_ready" | "dom_navigation_mutation" | "dom_validation_mutation" | "target_selection_state_changed" | "structured_state_mutation" | "click_effect_next_target_visible" | "owner_subtree_mutation" | "terminal_feedback" | "download" | "recorded_same_surface";
+  signal?: "application_error" | "network_response" | "auth_gate_changed" | "next_target_visible" | "next_target_resolver_ready" | "dom_navigation_mutation" | "dom_validation_mutation" | "target_selection_state_changed" | "structured_state_mutation" | "click_effect_next_target_visible" | "owner_subtree_mutation" | "terminal_feedback" | "download" | "recorded_same_surface" | "recorded_successor_owner" | "cross_field_lookup_refresh";
 };
+
+/**
+ * A recorded action may create an entity whose route contains a runtime-generated
+ * identifier, making later recorded pre-routes stale. Keep accepting the exact
+ * destination observed from that successful route transition while execution
+ * remains on the same browser page and exact URL. This allows intervening
+ * same-page actions (for example, toggling a checkbox) without guessing URL
+ * segments or weakening target resolution for the next action.
+ */
+export function matchesObservedActionSurface(input: {
+  previousActionSucceeded: boolean;
+  sameBrowserPage: boolean;
+  previousUrlBefore?: string;
+  previousUrlAfter?: string;
+  currentUrl: string;
+  expectedRouteBefore?: string;
+}): boolean {
+  if (!input.previousActionSucceeded
+    || !input.sameBrowserPage
+    || !input.expectedRouteBefore?.trim()
+    || !input.previousUrlBefore?.trim()
+    || !input.previousUrlAfter?.trim()) return false;
+  try {
+    const before = new URL(input.previousUrlBefore);
+    const after = new URL(input.previousUrlAfter, before);
+    const current = new URL(input.currentUrl, after);
+    const identity = (url: URL) => `${url.origin}${url.pathname}${url.search}${url.hash}`;
+    return identity(before) !== identity(after) && identity(current) === identity(after);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * A successful recorded action can create an entity with a runtime-assigned URL. When the
+ * immediately following recorded action expects the same captured destination, an observed
+ * same-tab route change plus visibility of that next target is enough to bind this run to its
+ * actual destination. This is execution-local evidence: it does not infer URL parameters or
+ * add a learned route family, and the next action still resolves its own target before acting.
+ */
+export function matchesObservedRecordedDestination(input: {
+  sameBrowserPage: boolean;
+  routeChanged: boolean;
+  applicationError: boolean;
+  nextTargetVisible: boolean;
+  previousUrl: string;
+  currentUrl: string;
+  expectedRouteAfter?: string;
+  nextExpectedRouteBefore?: string;
+}): boolean {
+  if (!input.sameBrowserPage
+    || !input.routeChanged
+    || input.applicationError
+    || !input.nextTargetVisible
+    || !input.expectedRouteAfter?.trim()
+    || !input.nextExpectedRouteBefore?.trim()
+    || !input.previousUrl.trim()
+    || !input.currentUrl.trim()) return false;
+  try {
+    const previous = new URL(input.previousUrl);
+    const current = new URL(input.currentUrl, previous);
+    const expectedAfter = new URL(input.expectedRouteAfter, previous);
+    const nextExpectedBefore = new URL(input.nextExpectedRouteBefore, current);
+    const identity = (url: URL) => `${url.origin}${url.pathname}${url.search}${url.hash}`;
+    return previous.origin === current.origin
+      && current.origin === expectedAfter.origin
+      && expectedAfter.origin === nextExpectedBefore.origin
+      && identity(previous) !== identity(current)
+      && identity(expectedAfter) === identity(nextExpectedBefore);
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Selects a bounded post-action completion signal from observations owned by
@@ -150,8 +339,14 @@ export function resolvePostActionSynchronization(
   // action itself. It must not be held behind a recorded page-surface condition
   // or a spinner that can remain visible after the file has already arrived.
   if (input.terminalDownloadObserved) return { completed: true, signal: "download" };
+  // A new authentication stage can appear before its request finishes. The stage change is
+  // progress, not a timeout or a completed exchange; keep the existing observer active.
+  if (input.authenticationRequestPending) return { completed: false };
   if (input.recordedPostActionSurfaceRequired && !input.recordedPostActionSurfaceReached && input.recordedTerminalActionFeedback) {
     return { completed: true, signal: "terminal_feedback" };
+  }
+  if (input.recordedPostActionSurfaceRequired && !input.recordedPostActionSurfaceReached && input.recordedPostActionSuccessorConfirmed) {
+    return { completed: true, signal: "recorded_successor_owner" };
   }
   // A recorded post-action surface is execution authority. Until the observed surface
   // reaches it, a DOM mutation, a 2xx response, an auth-gate flip, or a visible next target
@@ -163,6 +358,19 @@ export function resolvePostActionSynchronization(
   if (input.recordedPostActionSurfaceRequired && !input.recordedPostActionSurfaceReached) {
     return { completed: false };
   }
+  // A lookup click can populate a pre-existing dependent field without navigating or
+  // changing the auth detector's stage. Once that field's recorded option owner is
+  // resolver-ready and the action transport has settled, the observed refresh itself is
+  // the completion signal; do not wait out a long stability timeout for another event.
+  if (input.crossFieldLookupRefreshObserved && input.nextTargetReady && input.loadingSettled) {
+    return { completed: true, signal: "cross_field_lookup_refresh" };
+  }
+  // A causal selection on the current resolved control is a valid outcome even when the same
+  // authentication stage remains open (for example, choosing a delivery channel before entering
+  // its code). Pending auth requests and recorded-route postconditions were checked above.
+  if (input.targetSelectionStateChanged || input.selectionApplied) {
+    return { completed: true, signal: "target_selection_state_changed" };
+  }
   // A successful HTTP response can arrive while an SPA is still processing authentication.
   // Keep observing the same auth gate until it changes, the recorded next target appears, or
   // an application error is shown; the network response alone is only progress at this boundary.
@@ -172,7 +380,8 @@ export function resolvePostActionSynchronization(
   // authentication itself. Unscoped readiness and unresolved targets remain blocked.
   if (input.authenticationBoundaryStillActive
     && !(input.nextTargetRequiresRuntimeResolution && input.nextTargetReady)) return { completed: false };
-  const recordedSurfaceConfirmed = Boolean(input.recordedPostActionSurfaceRequired && input.recordedPostActionSurfaceReached);
+  const recordedSurfaceConfirmed = Boolean(input.recordedPostActionSurfaceRequired
+    && (input.recordedPostActionSurfaceReached || input.recordedPostActionSuccessorConfirmed));
   // FIRST_LOSS fix: a generic network_response/dom_validation_mutation was accepted as completion
   // even though the recording's next structured action (a selection owner/combobox with real
   // `associatedField` authority) had not actually materialized as an actionable owner -- only its
@@ -180,7 +389,17 @@ export function resolvePostActionSynchronization(
   // shared resolver used for every other structured action confirms the owner is resolvable. An
   // already-confirmed recorded post-action surface is stronger authority and is never blocked by
   // this check.
-  const nextOwnerBlocking = Boolean(input.nextTargetRequiresRuntimeResolution) && !input.nextTargetReady && !recordedSurfaceConfirmed;
+  // Identical screenshots in the source recording do not prove the runtime UI has already
+  // finished its same-route transition. If a known successor is still absent, keep observing
+  // for it instead of letting an early resolver preflight (which can see a stale/hidden owner)
+  // close the current action. This is limited to recorded same-surface clicks with an explicit
+  // next action; ordinary structured-owner readiness and terminal actions retain their behavior.
+  const recordedSameSurfaceAwaitingSuccessor = Boolean(input.recordedSameSurfaceAction
+    && input.nextTargetKnown
+    && !input.nextTargetAvailable
+    && !recordedSurfaceConfirmed);
+  const nextOwnerBlocking = (Boolean(input.nextTargetRequiresRuntimeResolution) && !input.nextTargetReady && !recordedSurfaceConfirmed)
+    || recordedSameSurfaceAwaitingSuccessor;
 
   // A Recording contract can explicitly show that an action left the page on the same
   // captured screen. When that evidence is present, a stable, same-route replay with no
@@ -199,10 +418,6 @@ export function resolvePostActionSynchronization(
   // next_target_visible/auth_gate_changed all require signals this kind of action simply never
   // produces. This is about the CURRENT action's own target, never the next action's readiness,
   // so it is not subject to `nextOwnerBlocking` (an unrelated concern).
-  if (input.targetSelectionStateChanged || input.selectionApplied) {
-    return { completed: true, signal: "target_selection_state_changed" };
-  }
-
   if (!nextOwnerBlocking && input.actionNetworkObserved && input.actionNetworkResponse) {
     return { completed: true, signal: "network_response" };
   }

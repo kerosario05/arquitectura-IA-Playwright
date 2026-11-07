@@ -163,6 +163,30 @@ test("Test Design calls the Jira scenario engine and projects its journey into t
   assert.equal(scenarios[0].origin, "ai");
 });
 
+test("Test Design shares Jira's duplicate-source reduction without losing coverage clauses", async () => {
+  const sourceText = 'AC1 — Resumen\nSe muestra "Resumen".';
+  const provider = fakeProvider([{
+    scenarios: [{
+      sourceIssueKey: issue.key,
+      title: "Consultar resumen",
+      preconditions: [],
+      steps: ["Abrir la aplicación configurada del proyecto", 'Validar que se muestre "Resumen"'],
+      expectedResult: 'Se muestra "Resumen".',
+      acceptanceCriteriaRefs: ["AC1.1"],
+    }],
+  }]);
+  const generated = await generateTestDesignScenariosWithCoverage({
+    ...issue,
+    description: sourceText,
+    acceptanceCriteria: sourceText,
+  }, { provider, appSlug: "design-fixture-app" });
+  const request = JSON.parse(provider.requests[0].messages[1].content);
+  assert.equal(request.issues[0].description, sourceText);
+  assert.equal(request.issues[0].acceptanceCriteria, null);
+  assert.deepEqual(request.issues[0].acceptanceClauses.map((clause: { id: string }) => clause.id), ["AC1.1"]);
+  assert.equal(generated.coverage[0].status, "complete");
+});
+
 test("Test Design refuses to silently generate without a project knowledge profile", async () => {
   const provider = fakeProvider([good]);
   await assert.rejects(

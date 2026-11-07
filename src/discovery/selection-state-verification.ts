@@ -88,3 +88,18 @@ export function hasCausalSelectionTransition(
   const valueChanged = Boolean(before && before.value !== after.value && after.value != null && after.value !== "");
   return valueChanged && beforeValue !== true;
 }
+
+const SELECTION_STATE_CLASS_TOKENS = new Set(["active", "selected", "checked", "is-active", "is-selected", "is-checked"]);
+
+/** A class-state transition on the already-resolved clicked owner is causal selection evidence. */
+export function hasCausalSelectionClassTransition(
+  before: readonly string[] | undefined,
+  after: readonly string[] | undefined,
+): boolean {
+  if (!before || !after) return false;
+  const previous = new Set(before.map((token) => token.trim().toLowerCase()).filter(Boolean));
+  return after.some((token) => {
+    const normalized = token.trim().toLowerCase();
+    return SELECTION_STATE_CLASS_TOKENS.has(normalized) && !previous.has(normalized);
+  });
+}

@@ -1,0 +1,9 @@
+{
+  "id": "aa-113-jira-8-adjuntar-el-archivo-de-prueba-en-una-nueva-solicitud",
+  "externalId": "AA-113:jira:8",
+  "title": "Adjuntar el archivo de prueba en una nueva solicitud",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-27T18:06:35.527Z"
+}

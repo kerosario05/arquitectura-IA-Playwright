@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { buildPromotionSourceScenario } from "./case-discovery-workflow";
 import { buildSpecExecutionContract } from "../automations/spec-execution-contract";
+import { compileDeterministicSpec } from "../automations/spec-compiler/deterministic-spec-compiler";
 import type { CaseDiscoveryResult } from "../types/discovery.types";
 import type { TestScenario } from "../types/testrail.types";
 
@@ -163,6 +164,109 @@ test("recording action lineage is matched by semantic step identity when scenari
   assert.ok(contractStep?.certifiedTechnicalTarget, "recording candidate remains available to the shared target materializer");
 });
 
+test("a same-field recording option is not attached to a different authored selection value", () => {
+  const action = 'Seleccionar "Mediana Empresa Zona Francas" en "Tipo de cliente"';
+  const scenario = { ...buildRecordingScenario(), steps: [{ index: 18, action, dataHints: [], controlIdentity: "field:tipo" }] } as any;
+  const recordedCelularCandidate = {
+    targetType: "structural",
+    locatorCandidates: [{ strategy: "css", value: "#recorded-phone-option", confidence: 0.85 }],
+    structuralContext: {
+      owner: { tag: "li", role: "option" },
+      stableDirectAttributes: { "aria-label": "Celular", id: "recorded-phone-option", role: "option" },
+      stableDescendants: [],
+      semanticShape: ["span"],
+      deterministicStructuralIdentity: true,
+      structuralIdentityMatchCount: 1,
+      scopeIdentity: { strategy: "id", value: "recorded-phone-list" },
+    },
+    confidence: 0.85,
+    validatedByInteraction: true,
+  };
+  scenario.recordingExecutionContract = {
+    actions: [{
+      actionType: "click",
+      controlIdentity: "field:tipo",
+      semanticField: "Tipo",
+      valueKey: "celular",
+      technicalTargetRef: "role:option|Celular",
+      technicalTargetRefs: ["role:option|Celular", "css:#recorded-phone-option", "id:recorded-phone-option"],
+      technicalTargetCandidates: [recordedCelularCandidate],
+      playwrightRecorderEvidence: {
+        kind: "role",
+        role: "option",
+        normalizedName: "Celular",
+        targetTag: "li",
+        runtimeResolutionRequired: true,
+      },
+    }],
+    runtimeInputRequirements: [],
+  };
+
+  const discoveredMedianaCandidate = {
+    targetType: "structural",
+    certificationTier: 1,
+    certifiedFrom: "discovery",
+    locatorCandidates: [{ strategy: "css", value: '[data-testid="customer-type-mediana"]', confidence: 0.95 }],
+    structuralContext: {
+      owner: { tag: "li", role: "option" },
+      stableDirectAttributes: { "data-testid": "customer-type-mediana", role: "option" },
+      stableDescendants: [],
+      semanticShape: ["span"],
+      deterministicStructuralIdentity: true,
+      structuralIdentityMatchCount: 1,
+    },
+    confidence: 0.95,
+    validatedByInteraction: true,
+  };
+  const discoveryResult = buildCaseResult({
+    steps: [{ index: 18, action, status: "found", technicalTargetCandidates: [discoveredMedianaCandidate] } as any],
+  });
+  for (const appSlug of ["portal-comercial", "web-test"]) {
+    const source = buildPromotionSourceScenario({ ...scenario, appSlug } as any, discoveryResult);
+    const sourceStep = source.steps?.find((step) => step.index === 18) as any;
+    assert.ok(sourceStep, `${appSlug}: the authored selection must survive promotion-source construction`);
+    assert.deepEqual(
+      sourceStep.technicalTargetCandidates,
+      [{ ...discoveredMedianaCandidate, reconfirmedByDiscovery: true }],
+      `${appSlug}: the recorded Celular option must not shadow the distinct value that Discovery actually selected`,
+    );
+
+    const plan = {
+      ...buildPlan({ strategy: "selection_option_causal_surface", value: "Mediana Empresa Zona Francas" }),
+      scenario: { ...buildPlan({ strategy: "selection_option_causal_surface", value: "Mediana Empresa Zona Francas" }).scenario, appSlug },
+      steps: [{
+        index: 18,
+        action: "click",
+        description: action,
+        target: { strategy: "selection_option_causal_surface", value: "Mediana Empresa Zona Francas" },
+      }],
+    } as any;
+    const contract = buildSpecExecutionContract(plan, source);
+    const contractStep = contract.steps.find((step) => step.scenarioStepIndex === 18);
+    assert.ok(contractStep?.certifiedTechnicalTarget, `${appSlug}: Discovery should provide the current option authority`);
+    assert.equal(contractStep!.certifiedTechnicalTarget!.certifiedFrom, "discovery");
+    assert.ok(!contractStep!.technicalTargetRefs?.some((ref) => ref.includes("recorded-phone-option")));
+    const compiled = compileDeterministicSpec(contract, {
+      targetSpecPath: `${process.cwd()}/automations/apps/${appSlug}/cases/selection/case.spec.ts`,
+    });
+    assert.deepEqual(compiled.unsupportedCapabilities, []);
+    assert.ok(!compiled.source.includes("recorded-phone-option"));
+    assert.ok(compiled.source.includes("customer-type-mediana"));
+  }
+
+  const matchingScenario = {
+    ...scenario,
+    steps: [{ index: 18, action: 'Seleccionar "Celular" en "Tipo"', dataHints: [], controlIdentity: "field:tipo" }],
+  };
+  const matchingSource = buildPromotionSourceScenario(matchingScenario, buildCaseResult());
+  const matchingStep = matchingSource.steps?.find((step) => step.index === 18) as any;
+  assert.deepEqual(
+    matchingStep.technicalTargetCandidates,
+    [recordedCelularCandidate],
+    "an observed recorded option remains reusable when it matches the authored selection value",
+  );
+});
+
 test("repeated recording labels keep each occurrence's own technical target over stale projected refs", () => {
   const makeButtonCandidate = (id: string) => [{
     targetType: "structural",
@@ -272,4 +376,103 @@ test("terminal feedback promotion does not require a trailing narrative success 
   const narrativeOutcome = contract.steps.find((candidate) => candidate.scenarioStepIndex === 20);
   assert.equal(narrativeOutcome?.required, false);
   assert.equal(narrativeOutcome?.executionStatus, "contextual_unresolved");
+});
+
+test("a successful click keeps its reconfirmed scoped target when captured identity was explicitly nondeterministic", () => {
+  const scenario = { ...buildRecordingScenario(), steps: [{ index: 7, action: 'Presionar botón asociado a "Identificación"', dataHints: [] }] } as any;
+  const weak = { targetType: "structural", locatorCandidates: [], validatedByInteraction: true,
+    structuralContext: { owner: { tag: "button" }, deterministicStructuralIdentity: false, structuralIdentityMatchCount: 1 } };
+  scenario.recordingExecutionContract = { actions: [{ actionType: "click", humanStep: scenario.steps[0].action, associatedField: "Identificación", technicalTargetCandidates: [weak] }], runtimeInputRequirements: [] };
+  const reconfirmed = { targetType: "structural", certificationTier: 1, certifiedFrom: "discovery", validatedByInteraction: true,
+    locatorCandidates: [{ strategy: "css", value: '[data-testid="identity-lookup"]' }],
+    structuralContext: { owner: { tag: "button" }, stableDirectAttributes: { "data-testid": "identity-lookup" }, deterministicStructuralIdentity: true, structuralIdentityMatchCount: 1 } };
+  const result = buildCaseResult({ steps: [{ index: 7, action: scenario.steps[0].action, status: "found", technicalTargetCandidates: [reconfirmed] } as any] });
+  const source = buildPromotionSourceScenario(scenario, result);
+  assert.deepEqual(source.steps?.[0].technicalTargetCandidates?.[0], { ...reconfirmed, reconfirmedByDiscovery: true });
+  const contract = buildSpecExecutionContract({ ...buildPlan({ strategy: "recorded:css", value: "Identificación" }), steps: [{ index: 1, action: "click", description: scenario.steps[0].action, target: { strategy: "recorded:css", value: "Identificación" } }] } as any, source);
+  assert.equal(contract.steps[0].certifiedTechnicalTarget?.structuralContext?.stableDirectAttributes?.["data-testid"], "identity-lookup");
+  const compiled = compileDeterministicSpec(contract, { targetSpecPath: `${process.cwd()}/automations/apps/demo/cases/lookup/case.spec.ts` });
+  assert.deepEqual(compiled.unsupportedCapabilities, []);
+  const failedSource = buildPromotionSourceScenario(scenario, buildCaseResult({steps:[{index:7,action:scenario.steps[0].action,status:"not_found",technicalTargetCandidates:[reconfirmed]} as any]}));
+  assert.deepEqual(failedSource.steps?.[0].technicalTargetCandidates?.[0], weak);
+  const unrelated = buildPromotionSourceScenario(scenario, buildCaseResult({steps:[{index:7,action:'Presionar "Otro control"',status:"found",technicalTargetCandidates:[reconfirmed]} as any]}));
+  assert.deepEqual(unrelated.steps?.[0].technicalTargetCandidates?.[0], weak);
+});
+
+test("a successful exact Discovery interaction outranks a deterministic recorded owner with no executable locator", () => {
+  const action = 'Presionar botón asociado a "¿No posee correo electrónico?"';
+  const scenario = { ...buildRecordingScenario(), steps: [{ index: 11, action, dataHints: [] }] } as any;
+  const recordedOwnerWithoutLocator = {
+    targetType: "structural",
+    locatorCandidates: [],
+    validatedByInteraction: true,
+    structuralContext: {
+      owner: { tag: "input", role: "switch" },
+      stableDirectAttributes: { role: "switch" },
+      deterministicStructuralIdentity: true,
+      structuralIdentityMatchCount: 1,
+    },
+  };
+  scenario.recordingExecutionContract = {
+    actions: [{
+      actionType: "click",
+      stepIndex: 11,
+      humanStep: action,
+      associatedField: "¿No posee correo electrónico?",
+      technicalTargetCandidates: [recordedOwnerWithoutLocator],
+    }],
+    runtimeInputRequirements: [],
+  };
+
+  const reconfirmed = {
+    targetType: "structural",
+    certificationTier: 3,
+    certifiedFrom: "discovery",
+    validatedByInteraction: true,
+    locatorCandidates: [{
+      strategy: "css",
+      value: 'section.qa-field:has(> span) input[type="checkbox"][role="switch"]',
+    }],
+    structuralContext: {
+      owner: { tag: "div" },
+      stableDescendants: [{ relation: "descendant", tag: "input", role: "switch", stableAttributes: {} }],
+    },
+  };
+  const successfulResult = buildCaseResult({
+    steps: [{ index: 11, action, status: "found", technicalTargetCandidates: [reconfirmed] } as any],
+  });
+  const source = buildPromotionSourceScenario(scenario, successfulResult);
+  const propagatedStep = source.steps?.find((step) => step.index === 11) as any;
+  assert.deepEqual(propagatedStep.technicalTargetCandidates[0], { ...reconfirmed, reconfirmedByDiscovery: true });
+  assert.deepEqual(propagatedStep.technicalTargetCandidates[1], recordedOwnerWithoutLocator);
+
+  const plan = {
+    ...buildPlan({ strategy: "snapshot:unique_checkable_control_in_caption_scope", value: "¿No posee correo electrónico?" }),
+    steps: [{
+      index: 11,
+      action: "click",
+      description: action,
+      target: { strategy: "snapshot:unique_checkable_control_in_caption_scope", value: "¿No posee correo electrónico?" },
+    }],
+  } as any;
+  const contract = buildSpecExecutionContract(plan, source);
+  const contractStep = contract.steps.find((step) => step.scenarioStepIndex === 11);
+  assert.equal(contractStep?.certifiedTechnicalTarget?.certificationTier, 3);
+  assert.equal(contractStep?.checkableCaptionOwner, true);
+  const compiled = compileDeterministicSpec(contract, {
+    targetSpecPath: `${process.cwd()}/automations/apps/demo/cases/checkable/case.spec.ts`,
+  });
+  assert.deepEqual(compiled.unsupportedCapabilities, []);
+  assert.equal(compiled.bindings[0]?.targetRef, `label:¿No posee correo electrónico?`);
+  assert.match(compiled.source, /checkableCaptionOwner: true/);
+  assert.doesNotMatch(compiled.source, /section\.qa-field/);
+
+  const failed = buildPromotionSourceScenario(scenario, buildCaseResult({
+    steps: [{ index: 11, action, status: "not_found", technicalTargetCandidates: [reconfirmed] } as any],
+  }));
+  assert.deepEqual((failed.steps?.[0] as any).technicalTargetCandidates[0], recordedOwnerWithoutLocator);
+  const mismatched = buildPromotionSourceScenario(scenario, buildCaseResult({
+    steps: [{ index: 11, action: 'Presionar "Otro control"', status: "found", technicalTargetCandidates: [reconfirmed] } as any],
+  }));
+  assert.deepEqual((mismatched.steps?.[0] as any).technicalTargetCandidates[0], recordedOwnerWithoutLocator);
 });

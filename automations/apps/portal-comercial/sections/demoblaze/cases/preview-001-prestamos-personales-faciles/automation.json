@@ -1,0 +1,131 @@
+{
+  "id": "preview-001-prestamos-personales-faciles",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Prestamos Personales Faciles",
+  "planPath": "automations\\apps\\portal-comercial\\sections\\demoblaze\\cases\\preview-001-prestamos-personales-faciles\\plan.json",
+  "specPath": "automations\\apps\\portal-comercial\\sections\\demoblaze\\cases\\preview-001-prestamos-personales-faciles\\case.spec.ts",
+  "appSlug": "portal-comercial",
+  "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+  "status": "spec_failed",
+  "source": "discovery",
+  "appProfile": "portal-comercial",
+  "createdAt": "2026-11-04T12:27:58.119Z",
+  "updatedAt": "2026-11-04T12:27:58.119Z",
+  "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-04T12-02-48-294Z\\discovered-plans.pending.json",
+  "pomStatus": "needs_manual_review",
+  "inlineDebugMode": false,
+  "specVerificationStatus": "failed",
+  "metadata": {
+    "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-04T12-02-48-294Z",
+    "pomDiagnostics": {
+      "status": "promoted",
+      "inlineFallbackUsed": false,
+      "reason": "promoted",
+      "requiredDataUsed": [],
+      "generatedPageObjects": [],
+      "generatedMethods": [],
+      "missingPageObjects": [],
+      "missingMethods": [],
+      "generatedCandidates": 0
+    },
+    "specGeneration": {
+      "mode": "deterministic",
+      "provider": null,
+      "model": null,
+      "skill": {
+        "name": null,
+        "version": null,
+        "hash": null,
+        "loaded": false
+      },
+      "invocations": 0,
+      "invocationsConsumed": 0,
+      "durationMs": 508376,
+      "usage": {
+        "inputTokens": null,
+        "cachedInputTokens": null,
+        "cacheWriteInputTokens": null,
+        "nonCachedInputTokens": null,
+        "outputTokens": null,
+        "reasoningOutputTokens": null,
+        "totalPhysicalTokens": null,
+        "durationMs": null,
+        "credits": null
+      },
+      "validation": {
+        "schema": "skipped",
+        "structure": "passed",
+        "traceFidelity": "skipped",
+        "typescript": "passed",
+        "playwrightDiscovery": "passed",
+        "semanticCoverage": "passed",
+        "functionalExecution": "failed"
+      },
+      "promotionAllowed": false,
+      "specsRequested": 1,
+      "specsValidated": 0,
+      "specsRejected": 1,
+      "specGenerationAttempts": 0,
+      "specRepairAttempts": 0,
+      "firstPassPromotion": false,
+      "failedGatesAttempt1": [
+        "functionalExecution"
+      ],
+      "regressedGates": [],
+      "missingRequirements": [],
+      "oracleTypes": [
+        "navigation_transition"
+      ],
+      "errors": [
+        "functional_execution_failed:exitCode=1",
+        "functional_execution_error:Error: Promoted click failed at step 43 target=\"24 - PRESTAMOS PERSONALES FACILES\". failureClass=ACTION_CALLBACK_TIMEOUT exactRuntimeError=\"Retry failed: click retry timed out after 15000ms\" currentUrl=https://srvqacgowb01.local.bsc.com:5000/requests/11253/edit clickPath=failed nativeClickAttempted=false nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true diagnostics={\"currentUrl\":\"https://srvqacgowb01.local.bsc.com:5000/requests/11253/edit\",\"actionIntent\":\"select\",\"target\":\"24 - PRESTAMOS PERSONALES FACILES\",\"stepIndex\":43,\"timeoutMs\":15000,\"stability\":{\"currentUrl\":\"https://srvqacgowb01.local.bsc.com:5000/requests/11253/edit\",\"title\":\"Banco Santa Cruz - Portal Comercial\",\"visibleHeadings\":[],\"visibleButtons\":[\"Configuración\",\"Sesión\",\"Añadir relacionado\",\"Salir\",\"Cancelar\",\"Guardar\",\"Gestión Documental\",\"Continuar\",\"Precalificar\",\"Cancelar\"],\"visibleTexts\":[\"Portal Comercial\",\"Websocket\",\"Conectado\",\"General\",\"Inicio\",\"Información\",\"Documentos\",\"Documentos en curso\",\"Configuracion\",\"Jornadas\",\"Nueva jornada\",\"Jornadas en curso\",\"Reasignación\",\"Auditoria de reasignación\",\"Configuración\",\"Solicitudes\",\"Campañas\",\"Solicitud multiproducto\",\"Solicitudes en curso\",\"Configuraciones\"],\"loadingDetected\":false,\"skeletonDetected\":false,\"listReadiness\":{\"cardsVisible\":0,\"listItemsVisible\":0,\"loadingDetected\":false,\"zeroProductsDetected\":false,\"hasEntityContainers\":true,\"visibleHeadings\":[],\"visibleButtons\":[\"Portal Comercial\",\"Configuración\",\"Sesión\",\"Inicio\",\"Información\",\"Documentos en curso\",\"Configuracion\",\"Nueva jornada\",\"Jornadas en curso\",\"Reasignación\"],\"ready\":true},\"diagnosticStatus\":\"completed\"},\"retryAttempted\":true,\"clickPath\":\"failed\",\"nativeClickAttempted\":false,\"nativeClickSucceeded\":false,\"nativeClickError\":\"selection_callback_owns_target_resolution\",\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Retry failed: click retry timed out after 15000ms\",\"expectedEffect\":\"selection_state_change\",\"effectDetected\":false,\"fallbackUsed\":\"none\",\"matchedLocatorStrategy\":\"unknown\",\"screenshotPath\":\"C:\\\\MisProyectos\\\\arquitectura-IA-Playwright-feature-auth-gate\\\\.artifacts\\\\promoted-runtime\\\\step-043.png\"}"
+      ],
+      "warnings": [
+        "functional_execution_screenshots=41",
+        "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 43)."
+      ],
+      "finalSpec": {
+        "origin": "deterministic_compiler",
+        "generatedBy": "core",
+        "strategy": "deterministic_compiler",
+        "fallback": null
+      },
+      "runtimeGate": {
+        "decision": "block",
+        "promotionStatus": "blocked",
+        "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 43)."
+      },
+      "specWritten": false,
+      "previousSpec": {
+        "existed": false,
+        "hash": null,
+        "lastModifiedAt": null
+      }
+    },
+    "promotionStrategyDiagnostics": {
+      "requestedStrategy": "auto",
+      "autoPomEnabled": true,
+      "selectedStrategy": "pom",
+      "reason": "spec_generation_validation_failed",
+      "blockers": [
+        "spec_generation_validation_failed"
+      ],
+      "availablePageObjects": [
+        "ProductListPage",
+        "OperationsMenuPage",
+        "LoginPage",
+        "FormPage"
+      ],
+      "requiredPageMethods": [],
+      "missingPageMethods": [],
+      "autoPomAttempted": false,
+      "autoPomCreatedMethods": [],
+      "fallbackUsed": false,
+      "requirePomRuntime": false,
+      "specPath": "automations\\apps\\portal-comercial\\sections\\demoblaze\\cases\\preview-001-prestamos-personales-faciles\\case.spec.ts",
+      "specHash": "7c89cb39b3b6288e9b065ab559406435c69b20da0cc0fa81879c5630338d7083",
+      "specSource": "ai_candidate"
+    }
+  }
+}

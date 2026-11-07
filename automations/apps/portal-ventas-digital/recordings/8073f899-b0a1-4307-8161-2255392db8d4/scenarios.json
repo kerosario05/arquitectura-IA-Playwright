@@ -1,0 +1,768 @@
+[
+  {
+    "scenarioId": "REC-8073F899-01",
+    "title": "Consulta",
+    "description": "Recorrido observado para completar \"Consulta\". Se registraron 12 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://solicitudedigitalesdev/",
+        "description": "Navegar a https://solicitudedigitalesdev/"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Tarjeta de CréditoTu aliado para comprar de forma inteligente."
+        },
+        "description": "Presionar \"Tarjeta de CréditoTu aliado para comprar de forma inteligente.\"",
+        "interactionId": "interaction-5",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-8",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "css",
+          "value": "#x_DocumentId"
+        },
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetRefs": [
+          "css:#x_DocumentId",
+          "id:x_DocumentId"
+        ],
+        "description": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "interactionId": "interaction-9",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl"
+        },
+        "description": "Marcar \"Acepto los Términos y Condiciones\"",
+        "interactionId": "interaction-12",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-15",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Salir"
+        },
+        "description": "Presionar \"Salir\"",
+        "interactionId": "interaction-19",
+        "pageKey": "tab-1"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Presionar \"Tarjeta de CréditoTu aliado para comprar de forma inteligente.\"",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "renderedStep": "Presionar \"Tarjeta de CréditoTu aliado para comprar de forma inteligente.\"",
+        "interactionId": "interaction-5",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "81f5c3cd9e40",
+        "screenAfterRef": "81f5c3cd9e40",
+        "routeBefore": "https://solicitudedigitalesdev/",
+        "routeAfter": "https://solicitudedigitalesdev/tarjetas",
+        "stateScope": "81f5c3cd9e40",
+        "stepNumber": 2
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-8",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "62c2920c432f",
+        "screenAfterRef": "62c2920c432f",
+        "routeBefore": "https://solicitudedigitalesdev/tarjetas",
+        "stateScope": "62c2920c432f",
+        "stepNumber": 3
+      },
+      {
+        "content": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"402-2467955-1\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "interactionId": "interaction-9",
+        "technicalTargetRefs": [
+          "css:#x_DocumentId",
+          "id:x_DocumentId"
+        ],
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "62c2920c432f",
+        "screenAfterRef": "62c2920c432f",
+        "routeBefore": "https://solicitudedigitalesdev/tarjetas",
+        "stateScope": "62c2920c432f",
+        "stepNumber": 4
+      },
+      {
+        "content": "Marcar \"Acepto los Términos y Condiciones\"",
+        "sourceEventRefs": [
+          "event-12"
+        ],
+        "renderedStep": "Marcar \"Acepto los Términos y Condiciones\"",
+        "interactionId": "interaction-12",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "62c2920c432f",
+        "screenAfterRef": "62c2920c432f",
+        "routeBefore": "https://solicitudedigitalesdev/tarjetas",
+        "stateScope": "62c2920c432f",
+        "stepNumber": 5
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-15",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "62c2920c432f",
+        "screenAfterRef": "f0878b91600f",
+        "routeBefore": "https://solicitudedigitalesdev/tarjetas",
+        "routeAfter": "https://solicitudedigitalesdev/tarjetas?method=getClientInfo&productSlug=tarjeta-credito-visa-clasica&hasError=true",
+        "stateScope": "62c2920c432f",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar \"Salir\"",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "renderedStep": "Presionar \"Salir\"",
+        "interactionId": "interaction-19",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "62c2920c432f",
+        "screenAfterRef": "62c2920c432f",
+        "routeBefore": "https://solicitudedigitalesdev/tarjetas?method=getClientInfo&productSlug=tarjeta-credito-visa-clasica&hasError=true",
+        "stateScope": "62c2920c432f",
+        "stepNumber": 7
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "numero_de_identificacion",
+        "label": "Número de identificación",
+        "stepIndex": 3,
+        "technicalTargetRefs": [
+          "css:#x_DocumentId",
+          "id:x_DocumentId"
+        ],
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "exampleValue": "402-2467955-1",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Número de identificación",
+        "needsReview": false,
+        "reviewReason": "explicit_associated_label"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Presionar \"Tarjeta de CréditoTu aliado para comprar de forma inteligente.\"",
+        "strategy": "role",
+        "value": "button|Tarjeta de CréditoTu aliado para comprar de forma inteligente."
+      },
+      {
+        "stepIndex": 2,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
+        "strategy": "css",
+        "value": "#x_DocumentId"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Marcar \"Acepto los Términos y Condiciones\"",
+        "strategy": "role",
+        "value": "checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Salir\"",
+        "strategy": "role",
+        "value": "button|Salir"
+      }
+    ],
+    "sourceRecordingId": "8073f899-b0a1-4307-8161-2255392db8d4",
+    "hasUncertainSteps": false,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": true,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 7,
+    "functionalActionCount": 6,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Consulta",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "pageKey": "tab-1",
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://solicitudedigitalesdev/",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-3",
+        "controlIdentity": "0b23ab3287d9",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "technicalTargetRefs": [],
+        "pageKey": "tab-1",
+        "screenBeforeRef": "0b23ab3287d9",
+        "screenAfterRef": "0b23ab3287d9",
+        "routeBefore": "https://solicitudedigitalesdev/",
+        "stateScope": "0b23ab3287d9",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-5",
+        "controlIdentity": "81f5c3cd9e40|Tarjeta de CréditoTu aliado para comprar de forma inteligente.|role|button|Tarjeta de CréditoTu aliado para comprar de forma inteligente.",
+        "action": "click",
+        "pageKey": "tab-1",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Tarjeta de CréditoTu aliado para comprar de forma inteligente.",
+          "css:#nav-item-tarjetas-de-credito",
+          "id:nav-item-tarjetas-de-credito"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#nav-item-tarjetas-de-credito",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a",
+                "role": "button"
+              },
+              "stableDirectAttributes": {
+                "href": "#",
+                "id": "nav-item-tarjetas-de-credito",
+                "role": "button"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",3]],\"descendantEntries\":[[\"circle\",1],[\"path\",9],[\"span\",5],[\"svg\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "nav-app-product-types"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\",\"role\":\"button\"},\"stableDirectAttributes\":{\"href\":\"#\",\"id\":\"nav-item-tarjetas-de-credito\",\"role\":\"button\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",3]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",9],[\\\"span\\\",5],[\\\"svg\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "screenBeforeRef": "81f5c3cd9e40",
+        "screenAfterRef": "81f5c3cd9e40",
+        "routeBefore": "https://solicitudedigitalesdev/",
+        "routeAfter": "https://solicitudedigitalesdev/tarjetas",
+        "stateScope": "81f5c3cd9e40",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-8",
+        "controlIdentity": "62c2920c432f|Continuar|role|button|Continuar",
+        "action": "click",
+        "pageKey": "tab-1",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar",
+          "css:#btn-solicitar-tarjeta-credito-visa-clasica",
+          "id:btn-solicitar-tarjeta-credito-visa-clasica"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-solicitar-tarjeta-credito-visa-clasica",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-solicitar-tarjeta-credito-visa-clasica"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "card-tarjeta-credito-visa-clasica"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-solicitar-tarjeta-credito-visa-clasica\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "screenBeforeRef": "62c2920c432f",
+        "screenAfterRef": "62c2920c432f",
+        "routeBefore": "https://solicitudedigitalesdev/tarjetas",
+        "stateScope": "62c2920c432f",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-9",
+        "controlIdentity": "62c2920c432f|Número de identificación|css|#x_DocumentId",
+        "semanticField": "Número de identificación",
+        "action": "fill",
+        "pageKey": "tab-1",
+        "valueKey": "numero_de_identificacion",
+        "recordedValue": "402-2467955-1",
+        "rawTypedValue": "40224679551",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "technicalTargetRefs": [
+          "css:#x_DocumentId",
+          "id:x_DocumentId"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"Número de identificación\"",
+        "screenBeforeRef": "62c2920c432f",
+        "screenAfterRef": "62c2920c432f",
+        "routeBefore": "https://solicitudedigitalesdev/tarjetas",
+        "stateScope": "62c2920c432f",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.8
+      },
+      {
+        "id": "interaction-12",
+        "controlIdentity": "62c2920c432f|control|role|checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl",
+        "semanticField": "control",
+        "action": "check",
+        "pageKey": "tab-1",
+        "valueKey": "control",
+        "sourceEventRefs": [
+          "event-12",
+          "event-13"
+        ],
+        "technicalTargetRefs": [
+          "role:checkbox|Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Pl",
+          "css:#base-ui-_r_2l_",
+          "id:base-ui-_r_2l_"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#base-ui-_r_2l_",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "checkbox"
+              },
+              "stableDirectAttributes": {
+                "aria-labelledby": "el_AcceptTermsAndConditions",
+                "id": "base-ui-_r_2l_",
+                "role": "checkbox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "el_AcceptTermsAndConditions"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"checkbox\"},\"stableDirectAttributes\":{\"id\":\"base-ui-_r_2l_\",\"role\":\"checkbox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": false,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "checkbox",
+          "normalizedName": "Acepto los Términos y Condiciones de la Aplicación Móvil, Web, Portal(es) y/o Plataforma(s) Digitales y los Términos y Condiciones de Uso e Intercambio de Información Personal. Al continuar con este proceso, autorizo a EL BANCO a: a) recopilar, capturar y utilizar mis datos biométricos como mecanismos alternos de autenticación e identificación; b) a consultar mis datos en el Maestro de Cedulados de la Junta Central Electoral, el buró de crédito y en la Tesorería de Seguridad Social (TSS); c) Compartir, entregar y transmitir mi información de carácter personal: Nombre, Apellido, Cédula de Identidad, Correo Electrónico y Teléfonos con entidades y organismos públicos y gubernamentales a los fines de cumplir con la legislación y normativa aplicable.",
+          "targetTag": "span",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "el_AcceptTermsAndConditions"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"control\"",
+        "screenBeforeRef": "62c2920c432f",
+        "screenAfterRef": "62c2920c432f",
+        "routeBefore": "https://solicitudedigitalesdev/tarjetas",
+        "stateScope": "62c2920c432f",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-15",
+        "controlIdentity": "62c2920c432f|Continuar|role|button|Continuar",
+        "action": "click",
+        "pageKey": "tab-1",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar",
+          "css:#btn-identity-validate",
+          "id:btn-identity-validate"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-identity-validate",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-identity-validate"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "_r_2f_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-identity-validate\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "screenBeforeRef": "62c2920c432f",
+        "screenAfterRef": "f0878b91600f",
+        "routeBefore": "https://solicitudedigitalesdev/tarjetas",
+        "routeAfter": "https://solicitudedigitalesdev/tarjetas?method=getClientInfo&productSlug=tarjeta-credito-visa-clasica&hasError=true",
+        "stateScope": "62c2920c432f",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-19",
+        "controlIdentity": "62c2920c432f|Salir|role|button|Salir",
+        "action": "click",
+        "pageKey": "tab-1",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Salir",
+          "css:#btn-leave-process",
+          "id:btn-leave-process"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-leave-process",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-leave-process"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"circle\",1],[\"path\",1],[\"span\",1],[\"svg\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "_r_45_"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-leave-process\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"circle\\\",1],[\\\"path\\\",1],[\\\"span\\\",1],[\\\"svg\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "screenBeforeRef": "62c2920c432f",
+        "screenAfterRef": "62c2920c432f",
+        "routeBefore": "https://solicitudedigitalesdev/tarjetas?method=getClientInfo&productSlug=tarjeta-credito-visa-clasica&hasError=true",
+        "stateScope": "62c2920c432f",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": true,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": true,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "numero_de_identificacion",
+        "semanticField": "Número de identificación",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "402-2467955-1",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 3,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "402-2467955-1",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-8073F899-01",
+      "requirements": [
+        {
+          "valueKey": "numero_de_identificacion",
+          "semanticField": "Número de identificación",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "402-2467955-1",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 3,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "402-2467955-1",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "numero_de_identificacion": "402-2467955-1"
+      },
+      "missingValues": []
+    },
+    "mutationOpportunities": []
+  }
+]

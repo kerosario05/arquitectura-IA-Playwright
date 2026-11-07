@@ -1,4 +1,4 @@
-import type { RecordedEvent, RecordedTarget, RecordedEditingSession, RecordedValueConstraint } from "./session-trace.types";
+﻿import type { RecordedEvent, RecordedTarget, RecordedEditingSession, RecordedValueConstraint, RecordedValueSelection } from "./session-trace.types";
 import type {
   RecordedDataField,
   RecordedScenario,
@@ -20,8 +20,26 @@ export type CanonicalInteractionAction =
   | "check"
   | "uncheck"
   | "press"
+  | "upload"
   | "navigation"
+  | "tab_switch"
   | "system_observation";
+
+/** Persist only a reusable web destination; credentials, query parameters, and token-like hashes are dropped. */
+export function sanitizeRecordedNavigationUrl(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return undefined;
+    url.username = "";
+    url.password = "";
+    url.search = "";
+    const routeHash = /^#\/(?!.*(?:token|code|session|auth|secret)=)[a-z0-9/_-]{0,180}$/i.test(url.hash) ? url.hash : "";
+    return `${url.origin}${url.pathname}${routeHash}`;
+  } catch {
+    return undefined;
+  }
+}
 
 /** Evidence-backed ownership of the application state in which an interaction is valid. */
 export type InteractionStateOwnership = {
@@ -60,7 +78,7 @@ export type InteractionStateOwnership = {
   /**
    * True when this interaction is the first action on a new surface (its screenKey differs
    * from the previous interaction's) and its field/owner identity could not be corroborated by
-   * structural evidence captured on ITS OWN target — only by an ancestor-walk-derived
+   * structural evidence captured on ITS OWN target â€” only by an ancestor-walk-derived
    * header/label, the signal vulnerable to still reflecting the previous surface's DOM for a
    * brief window after a transition. semanticField/description are withheld rather than
    * trusted in this case; the raw target/label evidence is still preserved for diagnosis.
@@ -68,7 +86,7 @@ export type InteractionStateOwnership = {
   ownerRecertificationRequired?: boolean;
   /**
    * The admission gate's structured outcome. Absent (or "accepted") means the interaction's
-   * technical identity is trusted as executable authority. "unresolved" means it is not —
+   * technical identity is trusted as executable authority. "unresolved" means it is not â€”
    * semanticField/description are withheld and the interaction must never be presented
    * downstream as a valid target, though its raw target/label evidence is preserved for
    * diagnosis. Single source of truth: see `isTechnicalIdentityAdmissible`/
@@ -78,7 +96,7 @@ export type InteractionStateOwnership = {
   admissionStatus?: "accepted" | "unresolved";
   admissionReason?: string;
   /**
-   * Recording Replay's runtime-resolution admission state — never execution authority on its
+   * Recording Replay's runtime-resolution admission state â€” never execution authority on its
    * own. "certified" mirrors admissionStatus="accepted". "runtime_resolution_required" means
    * admission rejected the recorded field/owner identity, but real structured evidence (a
    * recorded value plus its own technical target evidence, a genuine structural field name, or
@@ -99,6 +117,18 @@ export type CanonicalInteraction = InteractionStateOwnership & {
   entityScope?: string;
   rowRelation?: "next" | "added";
   action: CanonicalInteractionAction;
+  /** Durable file assets captured by the Recording flow, never file bytes or local paths. */
+  fileAssets?: import("./session-trace.types").RecordedFileAssetRef[];
+  /** Sanitized destination for an independent, directly observed browser navigation. */
+  navigationUrl?: string;
+  /** Recorder-owned browser tab identity, scoped to this recording. */
+  pageKey?: string;
+  /** True when the observed navigation opened a new browser tab. */
+  opensNewPage?: boolean;
+  /** The selected live text source for a value pasted into a later field. */
+  runtimeValueCapture?: { sourceEventRef: string; sourcePageKey?: string; technicalTargetRefs: string[]; valueSelection: RecordedValueSelection };
+  /** Source event containing a live value that this fill reuses at execution time. */
+  dependsOnEventRef?: string;
   valueKey?: string;
   recordedValue?: string;
   /** The discrete command key a `"press"` action sends (e.g. "Enter"). Absent for every other action type. */
@@ -181,21 +211,25 @@ export function isDynamicObjectDisplayLabel(target: RecordedTarget | undefined):
   if (dataContainer && /\b(?:undefined|null)\b|\[object Object\]/i.test(label)) return true;
   const digits = (label.match(/\d/g) ?? []).length;
   if (digits >= 7 || /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(label)) return true;
-  if (/[•*xX]{2,}.{0,8}\d{2,4}$/.test(label)
-    && /(?:card|tarjeta|account|cuenta|credit|cr[eé]dito)/i.test(label)) return true;
+  if (/[â€¢*xX]{2,}.{0,8}\d{2,4}$/.test(label)
+    && /(?:card|tarjeta|account|cuenta|credit|cr[eÃ©]dito)/i.test(label)) return true;
 
   const locatorContext = [
     ...(target.locators ?? []).map((locator) => `${locator.strategy}:${locator.value}`),
     ...Object.entries(target.attributes ?? {}).map(([key, value]) => `${key}:${value}`),
   ].join(" ");
   const identityHint = /(?:^|[\s_:#./-])(?:profile|perfil|customer|cliente|client|person|persona|user|usuario|titular|beneficiary|beneficiario|cardholder|accountowner)(?:$|[\s_:#./-])/i.test(locatorContext);
-  const words = label.match(/[\p{L}][\p{L}'’.-]*/gu) ?? [];
+  const words = label.match(/[\p{L}][\p{L}'â€™.-]*/gu) ?? [];
+  // A person's name carries no digits or currency: a card whose text includes a price is a product.
   const personShaped = words.length >= 2
     && words.length <= 6
+    && !/[\d$€£%]/.test(label)
     && words.every((word) => /^\p{Lu}/u.test(word))
     && !/\b(?:de|del|la|el|los|las|of|and|for)\b/i.test(label);
   const textEvidence = target.playwrightRecorderEvidence?.kind === "text"
-    && target.playwrightRecorderEvidence.runtimeResolutionRequired === true;
+    && target.playwrightRecorderEvidence.runtimeResolutionRequired === true
+    // A title the recorder promoted to tell sibling items apart is the identity of the chosen item, not run data.
+    && target.playwrightRecorderEvidence.promotedTitle !== true;
   return personShaped && ((identityHint && dataContainer) || (words.length >= 3 && dataContainer && textEvidence));
 }
 
@@ -629,7 +663,7 @@ export type RecordedActionReadiness = {
   /**
    * True when this action's own field/owner identity was never admitted, but it is still
    * `ready` because sufficient recorded evidence exists for the EXISTING runtime/MCP resolver to
-   * attempt live re-resolution (Recording Replay only). Never execution authority by itself —
+   * attempt live re-resolution (Recording Replay only). Never execution authority by itself â€”
    * `resolveActionTarget` still independently verifies/rejects it at runtime (resolved / ambiguous
    * / not_found / structurally incompatible).
    */
@@ -645,7 +679,7 @@ export type RecordedScenarioExecutionReadiness = {
   mutationReady: boolean;
   executionReady: boolean;
   /**
-   * false while ANY action is `runtimeResolutionRequired` (or otherwise not executionReady) —
+   * false while ANY action is `runtimeResolutionRequired` (or otherwise not executionReady) â€”
    * a Recording Replay execution attempt is allowed before full certification, but promotion
    * (spec generation, promoted-spec reuse, publication) is not.
    */
@@ -677,7 +711,8 @@ export function evaluateRecordedScenarioExecutionReadiness(
   const interactions = (scenario.canonicalInteractions ?? []).filter((interaction) =>
     hasExecutionAuthority(interaction)
     && interaction.action !== "system_observation"
-    && interaction.action !== "navigation",
+    && interaction.action !== "navigation"
+    && interaction.action !== "tab_switch",
   );
   const requirements = new Map((scenario.runtimeInputRequirements ?? []).map((requirement) => [requirement.valueKey, requirement]));
   // `readiness` is a persisted projection and may be stale after a materialization repair.
@@ -749,7 +784,7 @@ export function evaluateRecordedScenarioExecutionReadiness(
     if (!stateReady) blockReasons.push("state_sequence_invalid");
     // Unresolved is never optional BY DEFAULT: a required action whose technical/owner identity
     // admission gate rejected it must never be treated as ready just because SOME
-    // target/candidate happens to be present (e.g. a last-resort structural fallback) — that
+    // target/candidate happens to be present (e.g. a last-resort structural fallback) â€” that
     // would let a "control"/"Campo pendiente de identificar" action reach the browser runtime as
     // if resolved.
     if (interaction.admissionStatus === "unresolved" && !runtimeResolutionRequired) blockReasons.push("required_interaction_unresolved");
@@ -818,13 +853,13 @@ export function evaluateRecordedScenarioExecutionReadiness(
     ...(!mutationReady ? [scenario.mutationDiagnostics?.rejectionReason ?? "mutation_contract_invalid"] : []),
   ])];
   // Every other readiness axis above already mirrors a specific per-action blockReason
-  // (unresolved_runtime_value -> dataReady, state_sequence_invalid -> stateReady) — this is the
+  // (unresolved_runtime_value -> dataReady, state_sequence_invalid -> stateReady) â€” this is the
   // one axis (required_interaction_unresolved) with no dedicated boolean, so it is checked
   // directly against each action's own readiness rather than duplicating another named flag.
   const allActionsReady = actions.every((action) => action.ready);
   // `technicalReady` deliberately stays OUT of this AND-chain: it is the honest, unconditional
   // "does every action already carry a certified technical target" signal (never true for a
-  // runtime-resolution-eligible action, by design — see its own field doc). `allActionsReady`
+  // runtime-resolution-eligible action, by design â€” see its own field doc). `allActionsReady`
   // is the real per-action gate, and already accounts for the runtime-resolution carve-out
   // (missing_technical_target/no_structural_reresolution_strategy do not block a
   // runtime-resolution-required action there). Recording Replay may attempt execution on that
@@ -905,7 +940,7 @@ function fieldOf(target: RecordedTarget | undefined): string | undefined {
  * Delegates to the single shared admission authority (trace-normalizer.ts) so post-transition
  * owner recertification, semantic field admission, and trace normalization never independently
  * decide "this target has technical identity" differently. Never textual: only a stable
- * attribute or a non-positional, non-text-only locator counts — never label/header content, and
+ * attribute or a non-positional, non-text-only locator counts â€” never label/header content, and
  * never a comparison against a previous owner.
  */
 function hasStructuralIdentityCorroboration(target: RecordedTarget | undefined): boolean {
@@ -972,10 +1007,17 @@ function stateScopeOf(event: RecordedEvent, target: RecordedTarget | undefined):
   return parts.length > 0 ? parts.join("|") : undefined;
 }
 
+/** A navigation that opens another tab, or happens in another tab, is not the outcome of an action in this one. */
+function isOtherPageNavigation(candidate: RecordedEvent, source: RecordedEvent): boolean {
+  return candidate.opensNewPage === true
+    || Boolean(candidate.pageKey && source.pageKey && candidate.pageKey !== source.pageKey);
+}
+
 function transitionAfter(events: readonly RecordedEvent[], index: number, excludeSeqs?: ReadonlySet<number>): { event?: RecordedEvent; nextActionIndex?: number } {
   for (let cursor = index + 1; cursor < events.length; cursor += 1) {
     const candidate = events[cursor];
     if (typeof candidate.seq === "number" && excludeSeqs?.has(candidate.seq)) continue;
+    if (candidate.kind === "navigate" && isOtherPageNavigation(candidate, events[index])) continue;
     if (candidate.kind === "screen_change" && candidate.toScreenKey && candidate.toScreenKey !== candidate.screenKey) {
       return { event: candidate };
     }
@@ -1069,6 +1111,7 @@ function causalTransition(events: readonly RecordedEvent[], index: number, exclu
     }
     if (candidate.kind !== "navigate" || !candidate.url) continue;
     if (candidate.url === anchor.url) continue;
+    if (isOtherPageNavigation(candidate, anchor)) continue;
     // A tap can first dismiss an overlay and capture the underlying screen, then a later
     // route-only event can reflect the app's inactivity reset. When that event still carries
     // the just-captured screen key and the captured screen shares the action's route surface,
@@ -1155,6 +1198,27 @@ export function isTransientStatusTap(target: { role?: string; tag?: string } | u
   const role = target?.role?.toLowerCase();
   const tag = target?.tag?.toLowerCase();
   return Boolean(role && NON_ACTIONABLE_LIVE_REGION_ROLES.has(role) && !(tag && ACTIONABLE_TAGS.has(tag)));
+}
+
+/**
+ * A pointer on static text that a later `value_source` event copied from: the click only selected the
+ * value, it is not a control to replay. Matches by the element's own stable id/test id, never by label.
+ */
+export function isValueSelectionTap(events: readonly RecordedEvent[], index: number): boolean {
+  const tap = events[index];
+  if (tap.kind !== "tap" || tap.target?.role) return false;
+  const identities = new Set<string>();
+  for (const candidate of tap.target?.technicalTargetCandidates ?? []) {
+    const attributes = (candidate.structuralContext?.stableDirectAttributes ?? {}) as Record<string, unknown>;
+    for (const key of ["id", "data-testid"]) if (typeof attributes[key] === "string") identities.add(`${key}:${attributes[key]}`);
+  }
+  if (identities.size === 0) return false;
+  return events.slice(index + 1).some((event) => {
+    if (event.kind !== "value_source") return false;
+    const sourceId = event.target?.attributes?.id;
+    return (typeof sourceId === "string" && identities.has(`id:${sourceId}`))
+      || (event.target?.locators ?? []).some((locator) => identities.has(`${locator.strategy === "css" ? "id" : locator.strategy}:${locator.value.replace(/^#/, "")}`));
+  });
 }
 
 export function isMaskActivation(events: readonly RecordedEvent[], index: number): boolean {
@@ -1254,12 +1318,12 @@ export function buildCanonicalInteractions(
   }
   // Tracks the screen of the last emitted functional (tap/fill) interaction, so the very next
   // interaction on a DIFFERENT screen can be recognized as needing recertification before its
-  // field/owner identity is trusted — never by comparing label text against the previous owner.
+  // field/owner identity is trusted â€” never by comparing label text against the previous owner.
   let lastFunctionalScreenKey: string | undefined;
   // Tracks which screens have already produced at least one fill/select interaction, so a click
   // that lands on a screen with NO prior fill/select can be recognized as potentially missing a
   // required input the capture script never emitted an event for (see
-  // `missingRequiredFillPrecondition` below) — purely structural (per-screen action-kind
+  // `missingRequiredFillPrecondition` below) â€” purely structural (per-screen action-kind
   // presence), never a field name/label comparison.
   const screensWithFillOrSelect = new Set<string>();
   // Related state surface evidence is captured on the post_action OBSERVATION (emitted ~180ms after
@@ -1292,25 +1356,72 @@ export function buildCanonicalInteractions(
   }
   for (const [index, event] of events.entries()) {
     const target = event.target;
+    if (event.kind === "value_source") {
+      const refs = target?.locators?.map((locator) => `${locator.strategy}:${locator.value}`) ?? [];
+      if (refs.length && event.valueSelection) {
+        result.push({
+          id: `interaction-${index + 1}`,
+          controlIdentity: stableControlOf(event),
+          action: "system_observation",
+          sourceEventRefs: [`event-${index + 1}`],
+          technicalTargetRefs: refs,
+          ...(event.pageKey ? { pageKey: event.pageKey } : {}),
+          routeBefore: event.url,
+          runtimeValueCapture: {
+            sourceEventRef: `event-${index + 1}`,
+            ...(event.pageKey ? { sourcePageKey: event.pageKey } : {}),
+            technicalTargetRefs: [...refs],
+            valueSelection: { ...event.valueSelection },
+          },
+          technicalOnly: true,
+          executionAuthority: false,
+          confidence: 0.9,
+        });
+      }
+      continue;
+    }
     if (event.kind === "note" || event.kind === "launch" || event.kind === "screen_change") continue;
-    if (isNonActionableContainerTap(event)) continue;
+    if (isNonActionableContainerTap(event) || isValueSelectionTap(events, index)) continue;
+    if (event.kind === "tab_switch") {
+      result.push({
+        id: `interaction-${index + 1}`,
+        controlIdentity: stableControlOf(event),
+        action: "tab_switch",
+        sourceEventRefs: [`event-${index + 1}`],
+        technicalTargetRefs: [],
+        ...(event.pageKey ? { pageKey: event.pageKey } : {}),
+        description: event.pageKey ? `Cambiar a la pestaÃ±a "${event.pageKey}"` : "Cambiar de pestaÃ±a",
+        routeBefore: event.url,
+        technicalOnly: false,
+        executionAuthority: Boolean(event.pageKey),
+        confidence: event.pageKey ? 1 : 0,
+      });
+      continue;
+    }
     if (event.kind === "navigate" || event.kind === "back") {
-      if (typeof event.seq === "number" && ownedTransitionSeqs.has(event.seq)) continue;
+      if (typeof event.seq === "number" && ownedTransitionSeqs.has(event.seq) && event.opensNewPage !== true) continue;
       const ownership = ownershipForEvent(events, index, ownedTransitionSeqs);
+      const hasPriorUserAction = events.slice(0, index).some((candidate) =>
+        candidate.kind === "tap" || candidate.kind === "fill" || candidate.kind === "press" || candidate.kind === "file_upload",
+      );
+      const navigationUrl = event.kind === "navigate" ? sanitizeRecordedNavigationUrl(event.url) : undefined;
       result.push({
         id: `interaction-${index + 1}`,
         controlIdentity: stableControlOf(event),
         action: "navigation",
         sourceEventRefs: [`event-${index + 1}`],
         technicalTargetRefs: target?.locators?.map((locator) => `${locator.strategy}:${locator.value}`) ?? [],
+        ...(event.pageKey ? { pageKey: event.pageKey } : {}),
+        ...(event.opensNewPage === true ? { opensNewPage: true } : {}),
         description: target?.label ? `Presionar "${target.label}"` : undefined,
         ...ownership,
         technicalOnly: true,
+        ...((hasPriorUserAction || event.directUserNavigation === true) && navigationUrl ? { executionAuthority: true, navigationUrl } : {}),
         confidence: 0.9,
       });
       continue;
     }
-    if (event.kind !== "tap" && event.kind !== "fill" && event.kind !== "press") continue;
+    if (event.kind !== "tap" && event.kind !== "fill" && event.kind !== "press" && event.kind !== "file_upload") continue;
     if (isMaskActivation(events, index)) continue;
     if (event.kind === "tap" && isTransientStatusTap(target)) continue;
     const correlatedKeyboardEvidence = event.kind === "tap" && event.interactionId
@@ -1337,7 +1448,9 @@ export function buildCanonicalInteractions(
     // target of its own -- it must stay excluded from execution, never silently readmitted just
     // because its lineage came up empty.
     const isDisplayProjection = target?.sourceTechnicalEventSeqs !== undefined;
-    const action: CanonicalInteractionAction = event.kind === "press"
+    const action: CanonicalInteractionAction = event.kind === "file_upload"
+      ? "upload"
+      : event.kind === "press"
       ? "press"
       : selection
         ? "select"
@@ -1369,7 +1482,8 @@ export function buildCanonicalInteractions(
         && candidate.structuralContext.identityAmbiguous !== true,
       );
     const dynamicTargetNeedsRuntimeResolution = dynamicTargetLabel && !dynamicTargetHasStableEvidence;
-    const value = event.kind === "press"
+    const isRuntimeDerivedFill = event.kind === "fill" && event.valueSource === "application" && Boolean(event.dependsOnEventRef);
+    const value = event.kind === "press" || event.kind === "file_upload" || isRuntimeDerivedFill
       ? undefined
       : selection
         ? clean(target?.afterValue ?? target?.dynamicLifecycle?.selectedOption)
@@ -1380,13 +1494,13 @@ export function buildCanonicalInteractions(
     const key = event.kind === "press" ? clean(event.note ?? "") : undefined;
     // A field/owner identity resolved purely from an ancestor-walk label/header (fieldOf) is
     // never trusted for the first interaction on a new screen unless corroborated by structural
-    // evidence captured on THIS interaction's own target — the previous screen's owner is never
+    // evidence captured on THIS interaction's own target â€” the previous screen's owner is never
     // reused, and the check itself never compares label text.
     const isPostTransition = lastFunctionalScreenKey !== undefined && lastFunctionalScreenKey !== event.screenKey;
     const structurallyCorroborated = hasStructuralIdentityCorroboration(target);
     const ownerRecertificationRequired = isPostTransition && !structurallyCorroborated;
     // Independent of transitions: a generic fallback label ("control", "campo", ...) with no
-    // technical identity of its own is never admitted as executable authority either — this is
+    // technical identity of its own is never admitted as executable authority either â€” this is
     // the same admission decision "control"/"Campo pendiente de identificar" must fail.
     const genericWithoutIdentity = !structurallyCorroborated
       && isGenericUnresolvedLabel(target?.associatedField ?? target?.headerContext ?? target?.label);
@@ -1423,13 +1537,13 @@ export function buildCanonicalInteractions(
           : undefined;
     lastFunctionalScreenKey = event.screenKey;
     // Any fill/select EVENT at all proves the capture listener fired on this screen, regardless
-    // of whether ITS OWN identity was separately admitted — that is an independent, already
+    // of whether ITS OWN identity was separately admitted â€” that is an independent, already
     // handled concern (required_interaction_unresolved). This tracker exists only to catch the
     // "zero fill events were ever captured here" case.
     if (action === "fill" || action === "select") screensWithFillOrSelect.add(event.screenKey);
     const technicalTargetRefsForEvent = targetLocatorsForReplay.map((locator) => `${locator.strategy}:${locator.value}`);
     // A real structural label source (associatedField/headerContext/columnIdentity), never the raw
-    // ancestor-walk label fallback fieldOf(target) also accepts — that fallback is exactly the
+    // ancestor-walk label fallback fieldOf(target) also accepts â€” that fallback is exactly the
     // "control"/generic-label surface the admission gate exists to reject, so it must never be
     // resurrected here even for a runtime-resolution attempt. `columnIdentity` (a grid cell's
     // stable data-column/data-field/aria-colindex identity, see runtime-knowledge-extractor.ts)
@@ -1439,7 +1553,7 @@ export function buildCanonicalInteractions(
     // the live field-scoped resolver, it was just never offered as a candidate field name. Two
     // more exclusions, both required to avoid reopening bugs earlier tickets fixed: (1) a
     // post-transition uncorroborated owner (ownerRecertificationRequired) never contributes a
-    // certified structural field name here, however real-looking — that data is exactly what is
+    // certified structural field name here, however real-looking â€” that data is exactly what is
     // untrustworthy right after a surface change. The narrow editable-fill hint below remains
     // unresolved and only permits the live resolver to attempt a fresh unique match;
     // (2) a generic-shaped associatedField/headerContext/columnIdentity value ("control", "campo",
@@ -1472,7 +1586,7 @@ export function buildCanonicalInteractions(
     // A post-transition, uncorroborated owner (ownerRecertificationRequired) never contributes
     // its structural field name (already excluded above) NOR any label/display-text-shaped
     // technical evidence ("text" strategy locators literally embed display text as their
-    // value) — that is exactly the stale-previous-screen risk this rejection reason exists to
+    // value) â€” that is exactly the stale-previous-screen risk this rejection reason exists to
     // guard against, and this ticket must never reopen it. A genuinely non-textual technical
     // signal (a structural/data-testid/aria-label locator, or a captured field-owner diagnostic
     // attempt) carries no such risk even post-transition, because the EXISTING runtime resolver
@@ -1480,6 +1594,19 @@ export function buildCanonicalInteractions(
     // editable-fill hint below is passed as a runtime candidate only and must also be resolved
     // against the current surface.
     const nonTextualTechnicalEvidencePresent = technicalTargetRefsForEvent.some((ref) => !ref.startsWith("text:"));
+    // A click whose owner has deterministic STRUCTURAL identity (no label involved) that was unique inside its
+    // own scope at capture carries no stale-screen risk either: the runtime resolver re-counts it live and
+    // fails closed on anything but exactly one match on the current surface.
+    const postTransitionStructuralOwnerHint = ownerRecertificationRequired
+      && action === "click"
+      && (target?.technicalTargetCandidates ?? []).some((candidate) => {
+        const context = candidate.structuralContext;
+        return context?.deterministicStructuralIdentity === true
+          && context.identityAmbiguous !== true
+          && context.captureScopeUnique === true
+          && context.captureTargetMatchCount === 1
+          && Boolean(context.scopeIdentity);
+      });
     // A missing required fill is a PRECONDITION gap, never an identity-resolution one: no
     // technical target evidence on the click itself can substitute for a value that was simply
     // never recorded, so it is never eligible for runtime resolution either.
@@ -1574,7 +1701,7 @@ export function buildCanonicalInteractions(
       && !missingPressKey
       && (!recordedValueRequiredAsEvidence || Boolean(value))
       && (ownerRecertificationRequired
-        ? nonTextualTechnicalEvidencePresent || postTransitionEditableFieldHint
+        ? nonTextualTechnicalEvidencePresent || postTransitionEditableFieldHint || postTransitionStructuralOwnerHint
         : (technicalTargetRefsForEvent.length > 0 || Boolean(structuralFieldName) || Boolean(target?.fieldOwnerDiagnostic) || deterministicStructuralOwnerEvidence || scopedStructuralEvidencePresent || semanticRuntimeEligible || recorderRuntimeEligible));
     // A SECOND, independent runtime-resolution case: admission ACCEPTED the field/owner identity
     // (a real, non-generic associatedField/role) but the recorder never captured any technical
@@ -1593,7 +1720,7 @@ export function buildCanonicalInteractions(
     // landmark-wide match count taken at CAPTURE time (before the live re-resolver's own
     // `stableDescendants`/`semanticShape`/`:not(:has(...))` nearest-owner narrowing ever runs),
     // not the same scope or precision as the LIVE field-scoped resolver's own re-count. The exact
-    // same "Número de identificación" button (`identityAmbiguous:true, matchCount:2` at capture)
+    // same "NÃºmero de identificaciÃ³n" button (`identityAmbiguous:true, matchCount:2` at capture)
     // was PHYSICALLY resolved live to exactly one element and executed successfully before this
     // regression -- capture-time global ambiguity is a WEAKER, over-cautious proxy, never a
     // substitute for the live resolver's own independent `count !== 1` fail-closed check (which
@@ -1674,7 +1801,7 @@ export function buildCanonicalInteractions(
       semanticRuntimeEligible,
     });
     // semanticField/valueKey are only restored from a REAL structural field name, never from the
-    // rejected fallback label — this is "may attempt runtime resolution", not "this identity is
+    // rejected fallback label â€” this is "may attempt runtime resolution", not "this identity is
     // now certified": admissionStatus below stays "unresolved" regardless.
     // A press's payload is its `key`, never a dataset-bound field value -- computing a
     // semanticField/valueKey for it risks creating a spurious runtime input requirement (the
@@ -1694,6 +1821,8 @@ export function buildCanonicalInteractions(
       : undefined;
     const semanticField = event.kind === "press"
       ? undefined
+      : virtualKeyboardKey
+        ? (keyboardFieldLabel && !(recorderEvidence?.keyLabels ?? []).includes(keyboardFieldLabel) ? keyboardFieldLabel : undefined)
       : keyboardFieldLabel
         ? keyboardFieldLabel
       : structuralClickHasOnlyDisplayLabel
@@ -1710,7 +1839,7 @@ export function buildCanonicalInteractions(
       && target?.compoundRole === "selection"
       && value === undefined
       && target?.role?.toLowerCase() !== "option";
-    const valueKey = semanticField && !selectionControlOpened
+    const valueKey = semanticField && !selectionControlOpened && event.kind !== "file_upload" && !isRuntimeDerivedFill
       ? `${scope ? `${scope}.` : ""}${keyPart(semanticField)}${selection ? "_seleccion" : target?.compoundRole === "amount_or_text" ? "_valor" : ""}`
       : undefined;
     const ownership = ownershipForEvent(events, index);
@@ -1744,6 +1873,11 @@ export function buildCanonicalInteractions(
       ...(semanticField ? { semanticField } : {}),
       ...(scope ? { entityScope: scope } : {}),
       action,
+      ...(event.pageKey ? { pageKey: event.pageKey } : {}),
+      ...(event.kind === "file_upload" && event.fileAssets?.length ? { fileAssets: event.fileAssets.map((asset) => ({ ...asset })) } : {}),
+      ...(event.kind === "fill" && event.valueSource === "application" && event.dependsOnEventRef
+        ? { dependsOnEventRef: event.dependsOnEventRef }
+        : {}),
       ...(dynamicTargetLabel ? { dynamicTargetLabel: true } : {}),
       ...(valueKey ? { valueKey } : {}),
       ...(value ? { recordedValue: value } : {}),
@@ -1767,13 +1901,13 @@ export function buildCanonicalInteractions(
       // transported when the eligibility gate above accepted it for THIS action.
       ...(!dynamicTargetLabel && semanticRuntimeEligible && target?.semanticRuntimeEvidence ? { semanticRuntimeEvidence: target.semanticRuntimeEvidence } : {}),
       ...(!dynamicTargetLabel && recorderEvidence ? { playwrightRecorderEvidence: recorderEvidence } : {}),
-      // target.label itself is withheld here too when uncertified — it is exactly the
+      // target.label itself is withheld here too when uncertified â€” it is exactly the
       // ancestor-walk signal that can still reflect the previous screen for a brief window after
       // a transition, so falling back to raw label text would silently reintroduce the stale
       // owner this gate exists to prevent. The human-facing description is only ever built from
-      // a resolved semanticField (real structural evidence), never a rejected fallback label —
+      // a resolved semanticField (real structural evidence), never a rejected fallback label â€”
       // true both when fully accepted and when only runtime-resolution evidence exists.
-      ...(semanticField && target?.label && !dynamicTargetLabel ? { description: action === "select" ? `Seleccionar en "${semanticField}"` : `Ingresar en "${semanticField}"` } : {}),
+      ...(semanticField && target?.label && !dynamicTargetLabel ? { description: action === "select" ? `Seleccionar en "${semanticField}"` : action === "upload" ? `Adjuntar archivo en "${semanticField}"` : `Ingresar en "${semanticField}"` } : {}),
       ...ownership,
       ...(ownerRecertificationRequired ? { ownerRecertificationRequired: true } : {}),
       ...(admissionRejected ? { admissionStatus: "unresolved" as const, admissionReason } : { admissionStatus: "accepted" as const }),
@@ -1793,12 +1927,12 @@ export function buildCanonicalInteractions(
     });
   }
   // A compound control (combobox/autocomplete/grid picker) can raise several raw events for
-  // ONE physical selection — a click on the option descendant, a change/selection confirmation
-  // on the owning control — each with its own raw controlIdentity (built from that specific
+  // ONE physical selection â€” a click on the option descendant, a change/selection confirmation
+  // on the owning control â€” each with its own raw controlIdentity (built from that specific
   // event's own locator/target). Deduping on controlIdentity alone left these uncollapsed: the
   // OWNER is the same, but its raw pointer-target identity differs per event. selectorControlId
   // (already computed above for any compoundRole="selection" target) is the actionable-owner
-  // identity that must be used instead — controlIdentity remains the fallback for non-compound
+  // identity that must be used instead â€” controlIdentity remains the fallback for non-compound
   // controls, where raw target IS the owner.
   /** Collapse an explicitly captured segmented-input component into one logical action. The
    * browser recorder supplies the group evidence; no DOM ordinal is promoted to authority. */
@@ -1897,7 +2031,7 @@ export function buildCanonicalInteractions(
   };
   // A real recording still produced pairs like: interaction A targets the compound control's
   // own technical/structural owner (e.g. "structural:grid=..."), interaction B targets the
-  // selected option's display value (e.g. "Cuentas de Efectivo") — same valueKey, same
+  // selected option's display value (e.g. "Cuentas de Efectivo") â€” same valueKey, same
   // recordedValue, but selectorControlId/controlIdentity genuinely differ because each was
   // built from that event's own raw target. valueKey alone is never sufficient (two distinct
   // fields could coincidentally share one); requiring that exactly one side additionally
@@ -1906,7 +2040,7 @@ export function buildCanonicalInteractions(
   const hasOwnTechnicalIdentity = (interaction: CanonicalInteraction): boolean => interaction.technicalTargetRefs.length > 0;
   const deduped: CanonicalInteraction[] = [];
   for (const interaction of collapseSegmentedInputs(result)) {
-    // Only the IMMEDIATELY PRECEDING pushed interaction is a merge candidate — sequence
+    // Only the IMMEDIATELY PRECEDING pushed interaction is a merge candidate â€” sequence
     // adjacency is the gesture-cluster proxy: any other functional action (a different
     // selection, a fill, an owned navigation) landing between two same-owner/same-value
     // selections means they are legitimately separate user actions, not one gesture's
@@ -1914,7 +2048,7 @@ export function buildCanonicalInteractions(
     const previous = deduped[deduped.length - 1];
     const bothSelectCompatible = interaction.action === "select" && previous?.action === "select";
     // A compound control's OWNER-half tap (the one that opens it) very often carries NO value
-    // of its own — the value only appears on the OPTION-half event once something is chosen.
+    // of its own â€” the value only appears on the OPTION-half event once something is chosen.
     // Requiring an exact recordedValue match here would permanently block the owner+option
     // merge whenever the owner's raw event has none; two select actions are still
     // value-compatible when at most one side actually carries a recorded value. Two DIFFERENT
@@ -1930,7 +2064,7 @@ export function buildCanonicalInteractions(
       && previous.screenBeforeRef === interaction.screenBeforeRef
       && !previous.transitionObserved && !interaction.transitionObserved
       // Fail-closed: an unresolved owner/identity is never merged by coincidental value/text
-      // match — keep the raw events separate rather than guess they are the same gesture.
+      // match â€” keep the raw events separate rather than guess they are the same gesture.
       && previous.admissionStatus !== "unresolved" && interaction.admissionStatus !== "unresolved";
     // Capture V2 can report both the accessible custom checkbox owner (for example, a
     // role=checkbox span) and its backing input as separate adjacent tap events. They have
@@ -1951,14 +2085,14 @@ export function buildCanonicalInteractions(
       && adjacentRecordedEvents(previous, interaction));
     const sameGestureCluster = sharedGestureEvidence && dedupOwnerIdentity(previous) === dedupOwnerIdentity(interaction);
     // The owner+option shape: raw owner identities differ, but the same structured valueKey
-    // AND exactly one side has its own technical target — the other is the option/display half
+    // AND exactly one side has its own technical target â€” the other is the option/display half
     // of the same gesture, not an independently-identified field.
     const sameCompoundSelectionGesture = sharedGestureEvidence
       && Boolean(previous.valueKey) && previous.valueKey === interaction.valueKey
       && hasOwnTechnicalIdentity(previous) !== hasOwnTechnicalIdentity(interaction);
     if (sameGestureCluster || sameCompoundSelectionGesture || sameCheckboxOwnerGesture) {
       // Order-independent owner survival: whichever side actually carries technical target
-      // evidence becomes the retained record — a union of technicalTargetRefs alone would keep
+      // evidence becomes the retained record â€” a union of technicalTargetRefs alone would keep
       // the FIRST-pushed interaction's (possibly display-only) controlIdentity/description even
       // when the owner arrived second.
       const previousHasNamedCheckboxOwner = Boolean(previous.playwrightRecorderEvidence?.kind === "role"
@@ -1976,7 +2110,7 @@ export function buildCanonicalInteractions(
       // OWNER authority: `kept` already carries the field's own valueKey/semanticField (it is
       // the side WITH technical identity). VALUE authority: when the owner's own raw event
       // never carried a value, the option half's recordedValue is what the user actually
-      // selected — adopt it here rather than leave the merged action unresolved.
+      // selected â€” adopt it here rather than leave the merged action unresolved.
       if (kept.recordedValue === undefined && other.recordedValue !== undefined) {
         kept.recordedValue = other.recordedValue;
       }
@@ -2258,9 +2392,20 @@ export function validateInteractionStateSequence(interactions: readonly Canonica
   const executable = interactions.filter((interaction) => interaction.action !== "system_observation"
     && (!interaction.technicalOnly || interaction.action === "navigation"));
   const issues: string[] = [];
-  for (let index = 1; index < executable.length; index += 1) {
-    const previous = executable[index - 1];
+  // Screens and routes belong to ONE tab: an action on another tab (or the one that opens it) never follows the
+  // previous action's screen. Each action is compared with the last action of its own tab; with a single tab
+  // (no pageKey) this is exactly the previous consecutive action, as before.
+  const lastOnPage = new Map<string, CanonicalInteraction>();
+  for (let index = 0; index < executable.length; index += 1) {
     const current = executable[index];
+    const pageId = current.pageKey ?? "";
+    const previous = lastOnPage.get(pageId);
+    lastOnPage.set(pageId, current);
+    if (!previous) continue;
+    // A navigation interaction is the browser being taken to its own route (a URL opened directly, or a redirect
+    // no click owns): it establishes the state itself, so it cannot be a jump from the previous action's route.
+    // The actions that follow it are still compared with it, and click-to-click jumps stay blocked.
+    if (current.action === "navigation") continue;
     const sameRoute = !previous.routeAfter || !current.routeBefore || previous.routeAfter === current.routeBefore;
     if (previous.screenAfterRef && current.screenBeforeRef && previous.screenAfterRef !== current.screenBeforeRef && !sameRoute) {
       issues.push(`${previous.id}:${previous.screenAfterRef}->${current.id}:${current.screenBeforeRef}`);
@@ -2271,6 +2416,15 @@ export function validateInteractionStateSequence(interactions: readonly Canonica
     }
   }
   return { stateSequenceValid: issues.length === 0, stateSequenceIssues: issues };
+}
+
+/** Unfilled slots in a captured numeric mask are display state, not confirmed test data. */
+function hasUnfilledNumericMaskSlots(value: string | null | undefined): boolean {
+  return typeof value === "string"
+    && /\d/.test(value)
+    && value.includes("_")
+    && /[()+.\s\/-]/.test(value)
+    && /^[\d_()+.\s\/-]+$/.test(value);
 }
 
 function requirementFromField(
@@ -2284,8 +2438,13 @@ function requirementFromField(
   const canonicalValue = canonicalValueOverride !== undefined
     ? canonicalValueOverride === null ? null : clean(canonicalValueOverride) ?? null
     : clean(canonical?.recordedValue) ?? clean(canonical?.committedValue) ?? null;
-  const value = canonicalValue ?? persistedValue;
-  const canonicalAuthority = clean(canonical?.recordedValue)
+  const capturedValue = canonicalValue ?? persistedValue;
+  // Keep the immutable capture intact. Ask QA for a complete value instead of inventing
+  // missing digits or certifying a transient mask buffer as a runnable default.
+  const incompleteMask = !field.sensitive && !field.validatedByInteraction
+    && !derived && hasUnfilledNumericMaskSlots(capturedValue);
+  const value = incompleteMask ? null : capturedValue;
+  const canonicalAuthority = incompleteMask ? undefined : clean(canonical?.recordedValue)
     ? "canonical_logical" as const
     : canonicalValue
       ? "canonical_committed" as const
@@ -2308,7 +2467,8 @@ function requirementFromField(
     stepIndex: field.stepIndex,
     ...(canonical?.action === "select" && observedSelectionOptions?.length
       ? { controlType: "select" }
-      : field.formatHint ? { controlType: field.formatHint } : {}),
+      : field.controlType ? { controlType: field.controlType }
+        : field.formatHint ? { controlType: field.formatHint } : {}),
     ...(field.constraints?.length ? { constraints: field.constraints } : {}),
     ...(observedSelectionOptions?.length
       ? { allowedValues: [...observedSelectionOptions] }
@@ -2365,9 +2525,19 @@ function canonicalLogicalValueForField(
     ?? (value === clean(selection.recordedValue) ? null : value);
 }
 
+/** Steps the user deleted stay in canonicalInteractions for traceability but must never feed dataset values. */
+function activeCanonicalInteractions(scenario: {
+  canonicalInteractions?: readonly CanonicalInteraction[];
+  excludedInteractionIds?: readonly string[];
+}): CanonicalInteraction[] {
+  const excluded = new Set(scenario.excludedInteractionIds ?? []);
+  return (scenario.canonicalInteractions ?? []).filter((interaction) => !excluded.has(interaction.id));
+}
+
 export function materializeRuntimeInputRequirements(
   scenario: Pick<RecordedScenario, "requiredData"> & {
     canonicalInteractions?: CanonicalInteraction[];
+    excludedInteractionIds?: string[];
     selectorOptionInventories?: SelectorOptionInventory[];
   },
 ): RuntimeInputRequirement[] {
@@ -2381,7 +2551,7 @@ export function materializeRuntimeInputRequirements(
     // scoped canonical key exists, the unscoped entry is a migration alias, not another
     // logical runtime input.
     if (!field.key.includes(".") && scopedSuffixes.has(field.key)) continue;
-    const interactions = scenario.canonicalInteractions ?? [];
+    const interactions = activeCanonicalInteractions(scenario);
     const canonical = canonicalForField(field, interactions);
     const selectorInventory = canonical?.action === "select"
       && canonical.selectorControlId
@@ -2456,7 +2626,7 @@ export function applyRuntimeDatasetValues(
     // QA overrides belong to the effective runtime dataset only. Do not rewrite the
     // captured field/example value, which is part of the canonical recording contract.
     if (persistedQaValues[field.key] !== undefined || values[field.key] !== undefined) return field;
-    const canonicalValue = canonicalLogicalValueForField(field, scenario.canonicalInteractions ?? []) ?? null;
+    const canonicalValue = canonicalLogicalValueForField(field, activeCanonicalInteractions(scenario)) ?? null;
     return canonicalValue === null ? field : { ...field, exampleValue: canonicalValue, source: "RECORDED_CONFIRMED" as const };
   });
   const materializedRequirements = materializeRuntimeInputRequirements({ ...scenario, requiredData });
@@ -2475,6 +2645,11 @@ export function applyRuntimeDatasetValues(
       || withLineage.authority === "explicit_qa_edit"
       || isQaEditSource(withLineage.source);
     const qaOverridable = isQaOverridableRuntimeInput(withLineage);
+    if (!explicitQaEdit && !withLineage.sensitive && !withLineage.validatedByInteraction
+      && hasUnfilledNumericMaskSlots(effectiveValues[requirement.valueKey])) {
+      return { ...withLineage, value: null, resolved: false, source: "unresolved" as const,
+        authority: "unresolved" as const, authorityValue: null, editable: qaOverridable };
+    }
     return effectiveValues[requirement.valueKey] === undefined ? withLineage : {
        ...withLineage,
        value: effectiveValues[requirement.valueKey] ?? null,
@@ -2528,7 +2703,7 @@ export function applyRuntimeDatasetValues(
         ...step,
         content: safeTemplate,
         stepTemplate: safeTemplate,
-        renderedStep: `Ingresar "••••••" en "${fieldLabel}"`,
+        renderedStep: `Ingresar "â€¢â€¢â€¢â€¢â€¢â€¢" en "${fieldLabel}"`,
       };
     }
     const value = valuesByKey.get(step.valueKey);
@@ -2737,8 +2912,8 @@ function humanMutationTitle(primary: RecordedScenario, mutationType: MutationTyp
   if (mutationType === "REPEAT_ENTITY") return `${goal}: registrar varias ${subject.toLowerCase()} en un mismo proceso`;
   if (mutationType === "ZERO_ENTITY") return `${goal}: comprobar el proceso sin registrar ${subject.toLowerCase()}`;
   if (mutationType === "ALTERNATIVE_SELECTION" && alternativeValue?.trim()) return `${goal}: registrar usando ${alternativeValue.trim()}`;
-  if (mutationType === "ALTERNATIVE_SELECTION") return `${goal}: comprobar una opción observada alternativa`;
-  if (mutationType === "FIELD_OMISSION") return `${goal}: comprobar la omisión de un dato`;
+  if (mutationType === "ALTERNATIVE_SELECTION") return `${goal}: comprobar una opciÃ³n observada alternativa`;
+  if (mutationType === "FIELD_OMISSION") return `${goal}: comprobar la omisiÃ³n de un dato`;
   return `${goal}: comprobar una variante del proceso`;
 }
 
@@ -2788,7 +2963,7 @@ export function detectMutationOpportunities(
         { type: "clone_entity", sourceEntityScope: source.entityScope, targetEntityScope: `${source.entityScope.replace(/[_-]?\d+$/, "") || source.entityScope}_2` },
       ],
       evidenceRefs: primaryEvents,
-      rationale: "El recorrido observó un affordance de repetición/agregado y existe un bloque de entidad completo.",
+      rationale: "El recorrido observÃ³ un affordance de repeticiÃ³n/agregado y existe un bloque de entidad completo.",
       oracleAuthority: "MISSING",
       confidence: 0.8,
       needsReview: true,
@@ -2802,7 +2977,7 @@ export function detectMutationOpportunities(
       basePrimaryScenarioId: primary.scenarioId,
       operations: [{ type: "remove_entity", entityScope: blocks[0].entityScope }],
       evidenceRefs: primaryEvents,
-      rationale: "La grabación alcanzó una acción final desde el contexto de la entidad; el resultado de omitirla requiere revisión.",
+      rationale: "La grabaciÃ³n alcanzÃ³ una acciÃ³n final desde el contexto de la entidad; el resultado de omitirla requiere revisiÃ³n.",
       oracleAuthority: "MISSING",
       confidence: 0.55,
       needsReview: true,
@@ -2817,7 +2992,7 @@ export function detectMutationOpportunities(
       basePrimaryScenarioId: primary.scenarioId,
       operations: [{ type: "remove_action", interactionId: primary.canonicalInteractions?.find((interaction) => interaction.valueKey === actionInputs[0].valueKey)?.id ?? "" }],
       evidenceRefs: primaryEvents,
-      rationale: "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+      rationale: "Existen varios inputs observados; se propone una omisiÃ³n agrupada sin inventar el resultado.",
       oracleAuthority: "MISSING",
       confidence: 0.5,
       needsReview: true,
@@ -2860,7 +3035,7 @@ export function detectMutationOpportunities(
       basePrimaryScenarioId: primary.scenarioId,
       operations: [{ type: "replace_selection", interactionId: alternative.primarySelection.id, value: alternative.option }],
       evidenceRefs: alternative.inventory.observationRefs,
-      rationale: "La opción alternativa fue observada técnicamente en la misma superficie de selección.",
+      rationale: "La opciÃ³n alternativa fue observada tÃ©cnicamente en la misma superficie de selecciÃ³n.",
       oracleAuthority: "MISSING",
       confidence: 0.75,
       needsReview: true,
@@ -3213,9 +3388,9 @@ export function materializeScenarioMutation(primary: RecordedScenario, mutation:
       : terminalRailIndex >= 0 ? terminalRailIndex - 1 : -1;
     const repeatOperations = inserts.filter((operation) => operation.afterInteractionId === sourceInteractionId);
     const repeatSteps = repeatOperations.map((operation) => ({
-      content: operation.action.description ?? "Presionar el control observado de repetición",
-      renderedStep: operation.action.description ?? "Presionar el control observado de repetición",
-      stepTemplate: operation.action.description ?? "Presionar el control observado de repetición",
+      content: operation.action.description ?? "Presionar el control observado de repeticiÃ³n",
+      renderedStep: operation.action.description ?? "Presionar el control observado de repeticiÃ³n",
+      stepTemplate: operation.action.description ?? "Presionar el control observado de repeticiÃ³n",
       expected: "",
       classification: "FUNCTIONAL_ACTION" as const,
       interactionId: operation.action.id,
@@ -3238,7 +3413,7 @@ export function materializeScenarioMutation(primary: RecordedScenario, mutation:
       return {
         action: "click" as const,
         ...(targetRef && separator !== undefined && separator > 0 ? { target: { strategy: targetRef.slice(0, separator), value: targetRef.slice(separator + 1) } } : {}),
-        description: operation.action.description ?? "Presionar el control observado de repetición",
+        description: operation.action.description ?? "Presionar el control observado de repeticiÃ³n",
          interactionId: operation.action.id,
         ...(operation.action.screenBeforeRef ? { screenBeforeRef: operation.action.screenBeforeRef } : {}),
         ...(operation.action.screenAfterRef ? { screenAfterRef: operation.action.screenAfterRef } : {}),
@@ -3442,7 +3617,7 @@ export function materializeScenarioMutation(primary: RecordedScenario, mutation:
     scenarioStepCount: numberedSteps.length,
     functionalActionCount: numberedSteps.filter((step) => !step.isSetup && step.classification === "FUNCTIONAL_ACTION").length,
     nonUserSetupSteps: numberedSteps.filter((step) => step.isSetup === true).length,
-    reasonForDifference: numberedSteps.some((step) => step.isSetup) ? "El contador funcional excluye filas de setup/navegación inicial visibles en el preview." : "Todas las filas del escenario son acciones funcionales.",
+    reasonForDifference: numberedSteps.some((step) => step.isSetup) ? "El contador funcional excluye filas de setup/navegaciÃ³n inicial visibles en el preview." : "Todas las filas del escenario son acciones funcionales.",
   };
 }
 
@@ -3519,11 +3694,59 @@ export function toSharedMcpScenario(
       .map((step) => [step.interactionId!, step]),
   );
   const executableInteractionsForRoute = (materialized.canonicalInteractions ?? [])
-      .filter((interaction) => hasExecutionAuthority(interaction) && interaction.action !== "system_observation" && interaction.action !== "navigation");
+      .filter((interaction) => hasExecutionAuthority(interaction)
+        && interaction.action !== "system_observation"
+        && (interaction.action !== "navigation" || interaction.executionAuthority === true));
+  const canonicalInteractions = materialized.canonicalInteractions ?? [];
+  const runtimeValueCaptures = canonicalInteractions.flatMap((capture, capturePosition) => {
+    const source = capture.runtimeValueCapture;
+    if (!source || capture.action !== "system_observation") return [];
+    // The value-source observation can be emitted after the fill that consumes it (the recorder links them once the
+    // typed value is matched), so the destination may sit before the observation in the stream.
+    const destinationPosition = canonicalInteractions.findIndex((interaction) =>
+      interaction.action === "fill" && interaction.dependsOnEventRef === source.sourceEventRef,
+    );
+    if (destinationPosition < 0) return [];
+    const destination = canonicalInteractions[destinationPosition];
+    const sourcePage = source.sourcePageKey ?? capture.pageKey;
+    // The value must be read while its source page is still the one in use: scan for the boundary from the last
+    // interaction on that page before the destination (or from the observation itself when it precedes the fill).
+    let scanFrom = capturePosition;
+    if (destinationPosition < capturePosition) {
+      scanFrom = -1;
+      for (let index = destinationPosition - 1; index >= 0; index--) {
+        if (canonicalInteractions[index].pageKey === sourcePage) { scanFrom = index; break; }
+      }
+    }
+    const sourceOrigin = (() => {
+      try { return new URL(capture.routeBefore ?? "").origin; } catch { return ""; }
+    })();
+    const boundary = canonicalInteractions.slice(scanFrom + 1, destinationPosition).find((interaction) => {
+      if (interaction.action === "navigation") return true;
+      if (interaction.causedTransition !== true && !interaction.routeAfter) return false;
+      if (!sourceOrigin) return Boolean(interaction.causedTransition || interaction.routeAfter);
+      try {
+        const beforeOrigin = new URL(interaction.routeBefore ?? "").origin;
+        const afterOrigin = new URL(interaction.routeAfter ?? "").origin;
+        return Boolean(afterOrigin && (afterOrigin !== beforeOrigin || afterOrigin !== sourceOrigin));
+      } catch {
+        return interaction.causedTransition === true;
+      }
+    });
+    return [{
+      sourceEventRef: source.sourceEventRef,
+      ...((source.sourcePageKey ?? capture.pageKey) ? { sourcePageKey: source.sourcePageKey ?? capture.pageKey } : {}),
+      technicalTargetRefs: [...capture.technicalTargetRefs],
+      valueSelection: { ...source.valueSelection },
+      captureBeforeInteractionId: boundary?.id ?? destination.id,
+    }];
+  });
   const executableInteractions = executableInteractionsForRoute
       .map((interaction, actionOrder) => {
         const previousExecutableInteraction = actionOrder > 0 ? executableInteractionsForRoute[actionOrder - 1] : undefined;
-        const expectedRouteBefore = deriveExpectedRouteBefore(interaction, previousExecutableInteraction);
+        const expectedRouteBefore = interaction.action === "navigation"
+          ? previousExecutableInteraction?.routeAfter
+          : deriveExpectedRouteBefore(interaction, previousExecutableInteraction);
         const humanStep = interaction.id ? testRailStepByInteractionId.get(interaction.id) : undefined;
         // A rendered step is presentation-only. The template supplies the safe human
         // description while the canonical interaction supplies execution authority.
@@ -3539,6 +3762,11 @@ export function toSharedMcpScenario(
           actionType: interaction.action,
           interactionId: interaction.id,
           ...(interaction.key ? { key: interaction.key } : {}),
+          ...(interaction.navigationUrl ? { navigationUrl: interaction.navigationUrl } : {}),
+          ...(interaction.pageKey ? { pageKey: interaction.pageKey } : {}),
+          ...(interaction.opensNewPage ? { opensNewPage: true } : {}),
+          ...(interaction.fileAssets ? { fileAssets: interaction.fileAssets.map((asset) => ({ ...asset })) } : {}),
+          ...(humanStep?.fileSetValueKey ? { fileSetValueKey: humanStep.fileSetValueKey } : {}),
           ...(humanStep?.stepTemplate ?? humanStep?.content ? { humanStep: humanStep.stepTemplate ?? humanStep.content } : {}),
           ...(interaction.semanticField ? { semanticField: interaction.semanticField } : {}),
           // FIRST_LOSS fix: the same real field-relation authority that already backs
@@ -3561,11 +3789,18 @@ export function toSharedMcpScenario(
           ...(interaction.playwrightRecorderEvidence ? { playwrightRecorderEvidence: interaction.playwrightRecorderEvidence } : {}),
           ...(valueKey ? { valueKey } : {}),
           ...(humanStep?.segmentPosition ? { segmentPosition: humanStep.segmentPosition } : {}),
-          ...(requirement && (interaction.action === "fill" || interaction.action === "select" || interaction.playwrightRecorderEvidence?.kind === "virtual_keyboard") && typeof requirement.value === "string"
+          ...(requirement && !interaction.dependsOnEventRef && (interaction.action === "fill" || interaction.action === "select" || interaction.playwrightRecorderEvidence?.kind === "virtual_keyboard") && typeof requirement.value === "string"
             ? { value: requirement.value }
             : {}),
           ...(requirement?.valueRole ? { valueRole: requirement.valueRole } : {}),
-          ...(interaction.action === "fill" || interaction.action === "select" || interaction.playwrightRecorderEvidence?.kind === "virtual_keyboard" ? { runtimeValueSource: "dataset" as const } : {}),
+          ...(interaction.action === "fill" && interaction.dependsOnEventRef
+            ? { runtimeValueSource: "captured_application" as const, runtimeDerivedSourceEventRef: interaction.dependsOnEventRef }
+            : interaction.action === "fill" || interaction.action === "select" || interaction.playwrightRecorderEvidence?.kind === "virtual_keyboard"
+              ? { runtimeValueSource: "dataset" as const }
+              : {}),
+          ...(runtimeValueCaptures.filter((capture) => capture.captureBeforeInteractionId === interaction.id).length
+            ? { runtimeValueCaptureEventRefs: runtimeValueCaptures.filter((capture) => capture.captureBeforeInteractionId === interaction.id).map((capture) => capture.sourceEventRef) }
+            : {}),
           // The structured contract owns executable ordering. TestRail step
           // numbers are presentation metadata and may repeat around compound
           // interactions, so they cannot be used as runtime indices.
@@ -3610,6 +3845,7 @@ export function toSharedMcpScenario(
     actions: normalizeRecordingExecutionActionIndices(executableInteractions),
     runtimeInputRequirements: requirements.map((requirement) => ({ ...requirement })),
     datasetBindings,
+    ...(runtimeValueCaptures.length ? { runtimeValueCaptures } : {}),
   };
   return {
     sourceIssueKey: `REC-${materialized.sourceRecordingId.slice(0, 8).toUpperCase()}`,
@@ -3632,7 +3868,7 @@ export function toSharedMcpScenario(
     mcpExecutable: mutationEffectOk && executionAudit.executionReady,
     executionReadiness: mutationEffectOk && executionAudit.executionReady ? "ready" : "blocked_execution_contract",
     // Recording Replay may run with a runtime-resolution-required action still pending live
-    // re-verification, but promotion (spec generation/reuse/publication) never may — this stays
+    // re-verification, but promotion (spec generation/reuse/publication) never may â€” this stays
     // blocked until executionAudit.promotionReady, independent of Recording Replay's own gate.
     publishableToTestManagement: mutationEffectOk && readiness.publicationReadiness && executionAudit.promotionReady,
     publicationClassification: mutationEffectOk && readiness.publicationReadiness && executionAudit.promotionReady ? "executable" : "blocked",

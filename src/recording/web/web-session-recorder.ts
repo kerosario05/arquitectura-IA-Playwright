@@ -8,6 +8,7 @@ import type {
   RecordedControl,
   RecordedDynamicLifecycle,
   RecordedEvent,
+  RecordedFileAssetRef,
   RecordedLocator,
   RecordedScreen,
   RecordedStateSnapshot,
@@ -21,8 +22,10 @@ import { SHOULD_FLUSH_EDITING_SESSION_FILL_SOURCE } from "../field-edit-flush-de
 import { CaptureEngineV2ShadowBridge, type ShadowActionRecord, type ShadowBrowserMessage, type ShadowFunctionalActionRecord } from "../capture-engine-v2.shadow-bridge";
 import { buildCaptureScriptV2Content } from "./capture-engine-v2.browser-instrumentation";
 import { adaptCaptureActionToRawInteraction } from "../capture-engine-v2.raw-interaction-adapter";
-import { isGenericUnresolvedLabel } from "../trace-normalizer";
+import { isGenericUnresolvedLabel, isPlaceholderPrompt, isPassiveTextTapTarget } from "../trace-normalizer";
 import { executeRecordingControlAction, type RecordingControlAction, type RecordingControlResult } from "../recording-control";
+import { saveTestFile } from "../../test-files/test-file-store";
+import { maximizeBrowserWindow } from "../../local-agent/window-management";
 export { preserveCapturedTechnicalTargetLocators } from "../technical-target-transport";
 
 /**
@@ -58,6 +61,8 @@ export function fingerprintSnapshot(snapshot: RuntimeUiSnapshot): string {
 
 export type WebRecorderOptions = {
   baseUrl: string;
+  /** Project profile owning captured file assets. Required for durable file-upload recording. */
+  projectSlug?: string;
   framesDir: string;
   /** Capture screenshots only when a caller explicitly needs recording evidence. */
   captureScreenshots?: boolean;
@@ -89,8 +94,16 @@ export type WebRecorderOptions = {
   onScreen?: (screen: RecordedScreen) => void;
 };
 
-export function buildWebRecorderContextOptions(ignoreHTTPSErrors?: boolean): { ignoreHTTPSErrors: boolean } {
-  return { ignoreHTTPSErrors: ignoreHTTPSErrors === true };
+export function buildWebRecorderContextOptions(
+  ignoreHTTPSErrors?: boolean,
+  useNativeViewport = false,
+): { ignoreHTTPSErrors: boolean; viewport?: null } {
+  return {
+    ignoreHTTPSErrors: ignoreHTTPSErrors === true,
+    // A headed recorder (direct or local-agent) is a real desktop window. Use its
+    // window dimensions instead of Playwright's default fixed 1280x720 viewport.
+    ...(useNativeViewport ? { viewport: null } : {}),
+  };
 }
 
 /** How many elements one identity matched in the page, and where the clicked one sat. */
@@ -101,6 +114,8 @@ export type LocatorRanks = Partial<Record<"testId" | "ariaLabel" | "role" | "dom
 
 type RawInteraction = {
   kind: "click" | "input" | "submit" | "observation" | "press";
+  /** Recording-local page identity injected by the Playwright binding; never supplied by page content. */
+  pageKey?: string;
   interactionId?: string;
   /** Only present for kind="press" -- a discrete, non-textual command key (e.g. "Enter"). */
   key?: string;
@@ -128,6 +143,7 @@ type RawInteraction = {
   roleTechnicalIdentityEligible?: boolean;
   href?: string;
   valueSource?: "user" | "application";
+  dependsOnEventRef?: string;
   beforeValue?: string;
   afterValue?: string;
   observedOptions?: string[];
@@ -166,6 +182,93 @@ type RawInteraction = {
   actionability?: "NATIVE_ACTIONABLE" | "SEMANTIC_ACTIONABLE" | "FRAMEWORK_ACTIONABLE" | "NON_ACTIONABLE";
   actionOwner?: boolean;
   fieldOwnerDiagnostic?: FieldOwnerDiagnostic;
+};
+
+type FileUploadTargetDescriptor = {
+  label: string;
+  associatedField?: string;
+  id?: string;
+  name?: string;
+  testId?: string;
+  ariaLabel?: string;
+  inputType: "file";
+  multiple?: boolean;
+  uniqueFileInput?: boolean;
+  locatorMatchCounts?: Partial<Record<keyof LocatorRanks, number>>;
+};
+
+type BrowserFileUploadMessage = {
+  phase: "group_start" | "file_start" | "file_chunk" | "file_end" | "group_end" | "group_error";
+  groupId: string;
+  fileCount?: number;
+  target?: FileUploadTargetDescriptor;
+  fileIndex?: number;
+  filename?: string;
+  contentType?: string;
+  size?: number;
+  chunkIndex?: number;
+  data?: string;
+  reason?: string;
+};
+
+type BrowserValueOwnerDescriptor = {
+  label: string;
+  tagName: string;
+  inputType?: string;
+  id?: string;
+  name?: string;
+  testId?: string;
+  ariaLabel?: string;
+  /** Position-based CSS path, only when the element and its ancestors carry no stable id/name/test id/aria-label. */
+  structuralPath?: string;
+  locatorMatchCounts?: Partial<Record<keyof LocatorRanks, number>> & { structuralPath?: number };
+};
+
+type BrowserValueTransferMessage = {
+  phase: "copy" | "copy_seen" | "paste";
+  text: string;
+  owner?: BrowserValueOwnerDescriptor;
+  destination?: BrowserValueOwnerDescriptor;
+  selection?: import("../session-trace.types").RecordedValueSelection;
+};
+
+type EphemeralCopiedValue = {
+  text: string;
+  owner: BrowserValueOwnerDescriptor;
+  selection: import("../session-trace.types").RecordedValueSelection;
+  copiedAt: number;
+  pageKey?: string;
+};
+
+type PendingValuePaste = {
+  text: string;
+  destinationRefs: string[];
+  sourceEventRef: string;
+  pastedAt: number;
+};
+
+type PendingUploadFile = {
+  filename: string;
+  contentType: string;
+  size: number;
+  chunks: Buffer[];
+  nextChunkIndex: number;
+  receivedBytes: number;
+};
+
+type PendingUploadGroup = {
+  expectedFileCount: number;
+  target: FileUploadTargetDescriptor;
+  files: Map<number, PendingUploadFile>;
+  assets: RecordedFileAssetRef[];
+  pageKey?: string;
+};
+
+export type RecorderFilePayload = { name: string; mimeType: string; buffer: Buffer };
+type RecorderFileChooser = {
+  isMultiple(): boolean;
+  setFiles(files: readonly RecorderFilePayload[]): Promise<void>;
+  page(): Page;
 };
 
 const SECRET_FIELD_TOKENS = [
@@ -1167,6 +1270,22 @@ export const CAPTURE_SCRIPT = String.raw`
     }
     return actionable;
   };
+  // A click on a nameless picture or icon (a logo inside a card) has nothing a replay can find.
+  // Attribute it to the nearest ancestor that carries its own short text and holds no other
+  // control, so the card is named by what a person reads on it; otherwise keep the picture.
+  const namedOwnerOfNamelessGraphic = (el) => {
+    if (!el || !/^(img|svg|picture|canvas|i|path|use)$/.test((el.tagName || '').toLowerCase())) return el;
+    if (attr(el, 'alt') || attr(el, 'aria-label') || attr(el, 'title')) return el;
+    let ancestor = el.parentElement;
+    for (let depth = 0; ancestor && depth < 5; depth += 1, ancestor = ancestor.parentElement) {
+      const own = text(ancestor);
+      if (!own) continue;
+      if (own.length > 80) return el;
+      const controls = ancestor.querySelectorAll ? ancestor.querySelectorAll('button, a, input, select, textarea, [role="button"], [role="link"]') : [];
+      return controls.length > 1 ? el : ancestor;
+    }
+    return el;
+  };
   const lastValues = new Map();
   // Keep the user's logical input separate from a mask/currency display value. This is a
   // best-effort event reconstruction; the committed DOM value remains evidence, never its
@@ -1267,10 +1386,10 @@ export const CAPTURE_SCRIPT = String.raw`
     // editable owns the interaction outright -- an ancestor container (a form, a framework card,
     // the app root) must never be promoted over it, however text-rich or "framework actionable"
     // that container looks. Checked BEFORE any ancestor-climbing fallback, never after.
-    const el = deepestEditableFromEvent(event)
+    const el = namedOwnerOfNamelessGraphic(deepestEditableFromEvent(event)
       || interactive(event.target)
       || actionableAncestor(event.target)
-      || frameworkActionableAncestor(event.target, event);
+      || frameworkActionableAncestor(event.target, event));
     // Flush BEFORE this click's own describe/send so a missed-edit fallback fill is ordered
     // ahead of the click that follows it in the raw trace, never after.
     if (openEditingSession && openEditingSession.el !== el) flushEditingSession();
@@ -1390,6 +1509,16 @@ export class WebSessionRecorder {
   private context: BrowserContext | null = null;
 
   private page: Page | null = null;
+  private readonly pageKeys = new WeakMap<Page, string>();
+  private readonly pagesWithCapturedInitialNavigation = new WeakSet<Page>();
+  private readonly userDirectedNavigationPages = new WeakSet<Page>();
+  private readonly pageByKey = new Map<string, Page>();
+  private readonly pageStates = new Map<string, { screenKey: string; fingerprint: string }>();
+  private readonly pageKeyByFrameId = new Map<string, string>();
+  private readonly pageListSubscribers = new Set<() => void>();
+  private readonly fileChooserSubscribers = new Set<(available: boolean, pageKey?: string, multiple?: boolean) => void>();
+  private pendingFileChooser?: { chooser: RecorderFileChooser; pageKey: string; multiple: boolean; expires: NodeJS.Timeout };
+  private nextPageNumber = 0;
   private initialNavigationPromise: Promise<void> | null = null;
 
   private readonly startedAt = Date.now();
@@ -1397,6 +1526,13 @@ export class WebSessionRecorder {
   private readonly events: RecordedEvent[] = [];
 
   private readonly screens = new Map<string, RecordedScreen>();
+
+  private readonly pendingFileUploadGroups = new Map<string, PendingUploadGroup>();
+  /** Copy/paste payloads stay process-local; traces store selectors and offsets, never copied text. */
+  private readonly copiedValues: EphemeralCopiedValue[] = [];
+  /** Last role-less tap over passive text, to tell a text selection (repeat clicks / copy) from a lone click. */
+  private lastPassiveTap?: { event: RecordedEvent; key: string; at: number };
+  private readonly pendingValuePastes: PendingValuePaste[] = [];
 
   private seq = 0;
 
@@ -1458,6 +1594,8 @@ export class WebSessionRecorder {
    * underlying binding calls resolve. `stop()` awaits this before finalizing.
    */
   private v2IngestionQueue: Promise<void> = Promise.resolve();
+  /** Selected option value (lower-cased) -> the field it was selected in, for re-selection owners. */
+  private readonly selectedValueFieldLabels = new Map<string, string>();
 
   /** Post-action screen evidence must never delay the next captured interaction. */
   private postActionObservationQueue: Promise<void> = Promise.resolve();
@@ -1475,11 +1613,115 @@ export class WebSessionRecorder {
   }
 
   private log(line: string): void {
+    // Value-transfer diagnostics carry lengths and reasons only; mirror them to stdout so a recording can be diagnosed.
+    if (line.startsWith("[recording:value-transfer]")) console.log(line);
     this.options.onLog?.(line);
   }
 
   private now(): number {
     return Date.now() - this.startedAt;
+  }
+
+  private pageKeyFor(page: Page | null | undefined): string | undefined {
+    if (!page || page.isClosed()) return undefined;
+    const existing = this.pageKeys.get(page);
+    if (existing) return existing;
+    const pageKey = `tab-${++this.nextPageNumber}`;
+    this.pageKeys.set(page, pageKey);
+    this.pageByKey.set(pageKey, page);
+    this.pageStates.set(pageKey, { screenKey: pageKey === "tab-1" ? "inicio" : "inicio", fingerprint: "" });
+    return pageKey;
+  }
+
+  private pageStateFor(page: Page | null | undefined): { screenKey: string; fingerprint: string } {
+    const pageKey = this.pageKeyFor(page);
+    return pageKey ? this.pageStates.get(pageKey)! : { screenKey: this.lastScreenKey, fingerprint: this.lastFingerprint };
+  }
+
+  private async attachPage(page: Page, captureScriptContent: string, captureScriptV2Content?: string): Promise<void> {
+    const pageKey = this.pageKeyFor(page)!;
+    page.on("console", (msg) => {
+      const text = msg.text();
+      if (text.startsWith("[capture-v2-dom-authority]")) console.log(text);
+    });
+    page.on("framenavigated", (frame) => {
+      if (frame !== page.mainFrame() || this.stopped || frame.url() === "about:blank") return;
+      const state = this.pageStateFor(page);
+      const opensNewPage = pageKey !== "tab-1" && !this.pagesWithCapturedInitialNavigation.has(page);
+      this.pagesWithCapturedInitialNavigation.add(page);
+      const directUserNavigation = this.userDirectedNavigationPages.has(page);
+      if (directUserNavigation) this.userDirectedNavigationPages.delete(page);
+      this.pushEvent({
+        t: this.now(),
+        kind: "navigate",
+        screenKey: state.screenKey,
+        fingerprint: state.fingerprint,
+        url: frame.url(),
+        pageKey,
+        ...(opensNewPage ? { opensNewPage: true } : {}),
+        ...(directUserNavigation ? { directUserNavigation: true } : {}),
+      });
+      frame.evaluate(captureScriptContent).catch(() => undefined);
+      if (captureScriptV2Content) frame.evaluate(captureScriptV2Content).catch(() => undefined);
+      // Refresh only this page's state. A page switch must not compare its DOM fingerprint to
+      // the other tab's last screen, which made a return to Web A look like a false transition.
+      void this.absorbScreen(page).then(({ screenKey }) => {
+        this.pageStateFor(page).screenKey = screenKey;
+        if (pageKey === "tab-1") this.lastScreenKey = screenKey;
+      }).catch(() => undefined);
+    });
+    page.on("close", () => this.notifyPageListSubscribers());
+    // Listening for the chooser suppresses the native dialog. That is only wanted for the windowless browser
+    // driven through the integrated viewer (it supplies the bytes); a visible window or the user's own Chromium
+    // must open its real explorer, and the resulting trusted `change` is recorded as usual.
+    const windowless = !this.options.connectBrowser && this.options.headless !== false;
+    if (windowless) page.on("filechooser", (chooser) => {
+      if (this.pendingFileChooser) clearTimeout(this.pendingFileChooser.expires);
+      const expires = setTimeout(() => {
+        if (this.pendingFileChooser?.chooser === chooser) {
+          this.pendingFileChooser = undefined;
+          this.notifyFileChooserSubscribers(false);
+        }
+      }, 5 * 60_000);
+      const multiple = chooser.isMultiple();
+      this.pendingFileChooser = { chooser, pageKey, multiple, expires };
+      this.notifyFileChooserSubscribers(true, pageKey, multiple);
+    });
+    page.on("close", () => {
+      if (this.pendingFileChooser?.chooser.page() === page) {
+        clearTimeout(this.pendingFileChooser.expires);
+        this.pendingFileChooser = undefined;
+        this.notifyFileChooserSubscribers(false);
+      }
+    });
+    this.notifyPageListSubscribers();
+  }
+
+  private notifyPageListSubscribers(): void {
+    for (const subscriber of this.pageListSubscribers) subscriber();
+  }
+
+  private notifyFileChooserSubscribers(available: boolean, pageKey?: string, multiple = false): void {
+    for (const subscriber of this.fileChooserSubscribers) subscriber(available, pageKey, multiple);
+  }
+
+  async setActiveFileInputFiles(files: RecorderFilePayload[]): Promise<void> {
+    const pending = this.pendingFileChooser;
+    if (!pending) throw new Error("FILE_INPUT_NOT_ACTIVE");
+    if (files.length < 1 || files.length > 5) throw new Error("FILE_INPUT_FILE_COUNT_INVALID");
+    if (files.length > 1 && !pending.multiple) throw new Error("FILE_INPUT_DOES_NOT_ACCEPT_MULTIPLE");
+    try {
+      const page = pending.chooser.page();
+      await page.evaluate(() => { (window as any).__qaRecorderV2FileDelivery = true; }).catch(() => undefined);
+      await pending.chooser.setFiles(files).finally(() => {
+        page.evaluate(() => { setTimeout(() => { (window as any).__qaRecorderV2FileDelivery = false; }, 1000); }).catch(() => undefined);
+      });
+      clearTimeout(pending.expires);
+      if (this.pendingFileChooser === pending) this.pendingFileChooser = undefined;
+      this.notifyFileChooserSubscribers(false, pending.pageKey);
+    } catch (error) {
+      throw new Error(error instanceof Error ? `FILE_INPUT_SET_FAILED:${error.message}` : "FILE_INPUT_SET_FAILED");
+    }
   }
 
   private pushEvent(event: Omit<RecordedEvent, "seq">): RecordedEvent {
@@ -1489,39 +1731,295 @@ export class WebSessionRecorder {
     return full;
   }
 
-  private async captureFrame(tag: string): Promise<string | undefined> {
+  private stableValueLocators(owner: BrowserValueOwnerDescriptor | undefined): RecordedLocator[] {
+    if (!owner || !owner.tagName || !owner.locatorMatchCounts) return [];
+    // No stable attribute anywhere: the browser proved this path matches exactly this element on the page.
+    // Replay still requires it to resolve to one element and the copied value to keep its recorded shape.
+    if (owner.structuralPath && owner.locatorMatchCounts.structuralPath === 1 && owner.structuralPath.length <= 400) {
+      return [{ strategy: "css", value: owner.structuralPath, confidence: 0.5 }];
+    }
+    const raw: RawInteraction = {
+      kind: "click",
+      label: owner.label,
+      tagName: owner.tagName,
+      inputType: owner.inputType,
+      domId: owner.id,
+      name: owner.name,
+      testId: owner.testId,
+      ariaLabel: owner.ariaLabel,
+      ranks: {
+        ...(typeof owner.locatorMatchCounts.domId === "number" ? { domId: { count: owner.locatorMatchCounts.domId, index: 0 } } : {}),
+        ...(typeof owner.locatorMatchCounts.name === "number" ? { name: { count: owner.locatorMatchCounts.name, index: 0 } } : {}),
+        ...(typeof owner.locatorMatchCounts.testId === "number" ? { testId: { count: owner.locatorMatchCounts.testId, index: 0 } } : {}),
+        ...(typeof owner.locatorMatchCounts.ariaLabel === "number" ? { ariaLabel: { count: owner.locatorMatchCounts.ariaLabel, index: 0 } } : {}),
+      },
+    };
+    return buildWebLocators(raw).filter((locator) =>
+      !locator.ambiguous && ["id", "data-testid", "aria-label", "css"].includes(locator.strategy)
+      && (locator.strategy !== "css" || locator.value.startsWith("#") || locator.value.startsWith("[name=\"")),
+    );
+  }
+
+  private async onValueTransferMessage(message: BrowserValueTransferMessage, sourcePage = this.page): Promise<void> {
+    // A copy right after a click on passive text means that click selected text: it is not a replayable action.
+    if (!this.stopped && message && (message.phase === "copy" || message.phase === "copy_seen")
+      && this.lastPassiveTap?.event.target && Date.now() - this.lastPassiveTap.at <= 8000) {
+      this.lastPassiveTap.event.target.copySelectionGesture = true;
+    }
+    if (message?.phase === "copy_seen") return;
+    if (this.stopped || !message || typeof message.text !== "string" || message.text.length < 1 || message.text.length > 512) return;
+    const now = Date.now();
+    while (this.copiedValues.length && now - this.copiedValues[0].copiedAt > 120_000) this.copiedValues.shift();
+    while (this.pendingValuePastes.length && now - this.pendingValuePastes[0].pastedAt > 30_000) this.pendingValuePastes.shift();
+    if (message.phase === "copy") {
+      const locators = this.stableValueLocators(message.owner);
+      if (!message.owner || !message.selection || locators.length === 0
+        || isSensitiveField({ kind: "click", label: message.owner.label, name: message.owner.name, domId: message.owner.id, ariaLabel: message.owner.ariaLabel, inputType: message.owner.inputType })) {
+        // Not linkable: a later paste of this text is recorded as a typed literal. Say so instead of staying silent.
+        this.log(`[recording:value-transfer] phase=copy_ignored reason=${!message.owner || !message.selection ? "no_owner_or_selection" : locators.length === 0 ? "no_stable_locator" : "sensitive_field"} length=${message.text.length}`);
+        return;
+      }
+      this.copiedValues.push({ text: message.text, owner: message.owner, selection: message.selection, copiedAt: now, pageKey: this.pageKeyFor(sourcePage) });
+      if (this.copiedValues.length > 20) this.copiedValues.splice(0, this.copiedValues.length - 20);
+      this.log(`[recording:value-transfer] phase=copied length=${message.text.length} sourceIdentity=true`);
+      return;
+    }
+    if (message.phase !== "paste" || !message.destination
+      || isSensitiveField({ kind: "input", label: message.destination.label, name: message.destination.name, domId: message.destination.id, ariaLabel: message.destination.ariaLabel, inputType: message.destination.inputType })) return;
+    const source = [...this.copiedValues].reverse().find((candidate) =>
+      now - candidate.copiedAt <= 120_000 && candidate.text === message.text && this.stableValueLocators(candidate.owner).length > 0,
+    );
+    const destinationLocators = this.stableValueLocators(message.destination);
+    if (!source || destinationLocators.length === 0) {
+      this.log(`[recording:value-transfer] phase=paste_unlinked reason=${!source ? "no_matching_copy" : "no_stable_destination_locator"} length=${message.text.length}`);
+      return;
+    }
+    const sourceLocators = this.stableValueLocators(source.owner);
+    const sourceEventRef = `event-${this.events.length + 1}`;
+    const copyPage = source.pageKey ? this.pageByKey.get(source.pageKey) : sourcePage;
+    const state = this.pageStateFor(copyPage);
+    this.pushEvent({
+      t: this.now(),
+      kind: "value_source",
+      screenKey: state.screenKey,
+      fingerprint: state.fingerprint,
+      url: copyPage?.url(),
+      pageKey: source.pageKey,
+      target: {
+        label: source.owner.label || "valor visible",
+        tag: source.owner.tagName,
+        ...(source.owner.inputType ? { inputType: source.owner.inputType } : {}),
+        ...(source.owner.id ? { attributes: { id: source.owner.id } } : {}),
+        locators: sourceLocators.map((locator) => ({ ...locator })),
+      },
+      valueSelection: { ...source.selection },
+    });
+    this.pendingValuePastes.push({
+      text: message.text,
+      destinationRefs: destinationLocators.map((locator) => `${locator.strategy}:${locator.value}`),
+      sourceEventRef,
+      pastedAt: now,
+    });
+    if (this.pendingValuePastes.length > 20) this.pendingValuePastes.splice(0, this.pendingValuePastes.length - 20);
+    this.log(`[recording:value-transfer] phase=pasted sourceLinked=true length=${message.text.length}`);
+  }
+
+  private consumeValuePaste(raw: RawInteraction, locators: RecordedLocator[]): PendingValuePaste | undefined {
+    if (raw.kind !== "input" || typeof raw.value !== "string" || isSensitiveField(raw, this.options.sensitiveLabels)) return undefined;
+    const observedRefs = new Set(locators.filter((locator) => !locator.ambiguous).map((locator) => `${locator.strategy}:${locator.value}`));
+    if (observedRefs.size === 0) return undefined;
+    const now = Date.now();
+    const matchIndexes = this.pendingValuePastes.flatMap((paste, index) =>
+      paste.text === raw.value && now - paste.pastedAt <= 30_000
+        && paste.destinationRefs.some((ref) => observedRefs.has(ref)) ? [index] : [],
+    );
+    if (matchIndexes.length === 0) return undefined;
+    return this.pendingValuePastes.splice(matchIndexes[matchIndexes.length - 1], 1)[0];
+  }
+
+  private async onFileUploadMessage(message: BrowserFileUploadMessage, sourcePage = this.page): Promise<void> {
+    if (this.stopped) return;
+    if (!message || typeof message.groupId !== "string" || !/^upload-[a-z0-9-]{1,100}$/i.test(message.groupId)) {
+      throw new Error("FILE_UPLOAD_INVALID_GROUP");
+    }
+    if (message.phase === "group_start") {
+      if (!this.options.projectSlug?.trim()) throw new Error("FILE_UPLOAD_PROJECT_REQUIRED");
+      if (this.pendingFileUploadGroups.has(message.groupId)) throw new Error("FILE_UPLOAD_DUPLICATE_GROUP");
+      if (!Number.isInteger(message.fileCount) || (message.fileCount ?? 0) < 1 || (message.fileCount ?? 0) > 20 || !message.target) {
+        throw new Error("FILE_UPLOAD_INVALID_GROUP_SHAPE");
+      }
+      this.pendingFileUploadGroups.set(message.groupId, {
+        expectedFileCount: message.fileCount!,
+        target: message.target,
+        files: new Map(),
+        assets: [],
+        pageKey: this.pageKeyFor(sourcePage),
+      });
+      return;
+    }
+    const group = this.pendingFileUploadGroups.get(message.groupId);
+    if (!group) throw new Error("FILE_UPLOAD_GROUP_NOT_FOUND");
+    if (message.phase === "group_error") {
+      this.pendingFileUploadGroups.delete(message.groupId);
+      this.log(`[recording:file-upload] status=failed reason=${message.reason === "file_capture_failed" ? message.reason : "capture_error"}`);
+      return;
+    }
+    if (message.phase === "file_start") {
+      if (!Number.isInteger(message.fileIndex) || message.fileIndex! < 0 || message.fileIndex! >= group.expectedFileCount
+        || typeof message.filename !== "string" || typeof message.contentType !== "string"
+        || !Number.isInteger(message.size) || (message.size ?? 0) < 1 || (message.size ?? 0) > 25 * 1024 * 1024
+        || group.files.has(message.fileIndex!) || group.assets[message.fileIndex!] !== undefined) {
+        this.pendingFileUploadGroups.delete(message.groupId);
+        throw new Error("FILE_UPLOAD_INVALID_FILE_METADATA");
+      }
+      group.files.set(message.fileIndex!, {
+        filename: message.filename,
+        contentType: message.contentType,
+        size: message.size!,
+        chunks: [],
+        nextChunkIndex: 0,
+        receivedBytes: 0,
+      });
+      return;
+    }
+    if (message.phase === "file_chunk") {
+      const file = group.files.get(message.fileIndex ?? -1);
+      if (!file || !Number.isInteger(message.chunkIndex) || message.chunkIndex !== file.nextChunkIndex
+        || typeof message.data !== "string" || !/^[A-Za-z0-9+/]*={0,2}$/.test(message.data)) {
+        this.pendingFileUploadGroups.delete(message.groupId);
+        throw new Error("FILE_UPLOAD_INVALID_CHUNK");
+      }
+      const chunk = Buffer.from(message.data, "base64");
+      if (chunk.length < 1 || chunk.length > 256 * 1024 || file.receivedBytes + chunk.length > file.size) {
+        this.pendingFileUploadGroups.delete(message.groupId);
+        throw new Error("FILE_UPLOAD_CHUNK_SIZE_INVALID");
+      }
+      file.chunks.push(chunk);
+      file.nextChunkIndex += 1;
+      file.receivedBytes += chunk.length;
+      return;
+    }
+    if (message.phase === "file_end") {
+      const file = group.files.get(message.fileIndex ?? -1);
+      if (!file || file.receivedBytes !== file.size) {
+        this.pendingFileUploadGroups.delete(message.groupId);
+        throw new Error("FILE_UPLOAD_SIZE_MISMATCH");
+      }
+      const bytes = Buffer.concat(file.chunks, file.receivedBytes);
+      const asset = await saveTestFile({
+        projectSlug: this.options.projectSlug!.trim(),
+        filename: file.filename,
+        contentType: file.contentType,
+        bytes,
+      });
+      group.assets[message.fileIndex!] = {
+        fileRef: asset.fileRef,
+        filename: asset.filename,
+        contentType: asset.contentType,
+        size: asset.size,
+        sha256: asset.sha256,
+      };
+      group.files.delete(message.fileIndex!);
+      return;
+    }
+    if (message.phase === "group_end") {
+      this.pendingFileUploadGroups.delete(message.groupId);
+      if (group.files.size !== 0 || group.assets.length !== group.expectedFileCount || group.assets.some((asset) => !asset)) {
+        throw new Error("FILE_UPLOAD_GROUP_INCOMPLETE");
+      }
+      const descriptor = group.target;
+      const sourcePageKey = group.pageKey;
+      const sourcePageForUpload = sourcePageKey ? this.pageByKey.get(sourcePageKey) : this.page;
+      const state = this.pageStateFor(sourcePageForUpload);
+      const ranks: LocatorRanks = {
+        ...(typeof descriptor.locatorMatchCounts?.domId === "number" ? { domId: { count: descriptor.locatorMatchCounts.domId, index: 0 } } : {}),
+        ...(typeof descriptor.locatorMatchCounts?.name === "number" ? { name: { count: descriptor.locatorMatchCounts.name, index: 0 } } : {}),
+        ...(typeof descriptor.locatorMatchCounts?.testId === "number" ? { testId: { count: descriptor.locatorMatchCounts.testId, index: 0 } } : {}),
+        ...(typeof descriptor.locatorMatchCounts?.ariaLabel === "number" ? { ariaLabel: { count: descriptor.locatorMatchCounts.ariaLabel, index: 0 } } : {}),
+      };
+      const rawTarget: RawInteraction = {
+        kind: "input",
+        label: descriptor.label,
+        associatedField: descriptor.associatedField,
+        inputType: "file",
+        tagName: "input",
+        name: descriptor.name,
+        domId: descriptor.id,
+        testId: descriptor.testId,
+        ariaLabel: descriptor.ariaLabel,
+        ranks,
+      };
+      const locators = buildWebLocators(rawTarget);
+      if (locators.length === 0 && descriptor.uniqueFileInput === true) {
+        locators.push({ strategy: "css", value: 'input[type="file"]', confidence: 0.75 });
+      }
+      const target: RecordedEvent["target"] = {
+        label: descriptor.label || descriptor.name || "Archivo",
+        tag: "input",
+        inputType: "file",
+        role: "textbox",
+        associatedField: descriptor.associatedField || descriptor.label,
+        attributes: {
+          type: "file",
+          ...(descriptor.name ? { name: descriptor.name } : {}),
+          ...(descriptor.id ? { id: descriptor.id } : {}),
+          ...(descriptor.testId ? { "data-testid": descriptor.testId } : {}),
+          ...(descriptor.multiple ? { multiple: "true" } : {}),
+        },
+        locators,
+        enabled: true,
+      };
+      this.pushEvent({
+        t: this.now(),
+        kind: "file_upload",
+        screenKey: state.screenKey,
+        fingerprint: state.fingerprint,
+        url: sourcePageForUpload?.url(),
+        pageKey: sourcePageKey,
+        target,
+        fileAssets: group.assets,
+      });
+      this.log(`[recording:file-upload] status=captured files=${group.assets.length} target=${JSON.stringify(target.associatedField ?? target.label)}`);
+    }
+  }
+
+  private async captureFrame(tag: string, page = this.page): Promise<string | undefined> {
     if (this.options.captureScreenshots !== true) return undefined;
-    if (!this.page) return undefined;
-    const file = path.join(this.options.framesDir, `${String(this.seq).padStart(4, "0")}-${tag}.png`);
+    if (!page || page.isClosed()) return undefined;
+    const pageKey = this.pageKeyFor(page) ?? "tab";
+    const file = path.join(this.options.framesDir, `${String(this.seq).padStart(4, "0")}-${pageKey}-${tag}.png`);
     try {
-      await this.page.screenshot({ path: file });
+      await page.screenshot({ path: file });
       return file;
     } catch {
       return undefined;
     }
   }
 
-  private schedulePostActionObservation(): void {
+  private schedulePostActionObservation(page = this.page): void {
     this.postActionObservationQueue = this.postActionObservationQueue.then(async () => {
       // This work is deliberately outside v2IngestionQueue: the tap event has already been
       // appended and published, so screenshots/surface inspection cannot delay later actions.
       for (const delay of [60, 120, 180]) {
-        await this.page?.waitForTimeout(delay).catch(() => undefined);
-        const current = await this.absorbScreen();
-        if (current.screenKey !== this.lastScreenKey) break;
+        await page?.waitForTimeout(delay).catch(() => undefined);
+        const current = await this.absorbScreen(page);
+        if (current.screenKey !== current.previousScreenKey) break;
       }
-      const from = this.lastScreenKey;
-      const { changed, screenKey } = await this.absorbScreen();
+      const state = this.pageStateFor(page);
+      const from = state.screenKey;
+      const { changed, screenKey } = await this.absorbScreen(page);
       if (changed && screenKey !== from) {
-        this.lastScreenKey = screenKey;
+        state.screenKey = screenKey;
+        if (page === this.page) this.lastScreenKey = screenKey;
         this.pushEvent({
           t: this.now(),
           kind: "screen_change",
           screenKey: from,
           toScreenKey: screenKey,
-          fingerprint: this.lastFingerprint,
-          url: this.page?.url(),
-          framePath: await this.captureFrame("screen"),
+          fingerprint: state.fingerprint,
+          url: page?.url(),
+          pageKey: this.pageKeyFor(page),
+          framePath: await this.captureFrame("screen", page),
         });
         this.log(`[recording] pantalla -> ${this.screens.get(screenKey)?.title ?? screenKey}`);
       }
@@ -1537,12 +2035,15 @@ export class WebSessionRecorder {
    * navigating, and a paginated list changes URL without being a different screen. The
    * structural fingerprint is what actually distinguishes states.
    */
-  private async absorbScreen(): Promise<{ changed: boolean; screenKey: string }> {
-    if (!this.page) return { changed: false, screenKey: this.lastScreenKey };
-    const snapshot = await extractRuntimeUiSnapshot(this.page);
+  private async absorbScreen(page = this.page): Promise<{ changed: boolean; screenKey: string; previousScreenKey: string }> {
+    if (!page || page.isClosed()) return { changed: false, screenKey: this.lastScreenKey, previousScreenKey: this.lastScreenKey };
+    const pageKey = this.pageKeyFor(page)!;
+    const state = this.pageStateFor(page);
+    const previousScreenKey = state.screenKey;
+    const snapshot = await extractRuntimeUiSnapshot(page);
     const fingerprint = fingerprintSnapshot(snapshot);
     const screenKey = snapshot.screenKey || fingerprint.slice(0, 16);
-    const changed = fingerprint !== this.lastFingerprint;
+    const changed = fingerprint !== state.fingerprint;
 
     const controls: RecordedControl[] = snapshot.observedControls.map((c) => ({
         label: c.businessLabel ?? c.label,
@@ -1575,8 +2076,12 @@ export class WebSessionRecorder {
     this.screens.set(screenKey, recordedScreen);
     this.options.onScreen?.(recordedScreen);
 
-    this.lastFingerprint = fingerprint;
-    return { changed, screenKey };
+    state.fingerprint = fingerprint;
+    this.pageByKey.set(pageKey, page);
+    if (page === this.page) {
+      this.lastFingerprint = fingerprint;
+    }
+    return { changed, screenKey, previousScreenKey };
   }
 
   /**
@@ -1596,6 +2101,9 @@ export class WebSessionRecorder {
     }
     this.v2IngestionQueue = this.v2IngestionQueue.then(() => {
       const raw = adaptCaptureActionToRawInteraction(record.action) as unknown as RawInteraction;
+      raw.pageKey = record.action.documentContext?.frameId
+        ? this.pageKeyByFrameId.get(record.action.documentContext.frameId)
+        : undefined;
       // TEMPORARY DIAGNOSTIC (this ticket only): traces every V2 technical action's
       // CaptureAction -> RawInteraction -> RecordedEvent boundary explicitly, so a physical
       // recording that loses an action between these two layers is directly visible instead of
@@ -1605,7 +2113,7 @@ export class WebSessionRecorder {
       // wiring may route only to a UI/job-log channel, never guaranteed to reach the process's
       // own stdout, which is exactly the visibility gap this diagnostic exists to close.
       console.log(`[capture-v2-lineage] phase=raw_interaction_built seq=${record.seq} actionType=${record.action.actionType} rawKind=${raw.kind} ownerTag=${record.action.owner?.tag ?? "unknown"} ownerRole=${record.action.owner?.role ?? "unknown"}`);
-      return this.onInteraction(raw)
+      return this.onInteraction(raw, raw.pageKey ? this.pageByKey.get(raw.pageKey) : this.page)
         .then((event) => {
           console.log(`[capture-v2-lineage] phase=recorded_event_result seq=${record.seq} actionType=${record.action.actionType} recordedEventPresent=${Boolean(event)} recordedEventKind=${event?.kind ?? "none"}`);
           if (event && record.action.actionType === "click") this.v2SeqToClickEvent.set(record.seq, event);
@@ -1622,7 +2130,10 @@ export class WebSessionRecorder {
     if (this.captureAuthority !== "v2") return;
     this.v2IngestionQueue = this.v2IngestionQueue.then(async () => {
       const raw = adaptCaptureActionToRawInteraction(record.action) as unknown as RawInteraction;
-      await this.onInteraction(raw).catch((err) => {
+      raw.pageKey = record.action.documentContext?.frameId
+        ? this.pageKeyByFrameId.get(record.action.documentContext.frameId)
+        : undefined;
+      await this.onInteraction(raw, raw.pageKey ? this.pageByKey.get(raw.pageKey) : this.page).catch((err) => {
         this.log(`[capture-v2] pointer observation ingestion error: ${err instanceof Error ? err.message : String(err)}`);
       });
     });
@@ -1660,6 +2171,7 @@ export class WebSessionRecorder {
       const eventsBefore = this.events.length;
       return this.onInteraction({
         kind: "observation",
+        pageKey: payload.pageKey,
         observationType: "post_action",
         interactionId: correlationId,
         label: payload.label,
@@ -1671,7 +2183,7 @@ export class WebSessionRecorder {
           relatedStateContainerIdentity: payload.dynamicLifecycle?.relatedStateContainerIdentity,
           relatedStateMutations: payload.dynamicLifecycle?.relatedStateMutations,
         },
-      })
+      }, payload.pageKey ? this.pageByKey.get(payload.pageKey) : this.page)
         .then(() => {
         console.log(`[capture-v2-post-action] phase=trace_append observationForwarded=true traceEventAppended=${this.events.length > eventsBefore}`);
         return undefined;
@@ -1724,14 +2236,33 @@ export class WebSessionRecorder {
       const optionSourceLabelRaw = sourceEvents
         .find((event) => event.target?.role?.toLowerCase() === "option")
         ?.target?.label?.trim();
+      // A long option name ("... (incluye ..., ...)") can be reported as the generic placeholder while
+      // its own captured role locator still carries the exact accessible name (`option|<name>`).
+      const optionRoleLocatorName = sourceEvents
+        .find((event) => event.target?.role?.toLowerCase() === "option")
+        ?.target?.locators
+        ?.find((locator) => locator.strategy === "role" && /^option\|/i.test(locator.value))
+        ?.value.replace(/^option\|/i, "").trim();
       const optionSourceLabel = optionSourceLabelRaw && !isGenericUnresolvedLabel(optionSourceLabelRaw)
         ? optionSourceLabelRaw
-        : undefined;
+        : optionRoleLocatorName && !isGenericUnresolvedLabel(optionRoleLocatorName)
+          ? optionRoleLocatorName
+          : undefined;
       const selectedValue = evidence.selectedDisplay?.trim() || evidence.selectedValue?.trim() || optionSourceLabel;
       if (!selectedValue) return; // still no real selected-value evidence anywhere -- never invent one
+      if (record.action.owner?.selectionTriggerEvidence === "aria_popup" && !record.action.owner.associatedField?.trim()) {
+        return; // Keep the raw owner/option clicks visible when the custom trigger has no certified field label.
+      }
       const optionSourceEvent = sourceEvents.find((event) => event.target?.role?.toLowerCase() === "option");
+      const sourceEvent = optionSourceEvent ?? sourceEvents[0];
       const optionLocators = optionSourceEvent?.target?.locators ?? [];
       const optionTechnicalTargetCandidates = optionSourceEvent?.target?.technicalTargetCandidates;
+      // The opener, never the option: an opener with no recorded technical click (an editable combobox) leaves this empty.
+      const ownerSourceEvent = sourceEvents.find((event) => event.target?.role?.toLowerCase() !== "option");
+      const triggerTechnicalTarget = record.action.sourceRefs?.eventTargetRef
+        ?? owner?.technicalRefs?.[0]
+        ?? ownerSourceEvent?.target?.eventTargetRef;
+      const activatedTechnicalTarget = optionSourceEvent?.target?.eventTargetRef;
       // Only mark the source technical clicks as covered (hidden from their own independent
       // step) once we know a compensating selection event is actually about to be pushed below --
       // never hide them and then silently produce nothing.
@@ -1742,7 +2273,23 @@ export class WebSessionRecorder {
       }
       // Own field/accessible name first; associatedField only as a certified fallback; never the
       // option's own selected value used as the field's name (field identity != selected value).
-      const fieldLabel = owner?.accessibleName?.trim() || owner?.associatedField?.trim() || undefined;
+      // A re-selection reopens a trigger whose accessible name is its CURRENT value (e.g. a dropdown
+      // labelled "Cuentas de Efectivo" after that option was chosen). When field-owner resolution
+      // found no field for it and that exact value was already selected in a known field of this
+      // recording, the trigger belongs to that field; the value is never the field's name.
+      const ownerNameKey = owner?.accessibleName?.trim().toLowerCase();
+      const knownFieldForOwnerValue = !owner?.associatedField?.trim() && ownerNameKey
+        ? this.selectedValueFieldLabels.get(ownerNameKey)
+        : undefined;
+      // The owner's own name can be just its empty-state prompt ("Seleccione una opción"); the
+      // field's real label then travels in associatedField.
+      const ownerName = owner?.accessibleName?.trim();
+      const ownerFieldLabel = owner?.associatedField?.trim();
+      const fieldLabel = knownFieldForOwnerValue
+        || (owner?.selectionTriggerEvidence && ownerFieldLabel ? ownerFieldLabel : undefined)
+        || (isPlaceholderPrompt(ownerName) && ownerFieldLabel ? ownerFieldLabel : undefined)
+        || ownerName || ownerFieldLabel || undefined;
+      if (fieldLabel) this.selectedValueFieldLabels.set(selectedValue.trim().toLowerCase(), fieldLabel);
       this.pushEvent({
         t: this.now(),
         kind: "tap",
@@ -1758,9 +2305,10 @@ export class WebSessionRecorder {
         // demoted this event to a dropped `note`, even though a script that read the raw,
         // un-normalized trace never hit that filter and saw it as present.
         observationType: "pointer",
-        screenKey: this.lastScreenKey,
-        fingerprint: this.lastFingerprint,
-        url: this.page?.url(),
+        screenKey: sourceEvent?.screenKey ?? this.lastScreenKey,
+        fingerprint: sourceEvent?.fingerprint ?? this.lastFingerprint,
+        url: sourceEvent?.url ?? this.page?.url(),
+        pageKey: sourceEvent?.pageKey,
         target: {
           label: selectedValue,
           // "option" -- not the combobox's own role -- matching the existing compound-selection
@@ -1773,6 +2321,14 @@ export class WebSessionRecorder {
           compoundRole: "selection",
           associatedField: fieldLabel,
           observedOptions: optionSourceEvent?.target?.observedOptions,
+          ...(triggerTechnicalTarget || activatedTechnicalTarget ? {
+            dynamicLifecycle: {
+              ...(triggerTechnicalTarget ? { triggerTechnicalTarget } : {}),
+              ...(activatedTechnicalTarget ? { activatedTechnicalTarget } : {}),
+              selectedOption: selectedValue,
+              committedState: selectedValue,
+            },
+          } : {}),
           // The synthetic event summarizes the selection semantically, but its executable
           // authority comes only from the option click already captured by the browser. Carry
           // those exact locators/candidates forward instead of deriving a selector from the text.
@@ -1785,8 +2341,16 @@ export class WebSessionRecorder {
     });
   }
 
-  private async onInteraction(raw: RawInteraction): Promise<RecordedEvent | undefined> {
+  private async onInteraction(raw: RawInteraction, sourcePage = this.page): Promise<RecordedEvent | undefined> {
     if (this.stopped) return;
+    const pageKey = raw.pageKey ?? this.pageKeyFor(sourcePage);
+    if (raw.pageKey !== pageKey) raw.pageKey = pageKey;
+    const pageState = this.pageStateFor(sourcePage);
+    if (sourcePage && !pageState.fingerprint) {
+      await this.absorbScreen(sourcePage).catch(() => undefined);
+    }
+    const screenKey = pageState.screenKey;
+    const fingerprint = pageState.fingerprint;
     const sensitive = isSensitiveField(raw, this.options.sensitiveLabels);
     const locators = raw.kind === "observation" ? [] : buildWebLocators(raw);
     // Temporary diagnostic only, never changes what is recorded: surfaces the exact shape a
@@ -1794,7 +2358,7 @@ export class WebSessionRecorder {
     // fallback is all that reached buildWebLocators.
     if (isBareStructuralFallbackOnly(locators)) {
       console.log(describeFieldOwnerUnresolved({
-        screenKey: this.lastScreenKey,
+        screenKey,
         tagName: raw.tagName,
         role: raw.role,
         associatedField: raw.associatedField,
@@ -1809,7 +2373,7 @@ export class WebSessionRecorder {
       console.log(describeFieldOwnerUnresolvedDetail(raw.fieldOwnerDiagnostic));
     }
     const technicalTargetCandidates = preserveCapturedTechnicalTargetLocators(raw.technicalTargetCandidates, locators);
-    const framePath = raw.kind === "observation" ? undefined : await this.captureFrame(raw.kind);
+    const framePath = raw.kind === "observation" ? undefined : await this.captureFrame(raw.kind, sourcePage);
 
     const commonTarget = {
       label: raw.label || raw.name || raw.text || "control",
@@ -1868,9 +2432,10 @@ export class WebSessionRecorder {
         t: this.now(),
         interactionId: raw.interactionId,
         kind: "note",
-        screenKey: this.lastScreenKey,
-        fingerprint: this.lastFingerprint,
-        url: this.page?.url(),
+        screenKey,
+        fingerprint,
+        url: sourcePage?.url(),
+        pageKey,
         target: commonTarget,
         note: `Observación técnica (${raw.observationType ?? "post_action"}) sobre "${commonTarget.label}"`,
         observationType: raw.observationType ?? "post_action",
@@ -1879,12 +2444,14 @@ export class WebSessionRecorder {
     }
 
     if (raw.kind === "input") {
+      const valuePaste = this.consumeValuePaste(raw, locators);
       this.pushEvent({
         t: this.now(),
         kind: "fill",
-        screenKey: this.lastScreenKey,
-        fingerprint: this.lastFingerprint,
-        url: this.page?.url(),
+        screenKey,
+        fingerprint,
+        url: sourcePage?.url(),
+        pageKey,
         target: {
           ...commonTarget,
           label: raw.label || raw.name || "campo",
@@ -1893,9 +2460,10 @@ export class WebSessionRecorder {
         },
         // Password values are allowed only for the QA recording contract. They are persisted
         // in the trace/dataset but never written to the recorder log or console.
-        value: raw.value,
+        ...(!valuePaste && raw.value !== undefined ? { value: raw.value } : {}),
         redactedKey: sensitive ? normalizeLabel(raw.label || raw.name || "campo").replace(/\s+/g, "_") : undefined,
-        valueSource: raw.valueSource ?? "user",
+        valueSource: valuePaste ? "application" : raw.valueSource ?? "user",
+        ...(valuePaste ? { dependsOnEventRef: valuePaste.sourceEventRef } : {}),
         framePath,
       });
       return;
@@ -1911,9 +2479,10 @@ export class WebSessionRecorder {
       this.pushEvent({
         t: this.now(),
         kind: "press",
-        screenKey: this.lastScreenKey,
-        fingerprint: this.lastFingerprint,
-        url: this.page?.url(),
+        screenKey,
+        fingerprint,
+        url: sourcePage?.url(),
+        pageKey,
         target: commonTarget,
         note: raw.key,
         framePath,
@@ -1921,27 +2490,117 @@ export class WebSessionRecorder {
       return;
     }
 
+    // A pointer on passive text is either a click on an unattributed handler or the start of selecting text to
+    // copy. Repeated clicks on the same text (double/triple click) are a selection; a lone click is an action.
+    // Any role-less tap can be a text selection (a block such as a card header too); only passive text tags also
+    // record an explicit `false` for a lone click, the rest keep their previous handling unless a gesture is seen.
+    const passiveTap = isPassiveTextTapTarget(commonTarget);
+    const rolelessTap = !commonTarget.role?.trim();
+    const passiveKey = `${pageKey ?? ""}|${commonTarget.tag ?? ""}|${commonTarget.label ?? ""}`;
+    const passiveNow = Date.now();
+    const repeatsPassiveTap = rolelessTap && Boolean(this.lastPassiveTap
+      && this.lastPassiveTap.key === passiveKey && passiveNow - this.lastPassiveTap.at <= 3000);
+    if (repeatsPassiveTap && this.lastPassiveTap?.event.target) this.lastPassiveTap.event.target.copySelectionGesture = true;
     const tapEvent = this.pushEvent({
       t: this.now(),
       interactionId: raw.interactionId,
       kind: "tap",
-      screenKey: this.lastScreenKey,
-      fingerprint: this.lastFingerprint,
-      url: this.page?.url(),
-      target: commonTarget,
+      screenKey,
+      fingerprint,
+      url: sourcePage?.url(),
+      pageKey,
+      target: passiveTap
+        ? { ...commonTarget, copySelectionGesture: repeatsPassiveTap }
+        : repeatsPassiveTap ? { ...commonTarget, copySelectionGesture: true } : commonTarget,
       framePath,
     });
+    if (rolelessTap) this.lastPassiveTap = { event: tapEvent, key: passiveKey, at: passiveNow };
     this.log(`[recording] clic -> "${raw.label || raw.text || "(sin etiqueta)"}"`);
-    this.schedulePostActionObservation();
+    this.schedulePostActionObservation(sourcePage);
     return tapEvent;
   }
 
-  /** Transport access to the recorder-owned page; capture bindings and ingestion stay unchanged. */
-  liveViewTarget(): { page: Page; createCdp: () => Promise<CDPSession> } | undefined {
+  /** Transport access to every recorder-owned tab; capture bindings and ingestion stay unchanged. */
+  liveViewTarget(): {
+    page: Page;
+    createCdp: () => Promise<CDPSession>;
+    getTabs: () => Promise<Array<{ pageKey: string; url: string; title: string }>>;
+    resolveTab: (pageKey: string) => Promise<{ page: Page; createCdp: () => Promise<CDPSession> } | undefined>;
+    navigateUrl: (url: string, newTab: boolean, currentPageKey?: string) => Promise<string>;
+    recordTabSelection: (pageKey: string) => Promise<void>;
+    subscribeToTabs: (subscriber: () => void) => () => void;
+    subscribeToFileChooser: (subscriber: (available: boolean, pageKey?: string, multiple?: boolean) => void) => () => void;
+    uploadFiles: (files: RecorderFilePayload[]) => Promise<void>;
+    fileChooserState: () => { available: boolean; pageKey?: string; multiple?: boolean };
+  } | undefined {
     const page = this.page;
     const context = this.context;
     if (!page || !context) return undefined;
-    return { page, createCdp: () => context.newCDPSession(page) };
+    const resolveTab = async (pageKey: string) => {
+      const targetPage = this.pageByKey.get(pageKey);
+      if (!targetPage || targetPage.isClosed()) return undefined;
+      return { page: targetPage, createCdp: () => context.newCDPSession(targetPage) };
+    };
+    return {
+      page,
+      createCdp: () => context.newCDPSession(page),
+      getTabs: async () => Promise.all(context.pages().filter((candidate) => !candidate.isClosed()).map(async (candidate) => ({
+        pageKey: this.pageKeyFor(candidate)!,
+        url: candidate.url(),
+        title: await candidate.title().catch(() => candidate.url() || "Pestaña"),
+      }))),
+      resolveTab,
+      navigateUrl: async (rawUrl, newTab, currentPageKey) => {
+        const urlText = rawUrl.trim();
+        if (!urlText || urlText.length > 2048) throw new Error("LIVE_NAVIGATION_URL_INVALID");
+        const destination = new URL(/^[a-z][a-z0-9+.-]*:\/\//i.test(urlText) ? urlText : `https://${urlText}`);
+        if (!['http:', 'https:'].includes(destination.protocol) || destination.username || destination.password) {
+          throw new Error("LIVE_NAVIGATION_URL_UNSAFE");
+        }
+        const targetPage = newTab
+          ? await context.newPage()
+          : (currentPageKey ? this.pageByKey.get(currentPageKey) : page) ?? page;
+        const pageKey = this.pageKeyFor(targetPage)!;
+        this.userDirectedNavigationPages.add(targetPage);
+        await targetPage.goto(destination.toString(), { waitUntil: "domcontentloaded" });
+        return pageKey;
+      },
+      recordTabSelection: async (pageKey) => {
+        const selectedPage = this.pageByKey.get(pageKey);
+        if (!selectedPage || selectedPage.isClosed()) throw new Error("LIVE_TAB_NOT_FOUND");
+        const state = this.pageStateFor(selectedPage);
+        let safeUrl: string | undefined;
+        try {
+          const url = new URL(selectedPage.url());
+          if (url.protocol === "http:" || url.protocol === "https:") {
+            url.username = "";
+            url.password = "";
+            url.search = "";
+            const safeRouteHash = /^#\/(?!.*(?:token|code|session|auth|secret)=)[a-z0-9/_-]{0,180}$/i.test(url.hash) ? url.hash : "";
+            safeUrl = `${url.origin}${url.pathname}${safeRouteHash}`;
+          }
+        } catch { safeUrl = undefined; }
+        this.pushEvent({
+          t: this.now(),
+          kind: "tab_switch",
+          screenKey: state.screenKey,
+          fingerprint: state.fingerprint,
+          ...(safeUrl ? { url: safeUrl } : {}),
+          pageKey,
+        });
+      },      subscribeToTabs: (subscriber) => {
+        this.pageListSubscribers.add(subscriber);
+        return () => this.pageListSubscribers.delete(subscriber);
+      },
+      subscribeToFileChooser: (subscriber) => {
+        this.fileChooserSubscribers.add(subscriber);
+        return () => this.fileChooserSubscribers.delete(subscriber);
+      },
+      uploadFiles: (files) => this.setActiveFileInputFiles(files),
+      fileChooserState: () => this.pendingFileChooser
+        ? { available: true, pageKey: this.pendingFileChooser.pageKey, multiple: this.pendingFileChooser.multiple }
+        : { available: false, multiple: false },
+    };
   }
 
   /** Navigate after the recording session and live-view transport have been published. */
@@ -1953,12 +2612,15 @@ export class WebSessionRecorder {
       await page.goto(this.options.baseUrl, { waitUntil: "domcontentloaded" });
       const { screenKey } = await this.absorbScreen();
       this.lastScreenKey = screenKey;
+      const pageKey = this.pageKeyFor(page);
+      if (pageKey) this.pageStateFor(page).screenKey = screenKey;
       this.pushEvent({
         t: 0,
         kind: "launch",
         screenKey,
         url: this.options.baseUrl,
-        framePath: await this.captureFrame("launch"),
+        pageKey,
+        framePath: await this.captureFrame("launch", page),
       });
       this.log("[recording] navegador abierto: realiza el recorrido y pulsa Detener cuando termines");
     })();
@@ -1971,14 +2633,32 @@ export class WebSessionRecorder {
     }
     const engine =
       this.options.browserName === "firefox" ? firefox : this.options.browserName === "webkit" ? webkit : chromium;
+    const useNativeWindow = Boolean(this.options.connectBrowser) || this.options.headless === false;
+    this.log(`[recording:window] mode=${this.options.connectBrowser ? 'local_agent' : this.options.headless === false ? 'direct_headed' : 'headless'} nativeViewport=${useNativeWindow}`);
 
     this.browser = this.options.connectBrowser
       ? await this.options.connectBrowser()
-      : await engine.launch({ headless: this.options.headless ?? true });
+      : await engine.launch({
+          headless: this.options.headless ?? true,
+          ...(useNativeWindow && engine === chromium ? {args:['--start-maximized']} : {}),
+        });
     this.context = await this.browser.newContext(
-      buildWebRecorderContextOptions(this.options.ignoreHTTPSErrors),
+      buildWebRecorderContextOptions(this.options.ignoreHTTPSErrors, useNativeWindow),
     );
-    await this.context.exposeBinding("__qaRecord", async (_source, payload: RawInteraction) => {
+    await this.context.exposeBinding("__qaRecordFileUpload", async (source, message: BrowserFileUploadMessage) => {
+      try {
+        await this.onFileUploadMessage(message, source.page);
+      } catch (error) {
+        this.log(`[recording:file-upload] status=failed reason=${error instanceof Error ? error.message : "capture_error"}`);
+      }
+    });
+    await this.context.exposeBinding("__qaRecordValueTransfer", async (source, message: BrowserValueTransferMessage) => {
+      const task = this.v2IngestionQueue.catch(() => undefined).then(() => this.onValueTransferMessage(message, source.page));
+      this.v2IngestionQueue = task.then(() => undefined, () => undefined);
+      await task.catch(() => undefined);
+    });
+    await this.context.exposeBinding("__qaRecord", async (source, payload: RawInteraction) => {
+      payload.pageKey = this.pageKeyFor(source.page);
       const isPostAction = payload.kind === "observation" && payload.observationType === "post_action";
       if (isPostAction) {
         console.log(`[capture-v2-post-action] phase=binding_received __qaRecordReceived=true captureAuthority=${this.captureAuthority} interactionIdPresent=${Boolean(payload.interactionId)}`);
@@ -2033,7 +2713,10 @@ export class WebSessionRecorder {
         return frameId;
       };
       await this.context.exposeBinding("__qaRecordV2", async (source, message: ShadowBrowserMessage) => {
-        const normalizedMessage = { ...message, frameId: frameIdFor(source.frame) } as ShadowBrowserMessage;
+        const frameId = frameIdFor(source.frame);
+        const pageKey = this.pageKeyFor(source.page);
+        if (pageKey) this.pageKeyByFrameId.set(frameId, pageKey);
+        const normalizedMessage = { ...message, frameId } as ShadowBrowserMessage;
         v2Shadow.handleMessage(normalizedMessage);
       });
       captureScriptV2Content = buildCaptureScriptV2Content(captureInstanceId);
@@ -2056,36 +2739,14 @@ export class WebSessionRecorder {
       }
     }
 
+    this.context.on("page", (page) => {
+      void this.attachPage(page, captureScriptContent, captureScriptV2Content);
+    });
     this.page = await this.context.newPage();
-    // TEMPORARY DIAGNOSTIC (DOM-authority ticket only): forwards the browser-side
-    // "[capture-v2-dom-authority]" presence-check line (capture-engine-v2.browser-instrumentation.ts)
-    // to server stdout, exactly like the existing direct console.log("[capture-v2] ...") lines
-    // elsewhere in this file -- pure log plumbing, never touches a candidate/locator/readiness
-    // value. Any other browser console output is ignored.
-    this.page.on("console", (msg) => {
-      const text = msg.text();
-      if (text.startsWith("[capture-v2-dom-authority]")) console.log(text);
-    });
-    this.page.on("framenavigated", (frame) => {
-      if (frame !== this.page?.mainFrame() || this.stopped) return;
-      this.pushEvent({
-        t: this.now(),
-        kind: "navigate",
-        screenKey: this.lastScreenKey,
-        url: frame.url(),
-      });
-      // context.addInitScript already reinstalls CAPTURE_SCRIPT on every new document, but a
-      // fast redirect/full navigation can occasionally race ahead of that registration reaching
-      // the new document before the app's own bootstrap script runs. Re-evaluating here is a
-      // safety net, never a replacement: CAPTURE_SCRIPT's own window.__qaRecorderInstalledV1
-      // guard (already present) makes this a no-op whenever addInitScript already did its job,
-      // so a listener is never installed twice on the same document, and the exposed binding
-      // itself (context-scoped) needs no re-registration.
-      frame.evaluate(captureScriptContent).catch(() => undefined);
-      // Same defensive safety net for the V2 shadow script, guarded by its own, separate
-      // window.__qaRecorderV2InstalledV1 marker -- never touches the legacy guard above.
-      if (captureScriptV2Content) frame.evaluate(captureScriptV2Content).catch(() => undefined);
-    });
+    if (useNativeWindow) {
+      const maximized = await maximizeBrowserWindow(this.page);
+      this.log(`[recording:window] maximized=${maximized}`);
+    }
 
     return true;
   }
@@ -2101,6 +2762,13 @@ export class WebSessionRecorder {
     }).catch(() => undefined)));
     // Persist all actions accepted by the binding before closing its browser context.
     await this.v2IngestionQueue.catch(() => undefined);
+    this.copiedValues.length = 0;
+    this.pendingValuePastes.length = 0;
+    if (this.pendingFileChooser) {
+      clearTimeout(this.pendingFileChooser.expires);
+      this.pendingFileChooser = undefined;
+      this.notifyFileChooserSubscribers(false);
+    }
     // Post-action snapshots are optional enrichment, not user actions. Close the context first
     // to cancel any page evaluation that would otherwise keep Stop blocked indefinitely.
     await this.context?.close().catch(() => undefined);
@@ -2119,6 +2787,8 @@ export class WebSessionRecorder {
       );
     }
     await this.browser?.close().catch(() => undefined);
+    this.pageListSubscribers.clear();
+    this.fileChooserSubscribers.clear();
     this.context = null;
     this.browser = null;
     this.page = null;

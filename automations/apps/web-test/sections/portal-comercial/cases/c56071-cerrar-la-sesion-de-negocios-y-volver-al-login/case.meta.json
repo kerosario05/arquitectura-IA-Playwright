@@ -1,0 +1,10 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "portal-comercial",
+  "sectionName": "Portal Comercial",
+  "sectionId": 7433,
+  "sourceScenarioId": "C56071",
+  "testRailCaseId": 56071,
+  "generatedAt": "2026-10-26T22:38:45.787Z",
+  "title": "Cerrar la sesión de Negocios y volver al login"
+}

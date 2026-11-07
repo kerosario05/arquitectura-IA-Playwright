@@ -1,0 +1,9 @@
+{
+  "id": "aa-113-jira-40-restablecer-datos-crear-y-aprobar-una-solicitud-y-adjuntar-documentacion-complementaria",
+  "externalId": "AA-113:jira:40",
+  "title": "Restablecer datos, crear y aprobar una solicitud y adjuntar documentación complementaria",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-27T22:46:44.650Z"
+}

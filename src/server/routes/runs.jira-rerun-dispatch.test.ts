@@ -8,7 +8,7 @@ const source = fs.readFileSync(path.join(__dirname, "runs.ts"), "utf8");
 test("legacy Jira-origin scenario reruns dispatch through the dedicated Jira engine before Recording reuse", () => {
   const inference = source.indexOf("inferLegacyJiraRerunOrigin(issueKey, prepared.scenarios)");
   const jiraCreate = source.indexOf('executionEngine: "jira_semantic"', inference);
-  const jiraDispatch = source.indexOf("setImmediate(() => startScenarioPreviewRun(jiraJob.id))", inference);
+  const jiraDispatch = source.indexOf("scheduleJob(jiraJob.id, () => startScenarioPreviewRun(jiraJob.id))", inference);
   const jiraReturn = source.indexOf("return;", jiraDispatch);
   const recordingReuse = source.indexOf("if (prepared.allReusable)", inference);
   assert.ok(inference !== -1 && jiraCreate > inference && jiraDispatch > jiraCreate && jiraReturn > jiraDispatch);

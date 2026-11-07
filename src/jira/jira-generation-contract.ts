@@ -3,6 +3,7 @@ import {deriveJiraInputRequirements} from "./jira-input-requirements";
 import {isJiraStepAutoResolvable} from './jira-scenario-review';
 import {jiraRepeatedAssertionBlocks, canonicalJiraConditionalVisibilityStep, type JiraConditionRequirement} from "./jira-scenario-review";
 import {parseStepIntent} from '../discovery/step-intent-parser';
+import {parseJiraWorkflowStep} from './jira-workflow';
 import {jiraAcceptanceClauses,literalAlternativeBranches} from './jira-source-clauses';
 export {literalAlternativeBranches};
 import {jiraRowFormContractErrors} from './jira-row-form-contracts';
@@ -405,7 +406,8 @@ function jiraReactiveFilterResultMissing(steps:string[],issue?:JiraIssueSource):
  // Evidence = later assertion tied to results/list/rows/count, not any assertion (logo, header, nav...).
  const resultTerm=/\b(?:resultados?|results?|listas?|listados?|lists?|filas?|rows?|registros?|records?|coincid\w*|match\w*|cantidad|total|count|tabla|table|elementos|items?)\b/i;
  return steps.some((step,index)=>FILL_STEP.test(step)&&/\b(?:filtro|filtrar|filter|buscar|b[uú]squeda|search)\b/i.test(normalized(step))
-  && !steps.slice(index+1).some(next=>/^\s*(?:Validar|Verificar)\b/i.test(next)&&resultTerm.test(normalized(next))));
+  // A captured-row action is itself result evidence: the engine requires exactly one visible row matching the captured value.
+  && !steps.slice(index+1).some(next=>parseJiraWorkflowStep(next)?.kind==='clickCapturedRow'||(/^\s*(?:Validar|Verificar)\b/i.test(next)&&resultTerm.test(normalized(next)))));
 }
 
 /**

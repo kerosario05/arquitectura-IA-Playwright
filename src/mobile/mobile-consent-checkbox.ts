@@ -375,9 +375,10 @@ export async function ensureConsentCheckboxChecked(
     }
   }
 
-  // 2) Tick any standard (checkable) un-checked checkboxes.
-  const candidates = findUncheckedConsentCheckboxes(xml);
-  for (const candidate of candidates.slice(0, 5)) {
+  // 2) Tick un-checked CONSENT checkboxes only. Ticking every checkable control also pressed
+  //    the document-type options ("Cédula" / "Pasaporte"), switching the form to passport.
+  const candidates = findUncheckedConsentCheckboxes(xml).filter((candidate) => candidate.isConsent);
+  for (const candidate of candidates.slice(0, 3)) {
     try {
       const el = await browser.$(candidate.selector);
       if (!(await el.isExisting())) continue;
@@ -399,7 +400,13 @@ export async function ensureConsentCheckboxChecked(
   // Empirical evidence: for row [84,1466][1356,1907] with checkbox visual [84,1466][168,1550],
   //   - (126, 1508) = checkbox center → opens T&C modal (WRONG)
   //   - (126, 1686) = left edge at row center Y → toggles checkbox, enables Continuar (CORRECT)
-  if (isSubmitGated(xml)) {
+  // A consent checkbox ticked above must not be tapped again here: the row fallback toggled
+  // it straight back off. Re-read first so the gate reflects the tick.
+  if (ticked.length > 0) {
+    try { await browser.pause(600); } catch { /* pause may be unavailable in tests */ }
+    try { xml = await browser.getPageSource(); } catch { /* keep previous */ }
+  }
+  if (ticked.length === 0 && isSubmitGated(xml)) {
     const row = findConsentAcceptanceRow(xml);
     if (row && row.label) {
       // X: center of checkbox visual X range (or 7.5% of row width as fallback)

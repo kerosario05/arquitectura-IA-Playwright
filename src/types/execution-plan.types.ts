@@ -17,6 +17,7 @@ export type PlanAction =
   | "login"
   | "click"
   | "fill"
+  | "uploadFile"
   | "select"
   | "check"
   | "uncheck"
@@ -81,6 +82,31 @@ export type InputIntent = {
 };
 
 export type ExecutionPlanStep = {
+  /** Opt-in Jira workflow operation; Recording uses its own trace contract. */
+  jiraWorkflow?: import("../jira/jira-workflow").JiraWorkflowOperation;
+  /** Exact source interaction from a Recording contract; absent on Jira and manual plans. */
+  sourceInteractionId?: string;
+  recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "tab_switch" | "upload" | "system_observation";
+  /** Durable project-scoped file refs captured from the observed file input. */
+  fileAssets?: import("../recording/session-trace.types").RecordedFileAssetRef[];
+  /** Runtime-selected file set key for an observed Recording upload control. */
+  fileSetValueKey?: string;
+  /** Exact observed file-input locators. Used only by recorded upload steps. */
+  technicalTargetRefs?: string[];
+  /** Exact observed destination URL for a recorded cross-application navigation. */
+  navigationUrl?: string;
+  /** Recorder-owned tab identity; absent for Jira and legacy single-page plans. */
+  pageKey?: string;
+  /** Opens the pageKey in a new browser tab during replay when true. */
+  opensNewPage?: boolean;
+  /** Live value transfer metadata; never contains the copied value. */
+  runtimeDerivedSourceEventRef?: string;
+  runtimeValueCaptures?: Array<{
+    sourceEventRef: string;
+    sourcePageKey?: string;
+    technicalTargetRefs: string[];
+    valueSelection: import("../recording/session-trace.types").RecordedValueSelection;
+  }>;
   /** Live Discovery observation, independent of recorder evidence. */
   selectionControlKind?: "native_select";
   index: number;
@@ -97,6 +123,8 @@ export type ExecutionPlanStep = {
   rowScope?: number;
   rowRelation?: "next" | "added";
   associatedField?: string;
+  /** Semantic owner whose controlled selection surface contains this recorded query input. */
+  selectionQueryOwnerField?: string;
   /** Recorder-captured runtime evidence for compound controls such as segmented OTP inputs. */
   playwrightRecorderEvidence?: import("../recording/structural-owner-identity").PlaywrightRecorderEvidence;
   resolutionState?: "certified" | "runtime_resolution_required" | "unresolved_unrecoverable";

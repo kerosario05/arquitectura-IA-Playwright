@@ -1,0 +1,61 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-27T21:43:39.050Z",
+  "entries": [
+    {
+      "key": "usuario_portal",
+      "source": "unknown",
+      "fieldName": "[id=\"usuario\"]",
+      "stepIndex": 9,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena_portal",
+      "source": "unknown",
+      "fieldName": "[id=\"clave\"]",
+      "stepIndex": 10,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "rnc_prospecto",
+      "source": "unknown",
+      "fieldName": "[id=\"idNumero\"]",
+      "stepIndex": 14,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "usuario_aprobaciones",
+      "source": "unknown",
+      "fieldName": "[id=\"usuario\"]",
+      "stepIndex": 24,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena_aprobaciones",
+      "source": "unknown",
+      "fieldName": "[id=\"clave\"]",
+      "stepIndex": 25,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

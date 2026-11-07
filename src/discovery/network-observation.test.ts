@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { fillAndObserveRuntimeInput, startNetworkObservation, findActionServerError, isTerminalAuthenticationClientError } from "./case-discovery";
 import { waitForStableInteractiveScreen } from "../runner/execution-plan-executor";
+import { resolvePostActionSynchronization } from "./post-action-synchronization";
+import { waitForRecordedPressTransition } from "./recorded-press-stability";
 
 class FakePage {
   private listeners = new Map<string, Set<(value: any) => void>>();
@@ -110,6 +112,145 @@ const request = (url: string, method = "POST", resourceType = "fetch", redirecte
 });
 
 const response = (req: any, status: number, headers: Record<string, string> = {}) => ({ request: () => req, url: () => req.url(), status: () => status, headers: () => headers });
+
+test("press readiness distinguishes external telemetry failures from application failures", async () => {
+  const page = new FillObservationPage();
+  const observation = startNetworkObservation(page as any, 6);
+  const telemetry = request("https://telemetry.test/collect", "POST", "fetch");
+  page.emit("request", telemetry);
+  page.emit("requestfailed", telemetry);
+  assert.equal(observation.getProgressState().sameOriginRequestFailed, false);
+  const application = request("https://example.test/auth", "POST", "xhr");
+  page.emit("request", application);
+  page.emit("requestfailed", application);
+  assert.equal(observation.getProgressState().sameOriginRequestFailed, true);
+  await observation.stop({ passiveTail: false });
+});
+
+test("a recorded press waits for its destination and then for its loading screen", async () => {
+  const page = new StableFakePage();
+  let currentPath = "/auth";
+  (page as any).url = () => `https://example.test${currentPath}`;
+  const observation = startNetworkObservation(page as any, 6);
+  const submit = request("https://example.test/auth/submit", "POST", "xhr");
+  page.emit("request", submit);
+  let responseReceived = false;
+  const routeTimer = setTimeout(() => { currentPath = "/next"; }, 30);
+  const responseTimer = setTimeout(() => {
+    responseReceived = true;
+    page.loading = false;
+    page.emit("response", response(submit, 200));
+    page.emit("requestfinished", submit);
+  }, 90);
+  try {
+    const result = await waitForRecordedPressTransition(page as any, () => currentPath === "/next", () => observation.getProgressState());
+    assert.equal(result.stable, true);
+    assert.equal(responseReceived, true);
+    assert.equal(page.loading, false);
+    assert.ok(result.signals.includes("recorded_route"));
+  } finally {
+    clearTimeout(routeTimer);
+    clearTimeout(responseTimer);
+    await observation.stop();
+  }
+});
+
+test("a recorded press does not report a stable transition if its destination never appears", async () => {
+  const previousIdle = process.env.LOADING_STABILITY_TIMEOUT_MS;
+  const previousHardCap = process.env.ASYNC_OPERATION_HARD_SAFETY_CAP_MS;
+  process.env.LOADING_STABILITY_TIMEOUT_MS = "20";
+  process.env.ASYNC_OPERATION_HARD_SAFETY_CAP_MS = "100";
+  const page = new StableFakePage();
+  page.loading = false;
+  try {
+    const result = await waitForRecordedPressTransition(page as any, () => false, () => ({ active: false, pendingCount: 0 }));
+    assert.equal(result.stable, false);
+    assert.equal(result.terminationReason, "absolute_deadline_reached");
+  } finally {
+    if (previousIdle === undefined) delete process.env.LOADING_STABILITY_TIMEOUT_MS; else process.env.LOADING_STABILITY_TIMEOUT_MS = previousIdle;
+    if (previousHardCap === undefined) delete process.env.ASYNC_OPERATION_HARD_SAFETY_CAP_MS; else process.env.ASYNC_OPERATION_HARD_SAFETY_CAP_MS = previousHardCap;
+  }
+});
+
+test("long-lived connections do not count as finite requests for recorded press readiness", async () => {
+  const page = new FillObservationPage();
+  const observation = startNetworkObservation(page as any, 6);
+  page.emit("request", request("https://example.test/events", "GET", "eventsource"));
+  page.emit("request", request("https://example.test/socket", "GET", "websocket"));
+  assert.equal(observation.getProgressState().pendingFiniteCount, 0);
+  const submit = request("https://example.test/submit", "POST", "xhr");
+  page.emit("request", submit);
+  assert.equal(observation.getProgressState().pendingFiniteCount, 1);
+  page.emit("response", response(submit, 200));
+  assert.equal(observation.getProgressState().pendingFiniteCount, 0);
+  await observation.stop({ passiveTail: false });
+});
+
+test("tracks a pending same-origin action request even after an unrelated response", async () => {
+  const page = new FillObservationPage();
+  const observation = startNetworkObservation(page as any, 7);
+  const background = request("https://other.test/telemetry", "POST", "fetch");
+  const lookup = request("https://example.test/lookup", "GET", "fetch");
+  page.emit("request", background);
+  page.emit("request", lookup);
+  assert.equal(observation.getProgressState().pendingActionRequest, false);
+  const earlierProgress = observation.getProgressState();
+  const submit = request("https://example.test/auth/action", "POST", "xhr");
+  page.emit("request", submit);
+  assert.equal(earlierProgress.pendingActionRequest, false, "the request can start after an earlier scan");
+  assert.deepEqual(resolvePostActionSynchronization({ authGateChanged: true, nextTargetAvailable: true,
+    authenticationRequestPending: observation.hasPendingActionRequest() }), { completed: false });
+  page.emit("response", response(lookup, 200));
+  assert.equal(observation.getProgressState().responseObserved, true);
+  assert.equal(observation.getProgressState().pendingActionRequest, true);
+  page.emit("response", response(submit, 200));
+  assert.equal(observation.getProgressState().pendingActionRequest, false);
+  assert.equal(observation.hasPendingActionRequest(), false);
+  page.emit("response", response(background, 200));
+  await observation.stop();
+});
+
+test("an authentication stage transition waits for the observed request response", async () => {
+  const page = new StableFakePage();
+  (page as any).url = () => "https://example.test/auth";
+  page.loading = false;
+  const observation = startNetworkObservation(page as any, 7);
+  const submit = request("https://example.test/auth/action", "POST", "xhr");
+  page.emit("request", submit);
+  let sawPendingProbe = false;
+  let responseReceived = false;
+  const timer = setTimeout(() => {
+    responseReceived = true;
+    page.emit("response", response(submit, 200));
+    page.emit("requestfinished", submit);
+  }, 30);
+  try {
+    const result = await waitForStableInteractiveScreen(page as any, {
+      absoluteDeadlineMs: 500,
+      waitForPendingTransport: true,
+      progressProbe: () => observation.getProgressState(),
+      completionProbe: async () => {
+        const progress = observation.getProgressState();
+        if (progress.pendingActionRequest) sawPendingProbe = true;
+        return resolvePostActionSynchronization({
+          authenticationRequestPending: progress.pendingActionRequest,
+          authGateChanged: true,
+          nextTargetAvailable: true,
+          actionNetworkObserved: progress.pendingCount > 0 || progress.responseObserved,
+          actionNetworkResponse: progress.responseObserved,
+          loadingSettled: !progress.active,
+        });
+      },
+    });
+    assert.equal(sawPendingProbe, true);
+    assert.equal(responseReceived, true);
+    assert.equal(result.stable, true);
+    assert.ok(result.signals.includes("network_response") || result.signals.includes("auth_gate_changed"));
+  } finally {
+    clearTimeout(timer);
+    await observation.stop();
+  }
+});
 
 test("records safe request and response metadata without query, headers, or body", async () => {
   const page = new FakePage();
@@ -608,14 +749,9 @@ test("diagnostic observation preserves ordered multi-hop redirects", async () =>
   assert.equal(event.chainCompleted, true);
 });
 
-// FIRST_LOSS (jobId 38eaaeb6-f39e-44d2-96d8-9089b6196eaa): a subrequest (fetch/xhr, never the
-// document) that already received a real 2xx response before the browser also fired its own
-// `requestfailed` event (observed: POST .../ConsultarCasosBizagiSQL, response 204, then
-// failureCategory=browser_error) made `getProgressState().requestFailed` true unconditionally,
-// which `waitForStableInteractiveScreen` treats as terminal regardless of an authoritative
-// completionProbe -- aborting a wait ~188ms before the recorded route transition actually
-// completed. Reuses the exact non-terminal-failure test case-discovery.ts already applies a few
-// hundred lines downstream (relevantNetworkSettled), now also applied to `requestFailed` itself.
+// A fetch/xhr subrequest that received a real 2xx response before the browser also fired its own
+// `requestfailed` event is not a functional request failure. Reuse this behavior for
+// `getProgressState().requestFailed`, which `waitForStableInteractiveScreen` treats as terminal.
 const browserErrorFailure = (req: any) => ({ ...req, failure: () => ({ errorText: "net::ERR_FAILED" }) });
 
 test("getProgressState: a subrequest failing AFTER a real 2xx response is not reported as requestFailed", async () => {
@@ -652,6 +788,31 @@ test("getProgressState: a genuine connection failure with no prior response is s
   page.emit("requestfailed", req);
 
   assert.equal(observation.getProgressState().requestFailed, true);
+});
+
+test("getProgressState: the QA SQL bureau lookup 406 is settled feedback, not a terminal client error", async () => {
+  const page = new (class extends FakePage { url(): string { return "https://host.example/requests/create"; } })();
+  const observation = startNetworkObservation(page as any, 10);
+  const req = request("https://host.example/api/proxy/api/Procesos/MDW/ConsultarCasosBizagiSQL", "POST", "fetch");
+  page.emit("request", req);
+  page.emit("response", response(req, 406));
+
+  const state = observation.getProgressState();
+  assert.equal(state.terminalClientError, undefined);
+  assert.equal(state.requestFailed, false);
+  const [event] = await observation.stop();
+  assert.equal(event.state, "completed");
+  assert.equal(event.status, 406);
+});
+
+test("getProgressState: unrelated 406 responses remain terminal client errors", async () => {
+  const page = new (class extends FakePage { url(): string { return "https://host.example/requests/create"; } })();
+  const observation = startNetworkObservation(page as any, 10);
+  const req = request("https://host.example/api/other-lookup", "POST", "fetch");
+  page.emit("request", req);
+  page.emit("response", response(req, 406));
+
+  assert.equal(observation.getProgressState().terminalClientError?.status, 406);
 });
 
 test("auth rejection response closes observation only on the auth surface with no later business actions", async () => {

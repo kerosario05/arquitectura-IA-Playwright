@@ -50,15 +50,21 @@ export function inferTestRailActionInputRequirements(
     PLACEHOLDER_PATTERN.lastIndex = 0;
     if (PLACEHOLDER_PATTERN.test(line)) continue;
     const match = line.match(INPUT_ACTION_PATTERN);
-    const label = match ? normalizeInputLabel(match[2] ?? "") : "";
+    const bareMatch = match ? undefined : line.match(/^\s*(?:\d+\s*[.)]\s*)?(ingresar|introducir|escribir|completar|llenar|enter|type|fill)\s+["“']?([^"”']+?)["”']?\s*[.!?]*\s*$/i);
+    const bareLabel = normalizeInputLabel(bareMatch?.[2] ?? "");
+    // Bare field names are accepted only for unambiguous identity labels. Other
+    // bare fills may contain literal values and must not create guessed inputs.
+    const isBareIdentityField = /^(?:rnc|c[eé]dula|n[uú]mero de identificaci[oó]n|identificaci[oó]n|dni|id)$/i.test(bareLabel);
+    const label = match ? normalizeInputLabel(match[2] ?? "") : isBareIdentityField ? bareLabel : "";
     if (!label) continue;
+    const actionVerb = match?.[1] ?? bareMatch?.[1] ?? "";
     const key = inputKeyForLabel(label);
     if (labels.has(label.toLowerCase()) || keys.has(key)) continue;
     const sensitive = /(?:contrase(?:ñ|n)a|password|secret|clave)/i.test(label);
     inferred.push({
       key,
       label,
-      controlType: sensitive ? "password" : /^(seleccionar|elegir|select|choose)$/i.test(match![1]) ? "select" : "text",
+      controlType: sensitive ? "password" : /^(seleccionar|elegir|select|choose)$/i.test(actionVerb) ? "select" : "text",
       required: true,
       sensitive,
       allowedValues: [],

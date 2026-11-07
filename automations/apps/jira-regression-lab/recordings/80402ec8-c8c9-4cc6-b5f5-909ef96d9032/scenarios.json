@@ -1,0 +1,3466 @@
+[
+  {
+    "scenarioId": "REC-80402EC8-01",
+    "title": "Crear una solicitud en la web A, aprobarla en la web B y continuar en la web A adjuntando documentos",
+    "description": "Recorrido observado para completar \"Crear una solicitud en la web A, aprobarla en la web B y continuar en la web A adjuntando documentos\". Se registraron 25 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "http://127.0.0.1:4173",
+        "description": "Navegar a http://127.0.0.1:4173"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|RNC"
+        },
+        "valueKey": "rnc",
+        "technicalTargetRefs": [
+          "role:textbox|RNC",
+          "css:#login-rnc",
+          "id:login-rnc"
+        ],
+        "description": "Ingresar [rnc] en \"RNC\"",
+        "interactionId": "interaction-3",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Usuario"
+        },
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#login-user",
+          "id:login-user"
+        ],
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "interactionId": "interaction-4",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña"
+        },
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#login-password",
+          "id:login-password"
+        ],
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "interactionId": "interaction-6",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Iniciar sesión"
+        },
+        "description": "Presionar \"Iniciar sesión\"",
+        "interactionId": "interaction-7",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Código de acceso"
+        },
+        "valueKey": "codigo_de_acceso",
+        "technicalTargetRefs": [
+          "role:textbox|Código de acceso",
+          "css:#login-otp",
+          "id:login-otp"
+        ],
+        "description": "Ingresar [codigo_de_acceso] en \"Código de acceso\"",
+        "interactionId": "interaction-9",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-10",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|▤Solicitudes"
+        },
+        "description": "Presionar \"▤Solicitudes\"",
+        "interactionId": "interaction-12",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Nueva solicitud"
+        },
+        "description": "Presionar \"Nueva solicitud\"",
+        "interactionId": "interaction-14",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Asunto"
+        },
+        "valueKey": "asunto",
+        "technicalTargetRefs": [
+          "role:textbox|Asunto",
+          "css:#request-subject",
+          "id:request-subject"
+        ],
+        "description": "Ingresar [asunto] en \"Asunto\"",
+        "interactionId": "interaction-15",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Monto"
+        },
+        "valueKey": "monto",
+        "technicalTargetRefs": [
+          "role:textbox|Monto",
+          "css:#request-amount",
+          "id:request-amount"
+        ],
+        "description": "Ingresar [monto] en \"Monto\"",
+        "interactionId": "interaction-17",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Crear solicitud"
+        },
+        "description": "Presionar \"Crear solicitud\"",
+        "interactionId": "interaction-18",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "description": "Presionar \"NS-REQ-0001\"",
+        "interactionId": "interaction-19",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "http://127.0.0.1:4173/approvals/"
+        },
+        "value": "http://127.0.0.1:4173/approvals/",
+        "navigationUrl": "http://127.0.0.1:4173/approvals/",
+        "pageKey": "tab-2",
+        "opensNewPage": true,
+        "recordingActionType": "navigation",
+        "description": "Abrir una pestaña nueva y navegar al link \"http://127.0.0.1:4173/approvals/\"",
+        "interactionId": "interaction-20"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Usuario de aprobaciones"
+        },
+        "valueKey": "usuario_de_aprobaciones",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario de aprobaciones",
+          "css:#approvals-user",
+          "id:approvals-user"
+        ],
+        "description": "Ingresar [usuario_de_aprobaciones] en \"Usuario de aprobaciones\"",
+        "interactionId": "interaction-23",
+        "pageKey": "tab-2"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña de aprobaciones"
+        },
+        "valueKey": "contrasena_de_aprobaciones",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña de aprobaciones",
+          "css:#approvals-password",
+          "id:approvals-password"
+        ],
+        "description": "Ingresar [contrasena_de_aprobaciones] en \"Contraseña de aprobaciones\"",
+        "interactionId": "interaction-25",
+        "pageKey": "tab-2"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Ingresar a aprobaciones"
+        },
+        "description": "Presionar \"Ingresar a aprobaciones\"",
+        "interactionId": "interaction-26",
+        "pageKey": "tab-2"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Aprobar"
+        },
+        "description": "Presionar \"Aprobar\"",
+        "interactionId": "interaction-29",
+        "pageKey": "tab-2"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Confirmar aprobación"
+        },
+        "description": "Presionar \"Confirmar aprobación\"",
+        "interactionId": "interaction-31",
+        "pageKey": "tab-2"
+      },
+      {
+        "action": "switchTab",
+        "pageKey": "tab-1",
+        "recordingActionType": "tab_switch",
+        "description": "Cambiar a la pestaña \"http://127.0.0.1:4173/\"",
+        "interactionId": "interaction-32"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Volver a solicitudes"
+        },
+        "description": "Presionar \"Volver a solicitudes\"",
+        "interactionId": "interaction-34",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Continuar"
+        },
+        "description": "Presionar \"Continuar\"",
+        "interactionId": "interaction-36",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Adjuntar documentos"
+        },
+        "description": "Presionar \"Adjuntar documentos\"",
+        "interactionId": "interaction-38",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "css",
+          "value": "div:has(input[id=\"request-doc-0\"])"
+        },
+        "description": "Presionar \"Documento de identidad\"",
+        "interactionId": "interaction-39",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Guardar documentos"
+        },
+        "description": "Presionar \"Guardar documentos\"",
+        "interactionId": "interaction-41",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Finalizar solicitud"
+        },
+        "description": "Presionar \"Finalizar solicitud\"",
+        "interactionId": "interaction-43",
+        "pageKey": "tab-1"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Ingresar [rnc] en \"RNC\"",
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "stepTemplate": "Ingresar [rnc] en \"RNC\"",
+        "renderedStep": "Ingresar \"101010101\" en \"RNC\"",
+        "valueKey": "rnc",
+        "interactionId": "interaction-3",
+        "technicalTargetRefs": [
+          "role:textbox|RNC",
+          "css:#login-rnc",
+          "id:login-rnc"
+        ],
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [usuario] en \"Usuario\"",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "stepTemplate": "Ingresar [usuario] en \"Usuario\"",
+        "renderedStep": "Ingresar \"qa_empresa\" en \"Usuario\"",
+        "valueKey": "usuario",
+        "interactionId": "interaction-4",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#login-user",
+          "id:login-user"
+        ],
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 3
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña\"",
+        "renderedStep": "Ingresar el valor seguro asociado a \"Contraseña\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-6",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#login-password",
+          "id:login-password"
+        ],
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Iniciar sesión\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "renderedStep": "Presionar \"Iniciar sesión\"",
+        "interactionId": "interaction-7",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 5
+      },
+      {
+        "content": "Ingresar [codigo_de_acceso] en \"Código de acceso\"",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "stepTemplate": "Ingresar [codigo_de_acceso] en \"Código de acceso\"",
+        "renderedStep": "Ingresar \"123456\" en \"Código de acceso\"",
+        "valueKey": "codigo_de_acceso",
+        "interactionId": "interaction-9",
+        "technicalTargetRefs": [
+          "role:textbox|Código de acceso",
+          "css:#login-otp",
+          "id:login-otp"
+        ],
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-10",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 7
+      },
+      {
+        "content": "Presionar \"▤Solicitudes\"",
+        "sourceEventRefs": [
+          "event-12"
+        ],
+        "renderedStep": "Presionar \"▤Solicitudes\"",
+        "interactionId": "interaction-12",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 8
+      },
+      {
+        "content": "Presionar \"Nueva solicitud\"",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "renderedStep": "Presionar \"Nueva solicitud\"",
+        "interactionId": "interaction-14",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 9
+      },
+      {
+        "content": "Ingresar [asunto] en \"Asunto\"",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "stepTemplate": "Ingresar [asunto] en \"Asunto\"",
+        "renderedStep": "Ingresar \"Solicitud Northstar 1 documento\" en \"Asunto\"",
+        "valueKey": "asunto",
+        "interactionId": "interaction-15",
+        "technicalTargetRefs": [
+          "role:textbox|Asunto",
+          "css:#request-subject",
+          "id:request-subject"
+        ],
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 10
+      },
+      {
+        "content": "Ingresar [monto] en \"Monto\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "stepTemplate": "Ingresar [monto] en \"Monto\"",
+        "renderedStep": "Ingresar \"1500\" en \"Monto\"",
+        "valueKey": "monto",
+        "interactionId": "interaction-17",
+        "technicalTargetRefs": [
+          "role:textbox|Monto",
+          "css:#request-amount",
+          "id:request-amount"
+        ],
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 11
+      },
+      {
+        "content": "Presionar \"Crear solicitud\"",
+        "sourceEventRefs": [
+          "event-18"
+        ],
+        "renderedStep": "Presionar \"Crear solicitud\"",
+        "interactionId": "interaction-18",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "inicio",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "routeAfter": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 12
+      },
+      {
+        "content": "Presionar \"NS-REQ-0001\"",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "renderedStep": "Presionar \"NS-REQ-0001\"",
+        "interactionId": "interaction-19",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "inicio",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "routeAfter": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 13
+      },
+      {
+        "content": "Abrir una pestaña nueva y navegar al link \"http://127.0.0.1:4173/approvals/\"",
+        "recordingActionType": "navigation",
+        "navigationUrl": "http://127.0.0.1:4173/approvals/",
+        "pageKey": "tab-2",
+        "opensNewPage": true,
+        "expected": "La aplicación de destino carga correctamente",
+        "classification": "FUNCTIONAL_ACTION",
+        "interactionId": "interaction-20",
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "inicio",
+        "stepNumber": 14
+      },
+      {
+        "content": "Ingresar [usuario_de_aprobaciones] en \"Usuario de aprobaciones\"",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "stepTemplate": "Ingresar [usuario_de_aprobaciones] en \"Usuario de aprobaciones\"",
+        "renderedStep": "Ingresar \"qa_aprobador\" en \"Usuario de aprobaciones\"",
+        "valueKey": "usuario_de_aprobaciones",
+        "interactionId": "interaction-23",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario de aprobaciones",
+          "css:#approvals-user",
+          "id:approvals-user"
+        ],
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-2",
+        "screenBeforeRef": "ec56ca606e28",
+        "screenAfterRef": "ec56ca606e28",
+        "routeBefore": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "ec56ca606e28",
+        "stepNumber": 15
+      },
+      {
+        "content": "Ingresar [contrasena_de_aprobaciones] en \"Contraseña de aprobaciones\"",
+        "sourceEventRefs": [
+          "event-25"
+        ],
+        "stepTemplate": "Ingresar [contrasena_de_aprobaciones] en \"Contraseña de aprobaciones\"",
+        "renderedStep": "Ingresar el valor seguro asociado a \"Contraseña de aprobaciones\"",
+        "valueKey": "contrasena_de_aprobaciones",
+        "interactionId": "interaction-25",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña de aprobaciones",
+          "css:#approvals-password",
+          "id:approvals-password"
+        ],
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-2",
+        "screenBeforeRef": "ec56ca606e28",
+        "screenAfterRef": "ec56ca606e28",
+        "routeBefore": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "ec56ca606e28",
+        "stepNumber": 16
+      },
+      {
+        "content": "Presionar \"Ingresar a aprobaciones\"",
+        "sourceEventRefs": [
+          "event-26"
+        ],
+        "renderedStep": "Presionar \"Ingresar a aprobaciones\"",
+        "interactionId": "interaction-26",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-2",
+        "screenBeforeRef": "ec56ca606e28",
+        "screenAfterRef": "ec56ca606e28",
+        "routeBefore": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "ec56ca606e28",
+        "stepNumber": 17
+      },
+      {
+        "content": "Presionar \"Aprobar\"",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "renderedStep": "Presionar \"Aprobar\"",
+        "interactionId": "interaction-29",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-2",
+        "screenBeforeRef": "ec56ca606e28",
+        "screenAfterRef": "ec56ca606e28",
+        "routeBefore": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "ec56ca606e28",
+        "stepNumber": 18
+      },
+      {
+        "content": "Presionar \"Confirmar aprobación\"",
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "renderedStep": "Presionar \"Confirmar aprobación\"",
+        "interactionId": "interaction-31",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-2",
+        "screenBeforeRef": "ec56ca606e28",
+        "screenAfterRef": "ec56ca606e28",
+        "routeBefore": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "ec56ca606e28",
+        "stepNumber": 19
+      },
+      {
+        "content": "Cambiar a la pestaña \"http://127.0.0.1:4173/\"",
+        "recordingActionType": "tab_switch",
+        "pageKey": "tab-1",
+        "expected": "La pestaña http://127.0.0.1:4173/ queda activa",
+        "classification": "FUNCTIONAL_ACTION",
+        "interactionId": "interaction-32",
+        "sourceEventRefs": [
+          "event-32"
+        ],
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stepNumber": 20
+      },
+      {
+        "content": "Presionar \"Volver a solicitudes\"",
+        "sourceEventRefs": [
+          "event-34"
+        ],
+        "renderedStep": "Presionar \"Volver a solicitudes\"",
+        "interactionId": "interaction-34",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 21
+      },
+      {
+        "content": "Presionar \"Continuar\"",
+        "sourceEventRefs": [
+          "event-36"
+        ],
+        "renderedStep": "Presionar \"Continuar\"",
+        "interactionId": "interaction-36",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 22
+      },
+      {
+        "content": "Presionar \"Adjuntar documentos\"",
+        "sourceEventRefs": [
+          "event-38"
+        ],
+        "renderedStep": "Presionar \"Adjuntar documentos\"",
+        "interactionId": "interaction-38",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 23
+      },
+      {
+        "content": "Presionar \"Documento de identidad\"",
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "renderedStep": "Presionar \"Documento de identidad\"",
+        "interactionId": "interaction-39",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 24
+      },
+      {
+        "content": "Presionar \"Guardar documentos\"",
+        "sourceEventRefs": [
+          "event-41"
+        ],
+        "renderedStep": "Presionar \"Guardar documentos\"",
+        "interactionId": "interaction-41",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 25
+      },
+      {
+        "content": "Presionar \"Finalizar solicitud\"",
+        "sourceEventRefs": [
+          "event-43"
+        ],
+        "renderedStep": "Presionar \"Finalizar solicitud\"",
+        "interactionId": "interaction-43",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "stepNumber": 26
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "rnc",
+        "label": "RNC",
+        "stepIndex": 1,
+        "technicalTargetRefs": [
+          "role:textbox|RNC",
+          "css:#login-rnc",
+          "id:login-rnc"
+        ],
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "exampleValue": "101010101",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "RNC",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#login-user",
+          "id:login-user"
+        ],
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "exampleValue": "qa_empresa",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Usuario",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 3,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#login-password",
+          "id:login-password"
+        ],
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "codigo_de_acceso",
+        "label": "Código de acceso",
+        "stepIndex": 5,
+        "technicalTargetRefs": [
+          "role:textbox|Código de acceso",
+          "css:#login-otp",
+          "id:login-otp"
+        ],
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "exampleValue": "123456",
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Código de acceso",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "asunto",
+        "label": "Asunto",
+        "stepIndex": 9,
+        "technicalTargetRefs": [
+          "role:textbox|Asunto",
+          "css:#request-subject",
+          "id:request-subject"
+        ],
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "exampleValue": "Solicitud Northstar 1 documento",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Asunto",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "monto",
+        "label": "Monto",
+        "stepIndex": 10,
+        "technicalTargetRefs": [
+          "role:textbox|Monto",
+          "css:#request-amount",
+          "id:request-amount"
+        ],
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "exampleValue": "1500",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Monto",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "usuario_de_aprobaciones",
+        "label": "Usuario de aprobaciones",
+        "stepIndex": 14,
+        "technicalTargetRefs": [
+          "role:textbox|Usuario de aprobaciones",
+          "css:#approvals-user",
+          "id:approvals-user"
+        ],
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "exampleValue": "qa_aprobador",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Usuario de aprobaciones",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena_de_aprobaciones",
+        "label": "Contraseña de aprobaciones",
+        "stepIndex": 15,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña de aprobaciones",
+          "css:#approvals-password",
+          "id:approvals-password"
+        ],
+        "sourceEventRefs": [
+          "event-25"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña de aprobaciones",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Ingresar [rnc] en \"RNC\"",
+        "strategy": "role",
+        "value": "textbox|RNC"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "strategy": "role",
+        "value": "textbox|Usuario"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Presionar \"Iniciar sesión\"",
+        "strategy": "role",
+        "value": "button|Iniciar sesión"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Ingresar [codigo_de_acceso] en \"Código de acceso\"",
+        "strategy": "role",
+        "value": "textbox|Código de acceso"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      },
+      {
+        "stepIndex": 7,
+        "description": "Presionar \"▤Solicitudes\"",
+        "strategy": "role",
+        "value": "button|▤Solicitudes"
+      },
+      {
+        "stepIndex": 8,
+        "description": "Presionar \"Nueva solicitud\"",
+        "strategy": "role",
+        "value": "button|Nueva solicitud"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Ingresar [asunto] en \"Asunto\"",
+        "strategy": "role",
+        "value": "textbox|Asunto"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Ingresar [monto] en \"Monto\"",
+        "strategy": "role",
+        "value": "textbox|Monto"
+      },
+      {
+        "stepIndex": 11,
+        "description": "Presionar \"Crear solicitud\"",
+        "strategy": "role",
+        "value": "button|Crear solicitud"
+      },
+      {
+        "stepIndex": 14,
+        "description": "Ingresar [usuario_de_aprobaciones] en \"Usuario de aprobaciones\"",
+        "strategy": "role",
+        "value": "textbox|Usuario de aprobaciones"
+      },
+      {
+        "stepIndex": 15,
+        "description": "Ingresar [contrasena_de_aprobaciones] en \"Contraseña de aprobaciones\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña de aprobaciones"
+      },
+      {
+        "stepIndex": 16,
+        "description": "Presionar \"Ingresar a aprobaciones\"",
+        "strategy": "role",
+        "value": "button|Ingresar a aprobaciones"
+      },
+      {
+        "stepIndex": 17,
+        "description": "Presionar \"Aprobar\"",
+        "strategy": "role",
+        "value": "button|Aprobar"
+      },
+      {
+        "stepIndex": 18,
+        "description": "Presionar \"Confirmar aprobación\"",
+        "strategy": "role",
+        "value": "button|Confirmar aprobación"
+      },
+      {
+        "stepIndex": 20,
+        "description": "Presionar \"Volver a solicitudes\"",
+        "strategy": "role",
+        "value": "button|Volver a solicitudes"
+      },
+      {
+        "stepIndex": 21,
+        "description": "Presionar \"Continuar\"",
+        "strategy": "role",
+        "value": "button|Continuar"
+      },
+      {
+        "stepIndex": 22,
+        "description": "Presionar \"Adjuntar documentos\"",
+        "strategy": "role",
+        "value": "button|Adjuntar documentos"
+      },
+      {
+        "stepIndex": 23,
+        "description": "Presionar \"Documento de identidad\"",
+        "strategy": "css",
+        "value": "div:has(input[id=\"request-doc-0\"])"
+      },
+      {
+        "stepIndex": 24,
+        "description": "Presionar \"Guardar documentos\"",
+        "strategy": "role",
+        "value": "button|Guardar documentos"
+      },
+      {
+        "stepIndex": 25,
+        "description": "Presionar \"Finalizar solicitud\"",
+        "strategy": "role",
+        "value": "button|Finalizar solicitud"
+      }
+    ],
+    "sourceRecordingId": "80402ec8-c8c9-4cc6-b5f5-909ef96d9032",
+    "hasUncertainSteps": true,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23",
+      "event-24",
+      "event-25",
+      "event-26",
+      "event-27",
+      "event-28",
+      "event-29",
+      "event-30",
+      "event-31",
+      "event-32",
+      "event-33",
+      "event-34",
+      "event-35",
+      "event-36",
+      "event-37",
+      "event-38",
+      "event-39",
+      "event-40",
+      "event-41",
+      "event-42",
+      "event-43"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "expectedResultCandidate": "La pestaña http://127.0.0.1:4173/ queda activa",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 26,
+    "functionalActionCount": 25,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Crear una solicitud en la web A, aprobarla en la web B y continuar en la web A adjuntando documentos",
+    "stateSequenceValid": false,
+    "stateSequenceIssues": [
+      "interaction-18:inicio->interaction-19:9a0424e878a9"
+    ],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "pageKey": "tab-1",
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-3",
+        "controlIdentity": "9a0424e878a9|RNC|role|textbox|RNC",
+        "semanticField": "RNC",
+        "action": "fill",
+        "pageKey": "tab-1",
+        "valueKey": "rnc",
+        "recordedValue": "101010101",
+        "rawTypedValue": "101010101",
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|RNC",
+          "css:#login-rnc",
+          "id:login-rnc"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"RNC\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-4",
+        "controlIdentity": "9a0424e878a9|Usuario|role|textbox|Usuario",
+        "semanticField": "Usuario",
+        "action": "fill",
+        "pageKey": "tab-1",
+        "valueKey": "usuario",
+        "recordedValue": "qa_empresa",
+        "rawTypedValue": "qa_empresa",
+        "sourceEventRefs": [
+          "event-4"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#login-user",
+          "id:login-user"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Usuario\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-6",
+        "controlIdentity": "9a0424e878a9|Contraseña|role|textbox|Contraseña",
+        "semanticField": "Contraseña",
+        "action": "fill",
+        "pageKey": "tab-1",
+        "valueKey": "contrasena",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#login-password",
+          "id:login-password"
+        ],
+        "editingSessionRef": "edit-3",
+        "description": "Ingresar en \"Contraseña\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-7",
+        "controlIdentity": "9a0424e878a9|Iniciar sesión|role|button|Iniciar sesión",
+        "semanticField": "Iniciar sesión",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "iniciar_sesion",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Iniciar sesión"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Iniciar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Iniciar sesión",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-form"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(form[id=\"login-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(form[id=\"login-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Iniciar sesión\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-9",
+        "controlIdentity": "9a0424e878a9|Código de acceso|role|textbox|Código de acceso",
+        "semanticField": "Código de acceso",
+        "action": "fill",
+        "pageKey": "tab-1",
+        "valueKey": "codigo_de_acceso",
+        "recordedValue": "123456",
+        "rawTypedValue": "123456",
+        "sourceEventRefs": [
+          "event-9"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Código de acceso",
+          "css:#login-otp",
+          "id:login-otp"
+        ],
+        "editingSessionRef": "edit-4",
+        "description": "Ingresar en \"Código de acceso\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-10",
+        "controlIdentity": "9a0424e878a9|Continuar|role|button|Continuar",
+        "semanticField": "Continuar",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "continuar",
+        "sourceEventRefs": [
+          "event-10"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "otp-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Continuar",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "otp-form"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(form[id=\"otp-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(form[id=\"otp-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "otp-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Continuar\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-12",
+        "controlIdentity": "9a0424e878a9|▤Solicitudes|role|button|▤Solicitudes",
+        "semanticField": "▤Solicitudes",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "solicitudes",
+        "sourceEventRefs": [
+          "event-12"
+        ],
+        "technicalTargetRefs": [
+          "role:button|▤Solicitudes"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|▤Solicitudes",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "aside"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 10,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 10
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "▤Solicitudes",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "▤Solicitudes",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "app"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"▤Solicitudes\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-14",
+        "controlIdentity": "9a0424e878a9|Nueva solicitud|role|button|Nueva solicitud",
+        "semanticField": "Nueva solicitud",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "nueva_solicitud",
+        "sourceEventRefs": [
+          "event-14"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Nueva solicitud"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Nueva solicitud",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Nueva solicitud",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(table[aria-label=\"Solicitudes\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "main:has(button[aria-label=\"Buscar en el portal\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Nueva solicitud",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "section:has(table[aria-label=\"Solicitudes\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Nueva solicitud\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-15",
+        "controlIdentity": "9a0424e878a9|Asunto|role|textbox|Asunto",
+        "semanticField": "Asunto",
+        "action": "fill",
+        "pageKey": "tab-1",
+        "valueKey": "asunto",
+        "recordedValue": "Solicitud Northstar 1 documento",
+        "rawTypedValue": "Solicitud Northstar 1 documento",
+        "sourceEventRefs": [
+          "event-15"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Asunto",
+          "css:#request-subject",
+          "id:request-subject"
+        ],
+        "editingSessionRef": "edit-5",
+        "description": "Ingresar en \"Asunto\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-17",
+        "controlIdentity": "9a0424e878a9|Monto|role|textbox|Monto",
+        "semanticField": "Monto",
+        "action": "fill",
+        "pageKey": "tab-1",
+        "valueKey": "monto",
+        "recordedValue": "1500",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Monto",
+          "css:#request-amount",
+          "id:request-amount"
+        ],
+        "editingSessionRef": "edit-6",
+        "description": "Ingresar en \"Monto\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-18",
+        "controlIdentity": "9a0424e878a9|Crear solicitud|role|button|Crear solicitud",
+        "semanticField": "Crear solicitud",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "crear_solicitud",
+        "sourceEventRefs": [
+          "event-18"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Crear solicitud"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Crear solicitud",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "request-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Crear solicitud",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "request-form"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(form[id=\"request-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(form[id=\"request-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "main:has(button[aria-label=\"Buscar en el portal\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Crear solicitud",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "request-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Crear solicitud\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "inicio",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "routeAfter": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "9a0424e878a9",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-19",
+        "controlIdentity": "9a0424e878a9|NS-REQ-0001",
+        "action": "click",
+        "pageKey": "tab-1",
+        "sourceEventRefs": [
+          "event-19"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "dd"
+              },
+              "stableDirectAttributes": {
+                "id": "request-number"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"dd\"},\"stableDirectAttributes\":{\"id\":\"request-number\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_scoped_structural_runtime_evidence"
+            ],
+            "confidence": 0.6,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "inicio",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "routeAfter": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "9a0424e878a9",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true,
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7
+      },
+      {
+        "id": "interaction-20",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-20"
+        ],
+        "technicalTargetRefs": [],
+        "pageKey": "tab-2",
+        "opensNewPage": true,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "executionAuthority": true,
+        "navigationUrl": "http://127.0.0.1:4173/approvals/",
+        "confidence": 0.9
+      },
+      {
+        "id": "interaction-23",
+        "controlIdentity": "ec56ca606e28|Usuario de aprobaciones|role|textbox|Usuario de aprobaciones",
+        "semanticField": "Usuario de aprobaciones",
+        "action": "fill",
+        "pageKey": "tab-2",
+        "valueKey": "usuario_de_aprobaciones",
+        "recordedValue": "qa_aprobador",
+        "rawTypedValue": "qa_aprobador",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Usuario de aprobaciones",
+          "css:#approvals-user",
+          "id:approvals-user"
+        ],
+        "editingSessionRef": "edit-7",
+        "description": "Ingresar en \"Usuario de aprobaciones\"",
+        "screenBeforeRef": "ec56ca606e28",
+        "screenAfterRef": "ec56ca606e28",
+        "routeBefore": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "ec56ca606e28",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-25",
+        "controlIdentity": "ec56ca606e28|Contraseña de aprobaciones|role|textbox|Contraseña de aprobaciones",
+        "semanticField": "Contraseña de aprobaciones",
+        "action": "fill",
+        "pageKey": "tab-2",
+        "valueKey": "contrasena_de_aprobaciones",
+        "sourceEventRefs": [
+          "event-25"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña de aprobaciones",
+          "css:#approvals-password",
+          "id:approvals-password"
+        ],
+        "editingSessionRef": "edit-8",
+        "description": "Ingresar en \"Contraseña de aprobaciones\"",
+        "screenBeforeRef": "ec56ca606e28",
+        "screenAfterRef": "ec56ca606e28",
+        "routeBefore": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "ec56ca606e28",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-26",
+        "controlIdentity": "ec56ca606e28|Ingresar a aprobaciones|role|button|Ingresar a aprobaciones",
+        "semanticField": "Ingresar a aprobaciones",
+        "action": "click",
+        "pageKey": "tab-2",
+        "valueKey": "ingresar_a_aprobaciones",
+        "sourceEventRefs": [
+          "event-26"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Ingresar a aprobaciones"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Ingresar a aprobaciones",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "approvals-login"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Ingresar a aprobaciones",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "approvals-login"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(form[id=\"approvals-login\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(form[id=\"approvals-login\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "approvals"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Ingresar a aprobaciones",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "approvals-login"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Ingresar a aprobaciones\"",
+        "screenBeforeRef": "ec56ca606e28",
+        "screenAfterRef": "ec56ca606e28",
+        "routeBefore": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "ec56ca606e28",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-29",
+        "controlIdentity": "ec56ca606e28|Aprobar|role|button|Aprobar",
+        "semanticField": "Aprobar",
+        "action": "click",
+        "pageKey": "tab-2",
+        "valueKey": "aprobar",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Aprobar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Aprobar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "approvals"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Aprobar",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(table[aria-label=\"Solicitudes pendientes de aprobación\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "main:has(input[aria-label=\"Buscar solicitud\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "approvals"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Aprobar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(table[aria-label=\"Solicitudes pendientes de aprobación\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Aprobar\"",
+        "screenBeforeRef": "ec56ca606e28",
+        "screenAfterRef": "ec56ca606e28",
+        "routeBefore": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "ec56ca606e28",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-31",
+        "controlIdentity": "ec56ca606e28|Confirmar aprobación|role|button|Confirmar aprobación",
+        "semanticField": "Confirmar aprobación",
+        "action": "click",
+        "pageKey": "tab-2",
+        "valueKey": "confirmar_aprobacion",
+        "sourceEventRefs": [
+          "event-31"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Confirmar aprobación"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Confirmar aprobación",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "approvals"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Confirmar aprobación",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(section[aria-label=\"Confirmar aprobación\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "approvals"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Confirmar aprobación",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(section[aria-label=\"Confirmar aprobación\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Confirmar aprobación\"",
+        "screenBeforeRef": "ec56ca606e28",
+        "screenAfterRef": "ec56ca606e28",
+        "routeBefore": "http://127.0.0.1:4173/approvals/",
+        "stateScope": "ec56ca606e28",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-32",
+        "controlIdentity": "9a0424e878a9",
+        "action": "tab_switch",
+        "sourceEventRefs": [
+          "event-32"
+        ],
+        "technicalTargetRefs": [],
+        "pageKey": "tab-1",
+        "description": "Cambiar a la pestaña \"tab-1\"",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "technicalOnly": false,
+        "executionAuthority": true,
+        "confidence": 1
+      },
+      {
+        "id": "interaction-34",
+        "controlIdentity": "9a0424e878a9|Volver a solicitudes|role|button|Volver a solicitudes",
+        "semanticField": "Volver a solicitudes",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "volver_a_solicitudes",
+        "sourceEventRefs": [
+          "event-34"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Volver a solicitudes"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Volver a solicitudes",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Volver a solicitudes",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(dd[id=\"request-number\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(dd[id=\"request-number\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "main:has(button[aria-label=\"Buscar en el portal\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Volver a solicitudes",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(dd[id=\"request-number\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Volver a solicitudes\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-36",
+        "controlIdentity": "9a0424e878a9|Continuar|role|button|Continuar",
+        "semanticField": "Continuar",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "continuar",
+        "sourceEventRefs": [
+          "event-36"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Continuar",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(table[aria-label=\"Solicitudes\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(table[aria-label=\"Solicitudes\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "main:has(button[aria-label=\"Buscar en el portal\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(table[aria-label=\"Solicitudes\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Continuar\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-38",
+        "controlIdentity": "9a0424e878a9|Adjuntar documentos|role|button|Adjuntar documentos",
+        "semanticField": "Adjuntar documentos",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "adjuntar_documentos",
+        "sourceEventRefs": [
+          "event-38"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Adjuntar documentos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Adjuntar documentos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Adjuntar documentos",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(dd[id=\"request-number\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(dd[id=\"request-number\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "main:has(button[aria-label=\"Buscar en el portal\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Adjuntar documentos",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(dd[id=\"request-number\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Adjuntar documentos\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-39",
+        "controlIdentity": "9a0424e878a9|Documento de identidad|css|div:has(input[id=\"request-doc-0\"])",
+        "semanticField": "Documento de identidad",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "documento_de_identidad",
+        "sourceEventRefs": [
+          "event-39"
+        ],
+        "technicalTargetRefs": [
+          "css:div:has(input[id=\"request-doc-0\"])"
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Documento de identidad",
+          "targetTag": "input",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(input[id=\"request-doc-0\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "request-docs-form"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(form[id=\"request-docs-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(form[id=\"request-docs-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(dd[id=\"request-number\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "main:has(button[aria-label=\"Buscar en el portal\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "Documento de identidad",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(input[id=\"request-doc-0\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Documento de identidad\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.55
+      },
+      {
+        "id": "interaction-41",
+        "controlIdentity": "9a0424e878a9|Guardar documentos|role|button|Guardar documentos",
+        "semanticField": "Guardar documentos",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "guardar_documentos",
+        "sourceEventRefs": [
+          "event-41"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Guardar documentos"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Guardar documentos",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "request-docs-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Guardar documentos",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "request-docs-form"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(form[id=\"request-docs-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(form[id=\"request-docs-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(dd[id=\"request-number\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "main:has(button[aria-label=\"Buscar en el portal\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Guardar documentos",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "request-docs-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Guardar documentos\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      },
+      {
+        "id": "interaction-43",
+        "controlIdentity": "9a0424e878a9|Finalizar solicitud|role|button|Finalizar solicitud",
+        "semanticField": "Finalizar solicitud",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "finalizar_solicitud",
+        "sourceEventRefs": [
+          "event-43"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Finalizar solicitud"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar solicitud",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Finalizar solicitud",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(dd[id=\"request-number\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(dd[id=\"request-number\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "main:has(button[aria-label=\"Buscar en el portal\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Finalizar solicitud",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(dd[id=\"request-number\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Finalizar solicitud\"",
+        "screenBeforeRef": "9a0424e878a9",
+        "screenAfterRef": "9a0424e878a9",
+        "routeBefore": "http://127.0.0.1:4173/",
+        "stateScope": "9a0424e878a9",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": false,
+      "technicalReadiness": false,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": false,
+      "publicationReadiness": false,
+      "missingInputs": [
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 3,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena_de_aprobaciones",
+          "semanticField": "Contraseña de aprobaciones",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 15,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": [
+        "missing_runtime_input:contrasena",
+        "missing_runtime_input:contrasena_de_aprobaciones",
+        "RUNTIME_DATA_REQUIRED"
+      ]
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "rnc",
+        "semanticField": "RNC",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "101010101",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 1,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "101010101",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "usuario",
+        "semanticField": "Usuario",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "qa_empresa",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "qa_empresa",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena",
+        "semanticField": "Contraseña",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": null,
+        "source": "unresolved",
+        "resolved": false,
+        "sensitive": true,
+        "stepIndex": 3,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "unresolved",
+        "authorityValue": null,
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "codigo_de_acceso",
+        "semanticField": "Código de acceso",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "123456",
+        "source": "secure",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 5,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "123456",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "asunto",
+        "semanticField": "Asunto",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "Solicitud Northstar 1 documento",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 9,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "Solicitud Northstar 1 documento",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "monto",
+        "semanticField": "Monto",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "1500",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 10,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "1500",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "usuario_de_aprobaciones",
+        "semanticField": "Usuario de aprobaciones",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "qa_aprobador",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 14,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "qa_aprobador",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena_de_aprobaciones",
+        "semanticField": "Contraseña de aprobaciones",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": null,
+        "source": "unresolved",
+        "resolved": false,
+        "sensitive": true,
+        "stepIndex": 15,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "unresolved",
+        "authorityValue": null,
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-80402EC8-01",
+      "requirements": [
+        {
+          "valueKey": "rnc",
+          "semanticField": "RNC",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "101010101",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "101010101",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "usuario",
+          "semanticField": "Usuario",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "qa_empresa",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "qa_empresa",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 3,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "codigo_de_acceso",
+          "semanticField": "Código de acceso",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "123456",
+          "source": "secure",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 5,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "123456",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "asunto",
+          "semanticField": "Asunto",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "Solicitud Northstar 1 documento",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 9,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "Solicitud Northstar 1 documento",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "monto",
+          "semanticField": "Monto",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "1500",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 10,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "1500",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "usuario_de_aprobaciones",
+          "semanticField": "Usuario de aprobaciones",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "qa_aprobador",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 14,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "qa_aprobador",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena_de_aprobaciones",
+          "semanticField": "Contraseña de aprobaciones",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 15,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "rnc": "101010101",
+        "usuario": "qa_empresa",
+        "codigo_de_acceso": "123456",
+        "asunto": "Solicitud Northstar 1 documento",
+        "monto": "1500",
+        "usuario_de_aprobaciones": "qa_aprobador"
+      },
+      "missingValues": [
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 3,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena_de_aprobaciones",
+          "semanticField": "Contraseña de aprobaciones",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": null,
+          "source": "unresolved",
+          "resolved": false,
+          "sensitive": true,
+          "stepIndex": 15,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "unresolved",
+          "authorityValue": null,
+          "datasetAuthorityMismatch": false
+        }
+      ]
+    },
+    "mutationOpportunities": [
+      {
+        "opportunityId": "REC-80402EC8-01:field_omission",
+        "title": "Crear una solicitud en la web a, aprobarla en la web b y continuar en la web a adjuntando documentos: comprobar la omisión de un dato",
+        "mutationType": "FIELD_OMISSION",
+        "basePrimaryScenarioId": "REC-80402EC8-01",
+        "operations": [
+          {
+            "type": "remove_action",
+            "interactionId": "interaction-3"
+          }
+        ],
+        "evidenceRefs": [
+          "event-1",
+          "event-2",
+          "event-3",
+          "event-4",
+          "event-5",
+          "event-6",
+          "event-7",
+          "event-8",
+          "event-9",
+          "event-10",
+          "event-11",
+          "event-12",
+          "event-13",
+          "event-14",
+          "event-15",
+          "event-16",
+          "event-17",
+          "event-18",
+          "event-19",
+          "event-20",
+          "event-21",
+          "event-22",
+          "event-23",
+          "event-24",
+          "event-25",
+          "event-26",
+          "event-27",
+          "event-28",
+          "event-29",
+          "event-30",
+          "event-31",
+          "event-32",
+          "event-33",
+          "event-34",
+          "event-35",
+          "event-36",
+          "event-37",
+          "event-38",
+          "event-39",
+          "event-40",
+          "event-41",
+          "event-42",
+          "event-43"
+        ],
+        "rationale": "Existen varios inputs observados; se propone una omisión agrupada sin inventar el resultado.",
+        "oracleAuthority": "MISSING",
+        "confidence": 0.5,
+        "needsReview": true
+      }
+    ]
+  }
+]

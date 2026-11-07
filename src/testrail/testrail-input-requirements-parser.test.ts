@@ -2,6 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { parseTestRailInputRequirements } from './testrail-input-requirements-parser';
 
 describe('TestRail input requirements parser', () => {
+  it('infers an editable RNC requirement from a bare identity field action', async () => {
+    const { inferTestRailActionInputRequirements } = await import('./testrail-input-requirements-parser');
+    expect(inferTestRailActionInputRequirements('10. Ingresar "RNC"')).toMatchObject([
+      { key: 'input.rnc', label: 'RNC', controlType: 'text', required: true, editable: true, source: 'runtime_inferred' },
+    ]);
+    expect(inferTestRailActionInputRequirements('Ingresar "radames"')).toEqual([]);
+  });
+
   it('parses multiple generic declarations into structured requirements', () => {
     const result = parseTestRailInputRequirements(
       '- Company identifier (business.id, text)\n- Access token (session.token, secret)',

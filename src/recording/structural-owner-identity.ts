@@ -98,6 +98,20 @@ export type PlaywrightRecorderEvidence = {
   targetTag?: string;
   scopeIdentity?: StructuralScopeIdentity;
   captureMatchCount?: number;
+  /**
+   * The captured element shared its exact visible text with other visible elements of the same tag (for example the
+   * same price on several cards). Position in document order among them at capture time (`index`, 0-based, out of
+   * `count`). Replay uses it only when the live page has the same number of matches; it is never a fallback for a
+   * different count. `count` is omitted only when a person confirmed the position for a recording made before this
+   * evidence existed; replay then relies on the position alone.
+   */
+  textMatchOrdinal?: { index: number; count?: number };
+  /**
+   * `normalizedName` is the title of the item that was clicked, promoted by the recorder because it is unique on the
+   * page while the clicked leaf's own text (a price) repeats across sibling items. It names the item the person
+   * chose, so it is never treated as run-specific data (a customer name).
+   */
+  promotedTitle?: true;
   runtimeResolutionRequired: true;
   segmentCount?: number;
   /** Captured shape of a custom on-screen keyboard; carries no typed field value. */

@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-login-v2",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Login V2",
+  "source": "discovery",
+  "appSlug": "portal-comercial",
+  "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+  "createdAt": "2026-11-02T19:44:47.857Z"
+}

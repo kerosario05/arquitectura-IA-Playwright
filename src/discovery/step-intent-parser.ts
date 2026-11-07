@@ -92,8 +92,10 @@ export type ActionTargetItem = {
   selectionField?: string;
   /** Recorded editable field that materializes a selection owner inside a lazy grid editor. */
   selectionActivationField?: string;
+  /** Recorded owner of a transient query fill inside an already opened selection surface. */
+  selectionQueryOwnerField?: string;
   actionType?: StepIntentType;
-  recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation";
+  recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "tab_switch" | "upload" | "system_observation";
   technicalTargetRef?: string;
   /** The discrete command key a `"press"` action sends (e.g. "Enter"). Absent for every other action type. */
   key?: string;
@@ -130,6 +132,15 @@ export type ActionTargetItem = {
    * projections of the SAME source event. Absent for legacy/scenario-step sources.
    */
   sourceInteractionId?: string;
+  fileAssets?: Array<{ fileRef: string; filename: string; contentType: string; size: number; sha256: string }>;
+  fileSetValueKey?: string;
+  navigationUrl?: string;
+  pageKey?: string;
+  opensNewPage?: boolean;
+  runtimeDerivedSourceEventRef?: string;
+  runtimeValueCaptureEventRefs?: string[];
+  /** The click names an identifier transported earlier in this run (bound to this run's value). */
+  capturedValueTarget?: boolean;
   metadata?: Record<string, unknown>;
 };
 
@@ -444,6 +455,9 @@ export function parseSingleIntent(text: string): ParsedStepIntent | null {
   const precondResult = tryParsePreconditionContext(trimmed, normalized);
   if (precondResult) return precondResult;
 
+  const recordedBrowserResult = tryParseRecordedBrowserAction(trimmed, normalized);
+  if (recordedBrowserResult) return recordedBrowserResult;
+
   const assertionResult = tryParseAssertion(trimmed, normalized);
   if (assertionResult) return assertionResult;
 
@@ -717,7 +731,9 @@ function tryParseNavigationPath(text: string, normalized: string): ParsedStepInt
   // A slash is common inside recorded control labels (for example, a field label plus its
   // account context). An explicit action verb owns the step: keep `/` inside the target instead
   // of reclassifying the click as a navigation path and silently omitting it from execution.
-  if (/^(?:hacer\s+clic\s+en|clic\s+en|click\s+en|click|presionar|tocar|marcar|desmarcar|seleccionar|escoger|elegir)\b/i.test(text)) {
+  // Fill verbs own the step too ("Ingresar "15" en "Calle / Avenida / Autopista""); only the
+  // navigation form "ingresar a <menu> / <submenu>" keeps being parsed as a path.
+  if (/^(?:hacer\s+clic\s+en|clic\s+en|click\s+en|click|presionar|tocar|marcar|desmarcar|seleccionar|escoger|elegir|ingresar(?=\s+(?!a\s))|escribir|completar|digitar|teclear|rellenar|llenar|introducir|capturar)\b/i.test(text)) {
     return null;
   }
 
@@ -1272,7 +1288,44 @@ function tryParseCompositeAction(text: string, normalized: string): ParsedStepIn
   return null;
 }
 
+/**
+ * Steps a Recording emits for things that are not a click or a typed value: attaching a recorded file
+ * to a field, opening a second tab and returning to a tab. They are executable actions: the recording
+ * contract supplies the file assets, page keys and URLs; this only classifies the step.
+ */
+function tryParseRecordedBrowserAction(text: string, normalized: string): ParsedStepIntent | null {
+  const upload = text.match(/^adjuntar\s+["“]([^"”]+)["”]\s+en\s+["“]([^"”]+)["”][.!]?$/i);
+  if (upload) {
+    return { type: "action_fill", originalText: text, normalizedText: normalized,
+      actionTarget: cleanActionTarget(upload[2]), actionVerb: "upload", valueSource: "test_data", priority: 5 };
+  }
+  const newTab = text.match(/^abrir una pesta[ñn]a nueva y navegar al (?:link|enlace) ["“]([^"”]+)["”][.!]?$/i);
+  if (newTab) {
+    return { type: "action_click", originalText: text, normalizedText: normalized,
+      actionTarget: newTab[1].trim(), actionVerb: "navigate", priority: 5 };
+  }
+  // A same-tab navigation the recording kept as a step (an address opened directly). It is an action like the
+  // new-tab one; read as an assertion it was silently skipped and the page never changed.
+  const sameTabNavigation = text.match(/^navegar al (?:link|enlace) ["“]([^"”]+)["”][.!]?$/i);
+  if (sameTabNavigation) {
+    return { type: "action_click", originalText: text, normalizedText: normalized,
+      actionTarget: sameTabNavigation[1].trim(), actionVerb: "navigate", priority: 5 };
+  }
+  const switchTab = text.match(/^cambiar a la pesta[ñn]a ["“]([^"”]+)["”][.!]?$/i);
+  if (switchTab) {
+    return { type: "action_click", originalText: text, normalizedText: normalized,
+      actionTarget: switchTab[1].trim(), actionVerb: "switch_tab", priority: 5 };
+  }
+  return null;
+}
+
 function tryParseFillAction(text: string, normalized: string): ParsedStepIntent | null {
+  const attachFile = text.match(/^(?:adjuntar|cargar|subir|seleccionar)\s+(?:(?:el|un)\s+)?(?:archivo|documento|formulario)(?:\s+de\s+prueba)?\s+en\s+(?:(?:el\s+)?campo\s+)?["“]([^"”]+)["”][.!]?$/i);
+  if (attachFile) {
+    return { type: "action_fill", originalText: text, normalizedText: normalized,
+      actionTarget: cleanActionTarget(attachFile[1]), actionVerb: "upload", valueSource: "test_data", priority: 5 };
+  }
+
   const blankField = text.match(
     /^(?:dejar\s+(?:el\s+)?(?:campo\s+)?|vaciar\s+(?:el\s+)?(?:campo\s+)?|clear\s+(?:the\s+)?(?:field\s+)?)["']?([^"']+?)["']?\s+(?:vac[ií]o|empty)$/i
   ) ?? text.match(

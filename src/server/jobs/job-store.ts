@@ -5,6 +5,7 @@ import type { ChildProcess } from "child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { redactJiraScenarioInputs } from "../../jira/jira-rerun-manifest";
+import { purgeExpiredRerunSecrets, stashRerunSecrets } from "./rerun-secrets";
 import type { JiraScenarioInput } from "../../jira/jira-semantic-executor";
 
 export type JobStatus = "queued" | "running" | "done" | "failed" | "cancelled" | "completed_with_failures" | "completed_with_sync_errors";
@@ -16,6 +17,10 @@ export type JobSummary = {
   syncFailed?: number;
   passed: number;
   failed: number;
+  /** Ejecuciones móviles: pasos pasados/fallidos/bloqueados; passed/failed cuentan escenarios. */
+  stepsPassed?: number;
+  stepsFailed?: number;
+  stepsBlocked?: number;
   skipped?: number;
   completed?: number;
   requested?: number;
@@ -62,6 +67,7 @@ export type Job = {
   id: string;
   type: "sprint" | "discovery-batch" | "scenario-preview" | "mobile-emulator-boot" | "mobile-test-run" | "mobile-launch-execution" | "mobile-route-learning" | "session-recording";
   status: JobStatus;
+  queuePosition?: number;
   params: Record<string, unknown>;
   issueKey?: string;
   checklistUrl?: string;
@@ -88,6 +94,7 @@ export type Job = {
 
 export type JobInternal = Job & {
   process?: ChildProcess;
+  cancellationRequested?: boolean;
   emitter: EventEmitter;
 };
 
@@ -219,9 +226,10 @@ class JobStore {
     return Array.from(jobsById.values()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
-  update(id: string, patch: Partial<Pick<JobInternal, "status" | "startedAt" | "completedAt" | "durationMs" | "exitCode" | "summary" | "process" | "currentCase" | "currentCaseId" | "currentCaseTitle" | "errorMessage" | "issueKey" | "checklistUrl" | "defectCount">>): void {
+  update(id: string, patch: Partial<Pick<JobInternal, "status" | "queuePosition" | "startedAt" | "completedAt" | "durationMs" | "exitCode" | "summary" | "process" | "currentCase" | "currentCaseId" | "currentCaseTitle" | "errorMessage" | "issueKey" | "checklistUrl" | "defectCount">>): void {
     const job = this.jobs.get(id);
     if (!job) return;
+    if ((job.status === 'cancelled' || job.cancellationRequested) && patch.status && patch.status !== 'cancelled') return;
     Object.assign(job, patch);
     // Auto-compute durationMs when job completes (if not explicitly provided)
     if (patch.completedAt && job.startedAt && !patch.durationMs && !job.durationMs) {
@@ -232,6 +240,7 @@ class JobStore {
   }
 
   private loadPersistedJobs(): void {
+    purgeExpiredRerunSecrets();
     let files: string[];
     try {
       files = fs.readdirSync(RUN_HISTORY_DIR).filter((name) => name.endsWith(".json"));
@@ -265,6 +274,8 @@ class JobStore {
   clearTransientParams(id: string): void {
     const job = this.jobs.get(id);
     if (!job) return;
+    // Kept on disk (0600, 24h TTL) so a rerun of this job does not need the values typed again.
+    stashRerunSecrets(id, job.params.runtimeEntriesByCase);
     delete job.params.runtimeEntriesByCase;
     delete job.params.dataOverrides;
     delete job.params.jiraSemanticScenarios;

@@ -118,6 +118,75 @@ test("observable oracle preserves exact single and multiple requirementRefs by s
   assert.deepEqual(linked[0].requirementRefs, ["REQ-A", "REQ-B"]);
   assert.deepEqual(linked[1].requirementRefs, ["REQ-C"]);
 });
+
+test("recorded navigation without an authored expected result does not create an unresolved oracle", () => {
+  const navigation = 'Navegar al link "https://portal.example/requests"';
+  const scenario = buildScenario("");
+  scenario.steps = [{ index: 1, action: navigation, dataHints: [] }];
+  const caseResult = buildCaseResult({
+    status: "discovered_passed",
+    steps: [{ index: 1, action: navigation, status: "found" } as any],
+  });
+
+  const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
+
+  assert.equal(sourceScenario.expectedResult, undefined);
+  assert.equal(
+    sourceScenario.observableOracles?.some((oracle) => oracle.type === "unsupported_or_unresolved"),
+    false,
+  );
+});
+
+test("legacy generated navigation placeholder is removed only when a recorded execution contract backs it", () => {
+  const expected = "La aplicación de destino carga correctamente";
+  const scenario = buildScenario(expected) as TestScenario & {
+    recordingExecutionContract?: { actions: Array<{ actionType: string }> };
+  };
+  // Persisted recording contracts may begin at the app's configured entry route and
+  // represent that opening step as setup, with no distinct navigation action.
+  scenario.recordingExecutionContract = { actions: [{ actionType: "click" }] } as any;
+
+  const sourceScenario = buildPromotionSourceScenario(scenario, buildCaseResult({ status: "discovered_passed" }));
+
+  assert.equal(sourceScenario.expectedResult, undefined);
+  assert.equal(sourceScenario.observableOracles?.some((oracle) => oracle.type === "unsupported_or_unresolved"), false);
+});
+
+test("legacy navigation placeholder from a persisted expected-result consumption is suppressed for recordings", () => {
+  const expected = "La aplicación de destino carga correctamente";
+  const scenario = {
+    ...buildScenario(""),
+    expectedResult: expected,
+    recordingExecutionContract: { actions: [{ actionType: "click" }] },
+  } as TestScenario & {
+    expectedResult: string;
+    recordingExecutionContract: { actions: Array<{ actionType: string }> };
+  };
+  const caseResult = buildCaseResult({
+    status: "discovered_passed",
+    partialDiagnostics: {
+      expectedResultConsumption: [{
+        originalText: expected,
+        classification: "non_executable_criteria",
+        reason: "legacy recording navigation placeholder",
+      }],
+    } as any,
+  });
+
+  const sourceScenario = buildPromotionSourceScenario(scenario, caseResult);
+
+  assert.equal(sourceScenario.expectedResult, undefined);
+  assert.equal(sourceScenario.observableOracles?.some((oracle) => oracle.type === "unsupported_or_unresolved"), false);
+});
+
+test("the same generic expected text remains a blocker without recorded-navigation authority", () => {
+  const scenario = buildScenario("La aplicación de destino carga correctamente");
+  const sourceScenario = buildPromotionSourceScenario(scenario, buildCaseResult({ status: "discovered_passed" }));
+
+  assert.equal(sourceScenario.expectedResult, "La aplicación de destino carga correctamente");
+  assert.equal(sourceScenario.observableOracles?.some((oracle) => oracle.type === "unsupported_or_unresolved"), true);
+});
+
 test("observable oracle without requirementRefs remains undefined and never borrows another step", () => {
   const linked = attachObservableOracleRequirementRefs(
     [

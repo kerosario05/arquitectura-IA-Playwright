@@ -1,0 +1,248 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-11-01T04:02:37.974Z",
+  "entries": [
+    {
+      "key": "usuario",
+      "source": "unknown",
+      "fieldName": "Usuario",
+      "stepIndex": 2,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena",
+      "source": "unknown",
+      "fieldName": "Contraseña",
+      "stepIndex": 3,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "numero_de_identificacion",
+      "source": "unknown",
+      "fieldName": "Número de identificación",
+      "stepIndex": 6,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "fecha_de_expiracion",
+      "source": "unknown",
+      "fieldName": "Fecha de expiración",
+      "stepIndex": 10,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contacto",
+      "source": "unknown",
+      "fieldName": "Contacto",
+      "stepIndex": 15,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_1.nombre_de_la_empresa_actividad_independi",
+      "source": "unknown",
+      "fieldName": "Nombre de la empresa / Actividad independiente",
+      "stepIndex": 22,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_1.departamento_area",
+      "source": "unknown",
+      "fieldName": "Departamento / Área",
+      "stepIndex": 23,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_1.puesto_que_ocupa",
+      "source": "unknown",
+      "fieldName": "Puesto que ocupa",
+      "stepIndex": 24,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_1.salario",
+      "source": "unknown",
+      "fieldName": "Salario",
+      "stepIndex": 27,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_1.fecha_de_ingreso",
+      "source": "unknown",
+      "fieldName": "Fecha de ingreso",
+      "stepIndex": 29,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_1.telefono",
+      "source": "unknown",
+      "fieldName": "Teléfono",
+      "stepIndex": 30,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_1.nombre_edificio",
+      "source": "unknown",
+      "fieldName": "Nombre edificio",
+      "stepIndex": 32,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_1.referencia",
+      "source": "unknown",
+      "fieldName": "Referencia",
+      "stepIndex": 40,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_1.monto",
+      "source": "unknown",
+      "fieldName": "Monto",
+      "stepIndex": 45,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_1.plazo",
+      "source": "unknown",
+      "fieldName": "Plazo",
+      "stepIndex": 46,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_2.nombre_edificio",
+      "source": "unknown",
+      "fieldName": "Nombre edificio",
+      "stepIndex": 55,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_2.tiempo_en_vivienda",
+      "source": "unknown",
+      "fieldName": "Tiempo en vivienda",
+      "stepIndex": 67,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_2.cantidad_de_dependientes",
+      "source": "unknown",
+      "fieldName": "Cantidad de dependientes",
+      "stepIndex": 68,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_2.cantidad_de_hijos",
+      "source": "unknown",
+      "fieldName": "Cantidad de hijos",
+      "stepIndex": 69,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "nombres_y_apellidos",
+      "source": "unknown",
+      "fieldName": "Nombres y apellidos",
+      "stepIndex": 76,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "entity_1.telefono",
+      "source": "unknown",
+      "fieldName": "Teléfono",
+      "stepIndex": 77,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "relacion",
+      "source": "unknown",
+      "fieldName": "Relación",
+      "stepIndex": 78,
+      "valueType": "unknown",
+      "sensitive": false,
+      "demoSafe": true,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

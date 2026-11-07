@@ -1,0 +1,344 @@
+{
+  "version": "1.0",
+  "recordingId": "092786f1-a33a-401b-b9f9-69e0c8492916",
+  "projectSlug": "portal-empresarial",
+  "appSlug": "portal-empresarial",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "CONSULTA",
+    "normalizedGoal": "CONSULTA",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "3e7b2674871e",
+      "url": "https://172.27.4.31/login",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "3e7b2674871e"
+    },
+    {
+      "screenIdentity": "943b3d6d7412",
+      "url": "https://172.27.4.31/login",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "943b3d6d7412"
+    }
+  ],
+  "semanticComponents": [],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "observe",
+      "screenIdentity": "3e7b2674871e",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "navigate",
+      "screenIdentity": "3e7b2674871e",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    }
+  ],
+  "datasets": [],
+  "technicalObservations": [
+    {
+      "observationId": "screen-943b3d6d7412-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "943b3d6d7412",
+      "componentType": "textbox",
+      "label": "RNC de la empresa*",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "rnc",
+        "name": "userRnc",
+        "type": "text",
+        "placeholder": "Escribir aquí el RNC"
+      },
+      "placeholder": "Escribir aquí el RNC",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "rnc",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "943b3d6d7412:control:1",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-943b3d6d7412-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "943b3d6d7412",
+      "componentType": "textbox",
+      "label": "Nombre de usuario*",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "email",
+        "name": "userName",
+        "type": "text",
+        "placeholder": "Usuario"
+      },
+      "placeholder": "Usuario",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "email",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "943b3d6d7412:control:2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-943b3d6d7412-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "943b3d6d7412",
+      "componentType": "textbox",
+      "label": "Contraseña*",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "password",
+        "name": "password",
+        "type": "password",
+        "placeholder": "Clave"
+      },
+      "placeholder": "Clave",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "password",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "943b3d6d7412:control:3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-943b3d6d7412-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "943b3d6d7412",
+      "componentType": "a",
+      "label": "Registro Digital Nuevos Colaboradores",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Registro Digital Nuevos Colaboradores",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "943b3d6d7412:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-943b3d6d7412-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "943b3d6d7412",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "submit"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Continuar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "943b3d6d7412:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-943b3d6d7412-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "943b3d6d7412",
+      "componentType": "a",
+      "label": "Quiénes Somos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Quiénes Somos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "943b3d6d7412:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-943b3d6d7412-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "943b3d6d7412",
+      "componentType": "a",
+      "label": "Productos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Productos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "943b3d6d7412:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-943b3d6d7412-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "943b3d6d7412",
+      "componentType": "a",
+      "label": "Contactos",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Contactos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "943b3d6d7412:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-943b3d6d7412-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "943b3d6d7412",
+      "componentType": "a",
+      "label": "Pasos Reclamación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Pasos Reclamación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "943b3d6d7412:control:9",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "pageKey": "tab-1",
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://172.27.4.31/login",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-3",
+      "controlIdentity": "3e7b2674871e",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-3"
+      ],
+      "technicalTargetRefs": [],
+      "pageKey": "tab-1",
+      "screenBeforeRef": "3e7b2674871e",
+      "screenAfterRef": "3e7b2674871e",
+      "routeBefore": "https://172.27.4.31/login",
+      "stateScope": "3e7b2674871e",
+      "technicalOnly": true,
+      "confidence": 0.9
+    }
+  ],
+  "gridMetadata": {
+    "detected": false,
+    "grids": 0,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace"
+}

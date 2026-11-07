@@ -573,6 +573,15 @@ export type PromotedAppConfig = {
   extraLoginFields?: Record<string, string>;
   missingInputBehavior: MissingInputBehavior;
   ignoreHTTPSErrors?: boolean;
+  requestCancellation?: { enabled: boolean };
+  dataServices?: {
+    dataCedulas?: {
+      enabled: boolean;
+      database: string;
+    };
+  };
+  /** Literal message fragments for environment-specific application warnings that do not block discovery. */
+  nonBlockingApplicationErrorTextFragments?: string[];
   routeProfile?: AppRouteProfile;
   updatedAt: string;
 };
@@ -744,6 +753,13 @@ export function serializeRuntimeConfigForPromotion(config: FullConfig, existingC
     ignoreHTTPSErrors: config.app.ignoreHTTPSErrors,
     // Preserve routeProfile from existing config if available
     routeProfile: existingConfig?.routeProfile,
+    nonBlockingApplicationErrorTextFragments: existingConfig?.nonBlockingApplicationErrorTextFragments,
+    ...(existingConfig?.requestCancellation
+      ? { requestCancellation: { ...existingConfig.requestCancellation } }
+      : {}),
+    ...(existingConfig?.dataServices
+      ? { dataServices: { ...existingConfig.dataServices, dataCedulas: existingConfig.dataServices.dataCedulas ? { ...existingConfig.dataServices.dataCedulas } : undefined } }
+      : {}),
     updatedAt: new Date().toISOString()
   };
 }

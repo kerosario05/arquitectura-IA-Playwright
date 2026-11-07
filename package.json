@@ -59,11 +59,15 @@
     "test:auth-flow": "tsx src/auth/auth-flow.test.ts"
   },
   "dependencies": {
+    "@cucumber/gherkin": "^42.0.1",
+    "@cucumber/messages": "^34.2.1",
     "@google/genai": "^2.6.0",
     "@playwright/test": "^1.54.2",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
+    "fast-xml-parser": "^5.2.5",
+    "mssql": "^12.2.0",
     "multer": "^2.3.0",
     "odbc": "^2.5.0",
     "oracledb": "^7.0.1",
@@ -76,6 +80,7 @@
     "@types/jszip": "^3.4.0",
     "@types/multer": "^2.2.0",
     "@types/node": "^24.3.0",
+    "@types/oracledb": "^26.0.1",
     "@types/ws": "^8.18.2",
     "appium": "^3.5.0",
     "appium-uiautomator2-driver": "^8.4.0",

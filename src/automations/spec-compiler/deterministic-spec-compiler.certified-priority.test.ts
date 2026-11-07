@@ -70,6 +70,20 @@ const AMBIGUOUS_CERT = {
   certificationTier: 1,
 } as any;
 
+const VALIDATED_SCOPED_CHECKABLE_CERT = {
+  interactionEvidence: [],
+  validatedByInteraction: true,
+  certifiedFrom: "discovery",
+  targetType: "structural",
+  locatorCandidates: [{ strategy: "css", value: 'section:has-text("No posee correo electrónico"):has(input):not(:has(section:has-text("No posee correo electrónico"):has(input))) input', confidence: 0.55 }],
+  structuralContext: {
+    owner: { tag: "section" },
+    stableDescendants: [{ relation: "descendant", tag: "input", stableAttributes: {} }],
+  },
+  confidence: 0.55,
+  certificationTier: 3,
+} as any;
+
 test("1/BOTH_PRESENT_CERTIFIED_VALID: a coexisting technicalTargetRef and a valid, non-ambiguous certified structural target -- certified authority wins", () => {
   const clickStep = step({
     scenarioStepIndex: 4,
@@ -124,6 +138,20 @@ test("4/CERTIFIED_ONLY_VALID: no technicalTargetRef, only a valid certified stru
   const result = compileDeterministicSpec(contract([clickStep]));
 
   assert.equal(result.bindings[0].targetRef, "css:a.synthetic-nav-link");
+});
+
+test("4b/VALIDATED_SCOPED_CHECKABLE: a successfully interacted caption-scoped checkable keeps its grounded structural CSS candidate", () => {
+  const clickStep = step({
+    scenarioStepIndex: 11,
+    operation: "click",
+    target: { strategy: "text", value: "No posee correo electrónico" },
+    certifiedTechnicalTarget: VALIDATED_SCOPED_CHECKABLE_CERT,
+  });
+  const result = compileDeterministicSpec(contract([clickStep]));
+
+  assert.equal(result.unsupportedCapabilities.length, 0);
+  assert.equal(result.bindings[0].targetRef, `css:${VALIDATED_SCOPED_CHECKABLE_CERT.locatorCandidates[0].value}`);
+  assert.match(result.source, /parseSerializedTechnicalTargetString\('css:section:has-text/);
 });
 
 test("5/RUNTIME_RESOLUTION_REQUIRED: a valid certified structural target must NOT be promoted to certified authority when resolution is explicitly deferred -- existing runtime_deferred behavior preserved", () => {

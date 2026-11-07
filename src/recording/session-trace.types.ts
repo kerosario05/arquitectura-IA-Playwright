@@ -260,6 +260,12 @@ export type RecordedTarget = {
    */
   coveredByFunctionalSelection?: boolean;
   /**
+   * Set by the recorder on a role-less tap over passive text (span, p, dd...): true when the pointer events
+   * belong to selecting text to copy it (repeated clicks on the same text, or a copy right after), false for a
+   * lone click. Absent on older recordings, which keep the previous tag-based rule.
+   */
+  copySelectionGesture?: boolean;
+  /**
    * On a synthesized `compoundRole: "selection"` target only: the `RecordedEvent.seq` values of
    * the technical clicks (combobox + option) this derived step summarizes -- explicit lineage so
    * a later consumer (e.g. RecordingExecutionContract/promotion) can trace the display step back
@@ -316,12 +322,46 @@ export type RecordedEventKind =
   | "tap"
   | "fill"
   | "navigate"
+  /** Explicit selection of a previously captured browser tab in the live recording panel. */
+  | "tab_switch"
   | "back"
   | "swipe"
   | "screen_change"
   | "note"
   /** A discrete, non-textual command key (e.g. "Enter") -- its own technical action, never a click. */
-  | "press";
+  | "press"
+  /** User selected one or more files for an observed file input. Bytes live in the project file store. */
+  | "file_upload"
+  /** Trusted copy of a selected visible value; the copied text is never stored in the trace. */
+  | "value_source";
+
+export type RecordedFileAssetRef = {
+  fileRef: string;
+  filename: string;
+  contentType: string;
+  size: number;
+  sha256: string;
+};
+
+/** Selection coordinates relative to a captured input value or text content. */
+export type RecordedValueSelection = {
+  sourceKind: "input" | "text";
+  startOffset: number;
+  endOffset: number;
+  endAtSourceEnd: boolean;
+  /**
+   * Stable text that followed the selection when it was recorded (cut before the first digit, which is the
+   * likely volatile part). Replay ends the value at this anchor, so a value that changes length between runs
+   * is not cut at the recorded offset. Absent on older recordings: they keep offset-only behaviour.
+   */
+  endContext?: string;
+  /**
+   * Regular-expression source describing the kind of value copied (letters/punctuation literal, digit runs
+   * generalized), e.g. "^MPN\-\d+$". Replay refuses a value that does not match it, so a source resolved to a
+   * different element fails clearly instead of transporting the wrong text. Absent when the value is free text.
+   */
+  valueShape?: string;
+};
 
 export type RecordedEvent = {
   seq: number;
@@ -338,14 +378,25 @@ export type RecordedEvent = {
   redactedKey?: string;
   /** Web only. */
   url?: string;
+  /** Stable, recording-local browser page identity (tab-1, tab-2, ...). Absent in older traces. */
+  pageKey?: string;
+  /** True when this page was opened after the recording's initial browser page. */
+  opensNewPage?: boolean;
+  /** The URL was entered through the live recorder's explicit address control. */
+  directUserNavigation?: boolean;
   /** For `screen_change`: where the app landed. */
   toScreenKey?: string;
   /** Ephemeral frame captured for this event. Cleared once derivation consumes it. */
   framePath?: string;
   note?: string;
   valueSource?: "user" | "application";
-  dependsOnEventRef?: string;
   observationType?: "focus" | "dom_mutation" | "post_action" | "before_input" | "pointer" | "technical_noise";
+  /** Project-scoped durable file references; raw file contents are never persisted in the trace. */
+  fileAssets?: RecordedFileAssetRef[];
+  /** Runtime source selection metadata; copied text itself is kept only in process memory. */
+  valueSelection?: RecordedValueSelection;
+  /** For a pasted value, points to the selected UI text it was copied from. */
+  dependsOnEventRef?: string;
 };
 
 export type RecordedControl = {

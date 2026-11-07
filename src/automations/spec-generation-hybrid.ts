@@ -15,6 +15,7 @@ import { PROMOTED_SPEC_RUNTIME_PUBLIC_METHODS, materializePromotedRuntimeEnv } f
 import { loadSpecGenerationSkill, type LoadedSpecGenerationSkill, type SpecGenerationSkillState } from "./spec-generation-skill-loader";
 import {
   buildSpecExecutionContract,
+  isFilePickerActivationDelegatedToNextUpload,
   validateSpecExecutionContract,
   computeTraceFidelity,
   computeExecutionContractMetrics,
@@ -273,6 +274,7 @@ type HybridRepairState = {
 };
 
 export type SpecGenerationScenarioStep = {
+  expectedOutcomeKind?: "route_transition" | "in_place_transition";
   index: number;
   action: string;
   description?: string;
@@ -1356,6 +1358,7 @@ function buildSpecGenerationUserPrompt(input: {
 
 const PROMOTED_SPEC_RUNTIME_API_DESCRIPTOR: Record<string, { signature: string; returns: string }> = {
   clickPromotedTarget: { signature: "clickPromotedTarget({ stepIndex: number, target: string, actionIntent: string, expectedEffect: string, action: () => Promise<void> })", returns: "Promise<void>" },
+  completeRecordedFilePickerClick: { signature: "completeRecordedFilePickerClick({ stepIndex: number, target: string, uploadStepIndex: number })", returns: "Promise<void>" },
   fillPromotedField: { signature: "fillPromotedField({ stepIndex: number, target: string, value: string, action: () => Promise<void> })", returns: "Promise<void>" },
   pressPromotedTarget: { signature: "pressPromotedTarget({ stepIndex: number, target: string, key: string })", returns: "Promise<void>" },
   selectPromotedItem: { signature: "selectPromotedItem({ stepIndex: number, target: string, action: () => Promise<void> })", returns: "Promise<void>" },
@@ -3459,8 +3462,15 @@ export function structuralValidation(input: {
       if (contractStep.required !== false && !contractStep.operation.startsWith("assert")) {
         const expectedRuntimeMethod = ACTION_RUNTIME_METHOD_BY_OPERATION[contractStep.operation];
         if (expectedRuntimeMethod) {
+          const contractStepPosition = input.executionContract.steps.indexOf(contractStep);
+          const filePickerDelegation = isFilePickerActivationDelegatedToNextUpload(
+            contractStep,
+            input.executionContract.steps[contractStepPosition + 1],
+          );
           const matchingCalls = runtimeStepCalls.filter((call) =>
-            call.stepIndex === contractStep.scenarioStepIndex && ACTION_RUNTIME_METHODS.has(call.method)
+            call.stepIndex === contractStep.scenarioStepIndex
+            && (ACTION_RUNTIME_METHODS.has(call.method)
+              || (filePickerDelegation && call.method === "completeRecordedFilePickerClick"))
           );
           if (matchingCalls.length === 0) {
             semanticErrors.push(
@@ -3472,7 +3482,8 @@ export function structuralValidation(input: {
               `runtime_step_binding_ambiguous:step=${contractStep.scenarioStepIndex}`
               + `:operation=${contractStep.operation}:matchCount=${matchingCalls.length}`
             );
-          } else if (matchingCalls[0].method !== expectedRuntimeMethod) {
+          } else if (matchingCalls[0].method !== expectedRuntimeMethod
+            && !(filePickerDelegation && matchingCalls[0].method === "completeRecordedFilePickerClick")) {
             semanticErrors.push(
               `runtime_method_operation_mismatch:step=${contractStep.scenarioStepIndex}`
               + `:operation=${contractStep.operation}:expected=${expectedRuntimeMethod}:actual=${matchingCalls[0].method}`
@@ -3889,10 +3900,25 @@ export function buildPlaywrightCommandEnv(launchContext?: PlaywrightLaunchContex
   return Object.keys(envPatch).length > 0 ? envPatch : undefined;
 }
 
-export async function runNodeCommand(command: string, args: string[], envPatch?: NodeJS.ProcessEnv): Promise<CommandResult> {
+export async function runNodeCommand(command: string, args: string[], envPatch?: NodeJS.ProcessEnv, onLine?: (line: string) => void): Promise<CommandResult> {
   try {
     const env = envPatch ? { ...process.env, ...envPatch } : process.env;
-    const { stdout, stderr } = await execFileAsync(command, args, { cwd: process.cwd(), windowsHide: true, env });
+    // A long verbose run (100+ recorded steps) exceeds Node's 1 MB default and would be killed mid-run.
+    const pending = execFileAsync(command, args, { cwd: process.cwd(), windowsHide: true, env, maxBuffer: 512 * 1024 * 1024 });
+    if (onLine) {
+      for (const stream of [pending.child.stdout, pending.child.stderr]) {
+        if (!stream) continue;
+        let partial = '';
+        stream.setEncoding('utf8');
+        stream.on('data', (chunk: string) => {
+          const lines = (partial + chunk).split(/\r?\n/);
+          partial = lines.pop() ?? '';
+          for (const line of lines) onLine(line);
+        });
+        stream.on('end', () => { if (partial) onLine(partial); });
+      }
+    }
+    const { stdout, stderr } = await pending;
     return { ok: true, stdout: String(stdout ?? ""), stderr: String(stderr ?? ""), exitCode: 0 };
   } catch (error) {
     const cast = error as { stdout?: string; stderr?: string; code?: number };
@@ -4019,10 +4045,14 @@ function buildTypeValidationSource(specContent: string): string {
     "declare type ValidationTestFn = ((name: string, fn: (fixtures: { page: any }) => Promise<unknown> | unknown) => unknown) & { setTimeout: (ms: number) => void; info: () => { timeout: number }; describe: (name: string, fn: () => void) => void; };",
     "declare const test: ValidationTestFn;",
     "declare const expect: any;",
+    "declare type ValidationPage = import('@playwright/test').Page;",
     "interface PromotedSpecRuntimeApi {",
-    ...PROMOTED_SPEC_RUNTIME_PUBLIC_METHODS.map((method) => `  ${method}(...args: any[]): Promise<unknown>;`),
+    ...PROMOTED_SPEC_RUNTIME_PUBLIC_METHODS
+      .filter((method) => method !== "selectRecordedPage")
+      .map((method) => `  ${method}(...args: any[]): Promise<unknown>;`),
+    "  selectRecordedPage(pageKey: string, opensNewPage?: boolean): Promise<ValidationPage>;",
     "}",
-    "declare function createPromotedSpecRuntime(page: unknown): PromotedSpecRuntimeApi;",
+    "declare function createPromotedSpecRuntime(page: ValidationPage): PromotedSpecRuntimeApi;",
     ""
   ]);
 
@@ -4205,7 +4235,9 @@ async function defaultRunFunctionalExecution(
       "playwright.config.apps.candidate.ts",
       "--workers",
       "1"
-    ], buildPlaywrightCommandEnv(launchContext));
+    ], buildPlaywrightCommandEnv(launchContext), line => {
+      for (const telemetry of extractChildRuntimeTelemetry(line)) console.log(telemetry);
+    });
     const combinedOutput = `${commandResult.stdout}\n${commandResult.stderr}`;
     const parsed = parseFunctionalExecutionOutput(combinedOutput);
     return {
@@ -4261,11 +4293,14 @@ export function isInitialReadinessInfrastructureFailure(combinedOutput: string):
  * dumping the entire child output.
  */
 const CHILD_RUNTIME_TELEMETRY_PREFIXES = [
+  "[promoted-outcome]",
+  "[runtime:post-action-failure]",
   "[promoted-initial-navigation]",
   "[initial-navigation]",
   "[initial-readiness]",
   "[evidence:initial]",
   "[promoted-step]",
+  "[step-timing]",
   "[promoted-runtime-lifecycle]",
   "[screen-context-field-signals]",
   "[async-wait]",
@@ -4342,6 +4377,7 @@ export function classifyPreBusinessFailure(combinedOutput: string): "PRE_BUSINES
  */
 const PROMOTED_SUCCESS_TELEMETRY_PREFIXES = [
   "[promoted-step]",
+  "[step-timing]",
   "[promoted-fill-state]",
   "[promoted-press-dispatch]",
   "[promoted-press-wait]",
@@ -5249,8 +5285,10 @@ async function runHybridSpecGenerationInternal(
     const diskMatchesValidatedCandidate = diskCandidate === persistedCandidate;
 
     const tsRunner = deps?.runTypeScriptValidation ?? defaultRunTypeScriptValidation;
+      console.log('[promotion-progress] stage=typescript status=started');
       const tsResult = await tsRunner(validationPath);
       validation.typescript = tsResult.ok ? "passed" : "failed";
+      console.log(`[promotion-progress] stage=typescript status=${validation.typescript}`);
       if (!tsResult.ok) {
         errors.push(`typescript_validation_failed:exitCode=${tsResult.exitCode}`);
         const tsErrorLine = tsResult.stderr.split(/\r?\n/).map((line) => line.trim()).find((line) => line.length > 0);
@@ -5267,10 +5305,12 @@ async function runHybridSpecGenerationInternal(
           errors.push(`playwright_discovery_preflight_failed:runtimeImportResolves=${runtimeImportResolves}:diskMatchesValidatedCandidate=${diskMatchesValidatedCandidate}`);
         } else {
           const listRunner = deps?.runPlaywrightDiscovery ?? defaultRunPlaywrightDiscovery;
+          console.log('[promotion-progress] stage=playwright_collection status=started');
           const listResult = await listRunner(validationPath, playwrightLaunchContext);
           const discovered = countDiscoveredTests(`${listResult.stdout}\n${listResult.stderr}`);
           const discoveryOk = listResult.ok && discovered === 1;
           validation.playwrightDiscovery = discoveryOk ? "passed" : "failed";
+          console.log(`[promotion-progress] stage=playwright_collection status=${validation.playwrightDiscovery}`);
           if (!discoveryOk) {
           errors.push(`playwright_discovery_failed:exitCode=${listResult.exitCode}:discovered=${discovered ?? "unknown"}`);
           const discoveryErrorLine = summarizePlaywrightDiscoveryError(listResult.stdout, listResult.stderr);
@@ -5292,10 +5332,14 @@ async function runHybridSpecGenerationInternal(
           }
           if (functionalExecutionEnabled && discoveryOk && preRuntimeBlockingFailures.length === 0) {
           const functionalRunner = deps?.runFunctionalExecution ?? defaultRunFunctionalExecution;
+          console.log('[promotion-progress] stage=spec_execution status=started');
           const functionalResult = await functionalRunner(validationPath, playwrightLaunchContext);
+          console.log(`[promotion-progress] stage=spec_execution status=${functionalResult.ok ? 'completed' : 'failed'}`);
           const combinedFunctionalOutput = `${functionalResult.stdout}\n${functionalResult.stderr}`;
           const childRuntimeTelemetry = extractChildRuntimeTelemetry(combinedFunctionalOutput);
-          for (const line of childRuntimeTelemetry) console.log(line);
+          // The default runner streams these lines while executing. Injected runners
+          // retain the buffered-output contract used by deterministic fixtures.
+          if (deps?.runFunctionalExecution) for (const line of childRuntimeTelemetry) console.log(line);
           const hasEvidenceSteps = typeof functionalResult.evidenceSteps === "number" && functionalResult.evidenceSteps > 0;
           const functionalOk = functionalResult.ok && hasEvidenceSteps;
           if (isFunctionalExecutionInfrastructureFailure(functionalResult.ok, combinedFunctionalOutput)) {
@@ -5366,6 +5410,17 @@ async function runHybridSpecGenerationInternal(
               errors.push(`functional_execution_error:${functionalErrorLine}`);
             }
             console.log(`[functional-execution] exitCode=${functionalResult.exitCode} error="${functionalErrorLine ?? ""}" file="${testFileMatch?.[1] ?? ""}" line="${failedStepMatch?.[1] ?? ""}" timeout=${timeout} failedStepIndex=${functionalExecutionFailedStepIndex ?? "unknown"} operation="${structuredPromotedFailure?.operation ?? ""}"`);
+            // The first keyword line above can be unrelated telemetry. Keep the reporter's own
+            // failure block (numbered failure and what follows) next to the candidate for diagnosis.
+            try {
+              const failureStart = combinedLines.findIndex((line) => /^\d+\)\s+/.test(line));
+              const failureBlock = (failureStart >= 0 ? combinedLines.slice(failureStart, failureStart + 60) : combinedLines.slice(-60))
+                .map((line) => line.slice(0, 400));
+              await fs.writeFile(path.join(path.dirname(validationPath), "functional-execution-failure.txt"), failureBlock.join("\n"), "utf8");
+              console.log(`[functional-execution-failure-detail] ${JSON.stringify(failureBlock.slice(0, 3))}`);
+            } catch {
+              // best-effort diagnostics
+            }
           }
           if (functionalResult.ok && !hasEvidenceSteps) {
             errors.push(`functional_execution_no_evidence_steps:steps=${functionalResult.evidenceSteps ?? "null"}`);

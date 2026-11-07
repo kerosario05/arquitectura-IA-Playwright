@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-prueba-qa",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "prueba qa",
+  "source": "discovery",
+  "appSlug": "portal-comercial",
+  "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+  "createdAt": "2026-11-01T04:08:58.259Z"
+}

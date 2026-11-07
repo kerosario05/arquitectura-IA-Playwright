@@ -2,7 +2,7 @@
   "version": 1,
   "appSlug": "fenix",
   "createdAt": "2026-09-23T13:48:01.218Z",
-  "updatedAt": "2026-10-26T21:39:38.437Z",
+  "updatedAt": "2026-11-05T17:19:43.696Z",
   "items": [],
   "jiraRoutes": [
     {
@@ -948,6 +948,332 @@
         "scenario-1-step-19.png",
         "scenario-1-step-20.png",
         "scenario-1-step-21.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "fenix",
+      "id": "2ac50318b98eed7c13cfca4ee40853f98d3411b4489723907076a942dee80d5d",
+      "profileRevision": "854d1a28d006225af70656f58f8801b66c7a12dbb7f540424b4ef83491a12a0f",
+      "sourceIssueKey": "AA-97",
+      "scenarioId": "AA-97:jira:10:edited-9b813e14b2c6f01f",
+      "jobId": "9a166fc7-81f3-41e4-9c6b-c77e5bf0ce64",
+      "validatedAt": "2026-11-02T16:07:23.641Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "perfil empresarial",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SMS",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Código",
+          "dataRef": "codigo_acceso_sms"
+        },
+        {
+          "action": "click",
+          "field": "continuar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Transferencias",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Cuentas Propias",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta de origen",
+          "dataRef": "cuenta_origen"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta de destino",
+          "dataRef": "cuenta_destino"
+        },
+        {
+          "action": "fill",
+          "field": "Monto",
+          "dataRef": "monto_transferencia"
+        },
+        {
+          "action": "click",
+          "field": "Continuar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "continuar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SMS",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Token",
+          "dataRef": "token_transferencia_sms"
+        },
+        {
+          "action": "click",
+          "field": "Autorizar transferencia",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png",
+        "scenario-1-step-21.png",
+        "scenario-1-step-22.png",
+        "scenario-1-step-23.png",
+        "scenario-1-step-24.png",
+        "scenario-1-step-25.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "fenix",
+      "id": "764f213142347fe8d1367e4f79b94524d8b162a54caa7225590e0f9e6c468ec5",
+      "profileRevision": "854d1a28d006225af70656f58f8801b66c7a12dbb7f540424b4ef83491a12a0f",
+      "sourceIssueKey": "AA-97",
+      "scenarioId": "AA-97:jira:3:edited-5192a81f2d8cb837",
+      "jobId": "7343c090-0b56-4905-bdd0-ca1d5e513bfe",
+      "validatedAt": "2026-11-05T16:47:53.273Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "perfil empresarial",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "fenix",
+      "id": "4922d1a8e8f8763bb869f4a96a1feb5d6e0d9340192accafd643411212a43b41",
+      "profileRevision": "854d1a28d006225af70656f58f8801b66c7a12dbb7f540424b4ef83491a12a0f",
+      "sourceIssueKey": "AA-97",
+      "scenarioId": "AA-97:jira:15:edited-f382444aa7d70f42",
+      "jobId": "236da128-6fc2-4a64-8418-2c75a33fa659",
+      "validatedAt": "2026-11-05T17:19:43.688Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "click",
+          "field": "perfil empresarial",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SMS",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Código",
+          "dataRef": "codigo_acceso_sms"
+        },
+        {
+          "action": "click",
+          "field": "continuar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Transferencias",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Cuentas Propias",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta de origen",
+          "dataRef": "cuenta_origen"
+        },
+        {
+          "action": "select",
+          "field": "Cuenta de destino",
+          "dataRef": "cuenta_destino"
+        },
+        {
+          "action": "fill",
+          "field": "Monto",
+          "dataRef": "monto"
+        },
+        {
+          "action": "click",
+          "field": "Continuar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "continuar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "SMS",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Token",
+          "dataRef": "token_transferencia_sms"
+        },
+        {
+          "action": "click",
+          "field": "Autorizar transferencia",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png"
       ],
       "observables": []
     }

@@ -108,3 +108,27 @@ export function resolveAndroidSdk(options: ResolveAndroidSdkOptions = {}): Andro
 
   return { sdkHome, adbPath, emulatorPath };
 }
+
+/**
+ * Solo adb, para usar los dispositivos del PC del usuario por el túnel del agente:
+ * el servidor no necesita el emulador ni el SDK completo, basta platform-tools.
+ * Orden: ANDROID_ADB_PATH (ruta a adb.exe), y luego el SDK como en resolveAndroidSdk.
+ */
+export function resolveAdbPath(options: ResolveAndroidSdkOptions = {}): string {
+  const env = options.env ?? process.env;
+  const existsSync = options.existsSync ?? fs.existsSync;
+  const explicit = trimAndUnquote(env.ANDROID_ADB_PATH);
+  if (explicit) {
+    if (containsUnexpandedExpression(explicit)) throw new Error(`ANDROID_ADB_PATH contains an unexpanded environment expression: ${explicit}`);
+    const resolved = path.resolve(explicit);
+    if (!existsSync(resolved)) throw new Error(`ANDROID_ADB_PATH points to a missing file: ${resolved}`);
+    return resolved;
+  }
+  try {
+    // Mismo orden de búsqueda que resolveAndroidSdk, pero sin exigir el emulador.
+    const isEmulatorBinary = (p: string) => path.basename(path.dirname(p)) === "emulator" && /^emulator(\.exe)?$/.test(path.basename(p));
+    return resolveAndroidSdk({ ...options, existsSync: (p) => isEmulatorBinary(p) || existsSync(p) }).adbPath;
+  } catch (err) {
+    throw new Error(`adb not found: install Android platform-tools on the server and set ANDROID_ADB_PATH. ${err instanceof Error ? err.message : String(err)}`);
+  }
+}

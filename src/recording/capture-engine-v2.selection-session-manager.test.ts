@@ -186,3 +186,56 @@ test("15/16. this module never references onInteraction/pushEvent/SessionTrace -
   const source = fs.readFileSync(__filename.replace(/\.test\.ts$/, ".ts"), "utf8");
   assert.doesNotMatch(source, /onInteraction|pushEvent|SessionTrace/);
 });
+
+test("a role-less div/span trigger tied to a field opens a selection that the next option click projects", () => {
+  const trigger: CaptureOwner = { tag: "div", classification: "actionable", associatedField: "Tipo de ingreso", technicalRefs: ["id:pv_id_73"] };
+  const manager = new SelectionSessionManager();
+  assert.equal(manager.observeTechnicalClick({ owner: trigger, documentContext: docA, technicalActionSeq: 7 }).outcome, "opened");
+  const projected = manager.observeTechnicalClick({ owner: option, documentContext: docA, technicalActionSeq: 8, selectedDisplay: "Salario" });
+  assert.equal(projected.outcome, "projected");
+  assert.equal(projected.outcome === "projected" && projected.action.owner?.associatedField, "Tipo de ingreso");
+});
+
+test("an ARIA popup button projects its option under the captured owning field", () => {
+  const trigger: CaptureOwner = {
+    tag: "button",
+    role: "button",
+    classification: "actionable",
+    accessibleName: "DOP",
+    associatedField: "Moneda",
+    selectionTriggerEvidence: "aria_popup",
+    technicalRefs: ["id:currency-trigger"],
+  };
+  const manager = new SelectionSessionManager();
+  assert.equal(manager.observeTechnicalClick({ owner: trigger, documentContext: docA, technicalActionSeq: 10 }).outcome, "opened");
+  const projected = manager.observeTechnicalClick({ owner: option, documentContext: docA, technicalActionSeq: 11, selectedDisplay: "USD" });
+  assert.equal(projected.outcome, "projected");
+  assert.equal(projected.outcome === "projected" && projected.action.owner?.associatedField, "Moneda");
+  assert.equal(projected.outcome === "projected" && projected.action.selectionEvidence.selectedDisplay, "USD");
+});
+
+test("an ARIA popup without a captured field name remains ownerless", () => {
+  const trigger: CaptureOwner = {
+    tag: "button",
+    role: "button",
+    classification: "actionable",
+    accessibleName: "DOP",
+    selectionTriggerEvidence: "aria_popup",
+    technicalRefs: ["id:unlabelled-trigger"],
+  };
+  const manager = new SelectionSessionManager();
+  assert.equal(manager.observeTechnicalClick({ owner: trigger, documentContext: docA, technicalActionSeq: 12 }).outcome, "ignored");
+  assert.equal(manager.observeTechnicalClick({ owner: option, documentContext: docA, technicalActionSeq: 13 }).outcome, "orphan_option");
+});
+
+test("a container trigger without a field, a button, or a non-actionable div never opens a selection", () => {
+  for (const owner of [
+    { tag: "div", classification: "actionable" } as CaptureOwner,
+    { tag: "button", classification: "actionable", associatedField: "Algo" } as CaptureOwner,
+    { tag: "div", classification: "non_actionable", associatedField: "Algo" } as CaptureOwner,
+  ]) {
+    const manager = new SelectionSessionManager();
+    manager.observeTechnicalClick({ owner, documentContext: docA, technicalActionSeq: 1 });
+    assert.equal(manager.observeTechnicalClick({ owner: option, documentContext: docA, technicalActionSeq: 2 }).outcome, "orphan_option");
+  }
+});

@@ -98,6 +98,42 @@ test("2/unrelatedAbort + 4/disabledThenEnabledWithNoise. an unrelated xhr failur
   assert.notEqual(result.terminationReason, "request_failed");
 });
 
+test("2b/progressProbeAncillaryFailure. an aggregate XHR failure does not preempt a recorded postcondition that becomes observable after navigation", async () => {
+  const page = new FakePage();
+  let destinationReady = false;
+  const resultPromise = waitForStableInteractiveScreen(page as any, {
+    completionProbe: async () => ({ completed: destinationReady, signal: "recorded_destination_stable" }),
+    progressProbe: () => ({
+      active: true,
+      pendingCount: 1,
+      requestFailed: true,
+      terminalClientError: { resourceType: "xhr" },
+    }),
+    absoluteDeadlineMs: 500,
+  });
+  setTimeout(() => { destinationReady = true; }, 40);
+  const result = await resultPromise;
+  assert.equal(result.stable, true);
+  assert.ok(result.signals.includes("recorded_destination_stable"));
+  assert.notEqual(result.terminationReason, "request_failed");
+});
+
+test("2c/progressProbeDocumentFailure. an aggregate document failure remains terminal while a completion probe is pending", async () => {
+  const page = new FakePage();
+  const result = await waitForStableInteractiveScreen(page as any, {
+    completionProbe: async () => ({ completed: false }),
+    progressProbe: () => ({
+      active: false,
+      pendingCount: 0,
+      requestFailed: true,
+      terminalClientError: { resourceType: "document" },
+    }),
+    absoluteDeadlineMs: 500,
+  });
+  assert.equal(result.stable, false);
+  assert.equal(result.terminationReason, "request_failed");
+});
+
 test("3/relevantTransportFailure. a DOCUMENT-type request failure is still immediately terminal, even with a completionProbe present", async () => {
   const page = new FakePage();
   const resultPromise = waitForStableInteractiveScreen(page as any, {

@@ -74,7 +74,7 @@ function detectModalDialogElements(snapshot: PageSnapshot): { detected: boolean;
   return { detected: evidence.length > 0, evidence };
 }
 
-function detectFormElements(snapshot: PageSnapshot): { detected: boolean; evidence: string[] } {
+function detectFormElements(snapshot: PageSnapshot): { detected: boolean; evidence: string[]; formCount: number; inputCount: number } {
   const evidence: string[] = [];
   let formCount = 0;
   let inputCount = 0;
@@ -109,7 +109,7 @@ function detectFormElements(snapshot: PageSnapshot): { detected: boolean; eviden
     evidence.push(`${inputCount} input fields detected (likely form)`);
   }
   
-  return { detected: evidence.length > 0, evidence };
+  return { detected: evidence.length > 0, evidence, formCount, inputCount };
 }
 
 function detectNextTargetsVisible(
@@ -190,12 +190,18 @@ export async function detectPostClickUiChange(options: {
   const { beforeSnapshot, afterSnapshot, nextTargets = [] } = options;
   const evidence: string[] = [];
   
+  const beforeModalDialog = detectModalDialogElements(beforeSnapshot);
   const modalDialog = detectModalDialogElements(afterSnapshot);
-  if (modalDialog.detected) {
-    evidence.push(...modalDialog.evidence);
-    
+  const newModalEvidence = modalDialog.evidence.filter((item) => !beforeModalDialog.evidence.includes(item));
+  const modalCountIncreased = modalDialog.evidence.length > beforeModalDialog.evidence.length;
+  if (modalDialog.detected && (newModalEvidence.length > 0 || modalCountIncreased)) {
+    evidence.push(...(newModalEvidence.length ? newModalEvidence : modalDialog.evidence));
+
+    const beforeForm = detectFormElements(beforeSnapshot);
     const form = detectFormElements(afterSnapshot);
-    if (form.detected) {
+    const newFormEvidence = form.evidence.some((item) => !beforeForm.evidence.includes(item));
+    const formExpanded = form.formCount > beforeForm.formCount || form.inputCount > beforeForm.inputCount;
+    if (form.detected && (newFormEvidence || formExpanded)) {
       return {
         evaluated: true,
         success: true,
@@ -216,8 +222,11 @@ export async function detectPostClickUiChange(options: {
     };
   }
   
+  const beforeForm = detectFormElements(beforeSnapshot);
   const form = detectFormElements(afterSnapshot);
-  if (form.detected) {
+  const newFormEvidence = form.evidence.some((item) => !beforeForm.evidence.includes(item));
+  const formExpanded = form.formCount > beforeForm.formCount || form.inputCount > beforeForm.inputCount;
+  if (form.detected && (newFormEvidence || formExpanded)) {
     evidence.push(...form.evidence);
     return {
       evaluated: true,
@@ -230,9 +239,11 @@ export async function detectPostClickUiChange(options: {
   }
   
   if (nextTargets.length > 0) {
+    const beforeNextTargets = detectNextTargetsVisible(beforeSnapshot, nextTargets);
     const nextTargetsVisible = detectNextTargetsVisible(afterSnapshot, nextTargets);
-    if (nextTargetsVisible.detected) {
-      evidence.push(...nextTargetsVisible.evidence);
+    const newlyVisible = nextTargetsVisible.evidence.filter((item) => !beforeNextTargets.evidence.includes(item));
+    if (nextTargetsVisible.detected && newlyVisible.length > 0) {
+      evidence.push(...newlyVisible);
       return {
         evaluated: true,
         success: true,

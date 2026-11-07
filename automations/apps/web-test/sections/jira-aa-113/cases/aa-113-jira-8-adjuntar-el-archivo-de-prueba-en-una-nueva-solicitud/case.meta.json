@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "AA-113:jira:8",
+  "title": "Adjuntar el archivo de prueba en una nueva solicitud",
+  "generatedAt": "2026-10-27T18:06:35.524Z",
+  "executionEngine": "jira_semantic"
+}

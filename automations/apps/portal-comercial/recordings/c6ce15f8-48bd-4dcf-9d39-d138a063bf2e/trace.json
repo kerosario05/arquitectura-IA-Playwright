@@ -1,0 +1,4774 @@
+{
+  "recordingId": "c6ce15f8-48bd-4dcf-9d39-d138a063bf2e",
+  "projectSlug": "portal-comercial",
+  "appSlug": "portal-comercial",
+  "platform": "web",
+  "baseUrl": "https://srvqacgowb01.local.bsc.com:5000/",
+  "label": "Prueba",
+  "recordingGoal": {
+    "declaredGoal": "Prueba",
+    "normalizedGoal": "Prueba",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-11-05T11:08:30.266Z",
+  "status": "derived",
+  "events": [
+    {
+      "t": 3286,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "fingerprint": "",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "pageKey": "tab-1",
+      "seq": 0
+    },
+    {
+      "t": 4830,
+      "kind": "navigate",
+      "screenKey": "d216a82efeba",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "pageKey": "tab-1",
+      "seq": 1
+    },
+    {
+      "t": 4898,
+      "kind": "navigate",
+      "screenKey": "d216a82efeba",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "pageKey": "tab-1",
+      "seq": 2
+    },
+    {
+      "t": 5168,
+      "kind": "navigate",
+      "screenKey": "d216a82efeba",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "pageKey": "tab-1",
+      "seq": 3
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "dc6c2cb3e533",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "pageKey": "tab-1",
+      "seq": 4
+    },
+    {
+      "t": 18416,
+      "kind": "fill",
+      "screenKey": "dc6c2cb3e533",
+      "fingerprint": "90cf40b16ddadeeeec43d594200d0afff527792b4bb59e1ce68bd189c51e2b8e",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Usuario",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#username",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "username",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "radames",
+        "sensitive": false
+      },
+      "value": "radames",
+      "valueSource": "user",
+      "seq": 5
+    },
+    {
+      "t": 22392,
+      "kind": "fill",
+      "screenKey": "dc6c2cb3e533",
+      "fingerprint": "90cf40b16ddadeeeec43d594200d0afff527792b4bb59e1ce68bd189c51e2b8e",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "password",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena",
+      "valueSource": "user",
+      "seq": 6
+    },
+    {
+      "t": 22400,
+      "kind": "press",
+      "screenKey": "dc6c2cb3e533",
+      "fingerprint": "90cf40b16ddadeeeec43d594200d0afff527792b4bb59e1ce68bd189c51e2b8e",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Contraseña",
+        "role": "textbox",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "password",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "note": "Enter",
+      "seq": 7
+    },
+    {
+      "t": 22971,
+      "kind": "navigate",
+      "screenKey": "dc6c2cb3e533",
+      "fingerprint": "90cf40b16ddadeeeec43d594200d0afff527792b4bb59e1ce68bd189c51e2b8e",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "pageKey": "tab-1",
+      "seq": 8
+    },
+    {
+      "t": 48950,
+      "kind": "navigate",
+      "screenKey": "537026169b05",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/11171/edit",
+      "pageKey": "tab-1",
+      "seq": 9
+    },
+    {
+      "t": 58440,
+      "interactionId": "pointer-5",
+      "kind": "tap",
+      "screenKey": "596d0b2c9f07",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/11171/edit",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "MPN-3263",
+        "tag": "span",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "__nuxt",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "MPN-3263",
+          "targetTag": "span",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "__nuxt"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "copySelectionGesture": true
+      },
+      "seq": 10
+    },
+    {
+      "t": 59499,
+      "interactionId": "pointer-6",
+      "kind": "tap",
+      "screenKey": "596d0b2c9f07",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/11171/edit",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "MPN-3263",
+        "tag": "span",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "__nuxt",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "MPN-3263",
+          "targetTag": "span",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "__nuxt"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "copySelectionGesture": true
+      },
+      "seq": 11
+    },
+    {
+      "t": 60700,
+      "interactionId": "pointer-7",
+      "kind": "tap",
+      "screenKey": "596d0b2c9f07",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/11171/edit",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "MPN-3263",
+        "tag": "span",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "__nuxt",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "MPN-3263",
+          "targetTag": "span",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "__nuxt"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "copySelectionGesture": true
+      },
+      "seq": 12
+    },
+    {
+      "t": 68042,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "fingerprint": "",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "opensNewPage": true,
+      "seq": 13
+    },
+    {
+      "t": 72531,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Usuario",
+        "role": "combobox",
+        "tag": "select",
+        "associatedField": "Usuario",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "combobox",
+          "normalizedName": "Usuario",
+          "targetTag": "select",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(select[id=\"username\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "username"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "select[id=\"username\"]"
+            },
+            "fieldLabel": "Usuario",
+            "options": [
+              {
+                "value": "BMSC\\acamarena",
+                "label": "BMSC\\acamarena",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\adominguez",
+                "label": "BMSC\\adominguez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\dmeregildo",
+                "label": "BMSC\\dmeregildo",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\eknunez",
+                "label": "BMSC\\eknunez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\emarrero",
+                "label": "BMSC\\emarrero",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\fpimentel",
+                "label": "BMSC\\fpimentel",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\gpaulino",
+                "label": "BMSC\\gpaulino",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jgila",
+                "label": "BMSC\\jgila",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jperez",
+                "label": "BMSC\\jperez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jugonzalez",
+                "label": "BMSC\\jugonzalez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jvaldez",
+                "label": "BMSC\\jvaldez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\larias",
+                "label": "BMSC\\larias",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\lsoto",
+                "label": "BMSC\\lsoto",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\mespejo",
+                "label": "BMSC\\mespejo",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\mmdeleon",
+                "label": "BMSC\\mmdeleon",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\opeguero",
+                "label": "BMSC\\opeguero",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\reperez",
+                "label": "BMSC\\reperez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rjiminian",
+                "label": "BMSC\\rjiminian",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rlithgow",
+                "label": "BMSC\\rlithgow",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rmendez",
+                "label": "BMSC\\rmendez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rperez",
+                "label": "BMSC\\rperez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\yvalerio",
+                "label": "BMSC\\yvalerio",
+                "disabled": false
+              },
+              {
+                "value": "domain\\admon",
+                "label": "domain\\admon",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "BMSC\\acamarena"
+          }
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Usuario\"",
+      "observationType": "pointer",
+      "seq": 14
+    },
+    {
+      "t": 73078,
+      "interactionId": "pointer-1",
+      "kind": "tap",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Usuario",
+        "role": "combobox",
+        "tag": "select",
+        "associatedField": "Usuario",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "combobox|Usuario",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#username",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "username",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#username",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "select"
+              },
+              "stableDirectAttributes": {
+                "id": "username"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "option"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"option\",23]],\"descendantEntries\":[[\"option\",23]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "form-content"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"select\"},\"stableDirectAttributes\":{\"id\":\"username\"},\"stableDescendants\":[],\"semanticShape\":[\"option\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"option\\\",23]],\\\"descendantEntries\\\":[[\\\"option\\\",23]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "combobox",
+          "normalizedName": "Usuario",
+          "targetTag": "select",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(select[id=\"username\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "username"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "select[id=\"username\"]"
+            },
+            "fieldLabel": "Usuario",
+            "options": [
+              {
+                "value": "BMSC\\acamarena",
+                "label": "BMSC\\acamarena",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\adominguez",
+                "label": "BMSC\\adominguez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\dmeregildo",
+                "label": "BMSC\\dmeregildo",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\eknunez",
+                "label": "BMSC\\eknunez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\emarrero",
+                "label": "BMSC\\emarrero",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\fpimentel",
+                "label": "BMSC\\fpimentel",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\gpaulino",
+                "label": "BMSC\\gpaulino",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jgila",
+                "label": "BMSC\\jgila",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jperez",
+                "label": "BMSC\\jperez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jugonzalez",
+                "label": "BMSC\\jugonzalez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jvaldez",
+                "label": "BMSC\\jvaldez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\larias",
+                "label": "BMSC\\larias",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\lsoto",
+                "label": "BMSC\\lsoto",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\mespejo",
+                "label": "BMSC\\mespejo",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\mmdeleon",
+                "label": "BMSC\\mmdeleon",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\opeguero",
+                "label": "BMSC\\opeguero",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\reperez",
+                "label": "BMSC\\reperez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rjiminian",
+                "label": "BMSC\\rjiminian",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rlithgow",
+                "label": "BMSC\\rlithgow",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rmendez",
+                "label": "BMSC\\rmendez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rperez",
+                "label": "BMSC\\rperez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\yvalerio",
+                "label": "BMSC\\yvalerio",
+                "disabled": false
+              },
+              {
+                "value": "domain\\admon",
+                "label": "domain\\admon",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "BMSC\\acamarena"
+          }
+        }
+      },
+      "seq": 15
+    },
+    {
+      "t": 73943,
+      "kind": "fill",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "eb7f6bc81a24e1b49737a9ce1a559f5af9069717205455007f89fba30d338448",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "tag": "select",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "combobox|Usuario",
+            "confidence": 0.85
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "domain\\admon",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "select[id=\"username\"]"
+          },
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "username"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "select[id=\"username\"]"
+            },
+            "fieldLabel": "Usuario",
+            "options": [
+              {
+                "value": "BMSC\\acamarena",
+                "label": "BMSC\\acamarena",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\adominguez",
+                "label": "BMSC\\adominguez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\dmeregildo",
+                "label": "BMSC\\dmeregildo",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\eknunez",
+                "label": "BMSC\\eknunez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\emarrero",
+                "label": "BMSC\\emarrero",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\fpimentel",
+                "label": "BMSC\\fpimentel",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\gpaulino",
+                "label": "BMSC\\gpaulino",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jgila",
+                "label": "BMSC\\jgila",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jperez",
+                "label": "BMSC\\jperez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jugonzalez",
+                "label": "BMSC\\jugonzalez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jvaldez",
+                "label": "BMSC\\jvaldez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\larias",
+                "label": "BMSC\\larias",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\lsoto",
+                "label": "BMSC\\lsoto",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\mespejo",
+                "label": "BMSC\\mespejo",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\mmdeleon",
+                "label": "BMSC\\mmdeleon",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\opeguero",
+                "label": "BMSC\\opeguero",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\reperez",
+                "label": "BMSC\\reperez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rjiminian",
+                "label": "BMSC\\rjiminian",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rlithgow",
+                "label": "BMSC\\rlithgow",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rmendez",
+                "label": "BMSC\\rmendez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rperez",
+                "label": "BMSC\\rperez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\yvalerio",
+                "label": "BMSC\\yvalerio",
+                "disabled": false
+              },
+              {
+                "value": "domain\\admon",
+                "label": "domain\\admon",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "domain\\admon",
+            "clickedOption": {
+              "value": "domain\\admon",
+              "label": "domain\\admon"
+            },
+            "selectionMode": "index",
+            "selectedOptionIndex": 22
+          }
+        },
+        "sensitive": false
+      },
+      "value": "domain\\admon",
+      "valueSource": "user",
+      "seq": 16
+    },
+    {
+      "t": 74193,
+      "kind": "tap",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "eb7f6bc81a24e1b49737a9ce1a559f5af9069717205455007f89fba30d338448",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Usuario",
+        "role": "combobox",
+        "tag": "select",
+        "associatedField": "Usuario",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "combobox|Usuario",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#username",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "username",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#username",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "select"
+              },
+              "stableDirectAttributes": {
+                "id": "username"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "option"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"option\",23]],\"descendantEntries\":[[\"option\",23]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "form-content"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"select\"},\"stableDirectAttributes\":{\"id\":\"username\"},\"stableDescendants\":[],\"semanticShape\":[\"option\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"option\\\",23]],\\\"descendantEntries\\\":[[\\\"option\\\",23]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "combobox",
+          "normalizedName": "Usuario",
+          "targetTag": "select",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(select[id=\"username\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true,
+          "nativeSelection": {
+            "controlIdentity": {
+              "strategy": "id",
+              "value": "username"
+            },
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "select[id=\"username\"]"
+            },
+            "fieldLabel": "Usuario",
+            "options": [
+              {
+                "value": "BMSC\\acamarena",
+                "label": "BMSC\\acamarena",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\adominguez",
+                "label": "BMSC\\adominguez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\dmeregildo",
+                "label": "BMSC\\dmeregildo",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\eknunez",
+                "label": "BMSC\\eknunez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\emarrero",
+                "label": "BMSC\\emarrero",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\fpimentel",
+                "label": "BMSC\\fpimentel",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\gpaulino",
+                "label": "BMSC\\gpaulino",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jgila",
+                "label": "BMSC\\jgila",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jperez",
+                "label": "BMSC\\jperez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jugonzalez",
+                "label": "BMSC\\jugonzalez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\jvaldez",
+                "label": "BMSC\\jvaldez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\larias",
+                "label": "BMSC\\larias",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\lsoto",
+                "label": "BMSC\\lsoto",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\mespejo",
+                "label": "BMSC\\mespejo",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\mmdeleon",
+                "label": "BMSC\\mmdeleon",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\opeguero",
+                "label": "BMSC\\opeguero",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\reperez",
+                "label": "BMSC\\reperez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rjiminian",
+                "label": "BMSC\\rjiminian",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rlithgow",
+                "label": "BMSC\\rlithgow",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rmendez",
+                "label": "BMSC\\rmendez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\rperez",
+                "label": "BMSC\\rperez",
+                "disabled": false
+              },
+              {
+                "value": "BMSC\\yvalerio",
+                "label": "BMSC\\yvalerio",
+                "disabled": false
+              },
+              {
+                "value": "domain\\admon",
+                "label": "domain\\admon",
+                "disabled": false
+              }
+            ],
+            "selectedValue": "domain\\admon"
+          }
+        }
+      },
+      "seq": 17
+    },
+    {
+      "t": 75002,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "eb7f6bc81a24e1b49737a9ce1a559f5af9069717205455007f89fba30d338448",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Ingresar",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Ingresar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[id=\"btn-login\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Ingresar\"",
+      "observationType": "pointer",
+      "seq": 18
+    },
+    {
+      "t": 75200,
+      "interactionId": "pointer-2",
+      "kind": "tap",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "eb7f6bc81a24e1b49737a9ce1a559f5af9069717205455007f89fba30d338448",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Ingresar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Ingresar",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#btn-login",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "btn-login",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#btn-login",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "btn-login",
+                "name": "btn-login"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "form-content"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"btn-login\",\"name\":\"btn-login\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Ingresar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[id=\"btn-login\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 19
+    },
+    {
+      "t": 75354,
+      "kind": "navigate",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "eb7f6bc81a24e1b49737a9ce1a559f5af9069717205455007f89fba30d338448",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "seq": 20
+    },
+    {
+      "t": 82612,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Buscar",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Buscar\"",
+      "observationType": "pointer",
+      "seq": 21
+    },
+    {
+      "t": 84532,
+      "kind": "navigate",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "chrome://newtab/",
+      "pageKey": "tab-2",
+      "seq": 22
+    },
+    {
+      "t": 96908,
+      "kind": "navigate",
+      "screenKey": "0594480aa0f5",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "seq": 23
+    },
+    {
+      "t": 100710,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Buscar",
+        "role": "textbox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Buscar\"",
+      "observationType": "pointer",
+      "seq": 24
+    },
+    {
+      "t": 104248,
+      "kind": "value_source",
+      "screenKey": "596d0b2c9f07",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/11171/edit",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "texto visible",
+        "tag": "span",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "#__nuxt > div > div > div:nth-of-type(2) > div:nth-of-type(3) > main > section > section > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(2) > span",
+            "confidence": 0.5
+          }
+        ]
+      },
+      "valueSelection": {
+        "sourceKind": "text",
+        "startOffset": 0,
+        "endOffset": 8,
+        "endAtSourceEnd": true,
+        "valueShape": "^MPN\\-\\d+$"
+      },
+      "seq": 25
+    },
+    {
+      "t": 106043,
+      "kind": "fill",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Buscar",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Buscar",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#menuQuery",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "menuQuery",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "MPN-3263",
+        "sensitive": false
+      },
+      "valueSource": "application",
+      "dependsOnEventRef": "event-26",
+      "seq": 26
+    },
+    {
+      "t": 106049,
+      "kind": "press",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Buscar",
+        "role": "textbox",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Buscar",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#menuQuery",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "menuQuery",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "note": "Enter",
+      "seq": 27
+    },
+    {
+      "t": 109981,
+      "interactionId": "pointer-2",
+      "kind": "tap",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "MPN-3263",
+        "tag": "span",
+        "locators": [
+          {
+            "strategy": "id",
+            "value": "ui-bizagi-wp-app-inbox-grid-cases",
+            "confidence": 0.55
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "MPN-3263",
+          "targetTag": "span",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "ui-bizagi-wp-app-inbox-grid-cases"
+          },
+          "runtimeResolutionRequired": true
+        },
+        "copySelectionGesture": false
+      },
+      "seq": 28
+    },
+    {
+      "t": 118616,
+      "interactionId": "pointer-3",
+      "kind": "tap",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "1460cc2284030c93f92de2472b0150d0a12dea10e079d2a5e7db5b6321e83280",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "No",
+        "tag": "label",
+        "locators": [
+          {
+            "strategy": "css",
+            "value": "div:has(input[id=\"radio1579942no\"])",
+            "confidence": 0.55
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "No",
+          "targetTag": "label",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(input[id=\"radio1579942no\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(label[id=\"label-df6ac3e6-4fbf-4b7d-af58-cd7a67eca378\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "text",
+          "normalizedName": "No",
+          "targetTag": "label",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(input[id=\"radio1579942no\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 29
+    },
+    {
+      "t": 119224,
+      "kind": "tap",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "1460cc2284030c93f92de2472b0150d0a12dea10e079d2a5e7db5b6321e83280",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "No",
+        "role": "radio",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "radio|No",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#radio1579942no",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "radio1579942no",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#radio1579942no",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "input"
+              },
+              "stableDirectAttributes": {
+                "id": "radio1579942no",
+                "name": "radio1579942name"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "ui-bizagi-tab-173662d5-9094-44da-a55a-6bb1fae59b25"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"input\"},\"stableDirectAttributes\":{\"id\":\"radio1579942no\",\"name\":\"radio1579942name\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "radio",
+          "normalizedName": "No",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(input[id=\"radio1579942no\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 30
+    },
+    {
+      "t": 121300,
+      "interactionId": "pointer-4",
+      "kind": "note",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "5473dd7ce2e37ee98d7f5be6dcbce68a904f919a243d95f6c8a58c134f24e168",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Resultado Revisión Analista Recepción",
+        "role": "combobox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Resultado Revisión Analista Recepción\"",
+      "observationType": "pointer",
+      "seq": 31
+    },
+    {
+      "t": 125206,
+      "interactionId": "pointer-5",
+      "kind": "tap",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "5473dd7ce2e37ee98d7f5be6dcbce68a904f919a243d95f6c8a58c134f24e168",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Aprobado",
+        "role": "option",
+        "tag": "li",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|Aprobado",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#opt-1",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "opt-1",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#opt-1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "id": "opt-1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "listbox-105112c0-91ba-40a7-85ee-d7cc6eb08a88"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"opt-1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Aprobado",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "listbox-105112c0-91ba-40a7-85ee-d7cc6eb08a88"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "coveredByFunctionalSelection": true
+      },
+      "seq": 32
+    },
+    {
+      "t": 125213,
+      "kind": "tap",
+      "observationType": "pointer",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "5473dd7ce2e37ee98d7f5be6dcbce68a904f919a243d95f6c8a58c134f24e168",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Aprobado",
+        "role": "option",
+        "interactionType": "select",
+        "afterValue": "Aprobado",
+        "compoundRole": "selection",
+        "associatedField": "Resultado Revisión Analista Recepción",
+        "dynamicLifecycle": {
+          "triggerTechnicalTarget": "id:combo-105112c0-91ba-40a7-85ee-d7cc6eb08a88",
+          "selectedOption": "Aprobado",
+          "committedState": "Aprobado"
+        },
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|Aprobado",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#opt-1",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "opt-1",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#opt-1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "id": "opt-1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "listbox-105112c0-91ba-40a7-85ee-d7cc6eb08a88"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"opt-1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Aprobado",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "listbox-105112c0-91ba-40a7-85ee-d7cc6eb08a88"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "sourceTechnicalEventSeqs": [
+          44
+        ]
+      },
+      "seq": 33
+    },
+    {
+      "t": 125220,
+      "interactionId": "pointer-5",
+      "kind": "note",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "5473dd7ce2e37ee98d7f5be6dcbce68a904f919a243d95f6c8a58c134f24e168",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Aprobado",
+        "role": "option",
+        "tag": "li",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Aprobado",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "listbox-105112c0-91ba-40a7-85ee-d7cc6eb08a88"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Aprobado\"",
+      "observationType": "pointer",
+      "seq": 34
+    },
+    {
+      "t": 130235,
+      "interactionId": "pointer-6",
+      "kind": "note",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "5473dd7ce2e37ee98d7f5be6dcbce68a904f919a243d95f6c8a58c134f24e168",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Siguiente",
+        "role": "button",
+        "tag": "input",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Siguiente",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(input[id=\"formButton0\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Siguiente\"",
+      "observationType": "pointer",
+      "seq": 35
+    },
+    {
+      "t": 131175,
+      "interactionId": "pointer-6",
+      "kind": "tap",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "5473dd7ce2e37ee98d7f5be6dcbce68a904f919a243d95f6c8a58c134f24e168",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Siguiente",
+        "role": "button",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Siguiente",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#formButton1",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "formButton1",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#formButton1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "input",
+                "role": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "formButton1",
+                "role": "button"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "ui-bizagi-wp-project-plan-content-dashboard"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"input\",\"role\":\"button\"},\"stableDirectAttributes\":{\"id\":\"formButton1\",\"role\":\"button\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Siguiente",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(input[id=\"formButton0\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 36
+    },
+    {
+      "t": 145656,
+      "interactionId": "pointer-7",
+      "kind": "note",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "5473dd7ce2e37ee98d7f5be6dcbce68a904f919a243d95f6c8a58c134f24e168",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Resultado Revisión Aprobador",
+        "role": "combobox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Resultado Revisión Aprobador\"",
+      "observationType": "pointer",
+      "seq": 37
+    },
+    {
+      "t": 148163,
+      "interactionId": "pointer-8",
+      "kind": "tap",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "5473dd7ce2e37ee98d7f5be6dcbce68a904f919a243d95f6c8a58c134f24e168",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Aprobado",
+        "role": "option",
+        "tag": "li",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|Aprobado",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#opt-1",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "opt-1",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#opt-1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "id": "opt-1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "listbox-d8b2ae41-c1fe-4daf-be17-c3e316476c57"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"opt-1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Aprobado",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "listbox-d8b2ae41-c1fe-4daf-be17-c3e316476c57"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "coveredByFunctionalSelection": true
+      },
+      "seq": 38
+    },
+    {
+      "t": 148168,
+      "kind": "tap",
+      "observationType": "pointer",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "5473dd7ce2e37ee98d7f5be6dcbce68a904f919a243d95f6c8a58c134f24e168",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Aprobado",
+        "role": "option",
+        "interactionType": "select",
+        "afterValue": "Aprobado",
+        "compoundRole": "selection",
+        "associatedField": "Resultado Revisión Aprobador",
+        "dynamicLifecycle": {
+          "triggerTechnicalTarget": "id:combo-d8b2ae41-c1fe-4daf-be17-c3e316476c57",
+          "selectedOption": "Aprobado",
+          "committedState": "Aprobado"
+        },
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|Aprobado",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#opt-1",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "opt-1",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#opt-1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "id": "opt-1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "listbox-d8b2ae41-c1fe-4daf-be17-c3e316476c57"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"opt-1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Aprobado",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "listbox-d8b2ae41-c1fe-4daf-be17-c3e316476c57"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "sourceTechnicalEventSeqs": [
+          50
+        ]
+      },
+      "seq": 39
+    },
+    {
+      "t": 148172,
+      "interactionId": "pointer-8",
+      "kind": "note",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "5473dd7ce2e37ee98d7f5be6dcbce68a904f919a243d95f6c8a58c134f24e168",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Aprobado",
+        "role": "option",
+        "tag": "li",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Aprobado",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "listbox-d8b2ae41-c1fe-4daf-be17-c3e316476c57"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Aprobado\"",
+      "observationType": "pointer",
+      "seq": 40
+    },
+    {
+      "t": 153146,
+      "interactionId": "pointer-9",
+      "kind": "note",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "ac58b5bc7fc5bd4ea67e47bbab82c75a4b95ddc7314f6c19455e90c9715b72ca",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Siguiente",
+        "role": "button",
+        "tag": "input",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Siguiente",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(input[id=\"formButton0\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Siguiente\"",
+      "observationType": "pointer",
+      "seq": 41
+    },
+    {
+      "t": 154607,
+      "interactionId": "pointer-9",
+      "kind": "tap",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "ac58b5bc7fc5bd4ea67e47bbab82c75a4b95ddc7314f6c19455e90c9715b72ca",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Siguiente",
+        "role": "button",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Siguiente",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#formButton1",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "formButton1",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#formButton1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "input",
+                "role": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "formButton1",
+                "role": "button"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "ui-bizagi-wp-project-plan-content-dashboard"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"input\",\"role\":\"button\"},\"stableDirectAttributes\":{\"id\":\"formButton1\",\"role\":\"button\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Siguiente",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(input[id=\"formButton0\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 42
+    },
+    {
+      "t": 162970,
+      "interactionId": "pointer-10",
+      "kind": "note",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "ac58b5bc7fc5bd4ea67e47bbab82c75a4b95ddc7314f6c19455e90c9715b72ca",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Resultado de Desembolso",
+        "role": "combobox",
+        "tag": "input",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Resultado de Desembolso\"",
+      "observationType": "pointer",
+      "seq": 43
+    },
+    {
+      "t": 165324,
+      "interactionId": "pointer-11",
+      "kind": "tap",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "ac58b5bc7fc5bd4ea67e47bbab82c75a4b95ddc7314f6c19455e90c9715b72ca",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Aprobado",
+        "role": "option",
+        "tag": "li",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|Aprobado",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#opt-1",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "opt-1",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#opt-1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "id": "opt-1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "listbox-f159a51b-9bb5-4146-9589-678b210c6ae4"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"opt-1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Aprobado",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "listbox-f159a51b-9bb5-4146-9589-678b210c6ae4"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "coveredByFunctionalSelection": true
+      },
+      "seq": 44
+    },
+    {
+      "t": 165336,
+      "kind": "tap",
+      "observationType": "pointer",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "ac58b5bc7fc5bd4ea67e47bbab82c75a4b95ddc7314f6c19455e90c9715b72ca",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Aprobado",
+        "role": "option",
+        "interactionType": "select",
+        "afterValue": "Aprobado",
+        "compoundRole": "selection",
+        "associatedField": "Resultado de Desembolso",
+        "dynamicLifecycle": {
+          "triggerTechnicalTarget": "id:combo-f159a51b-9bb5-4146-9589-678b210c6ae4",
+          "selectedOption": "Aprobado",
+          "committedState": "Aprobado"
+        },
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "option|Aprobado",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#opt-1",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "opt-1",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#opt-1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "id": "opt-1",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "listbox-f159a51b-9bb5-4146-9589-678b210c6ae4"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"opt-1\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Aprobado",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "listbox-f159a51b-9bb5-4146-9589-678b210c6ae4"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "sourceTechnicalEventSeqs": [
+          56
+        ]
+      },
+      "seq": 45
+    },
+    {
+      "t": 165346,
+      "interactionId": "pointer-11",
+      "kind": "note",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "ac58b5bc7fc5bd4ea67e47bbab82c75a4b95ddc7314f6c19455e90c9715b72ca",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Aprobado",
+        "role": "option",
+        "tag": "li",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Aprobado",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "listbox-f159a51b-9bb5-4146-9589-678b210c6ae4"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Aprobado\"",
+      "observationType": "pointer",
+      "seq": 46
+    },
+    {
+      "t": 168001,
+      "interactionId": "pointer-12",
+      "kind": "note",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "e4d687543b37ccf33be4cc319f4a2a010dcf634b3da8cd22ef58c2c7d125916d",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Ejecutar Desembolso",
+        "role": "button",
+        "tag": "input",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Ejecutar Desembolso",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(label[id=\"label-2091790e-138b-4fc9-a338-aade67a44f87\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Ejecutar Desembolso\"",
+      "observationType": "pointer",
+      "seq": 47
+    },
+    {
+      "t": 168667,
+      "interactionId": "pointer-12",
+      "kind": "tap",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "e4d687543b37ccf33be4cc319f4a2a010dcf634b3da8cd22ef58c2c7d125916d",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Ejecutar Desembolso",
+        "role": "button",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Ejecutar Desembolso",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Ejecutar Desembolso",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "input",
+                "role": "button"
+              },
+              "stableDirectAttributes": {
+                "role": "button"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "ui-bizagi-tab-ea937fd7-02d7-40a3-8a95-ba1629c02064"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"input\",\"role\":\"button\"},\"stableDirectAttributes\":{\"role\":\"button\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Ejecutar Desembolso",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(label[id=\"label-2091790e-138b-4fc9-a338-aade67a44f87\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 48
+    },
+    {
+      "t": 175813,
+      "interactionId": "pointer-13",
+      "kind": "note",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "e4d687543b37ccf33be4cc319f4a2a010dcf634b3da8cd22ef58c2c7d125916d",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Siguiente",
+        "role": "button",
+        "tag": "input",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Siguiente",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(input[id=\"formButton0\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Siguiente\"",
+      "observationType": "pointer",
+      "seq": 49
+    },
+    {
+      "t": 176643,
+      "interactionId": "pointer-13",
+      "kind": "tap",
+      "screenKey": "2b879fd8ba19",
+      "fingerprint": "e4d687543b37ccf33be4cc319f4a2a010dcf634b3da8cd22ef58c2c7d125916d",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "pageKey": "tab-2",
+      "target": {
+        "label": "Siguiente",
+        "role": "button",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Siguiente",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#formButton1",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "formButton1",
+            "confidence": 0.8
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#formButton1",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "input",
+                "role": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "formButton1",
+                "role": "button"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "ui-bizagi-wp-project-plan-content-dashboard"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"input\",\"role\":\"button\"},\"stableDirectAttributes\":{\"id\":\"formButton1\",\"role\":\"button\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Siguiente",
+          "targetTag": "input",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(input[id=\"formButton0\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 50
+    },
+    {
+      "t": 188269,
+      "interactionId": "pointer-8",
+      "kind": "note",
+      "screenKey": "596d0b2c9f07",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/11171/edit",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Continuar\"",
+      "observationType": "pointer",
+      "seq": 51
+    },
+    {
+      "t": 188690,
+      "interactionId": "pointer-8",
+      "kind": "tap",
+      "screenKey": "596d0b2c9f07",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/11171/edit",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Continuar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Continuar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "__nuxt"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 52
+    },
+    {
+      "t": 197633,
+      "interactionId": "pointer-9",
+      "kind": "note",
+      "screenKey": "596d0b2c9f07",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/11171/edit",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Finalizar",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Finalizar\"",
+      "observationType": "pointer",
+      "seq": 53
+    },
+    {
+      "t": 198270,
+      "interactionId": "pointer-9",
+      "kind": "tap",
+      "screenKey": "596d0b2c9f07",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/11171/edit",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Finalizar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Finalizar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Finalizar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Finalizar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "__nuxt"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 54
+    },
+    {
+      "t": 200814,
+      "interactionId": "pointer-10",
+      "kind": "note",
+      "screenKey": "596d0b2c9f07",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/11171/edit",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Cerrar",
+        "role": "button",
+        "tag": "button",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Cerrar\"",
+      "observationType": "pointer",
+      "seq": 55
+    },
+    {
+      "t": 200935,
+      "interactionId": "pointer-10",
+      "kind": "tap",
+      "screenKey": "596d0b2c9f07",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/11171/edit",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Cerrar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Cerrar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Cerrar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Cerrar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 56
+    },
+    {
+      "t": 206181,
+      "kind": "navigate",
+      "screenKey": "596d0b2c9f07",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/11171/edit",
+      "pageKey": "tab-1",
+      "seq": 57
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "d216a82efeba",
+      "title": "d216a82efeba",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "firstSeenAt": 3380,
+      "controls": [],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "dc6c2cb3e533",
+      "title": "Banco Santa Cruz - Portal Comercial",
+      "fingerprint": "90cf40b16ddadeeeec43d594200d0afff527792b4bb59e1ce68bd189c51e2b8e",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "firstSeenAt": 5528,
+      "controls": [
+        {
+          "label": "Usuario",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingresa tu usuario",
+          "attributes": {
+            "id": "username",
+            "name": "username",
+            "placeholder": "Ingresa tu usuario"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "username",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingresa tu contraseña",
+          "attributes": {
+            "id": "password",
+            "name": "password",
+            "type": "password",
+            "placeholder": "Ingresa tu contraseña"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "password",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Mantener la sesión iniciada",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "remember-me",
+            "type": "checkbox"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "remember-me",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "submit",
+            "aria-label": "Iniciar sesión"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Iniciar sesión",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Banco Santa Cruz - Portal Comercial"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "c52e3defc610",
+      "title": "c52e3defc610",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "firstSeenAt": 23166,
+      "controls": [
+        {
+          "label": "Portal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Portal Comercial ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Sesión",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_0_0",
+            "aria-label": "Inicio",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_0_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_0_1",
+            "aria-label": "Información",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_0_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Información",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_1_0",
+            "aria-label": "Documentos en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_1_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Documentos en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuracion",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_1_1",
+            "aria-label": "Configuracion",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_1_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Configuracion",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuracion",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva jornada",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_0",
+            "aria-label": "Nueva jornada",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nueva jornada",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva jornada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Jornadas en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_1",
+            "aria-label": "Jornadas en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Jornadas en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Jornadas en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Reasignación",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_2",
+            "aria-label": "Reasignación",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Reasignación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Reasignación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Auditoria de reasignación",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_3",
+            "aria-label": "Auditoria de reasignación",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_3",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Auditoria de reasignación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Auditoria de reasignación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_4",
+            "aria-label": "Configuración",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_4",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "537026169b05",
+      "title": "537026169b05",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests",
+      "firstSeenAt": 28108,
+      "controls": [
+        {
+          "label": "Portal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Portal Comercial ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Sesión",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_0_0",
+            "aria-label": "Inicio",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_0_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_0_1",
+            "aria-label": "Información",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_0_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Información",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_1_0",
+            "aria-label": "Documentos en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_1_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Documentos en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuracion",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_1_1",
+            "aria-label": "Configuracion",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_1_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Configuracion",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuracion",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva jornada",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_0",
+            "aria-label": "Nueva jornada",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nueva jornada",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva jornada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Jornadas en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_1",
+            "aria-label": "Jornadas en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Jornadas en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Jornadas en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Reasignación",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_2",
+            "aria-label": "Reasignación",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Reasignación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Reasignación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Auditoria de reasignación",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_3",
+            "aria-label": "Auditoria de reasignación",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_3",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Auditoria de reasignación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Auditoria de reasignación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_4",
+            "aria-label": "Configuración",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_4",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 2,
+        "cells": 14,
+        "headers": [
+          "Solicitud",
+          "Solicitante",
+          "Tipo",
+          "Estado",
+          "Creado por",
+          "Actualizado por"
+        ],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "596d0b2c9f07",
+      "title": "596d0b2c9f07",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/11171/edit",
+      "firstSeenAt": 49051,
+      "controls": [
+        {
+          "label": "Portal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Portal Comercial ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Sesión",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_0_0",
+            "aria-label": "Inicio",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_0_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_0_1",
+            "aria-label": "Información",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_0_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Información",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_1_0",
+            "aria-label": "Documentos en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_1_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Documentos en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuracion",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_1_1",
+            "aria-label": "Configuracion",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_1_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Configuracion",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuracion",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva jornada",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_0",
+            "aria-label": "Nueva jornada",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nueva jornada",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva jornada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Jornadas en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_1",
+            "aria-label": "Jornadas en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Jornadas en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Jornadas en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Reasignación",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_2",
+            "aria-label": "Reasignación",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Reasignación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Reasignación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Auditoria de reasignación",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_3",
+            "aria-label": "Auditoria de reasignación",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_3",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Auditoria de reasignación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Auditoria de reasignación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_4",
+            "aria-label": "Configuración",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_4",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "2b879fd8ba19",
+      "title": "2b879fd8ba19",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "firstSeenAt": 68115,
+      "controls": [],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "89c907418dad",
+      "title": "89c907418dad",
+      "fingerprint": "eb7f6bc81a24e1b49737a9ce1a559f5af9069717205455007f89fba30d338448",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "firstSeenAt": 73268,
+      "controls": [
+        {
+          "label": "Usuario",
+          "role": "select",
+          "tag": "select",
+          "attributes": {
+            "id": "username"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "username",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Ingresar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "id": "btn-login",
+            "name": "btn-login",
+            "type": "submit"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "btn-login",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "0594480aa0f5",
+      "title": "0594480aa0f5",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "chrome://newtab/",
+      "firstSeenAt": 84977,
+      "controls": [],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "7b4f4ad87791",
+      "title": "Buscar",
+      "fingerprint": "1460cc2284030c93f92de2472b0150d0a12dea10e079d2a5e7db5b6321e83280",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "firstSeenAt": 110086,
+      "controls": [
+        {
+          "label": "Buscar",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Buscar",
+          "attributes": {
+            "id": "menuQuery",
+            "name": "menuQuery",
+            "type": "text",
+            "placeholder": "Buscar"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "menuQuery",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Bandeja de entrada",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Bandeja de entrada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nuevo Caso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nuevo Caso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Consultas",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Consultas",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Reportes",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Reportes",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Procesos en Vivo",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Procesos en Vivo",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Admin",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Admin",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Buscar"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 3,
+        "cells": 21,
+        "headers": [
+          "Número del caso",
+          "Proceso",
+          "Actividad",
+          "Fecha creación caso",
+          "Actividad vence en",
+          "Fecha Solución caso"
+        ],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "19731eb7751d",
+      "title": "Caso MPN-3263",
+      "fingerprint": "90cc67f5c8dfe5f65a8cae1af8e3d1c8d75d6c1787b7ac1b1485f9d012898826",
+      "url": "https://test-bscrd-santacruz.bizagi.com/",
+      "firstSeenAt": 119492,
+      "controls": [
+        {
+          "label": "Buscar",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Buscar",
+          "attributes": {
+            "id": "menuQuery",
+            "name": "menuQuery",
+            "type": "text",
+            "placeholder": "Buscar"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "menuQuery",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Bandeja de entrada",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Bandeja de entrada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nuevo Caso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nuevo Caso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Consultas",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Consultas",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Reportes",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Reportes",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Procesos en Vivo",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Procesos en Vivo",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Admin",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Admin",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Resumen",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Resumen",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Actividad",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Actividad ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Carpeta de caso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Carpeta de caso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Discusiones",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Discusiones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Archivos",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Archivos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Linea de tiempo",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Linea de tiempo",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Siguiente",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Siguiente  ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Solicitud MultiProducto Persona Natural MPN-3263",
+          "role": "a",
+          "tag": "a",
+          "attributes": {
+            "id": "go-to-parent-case"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "go-to-parent-case",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "(Sistema) Recibir Documentos Front",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "(Sistema) Recibir Documentos Front     ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Generar Documentación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Generar Documentación     ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Generar Documentación a Demanda",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Generar Documentación a Demanda     ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "      MPN-3263 - Esquema de Firmas Desembolso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "      MPN-3263 - Esquema de Firmas Desembolso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": " \n  Adicionar plan  ",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " \n  Adicionar plan  ",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Caso MPN-3263",
+        "Gestionar Desembolso",
+        "Proceso padre"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 19,
+        "rows": 88,
+        "cells": 658,
+        "headers": [
+          "id",
+          "Tipo de Relación",
+          "Tipo de Persona",
+          "Nombre Completo / Razón Social",
+          "Identificación",
+          "Tipo de Garantía",
+          "Número de Garantía",
+          "Tasación",
+          "Id",
+          "Identificador Único",
+          "Código del Cliente",
+          "Nombres y Apellidos",
+          "Estado Civil",
+          "Identificador",
+          "Documento PKM",
+          "Link",
+          "Fecha del Documento",
+          "Fecha de Expiración / Vencimiento",
+          "Descripción / Información Adicional",
+          "Documento Firmado",
+          "Tipo de Excepción",
+          "Motivo",
+          "SubMotivo",
+          "Descripción",
+          "Correo Electrónico",
+          "Actividad",
+          "Usuario",
+          "Usuario (BSC)",
+          "Inicio Gestión",
+          "Fin Gestión",
+          "Estado",
+          "Observación",
+          "Detalle",
+          "Nombre Oportunidad",
+          "Id Oportunidad",
+          "Etapa Oportunidad",
+          "Monto Oportunidad",
+          "Moneda",
+          "Propietario",
+          "Nombre Cliente"
+        ],
+        "headerRelationships": [
+          {
+            "header": "Link",
+            "field": "Link"
+          }
+        ]
+      },
+      "headerRelationships": [
+        {
+          "header": "Link",
+          "field": "Link"
+        }
+      ]
+    },
+    {
+      "screenKey": "dde0544d04bd",
+      "title": "Información General",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/11171/edit",
+      "firstSeenAt": 198472,
+      "controls": [
+        {
+          "label": "Portal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Portal Comercial ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Sesión",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_0_0",
+            "aria-label": "Inicio",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_0_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_0_1",
+            "aria-label": "Información",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_0_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Información",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_1_0",
+            "aria-label": "Documentos en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_1_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Documentos en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuracion",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_1_1",
+            "aria-label": "Configuracion",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_1_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Configuracion",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuracion",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva jornada",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_0",
+            "aria-label": "Nueva jornada",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nueva jornada",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva jornada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Jornadas en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_1",
+            "aria-label": "Jornadas en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Jornadas en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Jornadas en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Reasignación",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_2",
+            "aria-label": "Reasignación",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Reasignación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Reasignación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Auditoria de reasignación",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_3",
+            "aria-label": "Auditoria de reasignación",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_3",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Auditoria de reasignación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Auditoria de reasignación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_4",
+            "aria-label": "Configuración",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_4",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Información General",
+        "Condiciones Financieras",
+        "Resultado de Operación"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-11-05T11:11:57.603Z",
+  "durationMs": 207337,
+  "narrative": "Recorrido grabado en aplicación web: portal-comercial\nEtiqueta del recorrido: Prueba\n\nPantalla 1: inicio\n\nPantalla 2: d216a82efeba\n\nPantalla 3: Banco Santa Cruz - Portal Comercial\n  - El usuario ingresó \"radames\" en \"Usuario\"\n  - El usuario ingresó un valor sensible en \"Contraseña\" (contrasena)\n  Textos visibles: Banco Santa Cruz - Portal Comercial\n\nPantalla 4: 537026169b05\n\nPantalla 5: 596d0b2c9f07\n  - (Toque sin dueño accionable sobre \"MPN-3263\")\n  - (Toque sin dueño accionable sobre \"MPN-3263\")\n  - (Toque sin dueño accionable sobre \"MPN-3263\")\n\nPantalla 6: inicio\n\nPantalla 7: 2b879fd8ba19\n  - (Observación técnica (pointer) sobre \"Usuario\")\n  - El usuario presionó \"Usuario\"\n  - El usuario presionó \"Usuario\"\n  - El usuario presionó \"Usuario\"\n  - (Observación técnica (pointer) sobre \"Ingresar\")\n  - El usuario presionó \"Ingresar\"\n  - (Observación técnica (pointer) sobre \"Buscar\")\n\nPantalla 8: 0594480aa0f5\n\nPantalla 9: 2b879fd8ba19\n  - (Observación técnica (pointer) sobre \"Buscar\")\n\nPantalla 10: 596d0b2c9f07\n\nPantalla 11: 2b879fd8ba19\n  - El usuario ingresó \"MPN-3263\" en \"Buscar\"\n  - El usuario presionó \"MPN-3263\"\n  - El usuario presionó \"No\"\n  - El usuario presionó \"No\"\n  - (Observación técnica (pointer) sobre \"Resultado Revisión Analista Recepción\")\n  - El usuario presionó \"Aprobado\"\n  - El usuario presionó \"Aprobado\"\n  - (Observación técnica (pointer) sobre \"Aprobado\")\n  - (Observación técnica (pointer) sobre \"Siguiente\")\n  - El usuario presionó \"Siguiente\"\n  - (Observación técnica (pointer) sobre \"Resultado Revisión Aprobador\")\n  - El usuario presionó \"Aprobado\"\n  - El usuario presionó \"Aprobado\"\n  - (Observación técnica (pointer) sobre \"Aprobado\")\n  - (Observación técnica (pointer) sobre \"Siguiente\")\n  - El usuario presionó \"Siguiente\"\n  - (Observación técnica (pointer) sobre \"Resultado de Desembolso\")\n  - El usuario presionó \"Aprobado\"\n  - El usuario presionó \"Aprobado\"\n  - (Observación técnica (pointer) sobre \"Aprobado\")\n  - (Observación técnica (pointer) sobre \"Ejecutar Desembolso\")\n  - El usuario presionó \"Ejecutar Desembolso\"\n  - (Observación técnica (pointer) sobre \"Siguiente\")\n  - El usuario presionó \"Siguiente\"\n\nPantalla 12: 596d0b2c9f07\n  - (Observación técnica (pointer) sobre \"Continuar\")\n  - El usuario presionó \"Continuar\"\n  - (Observación técnica (pointer) sobre \"Finalizar\")\n  - El usuario presionó \"Finalizar\"\n  - (Observación técnica (pointer) sobre \"Cerrar\")\n  - El usuario presionó \"Cerrar\""
+}

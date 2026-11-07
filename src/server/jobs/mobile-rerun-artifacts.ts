@@ -84,6 +84,7 @@ export function normalizeMobileLaunchExecutionParams(params: MobileLaunchExecuti
     apkPath: typeof params.apkPath === "string" ? repairUtf8Mojibake(params.apkPath) : params.apkPath,
     appPackage: typeof params.appPackage === "string" ? repairUtf8Mojibake(params.appPackage) : params.appPackage,
     appActivity: typeof params.appActivity === "string" ? repairUtf8Mojibake(params.appActivity) : params.appActivity,
+    issueKey: typeof params.issueKey === "string" && params.issueKey.trim() ? params.issueKey.trim() : undefined,
     scenarios: normalizedScenarios,
     dataOverrides: normalizedOverrides,
   };

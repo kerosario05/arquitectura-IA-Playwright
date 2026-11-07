@@ -1,6 +1,7 @@
 import { execFileSync } from "child_process";
 import { existsSync, readdirSync, statSync } from "fs";
 import path from "path";
+import { ApkManifestError, readApkManifest } from "./apk-manifest";
 
 export interface ApkInspectorResult {
   apkPath: string;
@@ -10,7 +11,8 @@ export interface ApkInspectorResult {
   versionCode?: string;
   minSdk?: string;
   targetSdk?: string;
-  inspectionSource: "apkanalyzer" | "aapt2" | "aapt";
+  /** "manifest" = leído del APK en JS, sin herramientas del SDK. */
+  inspectionSource: "manifest" | "apkanalyzer" | "aapt2" | "aapt";
 }
 
 export class ApkInspectorError extends Error {
@@ -315,4 +317,25 @@ export function inspectApk(apkPath: string): ApkInspectorResult {
   }
 
   throw new ApkInspectorError("aapt_not_found", "No Android SDK tool found (apkanalyzer, aapt2 or aapt) in PATH or ANDROID_HOME/ANDROID_SDK_ROOT");
+}
+
+/**
+ * Lee el APK sin el SDK (el servidor ya no necesita build-tools); si el manifiesto
+ * no se puede leer, prueba apkanalyzer/aapt2/aapt como antes.
+ */
+export async function inspectApkFile(apkPath: string): Promise<ApkInspectorResult> {
+  validateApk(apkPath);
+  try {
+    const info = await readApkManifest(apkPath);
+    return { apkPath, ...info, inspectionSource: "manifest" };
+  } catch (err) {
+    try {
+      return inspectApk(apkPath);
+    } catch (fallbackErr) {
+      if (err instanceof ApkManifestError && fallbackErr instanceof ApkInspectorError && fallbackErr.code === "aapt_not_found") {
+        throw new ApkInspectorError("apk_inspection_failed", err.message);
+      }
+      throw fallbackErr;
+    }
+  }
 }

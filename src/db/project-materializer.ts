@@ -6,6 +6,8 @@ import {
   type ProjectConfiguration,
 } from "./project-reader";
 import { resolveSecretRef, SecretResolutionError } from "./secret-resolver";
+import { getProjectServiceConfig, type ProjectServiceConfig } from "./project-service-config-repository";
+import { OTP_ORACLE_LOCAL_TOKEN_KEY } from "../service-catalog/providers/otp-oracle-local-token";
 
 const LOGIN_MODE_MAP: Record<number, string> = { 1: "password", 2: "no_login", 3: "manual" };
 const MISSING_INPUT_MAP: Record<number, string> = {
@@ -70,26 +72,29 @@ export function buildWebAppConfig(cfg: ProjectConfiguration, warnings: string[])
   return appConfig;
 }
 
-function buildMobileAppConfig(cfg: ProjectConfiguration): Record<string, unknown> {
-  const appConfig: Record<string, unknown> = {};
-  if (cfg.otp && cfg.otp.enabled) {
-    appConfig.otpProfile = {
-      strategy: cfg.otp.strategy,
-      defaultChannel: cfg.otp.defaultChannel ?? undefined,
-      allowedChannels: safeParseArray(cfg.otp.allowedChannelsJson),
-      enabledEnvironments: safeParseArray(cfg.otp.enabledEnvironmentsJson),
-    };
-  }
-  return appConfig;
+/**
+ * `otpProfile` for app.config.json, from the project's OTP catalog service (which
+ * already falls back to the legacy ProjectOtpConfiguration row). The internal OTP
+ * endpoint and the mobile resolver read it from there.
+ */
+export function buildOtpProfile(config: ProjectServiceConfig | null): Record<string, unknown> | undefined {
+  if (!config || !config.enabled) return undefined;
+  const list = (value: unknown) => (Array.isArray(value) && value.length > 0 ? value : undefined);
+  return {
+    strategy: "oracle_local_token",
+    defaultChannel: typeof config.settings.defaultChannel === "string" ? config.settings.defaultChannel : undefined,
+    allowedChannels: list(config.settings.allowedChannels),
+    enabledEnvironments: list(config.settings.enabledEnvironments),
+  };
 }
 
-function safeParseArray(raw: string | null): string[] | undefined {
-  if (!raw) return undefined;
+async function readOtpServiceConfig(slug: string, warnings: string[]): Promise<ProjectServiceConfig | null> {
   try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as string[]) : undefined;
+    return await getProjectServiceConfig(slug, OTP_ORACLE_LOCAL_TOKEN_KEY);
   } catch {
-    return undefined;
+    // SQL Server installs without sql/schema/009 yet: materialize without an OTP profile.
+    warnings.push("service_catalog_unavailable");
+    return null;
   }
 }
 
@@ -181,13 +186,17 @@ export async function materializeProjectRuntime(identifier: {
   const warnings: string[] = [];
   const filesWritten: string[] = [];
 
+  const otpProfile = buildOtpProfile(await readOtpServiceConfig(cfg.slug, warnings));
+
   if (cfg.projectType === 1) {
     if (!cfg.web) throw new Error("missing WebProjectConfiguration");
-    writeJsonAtomic(path.join(appDir, "app.config.json"), buildWebAppConfig(cfg, warnings));
+    const appConfig = buildWebAppConfig(cfg, warnings);
+    if (otpProfile) appConfig.otpProfile = otpProfile;
+    writeJsonAtomic(path.join(appDir, "app.config.json"), appConfig);
     filesWritten.push("app.config.json");
   } else if (cfg.projectType === 2) {
     if (!cfg.mobile) throw new Error("missing MobileProjectConfiguration");
-    writeJsonAtomic(path.join(appDir, "app.config.json"), buildMobileAppConfig(cfg));
+    writeJsonAtomic(path.join(appDir, "app.config.json"), otpProfile ? { otpProfile } : {});
     filesWritten.push("app.config.json");
     writeJsonAtomic(path.join(appDir, "mobile.config.json"), buildMobileConfigFile(cfg));
     filesWritten.push("mobile.config.json");

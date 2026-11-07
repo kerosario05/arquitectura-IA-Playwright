@@ -115,14 +115,16 @@ function repairConcatenatedSteps(text: string): { repaired: string; wasRepaired:
     { pattern: /(")(Seleccionar)/gi, replacement: "$1\n$2" }
   ];
   
-  for (const { pattern, replacement } of quoteVerbPatterns) {
-    const matches = repaired.match(pattern);
-    if (matches) {
-      verbsDetected += matches.length;
-      repaired = repaired.replace(pattern, replacement);
-    }
+  for (const { pattern } of quoteVerbPatterns) {
+    // Split only after a CLOSING quote (odd number of quotes before it). An opening quote followed by
+    // a verb-like label, e.g. en "Seleccionar documento", is part of the same step.
+    repaired = repaired.replace(pattern, (match, quote: string, verb: string, offset: number, whole: string) => {
+      if ((whole.slice(0, offset).match(/"/g) ?? []).length % 2 === 0) return match;
+      verbsDetected += 1;
+      return `${quote}\n${verb}`;
+    });
   }
-  
+
   const wasRepaired = verbsDetected > 0;
   return { repaired, wasRepaired, verbsDetected };
 }

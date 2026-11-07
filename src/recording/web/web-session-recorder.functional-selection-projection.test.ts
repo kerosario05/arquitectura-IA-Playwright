@@ -135,6 +135,64 @@ test("4/fieldVsValue. selected option value and combobox field label are kept se
   assert.notEqual(selectionEvent.target?.afterValue, selectionEvent.target?.associatedField);
 });
 
+test("custom dropdown preserves its structurally observed field label when the trigger name is its current value", async () => {
+  const { recorder, events } = newRecorder();
+  const owner = {
+    tag: "button",
+    role: "button",
+    technicalRefs: ["id:currency-trigger"],
+    accessibleName: "DOP",
+    associatedField: "Moneda",
+    selectionTriggerEvidence: "aria_popup",
+  } as CaptureAction["owner"];
+  const trigger = technicalRecord({
+    actionType: "click",
+    identity: { label: "DOP", tagName: "button", role: "button" },
+    owner,
+    sourceRefs: { eventTargetRef: "id:currency-trigger" },
+  });
+  recorder.onV2TechnicalAction(trigger);
+  const option = technicalRecord(optionClick("USD"));
+  recorder.onV2TechnicalAction(option);
+  recorder.onV2FunctionalAction(functionalRecord({
+    functionalActionType: "select",
+    identity: { label: "DOP" },
+    owner,
+    sourceTechnicalActionSeqs: [trigger.seq, option.seq],
+    selectionEvidence: { selectedValue: "USD", selectedDisplay: "USD" },
+  }));
+  await recorder.v2IngestionQueue;
+
+  const selection = events.find((event) => event.target?.compoundRole === "selection");
+  assert.equal(selection?.target?.associatedField, "Moneda");
+  assert.equal(selection?.target?.afterValue, "USD");
+  assert.equal(selection?.target?.dynamicLifecycle?.triggerTechnicalTarget, "id:currency-trigger");
+});
+
+test("an ARIA popup with no unique field label leaves technical clicks uncollapsed", async () => {
+  const { recorder, events } = newRecorder();
+  const trigger = technicalRecord({
+    actionType: "click",
+    identity: { label: "DOP", tagName: "button", role: "button" },
+    owner: { tag: "button", role: "button", accessibleName: "DOP", selectionTriggerEvidence: "aria_popup" },
+  });
+  recorder.onV2TechnicalAction(trigger);
+  const option = technicalRecord(optionClick("USD"));
+  recorder.onV2TechnicalAction(option);
+  recorder.onV2FunctionalAction(functionalRecord({
+    functionalActionType: "select",
+    identity: { label: "DOP" },
+    owner: { tag: "button", role: "button", accessibleName: "DOP", selectionTriggerEvidence: "aria_popup" },
+    sourceTechnicalActionSeqs: [trigger.seq, option.seq],
+    selectionEvidence: { selectedValue: "USD", selectedDisplay: "USD" },
+  }));
+  await recorder.v2IngestionQueue;
+
+  assert.equal(events.length, 2);
+  assert.equal(events.some((event) => event.target?.compoundRole === "selection"), false);
+  assert.equal(events.every((event) => event.target?.coveredByFunctionalSelection !== true), true);
+});
+
 test("6/unnamedField. an unnamed combobox (no accessibleName, no associatedField) still produces a valid selection event -- technical identity untouched, no name invented", async () => {
   const { recorder, events } = newRecorder();
   const comboboxRecord = technicalRecord({ actionType: "click", identity: { tagName: "span", role: "combobox" }, owner: { tag: "span", role: "combobox", technicalRefs: ["id:unnamed-combo"] } });
@@ -232,4 +290,25 @@ test("NO DOUBLE COUNT fixture: fill + combobox-click + option-click + button-cli
     .filter((step) => !step.isSetup)
     .map((step) => step.content?.split(" ")[0]);
   assert.deepEqual(functionalContents, ["Ingresar", "Seleccionar", "Presionar"], "exactly 3 functional steps, never 4");
+});
+
+test("reselection. owner whose accessibleName is the previously selected value and has no associatedField keeps the original field label", async () => {
+  const { recorder, events } = newRecorder();
+  const fire = async (owner: CaptureAction["owner"], value: string) => {
+    const c = technicalRecord({ actionType: "click", identity: { tagName: "span", role: "combobox" }, owner });
+    recorder.onV2TechnicalAction(c);
+    const o = technicalRecord(optionClick(value));
+    recorder.onV2TechnicalAction(o);
+    recorder.onV2FunctionalAction(functionalRecord({
+      ...selectFunctionalAction([c.seq, o.seq], value),
+      owner,
+    }));
+    await recorder.v2IngestionQueue;
+  };
+  await fire({ tag: "span", role: "combobox", technicalRefs: ["id:cat"], accessibleName: "Categoría de producto" }, "Cuentas de Efectivo");
+  await fire({ tag: "span", role: "combobox", technicalRefs: ["id:cat"], accessibleName: "Cuentas de Efectivo" }, "Sistema de Prestamos");
+  const selections = events.filter((e) => e.target?.compoundRole === "selection");
+  assert.equal(selections.length, 2);
+  assert.equal(selections[1].target?.associatedField, "Categoría de producto");
+  assert.equal(selections[1].target?.afterValue, "Sistema de Prestamos");
 });

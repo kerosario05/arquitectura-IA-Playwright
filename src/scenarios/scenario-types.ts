@@ -175,7 +175,7 @@ export type CoverageContract = {
 export type McpScenarioStep = string;
 
 export type RecordingExecutionAction = {
-  actionType: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation";
+  actionType: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "tab_switch" | "upload" | "system_observation";
   interactionId?: string;
   /** The discrete command key a `"press"` action sends (e.g. "Enter"). Absent for every other action type. */
   key?: string;
@@ -211,7 +211,21 @@ export type RecordingExecutionAction = {
   /** 1-based character position for one executable press from a shared custom-keyboard value. */
   segmentPosition?: number;
   valueRole?: "action_input" | "secure_input" | "runtime_derived_oracle";
-  runtimeValueSource?: "dataset";
+  runtimeValueSource?: "dataset" | "captured_application";
+  /** Durable project-scoped assets selected during the source recording. */
+  fileAssets?: import("../recording/session-trace.types").RecordedFileAssetRef[];
+  /** Runtime-selected file set for this captured upload control. */
+  fileSetValueKey?: string;
+  /** Exact URL observed for an independent browser navigation, without credentials/query/hash. */
+  navigationUrl?: string;
+  /** Stable alias of the recorder-owned browser tab for this action. */
+  pageKey?: string;
+  /** True when this navigation created a new browser tab during recording. */
+  opensNewPage?: boolean;
+  /** Source event whose live value must be captured before this action leaves its surface. */
+  runtimeDerivedSourceEventRef?: string;
+  /** Event refs captured immediately before this recorded interaction. */
+  runtimeValueCaptureEventRefs?: string[];
   stepIndex?: number;
   entityScope?: string;
   rowRelation?: "next" | "added";
@@ -247,6 +261,13 @@ export type RecordingExecutionContract = {
   actions: RecordingExecutionAction[];
   runtimeInputRequirements: Array<Record<string, unknown>>;
   datasetBindings?: Record<string, string | null>;
+  runtimeValueCaptures?: Array<{
+    sourceEventRef: string;
+    sourcePageKey?: string;
+    technicalTargetRefs: string[];
+    valueSelection: import("../recording/session-trace.types").RecordedValueSelection;
+    captureBeforeInteractionId: string;
+  }>;
 };
 
 export type NegativeScenarioOracle = {

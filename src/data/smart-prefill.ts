@@ -201,7 +201,8 @@ export async function resolveSmartPrefill(input: {
     const secret = isSecret(requirement);
     let known: SmartPrefillValue | undefined;
     for (const [index, sourceMap] of sourceMaps.entries()) {
-      if (secret && index === 2) continue; // confirmed replay never carries secrets
+      if (secret && index === 2 && requirement.fieldCapability?.kind !== "password") continue;
+      if (secret && index === 2 && lookup(sourceMap, requirement.key, "confirmed_replay")?.verified !== true) continue;
       const fallbackSource: SmartPrefillValue["source"] = ["user_entered", "selection_runtime", "confirmed_replay", "qa_dataset", "project_config"][index] as SmartPrefillValue["source"];
       known = lookup(sourceMap, requirement.key, fallbackSource);
       if (known) break;

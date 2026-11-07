@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-prestamos-personales-faciles",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Prestamos Personales Faciles",
+  "source": "discovery",
+  "appSlug": "portal-comercial",
+  "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+  "createdAt": "2026-11-04T03:59:25.620Z"
+}

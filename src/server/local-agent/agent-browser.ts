@@ -2,6 +2,9 @@ import type { AddressInfo } from "node:net";
 import { chromium, type Browser } from "@playwright/test";
 import WebSocket, { WebSocketServer } from "ws";
 import { localAgentRegistry, type AgentDataChannel, type BrowserCloseReason, type LocalAgentRegistry } from "./agent-registry";
+import { maximizeBrowserWindow } from "../../local-agent/window-management";
+
+export { maximizeBrowserWindow } from "../../local-agent/window-management";
 
 /**
  * Un Chromium del PC del usuario, visto por el motor como un `Browser` de Playwright.
@@ -39,6 +42,7 @@ export async function openAgentBrowser(agentId: string, registry: LocalAgentRegi
   try {
     relay = await startRelay(channel);
     const browser = await chromium.connectOverCDP(relay.url, { timeout: 30_000 });
+    await maximizeBrowserWindow(browser);
     channel.onAgentClosed((reason) => fireLost(reason));
     browser.on("disconnected", () => fireLost("cdp_disconnected"));
     const opened = relay;

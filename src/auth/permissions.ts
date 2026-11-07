@@ -26,6 +26,12 @@ export type PermissionKey =
   | "testdesign.generate"
   | "testdesign.publish_testrail"
   | "testdesign.publish_jira"
+  | "services.view"
+  | "services.edit"
+  | "testplanning.view"
+  | "testplanning.sync"
+  | "testplanning.edit"
+  | "testplanning.commit"
   | "admin.users"
   | "admin.roles";
 
@@ -169,6 +175,48 @@ export const PERMISSION_MODULES: PermissionModule[] = [
     ],
   },
   {
+    key: "services",
+    label: "Catálogo de servicios",
+    permissions: [
+      {
+        key: "services.view",
+        label: "Ver catálogo de servicios",
+        description: "Consultar los servicios reutilizables (OTP, tokens) y en qué proyectos están activos",
+      },
+      {
+        key: "services.edit",
+        label: "Configurar servicios",
+        description: "Activar un servicio en un proyecto, cambiar su configuración y probarlo",
+      },
+    ],
+  },
+  {
+    key: "testplanning",
+    label: "Planificación de pruebas",
+    permissions: [
+      {
+        key: "testplanning.view",
+        label: "Ver planificación de pruebas",
+        description: "Acceder al módulo, elegir rama y leer los planes de prueba del repositorio",
+      },
+      {
+        key: "testplanning.sync",
+        label: "Actualizar repositorio",
+        description: "Ejecutar fetch y pull del repositorio desde el módulo",
+      },
+      {
+        key: "testplanning.edit",
+        label: "Editar escenarios",
+        description: "Editar, mover y agregar escenarios y pasos de los planes de prueba",
+      },
+      {
+        key: "testplanning.commit",
+        label: "Hacer commit y push",
+        description: "Confirmar los cambios de los planes de prueba y subirlos a la rama del repositorio",
+      },
+    ],
+  },
+  {
     key: "admin",
     label: "Administración",
     permissions: [
@@ -254,6 +302,10 @@ export const SYSTEM_ROLES: SystemRoleDefinition[] = [
       "executions.export",
       "testdesign.view",
       "testdesign.generate",
+      "services.view",
+      "testplanning.view",
+      "testplanning.sync",
+      "testplanning.edit",
     ],
   },
   {

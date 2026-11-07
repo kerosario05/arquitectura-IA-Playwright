@@ -124,3 +124,46 @@ test("5/snapshotErrorWithoutTransitionStillFailsClosed. a snapshot error on the 
     "without an observed route transition, an unreadable surface remains a failure after the bounded observation window",
   );
 });
+
+test("6/lateRouteTransitionWithinRouteBudget. a recorded route transition landing after stabilityTimeoutMs is accepted within routeTransitionTimeoutMs; the same delay still fails for non-navigation effects", async () => {
+  const destination = "https://example.test/destination";
+  const build = () => {
+    const startedAt = Date.now();
+    const snapshot = () => ({
+      ...BASE_SNAPSHOT,
+      url: Date.now() - startedAt > 300 ? destination : BASE_SNAPSHOT.url,
+      contentFingerprint: "10:111",
+    });
+    return {
+      evaluate: async () => snapshot(),
+      url: () => snapshot().url,
+      waitForTimeout: async (ms: number) => new Promise((resolve) => setTimeout(resolve, Math.min(ms, 20))),
+      on: () => undefined,
+      off: () => undefined,
+    } as unknown as Page;
+  };
+  const before = { ...BASE_SNAPSHOT, contentFingerprint: "10:111" };
+  const config = { evidenceEnabled: false, stabilityTimeoutMs: 100, routeTransitionTimeoutMs: 1500 } as any;
+
+  const navigation = new PromotedSpecRuntime(build(), config);
+  (navigation as any).waitForPromotedUiStable = async () => undefined;
+  await assert.doesNotReject(() => (navigation as any).postActionStability(BASE_SNAPSHOT.url, "navigation", undefined, before, "css:[aria-label=\"Depurar\"]"));
+
+  const uiChange = new PromotedSpecRuntime(build(), config);
+  await assert.rejects(
+    () => (uiChange as any).postActionStability(BASE_SNAPSHOT.url, "ui_change", undefined, before, "css:[aria-label=\"Depurar\"]"),
+    (error: unknown) => error instanceof Error && error.message.includes("no_observable_post_action_outcome"),
+  );
+});
+
+test("7/navigationWithoutRouteChangeStillFailsClosedAfterRouteBudget", async () => {
+  const page = fakePageWithSnapshots([{ ...BASE_SNAPSHOT, contentFingerprint: "10:111" }]);
+  (page as any).waitForTimeout = async (ms: number) => new Promise((resolve) => setTimeout(resolve, Math.min(ms, 20)));
+  const runtime = new PromotedSpecRuntime(page, { evidenceEnabled: false, stabilityTimeoutMs: 50, routeTransitionTimeoutMs: 300 } as any);
+  const startedAt = Date.now();
+  await assert.rejects(
+    () => (runtime as any).postActionStability(BASE_SNAPSHOT.url, "navigation", undefined, { ...BASE_SNAPSHOT, contentFingerprint: "10:111" }, "text:Depurar"),
+    (error: unknown) => error instanceof Error && error.message.includes("Post-click stability check failed"),
+  );
+  assert.ok(Date.now() - startedAt >= 250, "the wait used the longer route-transition budget before failing");
+});

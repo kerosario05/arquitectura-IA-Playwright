@@ -78,6 +78,44 @@ class QuietUntilPage extends FakePage {
   }
 }
 
+test("declared destination can arrive after the idle lease without retrying the action", async () => {
+  const page = new QuietUntilPage(60);
+  const result = await withEnv("LOADING_STABILITY_TIMEOUT_MS", "15", () =>
+    waitForStableInteractiveScreen(page as any, {
+      completionProbe: async () => ({ completed: page.enabled, signal: "recorded_destination_reached" }),
+      completionDeadline: "absolute",
+      absoluteDeadlineMs: 300,
+    }));
+  assert.equal(result.stable, true);
+  assert.ok(result.waitedMs >= 60);
+  assert.ok(result.signals.includes("recorded_destination_reached"));
+});
+
+test("a declared destination that never arrives fails at the bounded safety deadline", async () => {
+  const page = new QuietUntilPage(null);
+  const result = await withEnv("LOADING_STABILITY_TIMEOUT_MS", "15", () =>
+    waitForStableInteractiveScreen(page as any, {
+      completionProbe: async () => ({ completed: false }),
+      completionDeadline: "absolute",
+      absoluteDeadlineMs: 70,
+    }));
+  assert.equal(result.stable, false);
+  assert.equal(result.terminationReason, "absolute_deadline_reached");
+  assert.ok(result.waitedMs >= 70);
+});
+
+test("a terminal outcome still completes the declared-destination probe immediately", async () => {
+  const page = new QuietUntilPage(null);
+  const result = await withEnv("LOADING_STABILITY_TIMEOUT_MS", "15", () =>
+    waitForStableInteractiveScreen(page as any, {
+      completionProbe: async () => ({ completed: true, signal: "application_error" }),
+      completionDeadline: "absolute",
+      absoluteDeadlineMs: 300,
+    }));
+  assert.ok(result.signals.includes("application_error"));
+  assert.ok(result.waitedMs < 300);
+});
+
 test("1/stableProbeFalse. a quiet screen (no spinner, no pending) with completionProbe=false is never reported stable", async () => {
   const page = new QuietUntilPage(null); // never enables
   const result = await withEnv("LOADING_STABILITY_TIMEOUT_MS", "30", () =>
@@ -219,4 +257,18 @@ test("11/activityTarget. a probe-driven wait moves the pointer over its target w
   assert.equal(result.stable, false);
   assert.ok(mouseMoveCount > 0, "must emit explicit page-level pointer movement during a pending probe wait");
   assert.equal(hoverCount, 0, "must use page-level pointer input rather than locator hover");
+});
+
+test("a quiet screen with an absolute declared destination exits at the quiet-stall window, not the hard cap", async () => {
+  const page = new QuietUntilPage(null);
+  const result = await withEnv("COMPLETION_ABSOLUTE_QUIET_STALL_MS", "80", () =>
+    withEnv("LOADING_STABILITY_TIMEOUT_MS", "15", () =>
+      waitForStableInteractiveScreen(page as any, {
+        completionProbe: async () => ({ completed: false }),
+        completionDeadline: "absolute",
+        absoluteDeadlineMs: 3000,
+      })));
+  assert.equal(result.stable, false);
+  assert.equal(result.terminationReason, "stalled");
+  assert.ok(result.waitedMs >= 80 && result.waitedMs < 1500, `waitedMs=${result.waitedMs}`);
 });

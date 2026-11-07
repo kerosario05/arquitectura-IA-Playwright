@@ -5,8 +5,8 @@
     "name": "bsc",
     "baseUrl": "https://srvqacgowb01.local.bsc.com:5000/",
     "baseUrlHash": "1a1301246d13",
-    "createdAt": "2026-09-22T22:08:29.902Z",
-    "updatedAt": "2026-09-22T22:08:29.903Z",
+    "createdAt": "2026-11-04T12:27:58.086Z",
+    "updatedAt": "2026-11-04T12:27:58.087Z",
     "ignoreHTTPSErrors": true
   },
   "baseUrl": "https://srvqacgowb01.local.bsc.com:5000/",
@@ -14,11 +14,20 @@
   "testData": {},
   "testDataAliases": {},
   "testDataRefs": {},
-  "username": "adminr",
-  "password": "admin123",
-  "usernameRef": "APP_USERNAME",
-  "passwordRef": "APP_PASSWORD",
   "missingInputBehavior": "auto_generate",
   "ignoreHTTPSErrors": true,
-  "updatedAt": "2026-09-22T22:08:29.903Z"
+  "nonBlockingApplicationErrorTextFragments": [
+    "Error al consultar el buró de crédito",
+    "TransUnion Buro Report"
+  ],
+  "requestCancellation": {
+    "enabled": false
+  },
+  "dataServices": {
+    "dataCedulas": {
+      "enabled": true,
+      "database": "QA1"
+    }
+  },
+  "updatedAt": "2026-11-04T12:27:58.087Z"
 }

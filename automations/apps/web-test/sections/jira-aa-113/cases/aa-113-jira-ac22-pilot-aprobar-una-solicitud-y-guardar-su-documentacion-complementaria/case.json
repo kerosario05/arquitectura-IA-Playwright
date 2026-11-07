@@ -1,0 +1,9 @@
+{
+  "id": "aa-113-jira-ac22-pilot-aprobar-una-solicitud-y-guardar-su-documentacion-complementaria",
+  "externalId": "AA-113:jira:ac22-pilot",
+  "title": "Aprobar una solicitud y guardar su documentación complementaria",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-27T21:43:39.046Z"
+}

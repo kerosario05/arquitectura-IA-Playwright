@@ -1,0 +1,61 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-10-27T22:46:44.660Z",
+  "entries": [
+    {
+      "key": "usuario_negocios_ac22",
+      "source": "unknown",
+      "fieldName": "[id=\"usuario\"]",
+      "stepIndex": 6,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena_negocios_ac22",
+      "source": "unknown",
+      "fieldName": "[id=\"clave\"]",
+      "stepIndex": 7,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "rnc_camara_comercio_ac22",
+      "source": "unknown",
+      "fieldName": "[id=\"idNumero\"]",
+      "stepIndex": 11,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "usuario_aprobaciones_ac22",
+      "source": "unknown",
+      "fieldName": "[id=\"usuario\"]",
+      "stepIndex": 21,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    },
+    {
+      "key": "contrasena_aprobaciones_ac22",
+      "source": "unknown",
+      "fieldName": "[id=\"clave\"]",
+      "stepIndex": 22,
+      "valueType": "unknown",
+      "sensitive": true,
+      "demoSafe": false,
+      "required": true,
+      "maskedValue": ""
+    }
+  ]
+}

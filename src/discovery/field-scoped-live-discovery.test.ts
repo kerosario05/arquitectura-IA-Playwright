@@ -104,6 +104,18 @@ test("3. textbox and button in the same field: both observed, role compatibility
   assert.equal(evidence?.candidates.find((c) => c.tag === "button")?.actionable, true);
 });
 
+test("3b/checkableAction. a uniquely caption-scoped native switch is an actionable click owner", () => {
+  const toggle = new FakeElement("input", { type: "checkbox", role: "switch" });
+  const caption = new FakeElement("span", {}, "¿No posee correo electrónico?");
+  const field = new FakeElement("section", {}).append(caption, toggle);
+  const evidence = extractFieldScopedDomEvidence(fakeRoot(new FakeElement("main", {}).append(field)), "¿No posee correo electrónico?", "actionable");
+  assert.equal(evidence?.diagnostics.containerAccepted, true);
+  assert.equal(evidence?.candidates.length, 1);
+  assert.equal(evidence?.candidates[0]?.tag, "input");
+  assert.equal(evidence?.candidates[0]?.role, "switch");
+  assert.equal(evidence?.candidates[0]?.actionable, true);
+});
+
 test("5/multipleWithinField. two compatible inputs in the same field: both observed -- ambiguity is the materializer's decision, not this extractor's", () => {
   const inputA = new FakeElement("input", {});
   const inputB = new FakeElement("input", {});

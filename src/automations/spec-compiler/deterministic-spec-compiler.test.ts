@@ -128,6 +128,44 @@ test("3b/configuredNavigation uses the project base URL without a display-text l
   });
 });
 
+test("recorded multi-tab actions select the trace-owned page before navigating and asserting", () => {
+  const navigate = step({
+    scenarioStepIndex: 7,
+    operation: "navigate",
+    target: { strategy: "url", value: "https://approvals.example/queue" },
+    pageKey: "tab-2",
+    opensNewPage: true,
+  });
+  const assertion = step({
+    scenarioStepIndex: 8,
+    operation: "assertVisible",
+    target: { strategy: "text", value: "Solicitud aprobada", exact: true },
+    pageKey: "tab-2",
+    oracle: { type: "literal_visible_text", backed: true, polarity: "positive", target: "Solicitud aprobada" },
+  });
+  const result = compileDeterministicSpec(contract([navigate, assertion]));
+  assert.equal(result.unsupportedCapabilities.length, 0);
+  assert.match(result.source, /const recordingPage_7 = await promotedRuntime\.selectRecordedPage\("tab-2", true\);/);
+  assert.match(result.source, /await recordingPage_7\.goto\('https:\/\/approvals\.example\/queue'\);/);
+  assert.match(result.source, /const recordingPage_8 = await promotedRuntime\.selectRecordedPage\("tab-2", false\);/);
+  assert.match(result.source, /expect\(recordingPage_8\.getByText\('Solicitud aprobada'/);
+});
+
+test("recorded tab-switch step selects its trace-owned page and remains an explicit binding", () => {
+  const tabSwitch = step({
+    scenarioStepIndex: 9,
+    operation: "select_tab",
+    pageKey: "tab-1",
+    originalText: 'Cambiar a la pestaña "https://portal.example"',
+  });
+  const result = compileDeterministicSpec(contract([tabSwitch]));
+
+  assert.equal(result.unsupportedCapabilities.length, 0);
+  assert.match(result.source, /const recordingPage_9 = await promotedRuntime\.selectRecordedPage\("tab-1", false\);/);
+  assert.equal(result.bindings[0].operation, "select_tab");
+  assert.equal(result.bindings[0].runtimeMethod, "selectRecordedPage");
+});
+
 test("4/sequence fill->fill->press->click preserves order and cardinality", () => {
   const result = compileDeterministicSpec(contract([FILL_STEP, FILL_STEP_2, PRESS_STEP, CLICK_STEP]));
   assert.equal(result.unsupportedCapabilities.length, 0);

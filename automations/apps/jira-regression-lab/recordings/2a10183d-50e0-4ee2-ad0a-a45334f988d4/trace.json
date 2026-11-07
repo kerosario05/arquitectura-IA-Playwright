@@ -1,0 +1,1866 @@
+{
+  "recordingId": "2a10183d-50e0-4ee2-ad0a-a45334f988d4",
+  "projectSlug": "jira-regression-lab",
+  "appSlug": "jira-regression-lab",
+  "platform": "web",
+  "baseUrl": "http://127.0.0.1:4173",
+  "label": "Northstar 1 documento",
+  "recordingGoal": {
+    "declaredGoal": "Crear una solicitud en la web A, aprobarla en la web B y continuar en la web A adjuntando documentos",
+    "normalizedGoal": "Crear una solicitud en la web A, aprobarla en la web B y continuar en la web A adjuntando documentos",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-10-28T01:49:01.679Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 3934,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "fingerprint": "",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "seq": 0
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "9a0424e878a9",
+      "url": "http://127.0.0.1:4173",
+      "pageKey": "tab-1",
+      "seq": 1
+    },
+    {
+      "t": 9822,
+      "kind": "fill",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "e98c9adaac88b785b23d7730e314ddb87394ad916215e0fc849201f82fa7bcd4",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "RNC",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|RNC",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#login-rnc",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "login-rnc",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "101010101",
+        "sensitive": false
+      },
+      "value": "101010101",
+      "valueSource": "user",
+      "seq": 2
+    },
+    {
+      "t": 10618,
+      "kind": "fill",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "e98c9adaac88b785b23d7730e314ddb87394ad916215e0fc849201f82fa7bcd4",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Usuario",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#login-user",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "login-user",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "qa_empresa",
+        "sensitive": false
+      },
+      "value": "qa_empresa",
+      "valueSource": "user",
+      "seq": 3
+    },
+    {
+      "t": 11454,
+      "interactionId": "pointer-1",
+      "kind": "note",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "e98c9adaac88b785b23d7730e314ddb87394ad916215e0fc849201f82fa7bcd4",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Iniciar sesión\"",
+      "observationType": "pointer",
+      "seq": 4
+    },
+    {
+      "t": 11458,
+      "kind": "fill",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "e98c9adaac88b785b23d7730e314ddb87394ad916215e0fc849201f82fa7bcd4",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#login-password",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "login-password",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena",
+      "valueSource": "user",
+      "seq": 5
+    },
+    {
+      "t": 11539,
+      "interactionId": "pointer-1",
+      "kind": "tap",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "e98c9adaac88b785b23d7730e314ddb87394ad916215e0fc849201f82fa7bcd4",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Iniciar sesión",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Iniciar sesión",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Iniciar sesión",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Iniciar sesión",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "login-form"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(form[id=\"login-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(form[id=\"login-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Iniciar sesión",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "login-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 6
+    },
+    {
+      "t": 14069,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "otp-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Continuar\"",
+      "observationType": "pointer",
+      "seq": 7
+    },
+    {
+      "t": 14074,
+      "kind": "fill",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Código de acceso",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Código de acceso",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#login-otp",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "login-otp",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "123456",
+        "sensitive": true
+      },
+      "value": "123456",
+      "redactedKey": "codigo_de_acceso",
+      "valueSource": "user",
+      "seq": 8
+    },
+    {
+      "t": 14095,
+      "interactionId": "pointer-2",
+      "kind": "tap",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Continuar",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Continuar",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "otp-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Continuar",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "otp-form"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(form[id=\"otp-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(form[id=\"otp-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Continuar",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "otp-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 9
+    },
+    {
+      "t": 25828,
+      "interactionId": "pointer-3",
+      "kind": "note",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "▤Solicitudes",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "▤Solicitudes",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "app"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"▤Solicitudes\"",
+      "observationType": "pointer",
+      "seq": 10
+    },
+    {
+      "t": 25849,
+      "interactionId": "pointer-3",
+      "kind": "tap",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "▤Solicitudes",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|▤Solicitudes",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|▤Solicitudes",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "aside"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 10,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 10
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "▤Solicitudes",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "▤Solicitudes",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "app"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 11
+    },
+    {
+      "t": 27539,
+      "interactionId": "pointer-4",
+      "kind": "note",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "28003a710567a8dab72dbb66433433e62dd830d92f6bd02f1b7f95ec1dfbedf5",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Nueva solicitud",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Nueva solicitud",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "section:has(table[aria-label=\"Solicitudes\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Nueva solicitud\"",
+      "observationType": "pointer",
+      "seq": 12
+    },
+    {
+      "t": 27574,
+      "interactionId": "pointer-4",
+      "kind": "tap",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "28003a710567a8dab72dbb66433433e62dd830d92f6bd02f1b7f95ec1dfbedf5",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Nueva solicitud",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Nueva solicitud",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Nueva solicitud",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Nueva solicitud",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(table[aria-label=\"Solicitudes\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "main:has(button[aria-label=\"Buscar en el portal\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Nueva solicitud",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "section:has(table[aria-label=\"Solicitudes\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 13
+    },
+    {
+      "t": 29881,
+      "kind": "fill",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "2bed870ef1b52a0a4ba7d51e28e2ec5495615f8b5ccad825ab45d2d1b4593130",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Asunto",
+        "role": "input",
+        "tag": "input",
+        "inputType": "text",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Asunto",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#request-subject",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "request-subject",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "Solicitud Northstar 1 documento",
+        "sensitive": false
+      },
+      "value": "Solicitud Northstar 1 documento",
+      "valueSource": "user",
+      "seq": 14
+    },
+    {
+      "t": 30738,
+      "interactionId": "pointer-5",
+      "kind": "note",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "2bed870ef1b52a0a4ba7d51e28e2ec5495615f8b5ccad825ab45d2d1b4593130",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Crear solicitud",
+        "role": "button",
+        "tag": "button",
+        "locators": [],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Crear solicitud",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "request-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "note": "Observación técnica (pointer) sobre \"Crear solicitud\"",
+      "observationType": "pointer",
+      "seq": 15
+    },
+    {
+      "t": 30742,
+      "kind": "fill",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "2bed870ef1b52a0a4ba7d51e28e2ec5495615f8b5ccad825ab45d2d1b4593130",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Monto",
+        "role": "input",
+        "tag": "input",
+        "inputType": "number",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Monto",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#request-amount",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "request-amount",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "",
+        "sensitive": false
+      },
+      "value": "1500",
+      "valueSource": "user",
+      "seq": 16
+    },
+    {
+      "t": 30772,
+      "interactionId": "pointer-5",
+      "kind": "tap",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "2bed870ef1b52a0a4ba7d51e28e2ec5495615f8b5ccad825ab45d2d1b4593130",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Crear solicitud",
+        "role": "button",
+        "tag": "button",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "button|Crear solicitud",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Crear solicitud",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "request-form"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Crear solicitud",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "request-form"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(form[id=\"request-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(form[id=\"request-form\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "main:has(button[aria-label=\"Buscar en el portal\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Crear solicitud",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "request-form"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        }
+      },
+      "seq": 17
+    },
+    {
+      "t": 32472,
+      "interactionId": "pointer-6",
+      "kind": "tap",
+      "screenKey": "9a0424e878a9",
+      "fingerprint": "65d26f51d715e769ba1192b257c57be97fc90fb5610952485708c01ede9b1be1",
+      "url": "http://127.0.0.1:4173/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "NS-REQ-0001",
+        "tag": "dd",
+        "locators": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "dd"
+              },
+              "stableDirectAttributes": {
+                "id": "request-number"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "app"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"dd\"},\"stableDirectAttributes\":{\"id\":\"request-number\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner",
+              "v2_scoped_structural_runtime_evidence"
+            ],
+            "confidence": 0.6,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 18
+    },
+    {
+      "t": 34419,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "fingerprint": "",
+      "url": "http://127.0.0.1:4173/approvals/",
+      "pageKey": "tab-2",
+      "opensNewPage": true,
+      "directUserNavigation": true,
+      "seq": 19
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "9a0424e878a9",
+      "title": "Iniciar sesión",
+      "fingerprint": "e98c9adaac88b785b23d7730e314ddb87394ad916215e0fc849201f82fa7bcd4",
+      "url": "http://127.0.0.1:4173/",
+      "firstSeenAt": 3989,
+      "controls": [
+        {
+          "label": "Empresarial",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Empresarial",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Personal",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Personal",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "RNC",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "login-rnc",
+            "name": "login-rnc",
+            "type": "text"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "login-rnc",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Usuario",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "login-user",
+            "name": "login-user",
+            "type": "text"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "login-user",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "login-password",
+            "name": "login-password",
+            "type": "password"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "login-password",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "submit"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Iniciar sesión",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Iniciar sesión"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 4,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "39d05ef4e8c5",
+      "title": "39d05ef4e8c5",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "http://127.0.0.1:4173/",
+      "firstSeenAt": 11609,
+      "controls": [],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "14001fd87127",
+      "title": "14001fd87127",
+      "fingerprint": "28003a710567a8dab72dbb66433433e62dd830d92f6bd02f1b7f95ec1dfbedf5",
+      "url": "http://127.0.0.1:4173/",
+      "firstSeenAt": 25931,
+      "controls": [
+        {
+          "label": "▦",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▦ Resumen",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "◫",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "◫ Cuentas",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "⇄",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "⇄ Transferencias",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "♧",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "♧ Beneficiarios",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "▣",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▣ Pagos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "▤",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▤ Estados de cuenta",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "▥",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▥ Pagos masivos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "⚙",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "⚙ Administración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "◷",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "◷ Auditoría",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "▤",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▤ Solicitudes",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Buscar en el portal",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Buscar en el portal"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Buscar en el portal",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Notificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Notificaciones"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Notificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "QD",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "QD  QA Demo  Cliente empresarial⌄",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "4c846fa10de0",
+      "title": "Nueva solicitud",
+      "fingerprint": "2bed870ef1b52a0a4ba7d51e28e2ec5495615f8b5ccad825ab45d2d1b4593130",
+      "url": "http://127.0.0.1:4173/",
+      "firstSeenAt": 27665,
+      "controls": [
+        {
+          "label": "▦",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▦ Resumen",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "◫",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "◫ Cuentas",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "⇄",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "⇄ Transferencias",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "♧",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "♧ Beneficiarios",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "▣",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▣ Pagos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "▤",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▤ Estados de cuenta",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "▥",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▥ Pagos masivos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "⚙",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "⚙ Administración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "◷",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "◷ Auditoría",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "▤",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▤ Solicitudes",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Buscar en el portal",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Buscar en el portal"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Buscar en el portal",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Notificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Notificaciones"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Notificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "QD",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "QD  QA Demo  Cliente empresarial⌄",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Tipo de solicitud",
+          "role": "select",
+          "tag": "select",
+          "attributes": {
+            "id": "request-type",
+            "name": "request-type"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "request-type",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Asunto",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "request-subject",
+            "name": "request-subject",
+            "type": "text"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "request-subject",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Monto",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "request-amount",
+            "name": "request-amount",
+            "type": "number"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "request-amount",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Crear solicitud",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "submit"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Crear solicitud",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Cancelar",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "button"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Cancelar",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Nueva solicitud"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 4,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "858d050ea49d",
+      "title": "Solicitud creada",
+      "fingerprint": "65d26f51d715e769ba1192b257c57be97fc90fb5610952485708c01ede9b1be1",
+      "url": "http://127.0.0.1:4173/",
+      "firstSeenAt": 30859,
+      "controls": [
+        {
+          "label": "▦",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▦ Resumen",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "◫",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "◫ Cuentas",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "⇄",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "⇄ Transferencias",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "♧",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "♧ Beneficiarios",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "▣",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▣ Pagos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "▤",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▤ Estados de cuenta",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "▥",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▥ Pagos masivos",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "⚙",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "⚙ Administración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "◷",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "◷ Auditoría",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "▤",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "▤ Solicitudes",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Buscar en el portal",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Buscar en el portal"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Buscar en el portal",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Notificaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "aria-label": "Notificaciones"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Notificaciones",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "QD",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "QD  QA Demo  Cliente empresarial⌄",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Volver a solicitudes",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Volver a solicitudes",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Solicitud creada"
+      ],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "ec56ca606e28",
+      "title": "Acceso de aprobadores",
+      "fingerprint": "cea80b92e2f145b08cec73c2b0e3e82a16fb035a386a1ef04f7d5f7410687548",
+      "url": "http://127.0.0.1:4173/approvals/",
+      "firstSeenAt": 34464,
+      "controls": [
+        {
+          "label": "Usuario de aprobaciones",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "approvals-user",
+            "name": "approvals-user"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "approvals-user",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña de aprobaciones",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "approvals-password",
+            "name": "approvals-password",
+            "type": "password"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "approvals-password",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Ingresar a aprobaciones",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "submit"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Ingresar a aprobaciones",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Acceso de aprobadores"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 3,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-10-28T01:50:31.273Z",
+  "durationMs": 89594
+}

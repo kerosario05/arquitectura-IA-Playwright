@@ -1,4 +1,5 @@
 import { spawn, execFile, type ChildProcess } from "node:child_process";
+import { compactRecordedEvents } from "./compact-recorded-events";
 import { promisify } from "node:util";
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -47,6 +48,11 @@ const execFileAsync = promisify(execFile);
 
 export type AndroidRecorderOptions = {
   deviceId: string;
+  /**
+   * adb server to talk to: the tunnel to the adb on the user's PC. Absent = the server's own
+   * adb (default port 5037).
+   */
+  adb?: { adbPath: string; host?: string; port?: number };
   appPackage?: string;
   framesDir: string;
   /** How often the UI tree is re-read while the user explores. Default 1200ms. */
@@ -60,6 +66,17 @@ export type AndroidRecorderOptions = {
   onLog?: (line: string) => void;
   onEvent?: (event: RecordedEvent) => void;
   onScreen?: (screen: RecordedScreen) => void;
+  /**
+   * Reads the UI tree some other way than `uiautomator dump` (an Appium session that does not
+   * wait for idle). Returns null when it cannot; the recorder then falls back to the dump.
+   */
+  readSource?: () => Promise<string | null>;
+  /**
+   * Opens the app. Called by start() once everything else is ready, right before the first
+   * read: opening it earlier let the user tap its first screen ("Regístrate") while the
+   * recorder was still setting up, and that first action was lost.
+   */
+  launchApp?: () => Promise<void>;
 };
 
 /** Field labels whose content is redacted regardless of project configuration. */
@@ -86,6 +103,9 @@ export function isSensitiveLabel(label: string, extra: readonly string[] = []): 
 
 /** Where the UI tree is dumped on the device before being read back and deleted. */
 const SOURCE_DUMP_PATH = "/data/local/tmp/qa-recording-dump.xml";
+
+/** Global animation settings turned off while recording (restored exactly at stop). */
+const ANIMATION_SCALES = ["animator_duration_scale", "window_animation_scale", "transition_animation_scale"] as const;
 
 type EditTextState = { key: string; label: string; text: string };
 
@@ -117,6 +137,12 @@ function inputKey(node: { resourceId?: string; bounds: { x: number; y: number } 
 
 export class AndroidSessionRecorder {
   private touchProcess: ChildProcess | null = null;
+  private touchStreamReport: NodeJS.Timeout | null = null;
+  /**
+   * Original `animator_duration_scale` while the recorder has animations turned off, so stop()
+   * puts it back (null = the setting did not exist and is deleted again).
+   */
+  private animatorScaleToRestore: { value: string | null } | null = null;
 
   private pollTimer: NodeJS.Timeout | null = null;
 
@@ -142,6 +168,19 @@ export class AndroidSessionRecorder {
 
   /** Serializes source reads so a tap-triggered read never races the periodic one. */
   private readChain: Promise<unknown> = Promise.resolve();
+  /** A read is running; further requests only mark `readPending` instead of queueing. */
+  private reading = false;
+  /**
+   * Key presses on the soft keyboard since the last read. A value found on a screen's first
+   * read is normally state the screen came with; after the user typed, it is what they typed
+   * (a slow screen can be read for the first time only once the code is complete).
+   */
+  private keyboardTapsSinceRead = 0;
+  /** Taps that arrived before the first screen was read (the app was still opening). */
+  private pendingGestures: Gesture[] = [];
+  private readPending = false;
+  /** The pending read follows a tap: its screen change gets a frame. */
+  private readAfterTap = false;
 
   constructor(private readonly options: AndroidRecorderOptions) {}
 
@@ -150,14 +189,21 @@ export class AndroidSessionRecorder {
   }
 
   private adb(): string {
-    return resolveAndroidSdk().adbPath;
+    return this.options.adb?.adbPath ?? resolveAndroidSdk().adbPath;
   }
 
-  private async adbShell(command: string): Promise<string> {
+  /** `-H/-P` of the chosen adb server, then `-s <device>`, then the command. */
+  private deviceArgs(args: string[]): string[] {
+    const { adb } = this.options;
+    const server = adb?.host ? ["-H", adb.host, "-P", String(adb.port ?? 5037)] : [];
+    return [...server, "-s", this.options.deviceId, ...args];
+  }
+
+  private async adbShell(command: string, timeoutMs?: number): Promise<string> {
     const { stdout } = await execFileAsync(
       this.adb(),
-      ["-s", this.options.deviceId, "shell", command],
-      { maxBuffer: 32 * 1024 * 1024 },
+      this.deviceArgs(["shell", command]),
+      { maxBuffer: 32 * 1024 * 1024, ...(timeoutMs ? { timeout: timeoutMs } : {}) },
     );
     return stdout;
   }
@@ -235,16 +281,94 @@ export class AndroidSessionRecorder {
    * read as if it were current.
    */
   private async readSource(): Promise<string | null> {
+    if (this.options.readSource) {
+      const viaDriver = await this.options.readSource().catch(() => null);
+      if (viaDriver && viaDriver.includes("<hierarchy")) return viaDriver;
+    }
     try {
-      const out = await this.adbShell(
-        `uiautomator dump ${SOURCE_DUMP_PATH} >/dev/null 2>&1; cat ${SOURCE_DUMP_PATH}; rm -f ${SOURCE_DUMP_PATH}`,
-      );
+      let out = await this.dumpSource();
+      // Screens that never stop animating (an OTP field with an animated cursor, a looping
+      // loader) make uiautomator give up with "could not get idle state": the recorder would
+      // not see that screen at all, nor anything typed on it. With animations off the same
+      // screen dumps fine; they are restored when the recording stops.
+      if (out.includes("could not get idle state") && !this.animatorScaleToRestore) {
+        await this.disableAnimations();
+        out = await this.dumpSource();
+      }
       const start = out.indexOf("<?xml");
       const end = out.lastIndexOf("</hierarchy>");
       if (start === -1 || end === -1) return null;
       return out.slice(start, end + "</hierarchy>".length);
     } catch {
       return null;
+    }
+  }
+
+  private dumpSource(): Promise<string> {
+    return this.adbShell(
+      `timeout 20 uiautomator dump ${SOURCE_DUMP_PATH} 2>&1 | grep -i "idle state"; cat ${SOURCE_DUMP_PATH} 2>/dev/null; rm -f ${SOURCE_DUMP_PATH}`,
+      25_000,
+    );
+  }
+
+  /**
+   * Clicks made on a mirrored phone (Android Studio "Running Devices", scrcpy) are injected
+   * by software and never reach the touchscreen, so getevent cannot see them: the recording
+   * would get the screens and none of the taps. Says so up front, in the user's words.
+   */
+  private async warnIfMirrored(): Promise<void> {
+    try {
+      const ps = await this.adbShell('ps -A -o ARGS 2>/dev/null | grep -E "screensharing|scrcpy" | grep -v grep');
+      if (!ps.trim()) return;
+      const tool = ps.includes("screensharing") ? "la duplicación de pantalla de Android Studio" : "scrcpy";
+      this.log(`[recording] AVISO: el teléfono está duplicado en el PC (${tool}). Los clics y lo que escribas desde el PC no se graban: toca y escribe en el propio teléfono.`);
+    } catch {
+      // Only a hint: never blocks the recording.
+    }
+  }
+
+  /**
+   * The tap fell where the soft keyboard is: the keyboard is shown (asked to the device, since
+   * the last tree may predate it) and the tap is in the lower part of the screen it occupies.
+   */
+  private async onKeyboardArea(y: number): Promise<boolean> {
+    const height = this.calibration?.screenHeight;
+    if (!height || y < height * 0.5) return false;
+    try {
+      const ime = await this.adbShell("dumpsys input_method | grep -E \"mInputShown=|mWindowVisible=\"");
+      return /mInputShown=true|mWindowVisible=true/.test(ime);
+    } catch {
+      return false;
+    }
+  }
+
+  private async disableAnimations(): Promise<void> {
+    try {
+      const saved: Record<string, string | null> = {};
+      for (const name of ANIMATION_SCALES) {
+        const current = (await this.adbShell(`settings get global ${name}`)).trim();
+        saved[name] = current && current !== "null" ? current : null;
+      }
+      this.animatorScaleToRestore = { value: JSON.stringify(saved) };
+      await this.adbShell(ANIMATION_SCALES.map((name) => `settings put global ${name} 0`).join("; "));
+      this.log("[recording] la pantalla no deja de animarse: animaciones del dispositivo desactivadas hasta detener la grabación");
+    } catch (err) {
+      this.log(`[recording] no se pudieron desactivar las animaciones: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  private async restoreAnimations(): Promise<void> {
+    const saved = this.animatorScaleToRestore;
+    if (!saved) return;
+    this.animatorScaleToRestore = null;
+    try {
+      const values = JSON.parse(saved.value ?? "{}") as Record<string, string | null>;
+      await this.adbShell(ANIMATION_SCALES.map((name) => values[name] == null
+        ? `settings delete global ${name}`
+        : `settings put global ${name} ${values[name]}`).join("; "));
+      this.log("[recording] animaciones del dispositivo restauradas");
+    } catch (err) {
+      this.log(`[recording] no se pudieron restaurar las animaciones: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
@@ -259,12 +383,18 @@ export class AndroidSessionRecorder {
     return Date.now() - this.startedAt;
   }
 
+  /** Adds the screenshot to an event already recorded (and re-emits it so the trace keeps it). */
+  private async attachFrame(event: RecordedEvent, tag: string): Promise<void> {
+    const framePath = await this.captureFrame(tag);
+    if (framePath) event.framePath = framePath;
+  }
+
   private async captureFrame(tag: string): Promise<string | undefined> {
     const file = path.join(this.options.framesDir, `${String(this.seq).padStart(4, "0")}-${tag}.png`);
     try {
       const { stdout } = await execFileAsync(
         this.adb(),
-        ["-s", this.options.deviceId, "exec-out", "screencap", "-p"],
+        this.deviceArgs(["exec-out", "screencap", "-p"]),
         { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 },
       );
       fs.writeFileSync(file, stdout as unknown as Buffer);
@@ -329,6 +459,7 @@ export class AndroidSessionRecorder {
     }
     this.detectFills(nextInputs, nodes);
     this.inputs = nextInputs;
+    this.keyboardTapsSinceRead = 0;
 
     this.lastSource = source;
     this.lastFingerprint = snapshot.fingerprint;
@@ -348,7 +479,7 @@ export class AndroidSessionRecorder {
       const previous = this.inputs.get(key);
       if (previous && previous.text === state.text) continue;
       if (!state.text) continue;
-      if (previous === undefined && this.inputs.size === 0) {
+      if (previous === undefined && this.inputs.size === 0 && this.keyboardTapsSinceRead === 0) {
         // First observation of the screen: a pre-filled field is state, not an action.
         continue;
       }
@@ -376,7 +507,10 @@ export class AndroidSessionRecorder {
   private async handleGesture(gesture: Gesture): Promise<void> {
     if (this.stopped) return;
     const source = this.lastSource;
-    if (!source) return;
+    if (!source) {
+      this.pendingGestures.push(gesture);
+      return;
+    }
 
     if (gesture.kind === "swipe") {
       this.pushEvent({
@@ -391,40 +525,90 @@ export class AndroidSessionRecorder {
 
     const nodes = extractBoundedNodes(source);
     const hit = hitTest(nodes, gesture.x, gesture.y, { appPackage: this.options.appPackage });
-    const framePath = await this.captureFrame("tap");
+    // The soft keyboard is another window, absent from the app's tree: a tap on it resolves to
+    // whatever big container lies underneath. What was typed is recorded as the field's value
+    // (a fill), so the key presses themselves are not actions.
+    if ((!hit || hit.fallback) && (isKeyboardTap(nodes, gesture.y) || await this.onKeyboardArea(gesture.y))) {
+      this.keyboardTapsSinceRead += 1;
+      this.scheduleRead(600, false);
+      return;
+    }
+    // The event is recorded NOW, with the screen the tap happened on; the screenshot (≈1 s
+    // through the tunnel) is attached afterwards. Awaiting it first let the next screen read
+    // overtake the tap, so "Regístrate" landed after "the app moved to Registro".
+    const screenKey = this.lastScreenKey;
+    const fingerprint = this.lastFingerprint;
+    const width = this.calibration?.screenWidth ?? 0;
+    const height = this.calibration?.screenHeight ?? 0;
+    // A tap that only lands on a container covering (almost) the whole screen hit nothing the
+    // user could mean: it is kept as a note, never as a "Presionar <fondo>" step.
+    const onBackground = Boolean(hit?.fallback && hit.target.bounds && width > 0 && height > 0
+      && hit.target.bounds.width * hit.target.bounds.height >= 0.8 * width * height);
 
-    if (!hit) {
-      this.pushEvent({
+    if (!hit || onBackground) {
+      const event = this.pushEvent({
         t: this.now(),
         kind: "note",
-        screenKey: this.lastScreenKey,
-        fingerprint: this.lastFingerprint,
-        note: `Toque en (${gesture.x},${gesture.y}) fuera de la jerarquía de la app`,
-        framePath,
+        screenKey,
+        fingerprint,
+        note: onBackground
+          ? `Toque en (${gesture.x},${gesture.y}) sobre el fondo de la pantalla, sin control`
+          : `Toque en (${gesture.x},${gesture.y}) fuera de la jerarquía de la app`,
       });
+      void this.attachFrame(event, "tap");
+      this.scheduleRead(this.options.settleAfterTapMs ?? 1400, true);
       return;
     }
 
-    this.pushEvent({
+    const event = this.pushEvent({
       t: this.now(),
       kind: "tap",
-      screenKey: this.lastScreenKey,
-      fingerprint: this.lastFingerprint,
+      screenKey,
+      fingerprint,
       target: hit.target,
-      framePath,
-      note: hit.fallback ? "Resuelto sin control clickeable bajo el toque" : undefined,
+      note: hit.fallback ? `Resuelto sin control clickeable bajo el toque (${gesture.x},${gesture.y})` : undefined,
     });
+    void this.attachFrame(event, "tap");
     this.log(
-      `[recording] toque -> "${hit.target.label || "(sin etiqueta)"}" ${hit.fallback ? "(aproximado)" : ""}`,
+      `[recording] toque (${gesture.x},${gesture.y}) -> "${hit.target.label || "(sin etiqueta)"}" ${hit.fallback ? "(aproximado)" : ""}`,
     );
 
     // Let the app settle, then see where it went.
-    const from = this.lastScreenKey;
-    this.readChain = this.readChain.then(async () => {
-      await new Promise((r) => setTimeout(r, this.options.settleAfterTapMs ?? 1400));
-      const after = await this.readSource();
-      if (!after || this.stopped) return;
-      const { changed, screenKey } = this.absorbScreen(after);
+    this.scheduleRead(this.options.settleAfterTapMs ?? 1400, true);
+  }
+
+  /**
+   * Asks for a fresh read of the screen after `delayMs`.
+   *
+   * Reads are coalesced, never queued: one runs at a time and any number of requests made
+   * meanwhile become ONE more read. Queueing a settle-and-read per tap (and one per poll)
+   * let a fast typist build up tens of seconds of backlog, so every tap was hit-tested
+   * against a screen the user had already left.
+   */
+  private scheduleRead(delayMs: number, afterTap: boolean): void {
+    const request = () => {
+      if (this.stopped) return;
+      this.readPending = true;
+      if (afterTap) this.readAfterTap = true;
+      if (this.reading) return;
+      this.reading = true;
+      this.readChain = this.drainReads().finally(() => {
+        this.reading = false;
+      });
+    };
+    if (delayMs > 0) setTimeout(request, delayMs);
+    else request();
+  }
+
+  private async drainReads(): Promise<void> {
+    while (this.readPending && !this.stopped) {
+      this.readPending = false;
+      const afterTap = this.readAfterTap;
+      this.readAfterTap = false;
+      const source = await this.readSource();
+      if (!source || this.stopped) continue;
+      const from = this.lastScreenKey;
+      const { changed, screenKey } = this.absorbScreen(source);
       if (changed && screenKey !== from) {
         this.lastScreenKey = screenKey;
         this.pushEvent({
@@ -433,12 +617,11 @@ export class AndroidSessionRecorder {
           screenKey: from,
           toScreenKey: screenKey,
           fingerprint: this.lastFingerprint,
-          framePath: await this.captureFrame("screen"),
+          ...(afterTap ? { framePath: await this.captureFrame("screen") } : {}),
         });
         this.log(`[recording] pantalla -> ${this.screens.get(screenKey)?.title ?? screenKey}`);
       }
-    });
-    await this.readChain;
+    }
   }
 
   /**
@@ -450,21 +633,13 @@ export class AndroidSessionRecorder {
   async start(): Promise<boolean> {
     const touchDevices = await this.calibrate();
     if (!touchDevices) return false;
+    await this.warnIfMirrored();
+    // Loaders and animated cursors keep a screen from ever going idle, and uiautomator then
+    // spends ~12 s failing to read it. Off for the whole recording, restored by stop().
+    await this.disableAnimations();
 
     fs.mkdirSync(this.options.framesDir, { recursive: true });
 
-    const initial = await this.readSource();
-    if (initial) {
-      const { screenKey } = this.absorbScreen(initial);
-      this.lastScreenKey = screenKey;
-      this.pushEvent({
-        t: 0,
-        kind: "launch",
-        screenKey,
-        fingerprint: this.lastFingerprint,
-        framePath: await this.captureFrame("launch"),
-      });
-    }
 
     // One parser per candidate, each filtered to its own device, and the whole getevent
     // stream feeding all of them: which node actually delivers touches cannot be known from
@@ -481,12 +656,22 @@ export class AndroidSessionRecorder {
 
     this.touchProcess = spawn(
       this.adb(),
-      ["-s", this.options.deviceId, "shell", "getevent", "-lt"],
+      this.deviceArgs(["shell", "getevent", "-lt"]),
       { stdio: ["ignore", "pipe", "pipe"] },
     );
 
     let buffer = "";
+    // Bytes seen on the touch stream: a recording with screens but no taps says whether the
+    // stream went silent (transport) or carried touches nobody understood (parser).
+    let streamBytes = 0;
+    let reportedBytes = 0;
+    this.touchStreamReport = setInterval(() => {
+      if (streamBytes === reportedBytes) return;
+      reportedBytes = streamBytes;
+      this.log(`[recording] stream de toques: ${streamBytes} bytes recibidos${activeDevice ? ` (toques por ${activeDevice})` : " (sin toques reconocidos)"}`);
+    }, 10_000);
     this.touchProcess.stdout?.on("data", (chunk: Buffer) => {
+      streamBytes += chunk.length;
       buffer += chunk.toString("utf8");
       const lines = buffer.split(/\r?\n/);
       buffer = lines.pop() ?? "";
@@ -514,25 +699,25 @@ export class AndroidSessionRecorder {
     });
 
     const interval = this.options.pollIntervalMs ?? 1200;
-    this.pollTimer = setInterval(() => {
-      this.readChain = this.readChain.then(async () => {
-        if (this.stopped) return;
-        const source = await this.readSource();
-        if (!source) return;
-        const { changed, screenKey } = this.absorbScreen(source);
-        if (changed && screenKey !== this.lastScreenKey) {
-          const from = this.lastScreenKey;
-          this.lastScreenKey = screenKey;
-          this.pushEvent({
-            t: this.now(),
-            kind: "screen_change",
-            screenKey: from,
-            toScreenKey: screenKey,
-            fingerprint: this.lastFingerprint,
-          });
-        }
+    // The touch stream is already live: the app opens now, and a tap made while its first
+    // screen is being read waits in pendingGestures instead of being lost.
+    await this.options.launchApp?.();
+    const initial = await this.readSource();
+    if (initial) {
+      const { screenKey } = this.absorbScreen(initial);
+      this.lastScreenKey = screenKey;
+      this.pushEvent({
+        t: 0,
+        kind: "launch",
+        screenKey,
+        fingerprint: this.lastFingerprint,
+        framePath: await this.captureFrame("launch"),
       });
-    }, interval);
+    }
+    const early = this.pendingGestures.splice(0);
+    for (const gesture of early) await this.handleGesture(gesture).catch(() => undefined);
+
+    this.pollTimer = setInterval(() => this.scheduleRead(0, false), interval);
 
     this.log("[recording] grabación activa: interactúa con la app en el dispositivo");
     return true;
@@ -542,10 +727,17 @@ export class AndroidSessionRecorder {
     this.stopped = true;
     if (this.pollTimer) clearInterval(this.pollTimer);
     this.pollTimer = null;
+    if (this.touchStreamReport) clearInterval(this.touchStreamReport);
+    this.touchStreamReport = null;
     this.touchProcess?.kill();
     this.touchProcess = null;
-    await this.readChain.catch(() => undefined);
-    return { events: [...this.events], screens: [...this.screens.values()] };
+    await Promise.race([
+      this.readChain.catch(() => undefined),
+      new Promise((resolve) => setTimeout(resolve, 5_000)),
+    ]);
+    await this.restoreAnimations();
+    const screens = [...this.screens.values()];
+    return { events: compactRecordedEvents(this.events, screens), screens };
   }
 
   snapshotProgress(): { events: number; screens: number; currentScreen: string } {
@@ -560,4 +752,16 @@ export class AndroidSessionRecorder {
 /** Stable id for a recording, short enough to read in a log line. */
 export function newRecordingId(): string {
   return createHash("sha1").update(`${Date.now()}-${Math.random()}`).digest("hex").slice(0, 32);
+}
+
+/**
+ * Whether a tap that hit no control fell on the soft keyboard: an input has focus (it owns the
+ * keyboard) and the tap is below it, where the keyboard opens.
+ */
+export function isKeyboardTap(nodes: readonly BoundedNode[], y: number): boolean {
+  return nodes.some((node) =>
+    node.focused === true
+    && /EditText/i.test(node.className ?? "")
+    && y > node.bounds.y + node.bounds.height,
+  );
 }

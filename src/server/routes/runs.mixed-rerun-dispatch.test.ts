@@ -15,16 +15,16 @@ const source = fs.readFileSync(path.join(__dirname, "runs.ts"), "utf-8");
 
 test("1. allReusable dispatch is unchanged: still checked, still dispatches startReuseExistingPromotedSpecRun, still returns", () => {
   assert.ok(source.includes("if (prepared.allReusable) {"));
-  assert.ok(source.includes("setImmediate(() => startReuseExistingPromotedSpecRun(reuseJob.id));"));
+  assert.ok(source.includes("scheduleJob(reuseJob.id, () => startReuseExistingPromotedSpecRun(reuseJob.id));"));
 });
 
 test("2. noneReusable dispatch is unchanged: the original scenario-preview fallback dispatch line still exists verbatim", () => {
-  assert.ok(source.includes("setImmediate(() => startScenarioPreviewRun(newJob.id));"));
+  assert.ok(source.includes("scheduleJob(newJob.id, () => startScenarioPreviewRun(newJob.id));"));
 });
 
 test("3. a mixed batch (some reusable, some not) dispatches startMixedRerun, before the allReusable branch and before the noneReusable fallback block", () => {
   const mixedIdx = source.indexOf("classification=MIXED_RERUN dispatch=mixed_rerun_orchestrator");
-  const startMixedCallIdx = source.indexOf("setImmediate(() => startMixedRerun(", mixedIdx);
+  const startMixedCallIdx = source.indexOf("scheduleJob(parentJob.id, () => startMixedRerun(", mixedIdx);
   const allReusableIdx = source.indexOf("if (prepared.allReusable) {", mixedIdx);
   const fallbackBuildPayloadIdx = source.indexOf("// 4. Build new job payload");
   assert.ok(mixedIdx !== -1 && startMixedCallIdx !== -1 && allReusableIdx !== -1 && fallbackBuildPayloadIdx !== -1);
@@ -35,7 +35,7 @@ test("3. a mixed batch (some reusable, some not) dispatches startMixedRerun, bef
 
 test("4. the mixed branch never calls startScenarioPreviewRun or startReuseExistingPromotedSpecRun directly — only the orchestrator", () => {
   const mixedIdx = source.indexOf("classification=MIXED_RERUN dispatch=mixed_rerun_orchestrator");
-  const returnIdx = source.indexOf("return;", source.indexOf("setImmediate(() => startMixedRerun(", mixedIdx));
+  const returnIdx = source.indexOf("return;", source.indexOf("scheduleJob(parentJob.id, () => startMixedRerun(", mixedIdx));
   const mixedBlock = source.slice(mixedIdx, returnIdx);
   assert.ok(!mixedBlock.includes("startScenarioPreviewRun("));
   assert.ok(!mixedBlock.includes("startReuseExistingPromotedSpecRun("));

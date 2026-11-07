@@ -1,0 +1,3405 @@
+{
+  "version": "1.0",
+  "recordingId": "2a10183d-50e0-4ee2-ad0a-a45334f988d4",
+  "projectSlug": "jira-regression-lab",
+  "appSlug": "jira-regression-lab",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "Crear una solicitud en la web A, aprobarla en la web B y continuar en la web A adjuntando documentos",
+    "normalizedGoal": "Crear una solicitud en la web A, aprobarla en la web B y continuar en la web A adjuntando documentos",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "9a0424e878a9",
+      "title": "Iniciar sesión",
+      "url": "http://127.0.0.1:4173/",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "9a0424e878a9"
+    },
+    {
+      "screenIdentity": "39d05ef4e8c5",
+      "url": "http://127.0.0.1:4173/",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "39d05ef4e8c5"
+    },
+    {
+      "screenIdentity": "14001fd87127",
+      "url": "http://127.0.0.1:4173/",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "14001fd87127"
+    },
+    {
+      "screenIdentity": "4c846fa10de0",
+      "title": "Nueva solicitud",
+      "url": "http://127.0.0.1:4173/",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "4c846fa10de0"
+    },
+    {
+      "screenIdentity": "858d050ea49d",
+      "title": "Solicitud creada",
+      "url": "http://127.0.0.1:4173/",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "858d050ea49d"
+    },
+    {
+      "screenIdentity": "ec56ca606e28",
+      "title": "Acceso de aprobadores",
+      "url": "http://127.0.0.1:4173/approvals/",
+      "classification": "SCREEN_TRANSITION",
+      "sourceScreenKey": "ec56ca606e28"
+    }
+  ],
+  "semanticComponents": [
+    {
+      "componentId": "9a0424e878a9:control:9a0424e878a9|RNC|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "9a0424e878a9",
+      "label": "RNC",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-3"
+      ]
+    },
+    {
+      "componentId": "9a0424e878a9:control:9a0424e878a9|Usuario|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "9a0424e878a9",
+      "label": "Usuario",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-4"
+      ]
+    },
+    {
+      "componentId": "9a0424e878a9:control:9a0424e878a9|Contraseña|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "9a0424e878a9",
+      "label": "Contraseña",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-6"
+      ]
+    },
+    {
+      "componentId": "9a0424e878a9:control:9a0424e878a9|Iniciar sesión|button",
+      "componentType": "button",
+      "screenIdentity": "9a0424e878a9",
+      "label": "Iniciar sesión",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-7"
+      ]
+    },
+    {
+      "componentId": "9a0424e878a9:control:9a0424e878a9|Código de acceso|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "9a0424e878a9",
+      "label": "Código de acceso",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-9"
+      ]
+    },
+    {
+      "componentId": "9a0424e878a9:control:9a0424e878a9|Continuar|button",
+      "componentType": "button",
+      "screenIdentity": "9a0424e878a9",
+      "label": "Continuar",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-10"
+      ]
+    },
+    {
+      "componentId": "9a0424e878a9:control:9a0424e878a9|▤Solicitudes|button",
+      "componentType": "button",
+      "screenIdentity": "9a0424e878a9",
+      "label": "▤Solicitudes",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-12"
+      ]
+    },
+    {
+      "componentId": "9a0424e878a9:control:9a0424e878a9|Nueva solicitud|button",
+      "componentType": "button",
+      "screenIdentity": "9a0424e878a9",
+      "label": "Nueva solicitud",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-14"
+      ]
+    },
+    {
+      "componentId": "9a0424e878a9:control:9a0424e878a9|Asunto|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "9a0424e878a9",
+      "label": "Asunto",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-15"
+      ]
+    },
+    {
+      "componentId": "9a0424e878a9:control:9a0424e878a9|Monto|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "9a0424e878a9",
+      "label": "Monto",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-17"
+      ]
+    },
+    {
+      "componentId": "9a0424e878a9:control:9a0424e878a9|Crear solicitud|button",
+      "componentType": "button",
+      "screenIdentity": "9a0424e878a9",
+      "label": "Crear solicitud",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-18"
+      ]
+    },
+    {
+      "componentId": "9a0424e878a9:control:9a0424e878a9|NS-REQ-0001|control",
+      "componentType": "control",
+      "screenIdentity": "9a0424e878a9",
+      "label": "NS-REQ-0001",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-19"
+      ]
+    }
+  ],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "observe",
+      "screenIdentity": "9a0424e878a9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "fill",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "field": "RNC",
+      "controlAffordance": "editable",
+      "valueKey": "rnc",
+      "valueRole": "action_input",
+      "technicalTargetRef": "9a0424e878a9:control:role:textbox|RNC",
+      "afterState": "101010101",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-4",
+      "action": "fill",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "field": "Usuario",
+      "controlAffordance": "editable",
+      "valueKey": "usuario",
+      "valueRole": "action_input",
+      "technicalTargetRef": "9a0424e878a9:control:role:textbox|Usuario",
+      "afterState": "qa_empresa",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-5",
+      "action": "observe",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9a0424e878a9:control:9a0424e878a9|Iniciar sesión|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-6",
+      "action": "fill",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "field": "Contraseña",
+      "controlAffordance": "editable",
+      "valueKey": "contrasena",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "9a0424e878a9:control:role:textbox|Contraseña",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-7",
+      "action": "click",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9a0424e878a9:control:role:button|Iniciar sesión",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-8",
+      "action": "observe",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9a0424e878a9:control:9a0424e878a9|Continuar|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-9",
+      "action": "fill",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "field": "Código de acceso",
+      "controlAffordance": "editable",
+      "valueKey": "codigo_de_acceso",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "9a0424e878a9:control:role:textbox|Código de acceso",
+      "afterState": "123456",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-10",
+      "action": "click",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9a0424e878a9:control:role:button|Continuar",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-11",
+      "action": "observe",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9a0424e878a9:control:9a0424e878a9|▤Solicitudes|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-12",
+      "action": "click",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9a0424e878a9:control:role:button|▤Solicitudes",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-13",
+      "action": "observe",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9a0424e878a9:control:9a0424e878a9|Nueva solicitud|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-14",
+      "action": "click",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9a0424e878a9:control:role:button|Nueva solicitud",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-15",
+      "action": "fill",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "field": "Asunto",
+      "controlAffordance": "editable",
+      "valueKey": "asunto",
+      "valueRole": "action_input",
+      "technicalTargetRef": "9a0424e878a9:control:role:textbox|Asunto",
+      "afterState": "Solicitud Northstar 1 documento",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-16",
+      "action": "observe",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9a0424e878a9:control:9a0424e878a9|Crear solicitud|button",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-17",
+      "action": "fill",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "field": "Monto",
+      "controlAffordance": "editable",
+      "valueKey": "monto",
+      "valueRole": "action_input",
+      "technicalTargetRef": "9a0424e878a9:control:role:textbox|Monto",
+      "afterState": "1500",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-18",
+      "action": "click",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "controlAffordance": "clickable",
+      "technicalTargetRef": "9a0424e878a9:control:role:button|Crear solicitud",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-19",
+      "action": "activate",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "control",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "9a0424e878a9:control:9a0424e878a9|NS-REQ-0001|control",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-20",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    }
+  ],
+  "datasets": [
+    {
+      "valueKey": "rnc",
+      "semanticField": "RNC",
+      "valueRole": "action_input",
+      "value": "101010101",
+      "rawTypedValue": "101010101",
+      "committedValue": "101010101",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "9a0424e878a9:control:role:textbox|RNC",
+      "recordingId": "2a10183d-50e0-4ee2-ad0a-a45334f988d4",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "usuario",
+      "semanticField": "Usuario",
+      "valueRole": "action_input",
+      "value": "qa_empresa",
+      "rawTypedValue": "qa_empresa",
+      "committedValue": "qa_empresa",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "9a0424e878a9:control:role:textbox|Usuario",
+      "recordingId": "2a10183d-50e0-4ee2-ad0a-a45334f988d4",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "contrasena",
+      "semanticField": "Contraseña",
+      "valueRole": "secure_input",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "9a0424e878a9:control:role:textbox|Contraseña",
+      "recordingId": "2a10183d-50e0-4ee2-ad0a-a45334f988d4",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "codigo_de_acceso",
+      "semanticField": "Código de acceso",
+      "valueRole": "secure_input",
+      "value": "123456",
+      "rawTypedValue": "123456",
+      "committedValue": "123456",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "9a0424e878a9:control:role:textbox|Código de acceso",
+      "recordingId": "2a10183d-50e0-4ee2-ad0a-a45334f988d4",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "asunto",
+      "semanticField": "Asunto",
+      "valueRole": "action_input",
+      "value": "Solicitud Northstar 1 documento",
+      "rawTypedValue": "Solicitud Northstar 1 documento",
+      "committedValue": "Solicitud Northstar 1 documento",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "9a0424e878a9:control:role:textbox|Asunto",
+      "recordingId": "2a10183d-50e0-4ee2-ad0a-a45334f988d4",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "monto",
+      "semanticField": "Monto",
+      "valueRole": "action_input",
+      "value": "1500",
+      "rawTypedValue": "1500",
+      "committedValue": "1500",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "9a0424e878a9:control:role:textbox|Monto",
+      "recordingId": "2a10183d-50e0-4ee2-ad0a-a45334f988d4",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    }
+  ],
+  "technicalObservations": [
+    {
+      "observationId": "obs-3",
+      "status": "VALIDATED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "label": "RNC",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "101010101",
+      "semanticField": "RNC",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|RNC",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#login-rnc",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "login-rnc",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9a0424e878a9:control:role:textbox|RNC",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-1",
+      "inputValue": "101010101",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-4",
+      "status": "VALIDATED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "label": "Usuario",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "qa_empresa",
+      "semanticField": "Usuario",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Usuario",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#login-user",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "login-user",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9a0424e878a9:control:role:textbox|Usuario",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-2",
+      "inputValue": "qa_empresa",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-5",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9a0424e878a9:control:9a0424e878a9|Iniciar sesión|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-6",
+      "status": "VALIDATED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "input",
+      "semanticField": "Contraseña",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Contraseña",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#login-password",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "login-password",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9a0424e878a9:control:role:textbox|Contraseña",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-7",
+      "status": "VALIDATED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Iniciar sesión",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Iniciar sesión",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": false,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "login-form"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9a0424e878a9:control:role:button|Iniciar sesión",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-8",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9a0424e878a9:control:9a0424e878a9|Continuar|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-9",
+      "status": "VALIDATED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "label": "Código de acceso",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "123456",
+      "semanticField": "Código de acceso",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Código de acceso",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#login-otp",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "login-otp",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9a0424e878a9:control:role:textbox|Código de acceso",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-4",
+      "inputValue": "123456",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-10",
+      "status": "VALIDATED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "Continuar",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Continuar",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": false,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "otp-form"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9a0424e878a9:control:role:button|Continuar",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-11",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "▤Solicitudes",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9a0424e878a9:control:9a0424e878a9|▤Solicitudes|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-12",
+      "status": "VALIDATED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "▤Solicitudes",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|▤Solicitudes",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|▤Solicitudes",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "aside"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 10,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 10
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9a0424e878a9:control:role:button|▤Solicitudes",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-13",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "Nueva solicitud",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9a0424e878a9:control:9a0424e878a9|Nueva solicitud|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-14",
+      "status": "VALIDATED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "Nueva solicitud",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Nueva solicitud",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Nueva solicitud",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9a0424e878a9:control:role:button|Nueva solicitud",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-15",
+      "status": "VALIDATED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "label": "Asunto",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "Solicitud Northstar 1 documento",
+      "semanticField": "Asunto",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Asunto",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#request-subject",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "request-subject",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9a0424e878a9:control:role:textbox|Asunto",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-5",
+      "inputValue": "Solicitud Northstar 1 documento",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-16",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "Crear solicitud",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "9a0424e878a9:control:9a0424e878a9|Crear solicitud|button",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-17",
+      "status": "VALIDATED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "label": "Monto",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "1500",
+      "semanticField": "Monto",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Monto",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#request-amount",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "request-amount",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9a0424e878a9:control:role:textbox|Monto",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-6",
+      "inputValue": "1500",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-18",
+      "status": "VALIDATED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "Crear solicitud",
+      "tag": "button",
+      "role": "button",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "button|Crear solicitud",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Crear solicitud",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 2,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "request-form"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 2
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "9a0424e878a9:control:role:button|Crear solicitud",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-19",
+      "status": "VALIDATED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "control",
+      "label": "NS-REQ-0001",
+      "tag": "dd",
+      "locatorCandidates": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "dd"
+            },
+            "stableDirectAttributes": {
+              "id": "request-number"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"dd\"},\"stableDirectAttributes\":{\"id\":\"request-number\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner",
+            "v2_scoped_structural_runtime_evidence"
+          ],
+          "confidence": 0.6,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.4,
+      "technicalTargetRef": "9a0424e878a9:control:9a0424e878a9|NS-REQ-0001|control",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9a0424e878a9-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "Empresarial",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Empresarial",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9a0424e878a9:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9a0424e878a9-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "Personal",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Personal",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9a0424e878a9:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9a0424e878a9-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "label": "RNC",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "login-rnc",
+        "name": "login-rnc",
+        "type": "text"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "login-rnc",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9a0424e878a9:control:3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-9a0424e878a9-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "label": "Usuario",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "login-user",
+        "name": "login-user",
+        "type": "text"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "login-user",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9a0424e878a9:control:4",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-9a0424e878a9-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "login-password",
+        "name": "login-password",
+        "type": "password"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "login-password",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9a0424e878a9:control:5",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-9a0424e878a9-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "submit"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Iniciar sesión",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9a0424e878a9:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-14001fd87127-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "14001fd87127",
+      "componentType": "button",
+      "label": "▦",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▦ Resumen",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "14001fd87127:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-14001fd87127-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "14001fd87127",
+      "componentType": "button",
+      "label": "◫",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "◫ Cuentas",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "14001fd87127:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-14001fd87127-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "14001fd87127",
+      "componentType": "button",
+      "label": "⇄",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "⇄ Transferencias",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "14001fd87127:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-14001fd87127-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "14001fd87127",
+      "componentType": "button",
+      "label": "♧",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "♧ Beneficiarios",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "14001fd87127:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-14001fd87127-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "14001fd87127",
+      "componentType": "button",
+      "label": "▣",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▣ Pagos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "14001fd87127:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-14001fd87127-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "14001fd87127",
+      "componentType": "button",
+      "label": "▤",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▤ Estados de cuenta",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "14001fd87127:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-14001fd87127-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "14001fd87127",
+      "componentType": "button",
+      "label": "▥",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▥ Pagos masivos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "14001fd87127:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-14001fd87127-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "14001fd87127",
+      "componentType": "button",
+      "label": "⚙",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "⚙ Administración",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "14001fd87127:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-14001fd87127-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "14001fd87127",
+      "componentType": "button",
+      "label": "◷",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "◷ Auditoría",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "14001fd87127:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-14001fd87127-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "14001fd87127",
+      "componentType": "button",
+      "label": "▤",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▤ Solicitudes",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "14001fd87127:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-14001fd87127-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "14001fd87127",
+      "componentType": "button",
+      "label": "Buscar en el portal",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Buscar en el portal"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Buscar en el portal",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "14001fd87127:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-14001fd87127-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "14001fd87127",
+      "componentType": "button",
+      "label": "Notificaciones",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Notificaciones"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Notificaciones",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "14001fd87127:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-14001fd87127-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "14001fd87127",
+      "componentType": "button",
+      "label": "QD",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "QD  QA Demo  Cliente empresarial⌄",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "14001fd87127:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "▦",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▦ Resumen",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "◫",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "◫ Cuentas",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "⇄",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "⇄ Transferencias",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "♧",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "♧ Beneficiarios",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "▣",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▣ Pagos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "▤",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▤ Estados de cuenta",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "▥",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▥ Pagos masivos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "⚙",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "⚙ Administración",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "◷",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "◷ Auditoría",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "▤",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▤ Solicitudes",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "Buscar en el portal",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Buscar en el portal"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Buscar en el portal",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "Notificaciones",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Notificaciones"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Notificaciones",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "QD",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "QD  QA Demo  Cliente empresarial⌄",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "select",
+      "label": "Tipo de solicitud",
+      "tag": "select",
+      "role": "select",
+      "attributes": {
+        "id": "request-type",
+        "name": "request-type"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "request-type",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "4c846fa10de0:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "textbox",
+      "label": "Asunto",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "request-subject",
+        "name": "request-subject",
+        "type": "text"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "request-subject",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "4c846fa10de0:control:15",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "textbox",
+      "label": "Monto",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "request-amount",
+        "name": "request-amount",
+        "type": "number"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "request-amount",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "4c846fa10de0:control:16",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "Crear solicitud",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "submit"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Crear solicitud",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:17",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-4c846fa10de0-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "4c846fa10de0",
+      "componentType": "button",
+      "label": "Cancelar",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Cancelar",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "4c846fa10de0:control:18",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-858d050ea49d-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "858d050ea49d",
+      "componentType": "button",
+      "label": "▦",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▦ Resumen",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "858d050ea49d:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-858d050ea49d-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "858d050ea49d",
+      "componentType": "button",
+      "label": "◫",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "◫ Cuentas",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "858d050ea49d:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-858d050ea49d-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "858d050ea49d",
+      "componentType": "button",
+      "label": "⇄",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "⇄ Transferencias",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "858d050ea49d:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-858d050ea49d-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "858d050ea49d",
+      "componentType": "button",
+      "label": "♧",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "♧ Beneficiarios",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "858d050ea49d:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-858d050ea49d-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "858d050ea49d",
+      "componentType": "button",
+      "label": "▣",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▣ Pagos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "858d050ea49d:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-858d050ea49d-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "858d050ea49d",
+      "componentType": "button",
+      "label": "▤",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▤ Estados de cuenta",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "858d050ea49d:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-858d050ea49d-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "858d050ea49d",
+      "componentType": "button",
+      "label": "▥",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▥ Pagos masivos",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "858d050ea49d:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-858d050ea49d-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "858d050ea49d",
+      "componentType": "button",
+      "label": "⚙",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "⚙ Administración",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "858d050ea49d:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-858d050ea49d-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "858d050ea49d",
+      "componentType": "button",
+      "label": "◷",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "◷ Auditoría",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "858d050ea49d:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-858d050ea49d-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "858d050ea49d",
+      "componentType": "button",
+      "label": "▤",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "▤ Solicitudes",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "858d050ea49d:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-858d050ea49d-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "858d050ea49d",
+      "componentType": "button",
+      "label": "Buscar en el portal",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Buscar en el portal"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Buscar en el portal",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "858d050ea49d:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-858d050ea49d-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "858d050ea49d",
+      "componentType": "button",
+      "label": "Notificaciones",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "aria-label": "Notificaciones"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Notificaciones",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "858d050ea49d:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-858d050ea49d-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "858d050ea49d",
+      "componentType": "button",
+      "label": "QD",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "QD  QA Demo  Cliente empresarial⌄",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "858d050ea49d:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-858d050ea49d-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "858d050ea49d",
+      "componentType": "button",
+      "label": "Volver a solicitudes",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Volver a solicitudes",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "858d050ea49d:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-ec56ca606e28-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "ec56ca606e28",
+      "componentType": "textbox",
+      "label": "Usuario de aprobaciones",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "approvals-user",
+        "name": "approvals-user"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "approvals-user",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "ec56ca606e28:control:1",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-ec56ca606e28-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "ec56ca606e28",
+      "componentType": "textbox",
+      "label": "Contraseña de aprobaciones",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "approvals-password",
+        "name": "approvals-password",
+        "type": "password"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "approvals-password",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "ec56ca606e28:control:2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-ec56ca606e28-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "ec56ca606e28",
+      "componentType": "button",
+      "label": "Ingresar a aprobaciones",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "submit"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Ingresar a aprobaciones",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "ec56ca606e28:control:3",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [
+    {
+      "editingSessionId": "edit-1",
+      "controlIdentity": "9a0424e878a9|RNC|amount_or_text",
+      "screenIdentity": "9a0424e878a9",
+      "startedAt": 9822,
+      "endedAt": 9822,
+      "rawEventRefs": [
+        "event-3"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "9a0424e878a9:role:textbox|RNC"
+      ],
+      "inputValue": "101010101",
+      "rawTypedValue": "101010101",
+      "finalValue": "101010101"
+    },
+    {
+      "editingSessionId": "edit-2",
+      "controlIdentity": "9a0424e878a9|Usuario|amount_or_text",
+      "screenIdentity": "9a0424e878a9",
+      "startedAt": 10618,
+      "endedAt": 10618,
+      "rawEventRefs": [
+        "event-4"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "9a0424e878a9:role:textbox|Usuario"
+      ],
+      "inputValue": "qa_empresa",
+      "rawTypedValue": "qa_empresa",
+      "finalValue": "qa_empresa"
+    },
+    {
+      "editingSessionId": "edit-3",
+      "controlIdentity": "9a0424e878a9|Contraseña|amount_or_text",
+      "screenIdentity": "9a0424e878a9",
+      "startedAt": 11458,
+      "endedAt": 11458,
+      "rawEventRefs": [
+        "event-6"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "9a0424e878a9:role:textbox|Contraseña"
+      ]
+    },
+    {
+      "editingSessionId": "edit-4",
+      "controlIdentity": "9a0424e878a9|Código de acceso|amount_or_text",
+      "screenIdentity": "9a0424e878a9",
+      "startedAt": 14074,
+      "endedAt": 14074,
+      "rawEventRefs": [
+        "event-9"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "9a0424e878a9:role:textbox|Código de acceso"
+      ],
+      "inputValue": "123456",
+      "rawTypedValue": "123456",
+      "finalValue": "123456"
+    },
+    {
+      "editingSessionId": "edit-5",
+      "controlIdentity": "9a0424e878a9|Asunto|amount_or_text",
+      "screenIdentity": "9a0424e878a9",
+      "startedAt": 29881,
+      "endedAt": 29881,
+      "rawEventRefs": [
+        "event-15"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "9a0424e878a9:role:textbox|Asunto"
+      ],
+      "inputValue": "Solicitud Northstar 1 documento",
+      "rawTypedValue": "Solicitud Northstar 1 documento",
+      "finalValue": "Solicitud Northstar 1 documento"
+    },
+    {
+      "editingSessionId": "edit-6",
+      "controlIdentity": "9a0424e878a9|Monto|amount_or_text",
+      "screenIdentity": "9a0424e878a9",
+      "startedAt": 30742,
+      "endedAt": 30742,
+      "rawEventRefs": [
+        "event-17"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "9a0424e878a9:role:textbox|Monto"
+      ],
+      "inputValue": "1500",
+      "finalValue": "1500"
+    }
+  ],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "pageKey": "tab-1",
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "http://127.0.0.1:4173/",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-3",
+      "controlIdentity": "9a0424e878a9|RNC|role|textbox|RNC",
+      "semanticField": "RNC",
+      "action": "fill",
+      "pageKey": "tab-1",
+      "valueKey": "rnc",
+      "recordedValue": "101010101",
+      "rawTypedValue": "101010101",
+      "sourceEventRefs": [
+        "event-3"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|RNC",
+        "css:#login-rnc",
+        "id:login-rnc"
+      ],
+      "editingSessionRef": "edit-1",
+      "description": "Ingresar en \"RNC\"",
+      "screenBeforeRef": "9a0424e878a9",
+      "screenAfterRef": "9a0424e878a9",
+      "routeBefore": "http://127.0.0.1:4173/",
+      "stateScope": "9a0424e878a9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-4",
+      "controlIdentity": "9a0424e878a9|Usuario|role|textbox|Usuario",
+      "semanticField": "Usuario",
+      "action": "fill",
+      "pageKey": "tab-1",
+      "valueKey": "usuario",
+      "recordedValue": "qa_empresa",
+      "rawTypedValue": "qa_empresa",
+      "sourceEventRefs": [
+        "event-4"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Usuario",
+        "css:#login-user",
+        "id:login-user"
+      ],
+      "editingSessionRef": "edit-2",
+      "description": "Ingresar en \"Usuario\"",
+      "screenBeforeRef": "9a0424e878a9",
+      "screenAfterRef": "9a0424e878a9",
+      "routeBefore": "http://127.0.0.1:4173/",
+      "stateScope": "9a0424e878a9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-6",
+      "controlIdentity": "9a0424e878a9|Contraseña|role|textbox|Contraseña",
+      "semanticField": "Contraseña",
+      "action": "fill",
+      "pageKey": "tab-1",
+      "valueKey": "contrasena",
+      "sourceEventRefs": [
+        "event-6"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña",
+        "css:#login-password",
+        "id:login-password"
+      ],
+      "editingSessionRef": "edit-3",
+      "description": "Ingresar en \"Contraseña\"",
+      "screenBeforeRef": "9a0424e878a9",
+      "screenAfterRef": "9a0424e878a9",
+      "routeBefore": "http://127.0.0.1:4173/",
+      "stateScope": "9a0424e878a9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-7",
+      "controlIdentity": "9a0424e878a9|Iniciar sesión|role|button|Iniciar sesión",
+      "semanticField": "Iniciar sesión",
+      "action": "click",
+      "pageKey": "tab-1",
+      "valueKey": "iniciar_sesion",
+      "sourceEventRefs": [
+        "event-7"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Iniciar sesión"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Iniciar sesión",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": false,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "login-form"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "Iniciar sesión",
+        "role": "button",
+        "targetTag": "button",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "login-form"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "section:has(form[id=\"login-form\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(form[id=\"login-form\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "button",
+        "normalizedName": "Iniciar sesión",
+        "targetTag": "button",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "login-form"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"Iniciar sesión\"",
+      "screenBeforeRef": "9a0424e878a9",
+      "screenAfterRef": "9a0424e878a9",
+      "routeBefore": "http://127.0.0.1:4173/",
+      "stateScope": "9a0424e878a9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-9",
+      "controlIdentity": "9a0424e878a9|Código de acceso|role|textbox|Código de acceso",
+      "semanticField": "Código de acceso",
+      "action": "fill",
+      "pageKey": "tab-1",
+      "valueKey": "codigo_de_acceso",
+      "recordedValue": "123456",
+      "rawTypedValue": "123456",
+      "sourceEventRefs": [
+        "event-9"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Código de acceso",
+        "css:#login-otp",
+        "id:login-otp"
+      ],
+      "editingSessionRef": "edit-4",
+      "description": "Ingresar en \"Código de acceso\"",
+      "screenBeforeRef": "9a0424e878a9",
+      "screenAfterRef": "9a0424e878a9",
+      "routeBefore": "http://127.0.0.1:4173/",
+      "stateScope": "9a0424e878a9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-10",
+      "controlIdentity": "9a0424e878a9|Continuar|role|button|Continuar",
+      "semanticField": "Continuar",
+      "action": "click",
+      "pageKey": "tab-1",
+      "valueKey": "continuar",
+      "sourceEventRefs": [
+        "event-10"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Continuar"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Continuar",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": false,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "otp-form"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "Continuar",
+        "role": "button",
+        "targetTag": "button",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "otp-form"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "section:has(form[id=\"otp-form\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(form[id=\"otp-form\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "button",
+        "normalizedName": "Continuar",
+        "targetTag": "button",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "otp-form"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"Continuar\"",
+      "screenBeforeRef": "9a0424e878a9",
+      "screenAfterRef": "9a0424e878a9",
+      "routeBefore": "http://127.0.0.1:4173/",
+      "stateScope": "9a0424e878a9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-12",
+      "controlIdentity": "9a0424e878a9|▤Solicitudes|role|button|▤Solicitudes",
+      "semanticField": "▤Solicitudes",
+      "action": "click",
+      "pageKey": "tab-1",
+      "valueKey": "solicitudes",
+      "sourceEventRefs": [
+        "event-12"
+      ],
+      "technicalTargetRefs": [
+        "role:button|▤Solicitudes"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|▤Solicitudes",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "aside"
+            },
+            "deterministicStructuralIdentity": false,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 10,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 10
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "▤Solicitudes",
+        "role": "button",
+        "targetTag": "button",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "button",
+        "normalizedName": "▤Solicitudes",
+        "targetTag": "button",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "app"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"▤Solicitudes\"",
+      "screenBeforeRef": "9a0424e878a9",
+      "screenAfterRef": "9a0424e878a9",
+      "routeBefore": "http://127.0.0.1:4173/",
+      "stateScope": "9a0424e878a9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-14",
+      "controlIdentity": "9a0424e878a9|Nueva solicitud|role|button|Nueva solicitud",
+      "semanticField": "Nueva solicitud",
+      "action": "click",
+      "pageKey": "tab-1",
+      "valueKey": "nueva_solicitud",
+      "sourceEventRefs": [
+        "event-14"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Nueva solicitud"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Nueva solicitud",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "Nueva solicitud",
+        "role": "button",
+        "targetTag": "button",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "section:has(table[aria-label=\"Solicitudes\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "main:has(button[aria-label=\"Buscar en el portal\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "button",
+        "normalizedName": "Nueva solicitud",
+        "targetTag": "button",
+        "scopeIdentity": {
+          "strategy": "css",
+          "value": "section:has(table[aria-label=\"Solicitudes\"])"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"Nueva solicitud\"",
+      "screenBeforeRef": "9a0424e878a9",
+      "screenAfterRef": "9a0424e878a9",
+      "routeBefore": "http://127.0.0.1:4173/",
+      "stateScope": "9a0424e878a9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-15",
+      "controlIdentity": "9a0424e878a9|Asunto|role|textbox|Asunto",
+      "semanticField": "Asunto",
+      "action": "fill",
+      "pageKey": "tab-1",
+      "valueKey": "asunto",
+      "recordedValue": "Solicitud Northstar 1 documento",
+      "rawTypedValue": "Solicitud Northstar 1 documento",
+      "sourceEventRefs": [
+        "event-15"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Asunto",
+        "css:#request-subject",
+        "id:request-subject"
+      ],
+      "editingSessionRef": "edit-5",
+      "description": "Ingresar en \"Asunto\"",
+      "screenBeforeRef": "9a0424e878a9",
+      "screenAfterRef": "9a0424e878a9",
+      "routeBefore": "http://127.0.0.1:4173/",
+      "stateScope": "9a0424e878a9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-17",
+      "controlIdentity": "9a0424e878a9|Monto|role|textbox|Monto",
+      "semanticField": "Monto",
+      "action": "fill",
+      "pageKey": "tab-1",
+      "valueKey": "monto",
+      "recordedValue": "1500",
+      "sourceEventRefs": [
+        "event-17"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Monto",
+        "css:#request-amount",
+        "id:request-amount"
+      ],
+      "editingSessionRef": "edit-6",
+      "description": "Ingresar en \"Monto\"",
+      "screenBeforeRef": "9a0424e878a9",
+      "screenAfterRef": "9a0424e878a9",
+      "routeBefore": "http://127.0.0.1:4173/",
+      "stateScope": "9a0424e878a9",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-18",
+      "controlIdentity": "9a0424e878a9|Crear solicitud|role|button|Crear solicitud",
+      "semanticField": "Crear solicitud",
+      "action": "click",
+      "pageKey": "tab-1",
+      "valueKey": "crear_solicitud",
+      "sourceEventRefs": [
+        "event-18"
+      ],
+      "technicalTargetRefs": [
+        "role:button|Crear solicitud"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "button|Crear solicitud",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {},
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": false,
+            "identityAmbiguous": true,
+            "structuralIdentityMatchCount": 2,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "request-form"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 2
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "semanticRuntimeEvidence": {
+        "source": "accessible_name",
+        "normalizedValue": "Crear solicitud",
+        "role": "button",
+        "targetTag": "button",
+        "scopeAlternatives": [
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "request-form"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "div:has(form[id=\"request-form\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "section:has(form[id=\"request-form\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "css",
+              "value": "main:has(button[aria-label=\"Buscar en el portal\"])"
+            },
+            "captureMatchCount": 1
+          },
+          {
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "captureMatchCount": 1
+          }
+        ],
+        "captureUniqueTarget": true
+      },
+      "playwrightRecorderEvidence": {
+        "kind": "role",
+        "role": "button",
+        "normalizedName": "Crear solicitud",
+        "targetTag": "button",
+        "scopeIdentity": {
+          "strategy": "id",
+          "value": "request-form"
+        },
+        "captureMatchCount": 1,
+        "runtimeResolutionRequired": true
+      },
+      "description": "Ingresar en \"Crear solicitud\"",
+      "screenBeforeRef": "9a0424e878a9",
+      "screenAfterRef": "inicio",
+      "routeBefore": "http://127.0.0.1:4173/",
+      "routeAfter": "http://127.0.0.1:4173/approvals/",
+      "stateScope": "9a0424e878a9",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-19",
+      "controlIdentity": "9a0424e878a9|NS-REQ-0001",
+      "action": "click",
+      "pageKey": "tab-1",
+      "sourceEventRefs": [
+        "event-19"
+      ],
+      "technicalTargetRefs": [],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [],
+          "structuralContext": {
+            "owner": {
+              "tag": "dd"
+            },
+            "stableDirectAttributes": {
+              "id": "request-number"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "app"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"dd\"},\"stableDirectAttributes\":{\"id\":\"request-number\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner",
+            "v2_scoped_structural_runtime_evidence"
+          ],
+          "confidence": 0.6,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "screenBeforeRef": "9a0424e878a9",
+      "screenAfterRef": "inicio",
+      "routeBefore": "http://127.0.0.1:4173/",
+      "routeAfter": "http://127.0.0.1:4173/approvals/",
+      "stateScope": "9a0424e878a9",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "runtime_resolution_required",
+      "confidence": 0.7
+    },
+    {
+      "id": "interaction-20",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-20"
+      ],
+      "technicalTargetRefs": [],
+      "pageKey": "tab-2",
+      "opensNewPage": true,
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "http://127.0.0.1:4173/approvals/",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "executionAuthority": true,
+      "navigationUrl": "http://127.0.0.1:4173/approvals/",
+      "confidence": 0.9
+    }
+  ],
+  "gridMetadata": {
+    "detected": true,
+    "grids": 11,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace"
+}

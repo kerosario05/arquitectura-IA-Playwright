@@ -1,0 +1,9 @@
+{
+  "id": "44919556-ed19-4e58-b1f0-33d33481884f-adjuntar-un-documento-en-gestion-documental",
+  "externalId": "44919556-ed19-4e58-b1f0-33d33481884f",
+  "title": "Adjuntar un documento en Gestión Documental",
+  "source": "discovery",
+  "appSlug": "web-test",
+  "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+  "createdAt": "2026-10-27T19:20:30.944Z"
+}

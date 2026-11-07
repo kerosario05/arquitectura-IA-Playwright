@@ -381,6 +381,84 @@ async function main(): Promise<void> {
     assert.deepStrictEqual(titles, ["Pagar con tarjeta vigente y CVV", ...aiTitles["PAY-5"]]);
   });
 
+  await test("revalidates an edited generated step and replaces its stale review warning", async () => {
+    const created = await call("POST", "/api/test-design/drafts", anaToken, {
+      jiraProjectKey: "PAY",
+      projectSlug: "kiosko",
+      issues: ["PAY-77"],
+    });
+    assert.strictEqual(created.status, 201, JSON.stringify(created.body));
+    const reviewDraftId = created.body.draft.id;
+    const reviewStory = created.body.draft.stories[0];
+    const sourceSteps = [
+      "Abrir la aplicación configurada del proyecto",
+      'Ingresar usuario válido en "Usuario"',
+      'Ingresar contraseña no válida en "Contraseña"',
+      'Presionar "Iniciar sesión"',
+      "Validar que se informe que las credenciales no son válidas",
+    ];
+    const sourceScenario = {
+      scenarioId: "PAY-77:jira:1",
+      sourceIssueKey: "PAY-77",
+      title: "Rechazar credenciales no válidas",
+      steps: sourceSteps,
+      preconditions: [],
+      expectedResult: "Se informa el problema con las credenciales.",
+      acceptanceCriteriaRefs: ["AC8.1"],
+      validation: {
+        valid: false,
+        errors: ["JIRA_ASSERTION_CAPABILITY_UNSUPPORTED"],
+        issues: [{ code: "JIRA_ASSERTION_CAPABILITY_UNSUPPORTED", stepIndex: 5, step: sourceSteps[4] }],
+        warnings: [],
+      },
+    };
+    const scenario = {
+      id: "edited-review-case",
+      title: sourceScenario.title,
+      preconditions: "",
+      steps: sourceSteps.map(action => ({ action, expected: "" })),
+      data: [],
+      inputRequirements: [],
+      acceptanceCriteriaRefs: ["AC8.1"],
+      generationWarnings: [
+        "Revisar este caso antes de publicarlo: JIRA_ASSERTION_CAPABILITY_UNSUPPORTED",
+        "La cobertura AC8.1 de la historia sigue pendiente.",
+      ],
+      expectedResult: sourceScenario.expectedResult,
+      priority: "medium",
+      type: "negative",
+      selectedForTestRail: true,
+      selectedForJira: true,
+      testRailCaseId: null,
+      testRailDirty: false,
+      origin: "ai",
+      edited: false,
+      jiraSourceScenario: sourceScenario,
+      jiraSourceScenarioId: sourceScenario.scenarioId,
+      knowledgeProfileSlug: "kiosko",
+    };
+    await repo.saveStoryScenarios(reviewDraftId, reviewStory.id, [scenario as any]);
+
+    const correctedSteps = scenario.steps.map((step, index) => index === 4
+      ? { ...step, action: 'Validar que se muestre "problema de credenciales"' }
+      : step);
+    const saved = await call(
+      "PUT",
+      `/api/test-design/drafts/${reviewDraftId}/stories/${reviewStory.id}/scenarios`,
+      anaToken,
+      { scenarios: [{ ...scenario, steps: correctedSteps }] },
+    );
+    assert.strictEqual(saved.status, 200, JSON.stringify(saved.body));
+    const reviewed = saved.body.story.scenarios[0];
+    assert.strictEqual(reviewed.jiraSourceScenario.validation.errors.includes("JIRA_ASSERTION_CAPABILITY_UNSUPPORTED"), false);
+    assert.strictEqual(reviewed.jiraSourceScenario.validation.issues.some((issue: any) => issue.code === "JIRA_ASSERTION_CAPABILITY_UNSUPPORTED"), false);
+    assert.strictEqual(reviewed.generationWarnings.some((warning: string) => warning.includes("JIRA_ASSERTION_CAPABILITY_UNSUPPORTED")), false);
+    assert.strictEqual(reviewed.generationWarnings.includes("La cobertura AC8.1 de la historia sigue pendiente."), true);
+
+    const reread = await call("GET", `/api/test-design/drafts/${reviewDraftId}`, anaToken);
+    assert.strictEqual(reread.body.draft.stories[0].scenarios[0].jiraSourceScenario.validation.issues.length, 0);
+  });
+
   await test("a story left generating by a restart is reported as interrupted", async () => {
     const draft = (await call("GET", `/api/test-design/drafts/${genDraftId}`, anaToken)).body.draft;
     const story = draft.stories.find((s: any) => s.issueKey === "PAY-6");
@@ -628,6 +706,25 @@ async function main(): Promise<void> {
   await test("story detail requires a valid issue key", async () => {
     const res = await call("GET", "/api/test-design/jira/issues/not-a-key", anaToken);
     assert.strictEqual(res.status, 400);
+  });
+
+  // ------------------------------------------------------------------------
+  console.log("\nmétricas");
+
+  await test("metrics count only the drafts the caller can see", async () => {
+    const ana = await call("GET", "/api/test-design/metrics?days=30", anaToken);
+    assert.strictEqual(ana.status, 200, JSON.stringify(ana.body));
+    assert.ok(ana.body.metrics.funnel.designed > 0, JSON.stringify(ana.body.metrics.funnel));
+    assert.strictEqual(ana.body.metrics.period.days, 30);
+
+    const eva = await call("GET", "/api/test-design/metrics", evaToken);
+    assert.strictEqual(eva.status, 200, JSON.stringify(eva.body));
+    assert.strictEqual(eva.body.metrics.funnel.designed, 0);
+  });
+
+  await test("metrics refuse a project the caller was not granted", async () => {
+    const res = await call("GET", "/api/test-design/metrics?projectSlug=kiosko", evaToken);
+    assert.strictEqual(res.status, 403, JSON.stringify(res.body));
   });
 
   // ------------------------------------------------------------------------

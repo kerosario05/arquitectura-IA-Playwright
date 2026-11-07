@@ -5,6 +5,8 @@ export type ReusedSpecOutputLine = { stream: "stdout" | "stderr"; line: string }
 
 /** Keep only per-step boundaries needed by the live panel; the child still runs unchanged. */
 export function projectReusedSpecLiveOutput(event: ReusedSpecOutputLine): string | undefined {
+  const timing = event.line.match(/\[step-timing\]\s+stepIndex=(\d+)\s+action=(\w+)\s+status=(passed|failed)\s+durationMs=(\d+)(?:\s+phases=([\w:,]+))?/);
+  if (timing) return `[step-timing] stepIndex=${timing[1]} action=${timing[2]} status=${timing[3]} durationMs=${timing[4]}${timing[5] ? ` phases=${timing[5]}` : ""}`;
   const match = event.line.match(/\[promoted-step\][^\n]*\bstepIndex\s*=\s*(\d+)\b[^\n]*\bphase\s*=\s*(start|passed|failed)\b(?:[^\n]*\bfailureClass\s*=\s*([\w-]+))?/i);
   if (!match) return undefined;
   const stepIndex = Number(match[1]);

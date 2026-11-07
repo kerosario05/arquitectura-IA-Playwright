@@ -153,6 +153,68 @@ test("authored selects associate visible peer captions across shared form wrappe
   } finally { await browser.close(); }
 });
 
+test("snapshot can certify one actionable custom selector beside a plain field caption", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.setContent(`
+      <div role="dialog">
+        <div><span>Ubicación</span><div id="location-trigger" style="cursor:pointer">Seleccione una opción</div></div>
+        <div><span>Tipo</span><div id="type-trigger" style="cursor:pointer">Seleccione una opción</div></div>
+        <div id="options" role="listbox" hidden><div role="option">Casa</div><div role="option">Trabajo</div></div>
+      </div>
+      <script>
+        const trigger = document.querySelector('#location-trigger');
+        trigger.addEventListener('click', () => { document.querySelector('#options').hidden = false; });
+        for (const option of document.querySelectorAll('[role="option"]')) option.addEventListener('click', () => {
+          trigger.textContent = option.textContent;
+          document.querySelector('#options').hidden = true;
+        });
+      </script>
+    `);
+    const snapshot = {elements:[{
+      id:"location-trigger",tagName:"div",visible:true,nearbyText:"Ubicación",
+      actionability:"FRAMEWORK_ACTIONABLE",cursor:"pointer",pointerEvents:"auto",
+      candidateLocators:[{strategy:"css",value:"#location-trigger",confidence:0.55}],
+    }]} as any;
+    const result = await resolveActionTarget(page,snapshot,"Casa",{
+      actionType:"action_select",selectionField:"Ubicación",selectionValue:"Casa",
+    });
+    assert.equal(result.status,"resolved");
+    assert.equal(result.selectionApplied,true);
+    assert.equal(await page.locator("#location-trigger").innerText(),"Casa");
+    assert.equal(await page.locator("#type-trigger").innerText(),"Seleccione una opción");
+  } finally {
+    await browser.close();
+  }
+});
+
+test("snapshot selector recovery fails closed for duplicate observed owners", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.setContent(`
+      <div role="dialog">
+        <div><span>Ubicación</span><div id="location-a" style="cursor:pointer">Seleccione una opción</div></div>
+        <div><span>Ubicación</span><div id="location-b" style="cursor:pointer">Seleccione una opción</div></div>
+      </div>
+    `);
+    const snapshot = {elements:["a","b"].map((suffix)=>({
+      id:`location-${suffix}`,tagName:"div",visible:true,nearbyText:"Ubicación",
+      actionability:"FRAMEWORK_ACTIONABLE",cursor:"pointer",pointerEvents:"auto",
+      candidateLocators:[{strategy:"css",value:`#location-${suffix}`,confidence:0.55}],
+    }))} as any;
+    const result = await resolveActionTarget(page,snapshot,"Casa",{
+      actionType:"action_select",selectionField:"Ubicación",selectionValue:"Casa",
+    });
+    assert.notEqual(result.selectionApplied,true);
+    assert.equal(await page.locator("#location-a").innerText(),"Seleccione una opción");
+    assert.equal(await page.locator("#location-b").innerText(),"Seleccione una opción");
+  } finally {
+    await browser.close();
+  }
+});
+
 test("a caption with multiple actionable custom controls cannot certify an owner", async () => {
   const browser = await chromium.launch({ headless: true });
   try {

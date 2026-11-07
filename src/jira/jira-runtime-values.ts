@@ -11,6 +11,8 @@ export function jiraRuntimeValues(overrides: unknown, scenarioId: string, displa
 }
 
 export type JiraRuntimeInputRequirement = {
+  application?: string;
+  controlType?: string;
   key: string;
   label: string;
   stepIndex?: number;
@@ -166,6 +168,7 @@ export function jiraScenarioRuntimeValues(
       continue;
     }
     if (requirement.dataCondition === "invalid" || requirement.dataCondition === "expired") continue;
+    if (requirement.application && requirement.application !== "principal" || requirement.controlType?.startsWith("file")) continue;
     const configured = configuredValues[requirement.key]?.trim();
     if (configured) values[requirement.key] = configured;
   }
@@ -244,6 +247,13 @@ export function resolveJiraConfiguredInputValues(options: {
   for (const requirement of options.requirements) {
     if (values[requirement.key]?.trim()) continue;
     if (requirement.dataCondition === "invalid" || requirement.dataCondition === "expired") continue;
+
+    // Secondary-application credentials/files require explicit scoped data, never the primary app's roles.
+    if (requirement.application && requirement.application !== "principal" || requirement.controlType?.startsWith("file")) {
+      const exact = options.testData?.[requirement.key];
+      if (typeof exact === "string" && exact.trim()) values[requirement.key] = exact;
+      continue;
+    }
 
     const isAccessCode = /(?:\botp\b|one[_ -]?time|c[oó]digo.*(?:acceso|verificaci[oó]n|sms)|(?:acceso|verificaci[oó]n|sms).*c[oó]digo)/i
       .test(`${requirement.key} ${requirement.label}`);

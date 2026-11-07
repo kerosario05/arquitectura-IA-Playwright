@@ -1,3 +1,6 @@
+import { JiraWorkflowSession } from "../../jira/jira-workflow-runtime";
+import { bindJiraWorkflowPort } from "../../jira/jira-workflow-port";
+import { jiraWorkflowErrors, jiraWorkflowApplications, parseJiraWorkflowStep } from "../../jira/jira-workflow";
 import fs from "node:fs/promises";
 import fsSync from "node:fs";
 import path from "node:path";
@@ -28,6 +31,8 @@ import { invalidateJiraRoute, jiraProfileRevision, shouldInvalidateJiraLearnedRo
 import {prepareJiraScenarioReview} from "../../jira/jira-scenario-review";
 import { persistJiraCaseInputs, resolveJiraPublishedCaseId } from "../../jira/jira-case-input-persistence";
 import { linkJiraAutomationToTestRailCase } from "../../automations/automation-index";
+import { resolveTestFile } from "../../test-files/test-file-store";
+import { isJiraSpecGenerationEnabled } from "../services/spec-generation-policy";
 
 function jiraApplicationHttpErrorDiagnostic(error: unknown): { status: number; method: string; path: string } | undefined {
   const message = error instanceof Error ? error.message : String(error);
@@ -44,6 +49,7 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
   if (!job) return;
   const p = job.params;
   let session: RuntimeBrowserSession | undefined;
+  let workflow: JiraWorkflowSession | undefined;
   let passed = 0, failed = 0;
   const results: Array<Record<string, unknown>> = [];
   const dataValuesByScenario: Record<string, Record<string, string>> = {};
@@ -51,7 +57,7 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
   const emit = (event: Record<string, unknown>) => jobStore.appendLog(jobId, JSON.stringify({ executionEngine: "jira_semantic", ...event }));
   const cancelled = () => jobStore.get(jobId)?.status === "cancelled";
   const controller = new AbortController();
-  const unsubscribe = jobStore.subscribe(jobId, { onLog: () => {}, onUpdate: update => { if (update.status === "cancelled") { controller.abort(); void session?.close(); } } });
+  const unsubscribe = jobStore.subscribe(jobId, { onLog: () => {}, onUpdate: update => { if (update.status === "cancelled") { controller.abort(); void workflow?.close(); void session?.close(); } } });
   try {
     if (resolveExecutionEngine(p) !== "jira_semantic") throw new Error("INVALID_EXECUTION_ORIGIN");
     const scenarios = p.scenarios as JiraScenarioInput[];
@@ -93,9 +99,15 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
       };
     });
     const options = (p.options ?? {}) as { headed?: boolean; autoPromote?: boolean; autoPom?: boolean; overwrite?: boolean };
+    const jiraSpecGenerationEnabled = isJiraSpecGenerationEnabled();
+    const specGenerationEnabledForRun = jiraSpecGenerationEnabled && options.autoPromote !== false;
+    const specGenerationSkipReason = !jiraSpecGenerationEnabled
+      ? "environment_disabled"
+      : options.autoPromote === false ? "run_option_disabled" : undefined;
     await fs.mkdir(dir, { recursive: true });
     await fs.writeFile(path.join(dir, "jira-scenarios.json"), JSON.stringify(scenarios.map(redactJiraScenarioInputs)));
     jobStore.update(jobId, { status: "running", startedAt: new Date().toISOString() });
+    jobStore.appendLog(jobId, `[jira-spec-generation] enabled=${specGenerationEnabledForRun} source=${jiraSpecGenerationEnabled ? "run_option" : "JIRA_SPEC_GENERATION_ENABLED"}`);
     for (const [offset, scenario] of scenarios.entries()) {
       if (cancelled()) break;
       let failedAtStep: number | undefined;
@@ -119,6 +131,10 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
       let result: Record<string, unknown>;
       try {
         if (reviewed.errors.length) throw new Error(reviewed.errors[0]);
+        if (executionScenario.steps.some(step => parseJiraWorkflowStep(step)?.kind === "application")) {
+          const workflowErrors = jiraWorkflowErrors(executionScenario.steps, ["principal", ...Object.keys(jiraWorkflowApplications(profile))]);
+          if (workflowErrors.length) throw new Error(workflowErrors[0]);
+        }
         emit({type:"test_variant_prepared",caseId,notApplicableStepIndices:reviewed.skippedAssertionSteps});
         const resolvedScenarioValues = resolveJiraConfiguredInputValues({
           overrides: p.dataOverrides,
@@ -190,18 +206,25 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
           hasPasswordCredentials: Boolean(runtimeConfig.app.username && runtimeConfig.app.password),
           hasAuthoredCredentialEntry: jiraScenarioHasAuthoredCredentialEntry(executionScenario.steps),
           hasAuthGateData: hasJiraAuthGateData(authTestData),
-          load: () => loadConfiguredJiraAuthFlow(appSlug, session!.page, authTestData),
+          load: () => loadConfiguredJiraAuthFlow(appSlug, (workflow?.page ?? session!.page), authTestData),
         });
-        const discovery = await discoverJiraScenario(executionScenario, createJiraPlaywrightPort(session.page, baseUrl, authFlow),
+        workflow = executionScenario.steps.some(step => parseJiraWorkflowStep(step)) ? new JiraWorkflowSession(session.page, profile, appSlug) : undefined;
+        const resolveFile = async (fileRef: string) => {
+          const asset = await resolveTestFile(appSlug, fileRef);
+          return { filename: asset.filename, contentType: asset.contentType, bytes: await fs.readFile(asset.path) };
+        };
+        const primaryPort = createJiraPlaywrightPort(session.page, baseUrl, authFlow, resolveFile);
+        const browserPort = workflow ? bindJiraWorkflowPort(workflow, primaryPort, (page, url) => createJiraPlaywrightPort(page, url, undefined, resolveFile)) : primaryPort;
+        const discovery = await discoverJiraScenario(executionScenario, browserPort,
           effectiveRuntimeValues, async (stepIndex, phase) => {
             failedAtStep = stepIndex;
             emit({ type: "step_progress", caseId, stepIndex, phase });
             if (phase === "passed") {
               const stepScreenshotPath = path.join(dir, `scenario-${offset + 1}-step-${stepIndex}.png`);
               try {
-                await captureJiraEvidenceScreenshot(session!.page, { path: stepScreenshotPath, fullPage: true });
+                await captureJiraEvidenceScreenshot((workflow?.page ?? session!.page), { path: stepScreenshotPath, fullPage: true });
                 stepScreenshotPaths[String(stepIndex)] = stepScreenshotPath;
-                const identity = await readJiraScreenIdentity(session!.page);
+                const identity = await readJiraScreenIdentity((workflow?.page ?? session!.page));
                 if (identity) stepScreenIdentities[String(stepIndex)] = identity;
                 emit({ type: "step_evidence_captured", caseId, stepIndex });
               } catch (error) {
@@ -215,8 +238,8 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
             // to the configured base URL, but before the first scenario action runs.
             initialScreenshotPath = path.join(dir, `scenario-${offset + 1}-initial.png`);
             try {
-              await captureJiraEvidenceScreenshot(session!.page, { path: initialScreenshotPath, fullPage: true });
-              initialScreenIdentity = await readJiraScreenIdentity(session!.page);
+              await captureJiraEvidenceScreenshot((workflow?.page ?? session!.page), { path: initialScreenshotPath, fullPage: true });
+              initialScreenIdentity = await readJiraScreenIdentity((workflow?.page ?? session!.page));
               emit({ type: "initial_evidence_captured", caseId });
             } catch (error) {
               initialScreenshotPath = undefined;
@@ -245,11 +268,15 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
             evidenceScreenshotPath = undefined;
           });
         }
-        await session.close(); session = undefined;
+        await workflow?.close();
+        await session.close(); session = undefined; workflow = undefined;
         if (cancelled()) break;
         emit({ type: "discovery_finished", caseId, status: "passed", executionEngine: "jira_semantic" });
+        if (!specGenerationEnabledForRun) {
+          emit({ type: "spec_generation_skipped", caseId, reason: specGenerationSkipReason ?? "disabled" });
+        }
         let specPath: string | undefined;
-        if (options.autoPromote !== false) {
+        if (specGenerationEnabledForRun) {
           emit({ type: "spec_generation_started", caseId, compiler: "jira-semantic-v1" });
           const sectionSlug = `jira-${scenario.sourceIssueKey.toLowerCase()}`;
           failedAtStep = undefined; // A spec failure is not the last successful Discovery step.
@@ -282,6 +309,9 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
         }
         passed++;
         result = { caseId, scenarioId: caseId, status: "passed", automationReady: Boolean(specPath), promotionAllowed: Boolean(specPath), specPath,
+          specGenerationStatus: specGenerationEnabledForRun ? "passed" : "skipped",
+          specGenerationInvoked: specGenerationEnabledForRun,
+          ...(specGenerationSkipReason ? { specGenerationReason: specGenerationSkipReason } : {}),
           ...(initialScreenshotPath ? { initialScreenshotPath } : {}),
           ...(Object.keys(stepScreenshotPaths).length ? { stepScreenshotPaths } : {}),
           ...jiraEvidenceScreenIdentityFields({ initialScreenIdentity, stepScreenIdentities }),
@@ -328,7 +358,7 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
           ...(Object.keys(stepScreenshotPaths).length ? { stepScreenshotPaths } : {}),
           ...jiraEvidenceScreenIdentityFields({ initialScreenIdentity, stepScreenIdentities }),
           ...(evidenceScreenshotPath ? { screenshotPath: evidenceScreenshotPath, evidenceScreenshotPath } : {}) };
-      } finally { await session?.close().catch(() => {}); session = undefined; }
+      } finally { await workflow?.close(); await session?.close().catch(() => {}); session = undefined; workflow = undefined; }
       results.push(result!);
       emit({ type: "case_finished", ...result!, title: scenario.title, index: offset + 1, total: scenarios.length });
       jobStore.update(jobId, { summary: { passed, failed, completed: passed + failed, totalCases: scenarios.length, artifactsDir: dir } });
@@ -363,7 +393,7 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
     jobStore.update(jobId, { status: syncFailed ? "completed_with_sync_errors" : failed ? "completed_with_failures" : "done", completedAt: new Date().toISOString() });
   } catch {
     if (!cancelled()) jobStore.update(jobId, { status: "failed", errorMessage: "JIRA_ENGINE_SETUP_FAILED", completedAt: new Date().toISOString() });
-  } finally { unsubscribe(); await session?.close().catch(() => {}); jobStore.clearTransientParams(jobId); }
+  } finally { unsubscribe(); await workflow?.close(); await session?.close().catch(() => {}); jobStore.clearTransientParams(jobId); }
 }
 
 async function generateJiraEvidence(

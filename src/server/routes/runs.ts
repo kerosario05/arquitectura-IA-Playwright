@@ -4,6 +4,8 @@ import { filterByProjectAccess } from "../middleware/route-policy";
 import fs from "fs";
 import path from "path";
 import { jobStore } from "../jobs/job-store";
+import { scheduleJob } from "../jobs/job-scheduler";
+import {terminateJobProcess} from "../jobs/terminate-job-process";
 import { startSprintRun } from "../jobs/run-runner";
 import {
   buildDiscoveryBatchChecklistIdentity,
@@ -17,6 +19,7 @@ import { startMixedRerun } from "../jobs/mixed-rerun-orchestrator";
 import { inferLegacyJiraRerunOrigin, isScenarioEligibleForEngine, resolveExecutionEngine } from "../../jira/execution-origin";
 import { startMobileLaunchExecutionJob } from "../jobs/mobile-launch-execution-runner";
 import { prepareRerun } from "../jobs/rerun-runner";
+import {refreshRecordingRerunData} from "../jobs/refresh-recording-rerun-data";
 import { launchExecution, type LaunchScenario, type LaunchExecutionInput } from "../jobs/launch-orchestrator";
 import { coordinateLaunchRequest } from "../jobs/launch-request-coordinator";
 import { defectChecklistStore } from "../services/defect-checklist-store";
@@ -40,6 +43,8 @@ import { resolveTestDesignLaunchLinks, type TestDesignCaseResolution } from "../
 import { toJiraSemanticDesignScenario } from "../../test-design/test-design-lineage";
 import { refreshEditedJiraSource } from "../../test-design/test-design-edited-source";
 import { extractTextFromAdf } from "../../jira/adf-extractor";
+import { planRerunServiceBindings, serviceBindingBlockedBody, type RerunScenarioOwner } from "../../service-catalog/execution-bindings";
+import type { RuntimeServiceBinding } from "../../service-catalog/runtime-service-values";
 
 export const runsRouter = Router();
 
@@ -390,6 +395,7 @@ export function extractExistingTestRailCaseIdsFromPayload(body: Record<string, u
 export function buildRunStreamPayload(
   job: {
     status: string;
+    queuePosition?: number;
     exitCode?: number;
     summary?: Record<string, unknown>;
     errorMessage?: string;
@@ -407,6 +413,7 @@ export function buildRunStreamPayload(
 ) {
   const payload: Record<string, unknown> = {
     status: job.status,
+    queuePosition: job.queuePosition,
     summary: job.summary,
     currentCase: job.currentCase,
     currentCaseId: job.currentCaseId,
@@ -602,7 +609,7 @@ runsRouter.post("/scenario-preview", async (req, res, next) => {
   if (issueKey) {
     jobStore.update(job.id, { issueKey, checklistUrl } as any);
   }
-  setImmediate(() => startScenarioPreviewRun(job.id));
+  scheduleJob(job.id, () => startScenarioPreviewRun(job.id));
 
   res.status(202).json({
     ok: true,
@@ -676,7 +683,7 @@ runsRouter.post("/discovery-batch", (req, res) => {
     defectCount,
     ...(issueKey ? { issueKey } : {}),
   });
-  setImmediate(() => startDiscoveryBatchRun(job.id));
+  scheduleJob(job.id, () => startDiscoveryBatchRun(job.id));
 
   res.status(202).json({
     jobId: job.id,
@@ -853,6 +860,7 @@ runsRouter.get("/:jobId/logs", (req, res) => {
       } else {
         send("status", buildRunStreamPayload({
           status: job.status,
+          queuePosition: job.queuePosition,
           summary: job.summary,
           currentCase: (job as any).currentCase,
           currentCaseId: (job as any).currentCaseId,
@@ -918,7 +926,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
     }
     const newJob = jobStore.create("scenario-preview", { ...previous.params, scenarios: selected, sourceJobId: jobId, dataOverrides,
       options: { ...(previous.params.options as Record<string, unknown> ?? {}), overwrite: true } });
-    setImmediate(() => startScenarioPreviewRun(newJob.id));
+    scheduleJob(newJob.id, () => startScenarioPreviewRun(newJob.id));
     res.json({ ok: true, jobId: newJob.id, status: newJob.status, mode: "rerun", scenarioCount: selected.length, issueKey: previous.issueKey });
     return;
   }
@@ -944,6 +952,27 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
     return;
   }
 
+  let regeneratedSpecValues: Record<string, Record<string, string>> = {};
+  const rerunDataLiveLogs: string[] = [];
+  try {
+    if (prepared.jobType === "scenario-preview") {
+      regeneratedSpecValues = await refreshRecordingRerunData(prepared, undefined, (line) => rerunDataLiveLogs.push(line));
+    }
+  } catch (error) { next(error); return; }
+
+  // Catalog services (OTP...) are planned again from today's bindings: the source job may
+  // never have carried them, and a rerun must not fall back to the recorded code.
+  let rerunServiceBindings: RuntimeServiceBinding[] = [];
+  if (prepared.jobType !== "discovery-batch" && prepared.jobType !== "mobile-launch-execution" && prepared.appSlug) {
+    const services = await planRerunServiceBindings(prepared.appSlug, (prepared.scenarios ?? []) as RerunScenarioOwner[]);
+    if (services.blocked.length > 0) {
+      res.status(409).json(serviceBindingBlockedBody(services.blocked));
+      return;
+    }
+    rerunServiceBindings = services.bindings;
+  }
+  const serviceBindingsParam = rerunServiceBindings.length > 0 ? { serviceBindings: rerunServiceBindings } : {};
+
   if (prepared.jobType === "discovery-batch") {
     const discoveryJob = jobStore.create("discovery-batch", prepared.discoveryParams);
     const checklistIdentity = buildDiscoveryBatchChecklistIdentity({ jobId: discoveryJob.id });
@@ -957,7 +986,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
       discoveryJob.id,
       `[runs:rerun] sourceJobId=${jobId} mode=${mode} selected=${prepared.selectedCount} total=${prepared.totalCount} dispatch=fresh_discovery_batch appSlug=${prepared.appSlug}`,
     );
-    setImmediate(() => startDiscoveryBatchRun(discoveryJob.id));
+    scheduleJob(discoveryJob.id, () => startDiscoveryBatchRun(discoveryJob.id));
     res.json({
       ok: true,
       jobId: discoveryJob.id,
@@ -1067,7 +1096,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
       if (checklistUrl) jobStore.update(jiraJob.id, { issueKey: jiraOrigin.jiraKey, checklistUrl } as any);
       jobStore.appendLog(jiraJob.id, `[runs:rerun] sourceJobId=${jobId} mode=${mode} selected=${prepared.selectedCount} total=${prepared.totalCount} dispatch=jira_semantic recoveredOrigin=scenario_source_issue_key`);
       jobStore.appendLog(jiraJob.id, `[scenario-preview] selectedExecutionEngine=jira_semantic compiler=jira-semantic-v1 origin=${jiraOrigin.jiraKey}`);
-      setImmediate(() => startScenarioPreviewRun(jiraJob.id));
+      scheduleJob(jiraJob.id, () => startScenarioPreviewRun(jiraJob.id));
       res.json({ ok: true, jobId: jiraJob.id, status: jiraJob.status, mode: "rerun", scenarioCount: prepared.selectedCount, issueKey: jiraOrigin.jiraKey, executionEngine: "jira_semantic" });
       return;
     }
@@ -1107,6 +1136,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
         rerunMode: mode,
         rerun: true,
         executionMode: "mixed_rerun",
+        ...serviceBindingsParam,
         recordingSelections: prepared.recordingSelections,
         sectionName: prepared.sectionName,
         sectionSlug: prepared.sectionSlug,
@@ -1117,7 +1147,8 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
         `[runs:rerun] sourceJobId=${jobId} mode=${mode} selected=${prepared.selectedCount} total=${prepared.totalCount} `
         + `dispatch=mixed_rerun reuseCount=${reuseScenarios.length} fallbackCount=${fallbackScenarios.length}`,
       );
-      setImmediate(() => startMixedRerun({
+      for (const line of rerunDataLiveLogs) jobStore.appendLog(parentJob.id, line);
+      scheduleJob(parentJob.id, () => startMixedRerun({
         parentJobId: parentJob.id,
         appSlug: prepared.appSlug,
         targetAppSlug: prepared.targetAppSlug,
@@ -1129,6 +1160,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
         rerunMode: mode,
         reuseScenarios,
         fallbackScenarios,
+        specDatasetValuesByScenario: regeneratedSpecValues,
       }));
       res.json({
         ok: true,
@@ -1163,12 +1195,14 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
         executionMode: "reuse_existing_promoted_spec",
         recordingSelections: prepared.recordingSelections,
         environment: prepared.environment,
+        ...serviceBindingsParam,
       });
       jobStore.appendLog(reuseJob.id, `[runs:rerun] sourceJobId=${jobId} mode=${mode} selected=${prepared.selectedCount} total=${prepared.totalCount} dispatch=reuse_existing_promoted_spec`);
+      for (const line of rerunDataLiveLogs) jobStore.appendLog(reuseJob.id, line);
       for (const s of reuseJobScenarios) {
         console.log(`[promoted-spec-rerun] phase=execution_start scenarioId=${s.scenarioId} specPath=${s.specPath}`);
       }
-      setImmediate(() => startReuseExistingPromotedSpecRun(reuseJob.id));
+      scheduleJob(reuseJob.id, () => startReuseExistingPromotedSpecRun(reuseJob.id));
       res.json({
         ok: true,
         jobId: reuseJob.id,
@@ -1204,6 +1238,8 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
       sourceJobId: jobId,
       rerunMode: mode,
       rerun: true,
+      // Today's bindings replace whatever the source job carried, including none.
+      serviceBindings: rerunServiceBindings.length > 0 ? rerunServiceBindings : undefined,
       issueKey,
       checklistUrl,
       sectionName: prevParams.sectionName,
@@ -1224,6 +1260,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
       sourceJobId: jobId,
       rerunMode: mode,
       rerun: true,
+      ...serviceBindingsParam,
       issueKey,
       checklistUrl,
       launchId: launchMeta?.launchId,
@@ -1245,6 +1282,7 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
     };
   }
 
+  if (Object.keys(regeneratedSpecValues).length) newPayload.specDatasetValuesByScenario = regeneratedSpecValues;
   const newJob = jobStore.create(prepared.jobType, newPayload);
   const scopedChecklistUrl = checklistUrl
     ? `${checklistUrl}${checklistUrl.includes("?") ? "&" : "?"}jobId=${encodeURIComponent(newJob.id)}`
@@ -1256,11 +1294,13 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
    jobStore.appendLog(newJob.id, `[runs:rerun] newJobId=${newJob.id} issueKey=${issueKey || "?"} checklistUrl=${scopedChecklistUrl || "?"}`);
   jobStore.appendLog(newJob.id, `[runs:rerun] appSlug=${prepared.appSlug}`);
   jobStore.appendLog(newJob.id, `[runs:rerun] sourceJobType=${prepared.jobType}`);
+  jobStore.appendLog(newJob.id, `[runs:rerun] serviceBindings=${rerunServiceBindings.length}`);
+  for (const line of rerunDataLiveLogs) jobStore.appendLog(newJob.id, line);
 
   if (prepared.jobType === "mobile-launch-execution") {
     setImmediate(() => startMobileLaunchExecutionJob(newJob.id));
   } else {
-    setImmediate(() => startScenarioPreviewRun(newJob.id));
+    scheduleJob(newJob.id, () => startScenarioPreviewRun(newJob.id));
   }
 
   res.json({
@@ -1364,7 +1404,9 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
         for (const requirement of requirements) {
           if (entries.some(entry => entry.key === requirement.key)) continue;
           const label = norm(requirement.label);
-          const source = entries.find(entry => entry.key === `jira_step_${requirement.stepIndex}`)
+          const source = entries.find(entry => entry.fieldLabel && norm(entry.fieldLabel) === label)
+            ?? entries.find(entry => !entry.fieldLabel && entry.key === `jira_step_${requirement.stepIndex}`)
+            ?? entries.find(entry => !entry.fieldLabel && new RegExp(`^jira_edit_[a-f0-9]+_${requirement.stepIndex}$`).test(entry.key))
             ?? entries.find(entry => label && (norm(entry.key) === label || norm(entry.key).startsWith(`${label}_`)))
             ?? entries.find(entry => label && `_${norm(entry.key)}_`.includes(`_${label}_`));
           if (source) entries.push({ ...source, key: requirement.key });
@@ -1506,25 +1548,43 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
   }
 });
 
-runsRouter.delete("/:jobId", (req, res) => {
+runsRouter.delete("/:jobId", async (req, res) => {
   const internal = jobStore.getInternal(req.params.jobId);
   if (!internal) {
     res.status(404).json({ error: "Job not found" });
     return;
   }
 
-  if (internal.status !== "running") {
+  if (internal.status !== "running" && internal.status !== "queued") {
     res.status(400).json({ error: `Cannot cancel a job in status: ${internal.status}` });
     return;
   }
 
-  internal.process?.kill("SIGTERM");
+  if (internal.cancellationRequested) {
+    res.status(409).json({error: "La ejecución ya se está deteniendo"});
+    return;
+  }
+  internal.cancellationRequested = true;
+  if (internal.status === "queued") {
+    jobStore.appendLog(req.params.jobId, "[run:cancel] Ejecución en espera detenida por el usuario");
+    jobStore.update(req.params.jobId, { status: "cancelled", completedAt: new Date().toISOString() });
+    res.json({ ok: true, jobId: req.params.jobId, status: "cancelled" });
+    return;
+  }
+  try {
+    await terminateJobProcess(internal.process);
+  } catch (error) {
+    internal.cancellationRequested = false;
+    res.status(500).json({error: error instanceof Error ? error.message : "No se pudo detener la ejecución"});
+    return;
+  }
+  jobStore.appendLog(req.params.jobId, "[run:cancel] Ejecución detenida por el usuario");
   jobStore.update(req.params.jobId, {
     status: "cancelled",
     completedAt: new Date().toISOString()
   });
 
-  res.json({ ok: true, jobId: req.params.jobId });
+  res.json({ ok: true, jobId: req.params.jobId, status: "cancelled" });
 });
 
 // ── TestRail result sync backfill — sync results from a completed launch to the TestRun ──

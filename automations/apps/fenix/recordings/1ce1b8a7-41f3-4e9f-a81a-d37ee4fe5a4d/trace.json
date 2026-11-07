@@ -1,0 +1,36 @@
+{
+  "recordingId": "1ce1b8a7-41f3-4e9f-a81a-d37ee4fe5a4d",
+  "projectSlug": "fenix",
+  "appSlug": "fenix",
+  "platform": "web",
+  "baseUrl": "https://qa1.santacruz.do/onlinebanking",
+  "label": "CONSULTA",
+  "recordingGoal": {
+    "declaredGoal": "CONSULTA",
+    "normalizedGoal": "CONSULTA",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-11-04T15:50:41.099Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 2613,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "fingerprint": "",
+      "url": "https://qa1.santacruz.do/onlinebanking",
+      "pageKey": "tab-1",
+      "seq": 0
+    }
+  ],
+  "screens": [],
+  "endedAt": "2026-11-04T15:50:44.335Z",
+  "durationMs": 3236
+}

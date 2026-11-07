@@ -60,6 +60,25 @@ test('verified classic edit reaches project knowledge and regeneration without c
  }
 });
 
+test('a passed TestRail case without a Jira reference teaches its route under TR-<caseId>',async()=>{
+ const actions=['Abrir la aplicación configurada del proyecto','Presionar "SMS"'];
+ const scenario={source:'testrail',externalId:'C57449',caseId:57449,title:'Flow',steps:actions.map((action,i)=>({index:i+1,action}))} as any;
+ const plan={version:'1.0',source:'discovery_generated',status:'validated',scenario:{title:'Flow'},requiredData:[],createdAt:new Date().toISOString(),steps:[{index:1,action:'navigate',target:'APP_BASE_URL',description:actions[0]},{index:2,action:'click',target:{strategy:'css',value:'#observed'},description:actions[1]}]} as any;
+ const input={scenario,plan,status:'discovered_passed',appSlug:'fixture-bank',profileRevision:'rev',jobId:'job',evidenceRefs:['snapshot.json']};
+ const routes:JiraLearnedRoute[]=[];
+ assert.equal((await persistClassicJiraDiscoveryRoute(input,async route=>{routes.push(route);})).status,'persisted');
+ assert.match(JSON.stringify(routes),/TR-57449/);
+ // still nothing to learn from: a failed discovery, a recording, ambiguous Jira references, or no usable case id
+ for(const patch of [{status:'exploration_failed'},{scenario:{...scenario,recordingId:'recording'}},{scenario:{...scenario,references:'HU-1 HU-2'}},{scenario:{...scenario,caseId:undefined}}]) {
+  assert.equal((await persistClassicJiraDiscoveryRoute({...input,...patch},async()=>{assert.fail('must not persist');})).status,'skipped');
+ }
+ // an explicit single Jira reference keeps winning over the derived key
+ const withRef:JiraLearnedRoute[]=[];
+ await persistClassicJiraDiscoveryRoute({...input,scenario:{...scenario,references:'HU-9'}},async route=>{withRef.push(route);});
+ assert.match(JSON.stringify(withRef),/HU-9/);
+ assert.doesNotMatch(JSON.stringify(withRef),/TR-57449/);
+});
+
 test('known observable binding requires exact lineage and never downgrades comparisons',()=>{
  const requirement='Validar que se muestre "la pantalla de verificación"';
  assert.deepEqual(bindKnownJiraObservables([requirement],[{requirement,target:'Confirma tu identidad'}]),['Validar que se muestre "Confirma tu identidad"']);

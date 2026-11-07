@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from "@playwright/test";
+import fs from "node:fs/promises";
 import type { DataContext } from "../data/data-context";
 import { assertValidExecutionPlan } from "../plans";
 import type { ExecutionPlan, ExecutionPlanStep } from "../types/execution-plan.types";
@@ -13,6 +14,9 @@ import { ensureSupportingCheckbox, ensureSupportingMultiselect, resolveSupportin
 import { resolveSupportingAutofill, type ResolvableObservedControl } from "./supporting-autofill";
 import type { RuntimeInputRequirement } from "../testrail/testrail-runtime-transformer";
 import { AsyncOperationProgressLease } from "./async-operation-progress-lease";
+import { resolveTestFile } from "../test-files/test-file-store";
+import { captureRecordedApplicationValue, fillRecordedValue, uploadRecordedFiles, type RecordedRuntimeValueCapture } from "../recording/recorded-runtime-actions";
+import { captureFeedbackBaseline, newNonFailureFeedbackProbe } from "../recording/upload-completion";
 
 /**
  * Classify scenario evidence kind from its steps — no hardcoded HUs or entities.
@@ -65,6 +69,7 @@ export type ScreenProgressProbe = boolean | {
   signal?: string;
   pendingCount?: number;
   requestFailed?: boolean;
+  terminalClientError?: { resourceType?: string };
   lastProgressAt?: number;
 };
 
@@ -123,8 +128,16 @@ export async function waitForStableInteractiveScreen(
   options?: {
     progressProbe?: () => ScreenProgressProbe;
     completionProbe?: () => Promise<ScreenCompletionProbeResult>;
+    /** An explicit recorded destination may arrive after a quiet gap between backend operations. */
+    completionDeadline?: "idle" | "absolute";
     waitForPendingTransport?: boolean;
     absoluteDeadlineMs?: number;
+    /**
+     * Polled each iteration: when it resolves true the action already has its observable outcome
+     * (e.g. the file picker opened) and the wait ends as stable instead of waiting out unrelated
+     * loading signals elsewhere on the page.
+     */
+    earlyExit?: () => Promise<boolean>;
     /** Resolved action target to keep pointer activity alive during long post-action waits. */
     activityTarget?: Locator;
     /** Last known target geometry captured before transient target markers are released. */
@@ -137,6 +150,13 @@ export async function waitForStableInteractiveScreen(
     `completionProbeProvided=${Boolean(options?.completionProbe)}`,
   );
   const idleWindowMs = Number(process.env.LOADING_STABILITY_TIMEOUT_MS) || 8000;
+  const completionUsesAbsoluteDeadline = Boolean(options?.completionProbe && options.completionDeadline === "absolute");
+  // An absolute completion deadline disables the normal idle exit. A dead page (no pending
+  // request, no meaningful progress) would then burn the full hard cap. Exit after a quiet
+  // window far longer than the idle window so slow-but-alive operations are not cut.
+  const quietStallMs = Number(process.env.COMPLETION_ABSOLUTE_QUIET_STALL_MS) || Math.max(20000, idleWindowMs * 2.5);
+  const quietStallReached = () => completionUsesAbsoluteDeadline
+    && Date.now() - progressLease.lastMeaningfulProgressAt >= quietStallMs;
   const hardSafetyCapEnv = process.env.ASYNC_OPERATION_HARD_SAFETY_CAP_MS
     ?? process.env.LOADING_STABILITY_HARD_SAFETY_CAP_MS
     ?? process.env.LOADING_STABILITY_ABSOLUTE_DEADLINE_MS;
@@ -175,27 +195,39 @@ export async function waitForStableInteractiveScreen(
     progressLease.recordMeaningfulProgress();
     if (!progressSignals.includes(signal)) progressSignals.push(signal);
   };
+  // The same XHR/fetch repeated while the page waits is background polling (shared-state refresh,
+  // heartbeat), not the action's own work. Without this, any app that polls can never look "stable".
+  // The first two occurrences still count, so a real request/response pair is always seen.
+  const pollCounts = new Map<string, number>();
+  const backgroundPoll = new WeakSet<object>();
   const onRequest = (request: any) => {
     if (isRelevant(request)) {
+      const type = String(request.resourceType?.() ?? "other");
+      if (type === "xhr" || type === "fetch") {
+        const pollKey = `${String(request.method?.() ?? "GET")} ${String(request.url?.() ?? "").split("?")[0]}`;
+        const occurrences = (pollCounts.get(pollKey) ?? 0) + 1;
+        pollCounts.set(pollKey, occurrences);
+        if (occurrences > 2) { backgroundPoll.add(request as object); return; }
+      }
       pendingRelevantRequests.add(request as object);
       noteProgress("request_started");
     }
   };
   const onResponse = (response: any) => {
     const request = response.request?.();
-    if (isRelevant(request)) {
+    if (isRelevant(request) && !backgroundPoll.has(request as object)) {
       pendingRelevantRequests.delete(request as object);
       noteProgress("response_received");
     }
   };
   const onRequestFinished = (request: any) => {
-    if (isRelevant(request)) {
+    if (isRelevant(request) && !backgroundPoll.has(request as object)) {
       pendingRelevantRequests.delete(request as object);
       noteProgress("request_finished");
     }
   };
   const onRequestFailed = (request: any) => {
-    if (!isRelevant(request)) return;
+    if (!isRelevant(request) || backgroundPoll.has(request as object)) return;
     pendingRelevantRequests.delete(request as object);
     // FIRST_LOSS fix: a request the browser itself cancelled BECAUSE the page is navigating away
     // (Playwright reports this as `requestfailed` with an abort/cancel errorText, e.g.
@@ -255,7 +287,7 @@ export async function waitForStableInteractiveScreen(
   }
   try { (page.context?.() as any)?.on?.("close", onContextClose); } catch { /* best effort */ }
 
-  const readProgressProbe = (): { active: boolean; progressed: boolean; requestFailed: boolean } => {
+  const readProgressProbe = (): { active: boolean; progressed: boolean; requestFailed: boolean; failedResourceType?: string } => {
     const raw = options?.progressProbe?.();
     if (typeof raw === "boolean") {
       probeActive = raw;
@@ -278,7 +310,12 @@ export async function waitForStableInteractiveScreen(
       noteProgress(raw.signal || "probe_progress");
     }
     if (raw.signal && !progressSignals.includes(raw.signal)) progressSignals.push(raw.signal);
-    return { active: probeActive, progressed, requestFailed: raw.requestFailed === true };
+    return {
+      active: probeActive,
+      progressed,
+      requestFailed: raw.requestFailed === true,
+      ...(raw.terminalClientError?.resourceType ? { failedResourceType: raw.terminalClientError.resourceType } : {}),
+    };
   };
 
   // Loading text patterns (lowercase for matching)
@@ -302,6 +339,26 @@ export async function waitForStableInteractiveScreen(
     let lastCompletionProbeSatisfied: boolean | undefined;
 
     if (pageClosed || contextClosed) break;
+
+    if (options?.earlyExit && await options.earlyExit().catch(() => false)) {
+      if (!signals.includes("early_exit_outcome_observed")) signals.push("early_exit_outcome_observed");
+      cleanup();
+      return {
+        stable: true,
+        waitedMs: Date.now() - start,
+        signals,
+        progressSignals,
+        relevantPendingRequests: Math.max(pendingRelevantRequests.size, probePendingCount),
+        activeAsyncOperation: false,
+        stallThresholdReached: false,
+        lastProgressAgeMs: Math.max(0, Date.now() - progressLease.lastMeaningfulProgressAt),
+        idleDeadlineMs: progressLease.idleDeadline,
+        hardSafetyDeadlineMs: progressLease.hardSafetyDeadline,
+        absoluteDeadlineMs: absoluteDeadlineAt,
+        waitState: "completed",
+        terminationReason: "stable",
+      };
+    }
 
     // Discovery may spend several seconds confirming a recorded postcondition. Keep the
     // resolved control active with real browser pointer movement during that wait so an
@@ -358,13 +415,37 @@ export async function waitForStableInteractiveScreen(
       }
 
       // 3. Spinner/progress elements
-      const spinnerCount = await page.locator('[role="progressbar"], .spinner, .loader, .skeleton, .shimmer, [class*="spin"], [class*="load"]').count();
-      const visibleSpinners = await page.locator('[role="progressbar"], .spinner, .loader, .skeleton, .shimmer, [class*="spin"]:visible, [class*="load"]:visible').count();
-      if (visibleSpinners > 0) { loadingDetected = true; if (!signals.includes("spinner")) signals.push("spinner"); }
+      // Class fragments are whole loading words: a bare "load" also matches "upload"/"download"
+      // (file-upload buttons), which kept a static screen "loading" until the hard budget (2 min).
+      // A page can keep a "loading" class on a layout container for its whole life (a component marker, not an
+      // indicator). A project lists such containers in ASYNC_WAIT_IGNORE_LOADER_SELECTOR (a CSS selector list) and
+      // they stop counting as a loader; unset, nothing is excluded.
+      const ignoredLoaders = process.env.ASYNC_WAIT_IGNORE_LOADER_SELECTOR?.trim();
+      const ignoredLoadersGuard = ignoredLoaders ? `:not(${ignoredLoaders})` : "";
+      const spinnerSelector = ['[role="progressbar"]', ".spinner", ".loader", ".skeleton", ".shimmer", '[class*="spinner" i]', '[class*="loader" i]', '[class*="loading" i]', '[class*="skeleton" i]']
+        .map((part) => `${part}${ignoredLoadersGuard}:visible`).join(", ");
+      const visibleSpinners = await page.locator(spinnerSelector).count();
+      if (visibleSpinners > 0) {
+        loadingDetected = true;
+        if (!signals.includes("spinner")) {
+          signals.push("spinner");
+          // Once per wait: which element is holding the screen "loading" (tag, id, classes, opacity only, never text),
+          // so a loader that stays rendered after the page is usable can be told apart from a real one.
+          // Diagnostic only: any failure here (a page double, a navigating page) must never end the wait.
+          let spinnerIdentity = "unavailable";
+          try {
+            spinnerIdentity = await page.locator(spinnerSelector).first().evaluate((element) => {
+              const style = window.getComputedStyle(element);
+              return `tag=${element.tagName.toLowerCase()} id=${element.id || "-"} class=${String(element.getAttribute("class") ?? "-").slice(0, 120)} opacity=${style.opacity} ariaHidden=${element.getAttribute("aria-hidden") ?? "-"}`;
+            });
+          } catch { /* keep "unavailable" */ }
+          console.log(`[async-wait] spinnerMatch count=${visibleSpinners} ${spinnerIdentity}`);
+        }
+      }
 
-      // 4. Button/input disabled during loading (overlay pattern)
+      // 4. Button/input disabled during loading (overlay pattern): needs a spinner that is on screen.
       const disabledDuringLoad = await page.locator('button[disabled], input[disabled]').count();
-      if (disabledDuringLoad > 5 && spinnerCount > 0) { loadingDetected = true; if (!signals.includes("disabled_overlay")) signals.push("disabled_overlay"); }
+      if (disabledDuringLoad > 5 && visibleSpinners > 0) { loadingDetected = true; if (!signals.includes("disabled_overlay")) signals.push("disabled_overlay"); }
 
     } catch {
       // Page may have navigated or closed — exit wait
@@ -386,7 +467,18 @@ export async function waitForStableInteractiveScreen(
     // the previous screen. The probe remains bounded by the existing wait
     // budget and is agnostic to the application or route.
     const probeState = readProgressProbe();
-    if (probeState.requestFailed) requestFailed = true;
+    // The aggregate progress probe can report an XHR/fetch failure that is
+    // unrelated to the recorded postcondition (for example, a list/catalog
+    // request aborted while the page navigates). When a completion probe owns
+    // readiness, keep observing those secondary failures until the probe
+    // succeeds or the existing idle/hard deadline expires. The page event
+    // listener above still makes document-load failures immediately terminal;
+    // preserve that guarantee when the progress probe identifies a document
+    // failure too.
+    if (probeState.requestFailed
+      && (!options?.completionProbe || probeState.failedResourceType === "document")) {
+      requestFailed = true;
+    }
     const relevantPendingCount = Math.max(pendingRelevantRequests.size, probePendingCount);
     if (requestFailed) {
       logAsyncState("request_failed", relevantPendingCount, loadingDetected);
@@ -403,7 +495,7 @@ export async function waitForStableInteractiveScreen(
     }
     loadingCurrentlyDetected = loadingDetected;
 
-    if (loadingDetected && relevantPendingCount === 0 && Date.now() >= progressLease.idleDeadline) {
+    if (loadingDetected && relevantPendingCount === 0 && ((Date.now() >= progressLease.idleDeadline && !completionUsesAbsoluteDeadline) || quietStallReached())) {
       logAsyncState("idle", relevantPendingCount, true);
       break;
     }
@@ -424,7 +516,7 @@ export async function waitForStableInteractiveScreen(
       // target that will never become ready still fails closed well before the hard safety cap,
       // never waiting indefinitely.
       if (options?.completionProbe) {
-        const idleDeadlineReached = Date.now() >= progressLease.idleDeadline;
+        const idleDeadlineReached = (Date.now() >= progressLease.idleDeadline && !completionUsesAbsoluteDeadline) || quietStallReached();
         console.log(
           `[async-wait] completionProbeProvided=true completionProbeSatisfied=${lastCompletionProbeSatisfied === true} ` +
           `screenStable=true loadingSignal=${loadingDetected} relevantPendingRequests=${relevantPendingCount} ` +
@@ -484,7 +576,7 @@ export async function waitForStableInteractiveScreen(
       ? "context_closed"
       : requestFailed
         ? "request_failed"
-        : now >= absoluteDeadlineAt && activeAsyncOperation
+        : now >= absoluteDeadlineAt && (activeAsyncOperation || completionUsesAbsoluteDeadline)
           ? "absolute_deadline_reached"
           : "stalled";
   if (terminationReason === "request_failed") logAsyncState("request_failed", relevantPendingCount, loadingCurrentlyDetected);
@@ -588,6 +680,8 @@ export async function executeExecutionPlan(input: {
     causal: boolean;
   };
 }): Promise<PlanExecutionResult> {
+  // Keep page switching local to this execution; never mutate the caller's input object.
+  input = { ...input };
   assertValidExecutionPlan(input.plan);
 
   const startedAt = new Date();
@@ -598,6 +692,11 @@ export async function executeExecutionPlan(input: {
   const runtimeSnapshots: Awaited<ReturnType<typeof extractRuntimeUiSnapshot>>[] = [];
   const executedClickTargets: string[] = [];
   const executedSteps: string[] = [];
+  // Values copied from one observed application are scoped to this execution only. They are
+  // deliberately kept out of plan files, datasets, evidence logs, and persisted knowledge.
+  const recordedApplicationValues = new Map<string, string>();
+  let currentPage = input.page;
+  const recordedPages = new Map<string, Page>([["tab-1", input.page]]);
 
   for (const step of steps) {
     if (aborted) {
@@ -620,6 +719,27 @@ export async function executeExecutionPlan(input: {
     let errorMessage: string | undefined;
 
     try {
+      if (step.pageKey) {
+        if (!/^tab-[1-9]\d*$/.test(step.pageKey)) throw new Error("RECORDED_TAB_KEY_INVALID");
+        let recordedPage = recordedPages.get(step.pageKey);
+        if (!recordedPage && step.opensNewPage === true) {
+          const context = recordedPages.get("tab-1")!.context();
+          recordedPage = context.pages().find((candidate) =>
+            !candidate.isClosed() && ![...recordedPages.values()].includes(candidate),
+          );
+          if (!recordedPage) recordedPage = await context.newPage();
+          recordedPages.set(step.pageKey, recordedPage);
+        }
+        if (!recordedPage) throw new Error("RECORDED_TAB_NOT_AVAILABLE");
+        if (recordedPage.isClosed()) throw new Error("RECORDED_TAB_CLOSED");
+        currentPage = recordedPage;
+        input.page = recordedPage;
+      }
+      for (const capture of step.runtimeValueCaptures ?? []) {
+        const value = await captureRecordedApplicationValue(currentPage, capture as RecordedRuntimeValueCapture);
+        recordedApplicationValues.set(capture.sourceEventRef, value);
+        console.log(`[recording-runtime-value] captured=true sourceEventRef=${capture.sourceEventRef} length=${value.length}`);
+      }
       // Wait for screen stability before resolving targets/clicks/assertions.
       // Skip for navigate (already waits for domcontentloaded) and login steps.
       const needsStabilityWait = step.action !== "navigate" && step.action !== "login";
@@ -635,7 +755,21 @@ export async function executeExecutionPlan(input: {
 
       switch (step.action) {
         case "navigate": {
-          if (step.target === "APP_BASE_URL") {
+          if (step.navigationUrl) {
+            let navigationUrl: URL;
+            try {
+              navigationUrl = new URL(step.navigationUrl);
+            } catch {
+              throw new Error("recorded_navigation_url_invalid");
+            }
+            if (!["http:", "https:"].includes(navigationUrl.protocol) || navigationUrl.username || navigationUrl.password) {
+              throw new Error("recorded_navigation_url_unsafe");
+            }
+            await input.page.goto(navigationUrl.toString(), { waitUntil: "domcontentloaded" });
+            const navStability = await waitForStableInteractiveScreen(input.page);
+            if (!navStability.stable) throw new Error("recorded_navigation_screen_not_stable");
+            executedSteps.push(`Navegar a la aplicación observada (${navigationUrl.origin}).`);
+          } else if (step.target === "APP_BASE_URL") {
             const runtimeBaseUrl = input.runtimeConfig?.app.baseUrl ?? input.appBaseUrl;
             if (!runtimeBaseUrl) {
               throw new Error("navigate APP_BASE_URL requires appBaseUrl in executor input.");
@@ -679,6 +813,12 @@ export async function executeExecutionPlan(input: {
           break;
         }
         case "fill": {
+          if (step.runtimeDerivedSourceEventRef) {
+            const value = recordedApplicationValues.get(step.runtimeDerivedSourceEventRef);
+            if (value === undefined) throw new Error("recorded_runtime_value_not_captured");
+            await fillRecordedValue(input.page, step.technicalTargetRefs ?? [], value);
+            break;
+          }
           if (!step.target || step.target === "APP_BASE_URL") {
             throw new Error("fill requires concrete target.");
           }
@@ -692,6 +832,42 @@ export async function executeExecutionPlan(input: {
             await resolveSupportingDate(locator, { strategy: "valid_in_range" });
           } else {
             throw new Error("fill requires value, valueKey, or supportingStrategy.");
+          }
+          break;
+        }
+        case "uploadFile": {
+          if (step.fileAssets?.length || step.fileSetValueKey) {
+            const appSlug = input.runtimeConfig?.app.appProfile?.trim();
+            if (!appSlug) throw new Error("recorded_upload_requires_project_profile");
+            const fileSetValue = step.fileSetValueKey
+              ? input.dataContext.entries.find((entry) => entry.key.trim().toLowerCase() === step.fileSetValueKey!.trim().toLowerCase())?.value
+              : undefined;
+            if (step.fileSetValueKey && !fileSetValue) throw new Error("recorded_file_set_runtime_value_missing");
+            const feedbackBaseline = await captureFeedbackBaseline(input.page);
+            await uploadRecordedFiles(input.page, {
+              projectSlug: appSlug,
+              technicalTargetRefs: step.technicalTargetRefs ?? [],
+              fileAssets: step.fileAssets,
+              ...(fileSetValue ? { fileSetValue } : {}),
+            });
+            // The app's own "uploaded" message ends the wait; rows that keep syncing do not hold the next step.
+            const uploadStability = await waitForStableInteractiveScreen(input.page, {
+              earlyExit: newNonFailureFeedbackProbe(input.page, feedbackBaseline),
+            });
+            if (!uploadStability.stable) throw new Error("recorded_file_upload_page_not_stable");
+            break;
+          }
+          if (!step.target || step.target === "APP_BASE_URL") throw new Error("uploadFile requires a concrete file input target.");
+          const fileRef = resolveStepValue({ step, dataContext: input.dataContext });
+          const appSlug = input.runtimeConfig?.app.appProfile?.trim();
+          if (!fileRef || !appSlug) throw new Error("uploadFile requires a file reference and project profile.");
+          const asset = await resolveTestFile(appSlug, fileRef);
+          const locator = resolveLocatorFromPlanTarget(input.page, step.target).first();
+          const isFileInput = await locator.evaluate(element => element instanceof HTMLInputElement && element.type === "file").catch(() => false);
+          if (!isFileInput) throw new Error("uploadFile target must resolve to an observed input[type=file].");
+          await locator.setInputFiles({ name: asset.filename, mimeType: asset.contentType, buffer: await fs.readFile(asset.path) });
+          if (!await locator.evaluate(element => (element as HTMLInputElement).files?.length === 1)) {
+            throw new Error("uploadFile did not confirm the selected file.");
           }
           break;
         }
@@ -804,7 +980,11 @@ export async function executeExecutionPlan(input: {
         case "screenshot":
           break;
         case "noop":
-          stepStatus = "skipped";
+          if (step.recordingActionType === "tab_switch") {
+            runtimeSnapshots.push(await extractRuntimeUiSnapshot(input.page));
+          } else {
+            stepStatus = "skipped";
+          }
           break;
         default:
           throw new Error(`Unsupported step action: ${step.action}`);

@@ -14,6 +14,9 @@ export type TestDesignDatum = {
   key: string;
   label?: string;
   value: string;
+  controlType?: string;
+  application?: string;
+  required?: boolean;
   sensitive: boolean;
   /** Short hint shown under the field, e.g. what kind of value is expected. */
   description: string;

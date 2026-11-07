@@ -310,7 +310,7 @@ test("keeps confirmed replay metadata in the resolved contract while generated s
   assert.deepEqual(result.generated.map((field) => field.key), ["fixture.generated"]);
 });
 
-test("never replays a secret value", async () => {
+test("restores the last confirmed password without sending it to the provider", async () => {
   let providerCalls = 0;
   const result = await resolveScenarioSyntheticBatch({
     projectId: "00000000-0000-0000-0000-000000000001",
@@ -326,8 +326,9 @@ test("never replays a secret value", async () => {
     }],
     provider: fakeProvider(() => { providerCalls += 1; }),
   });
-  assert.equal(result.resolved.length, 0);
-  assert.deepEqual(result.unresolved, [{ key: "auth.password", status: "unresolved" }]);
-  assert.equal(result.compatibleValuesFound, 0);
+  assert.equal(result.resolved.length, 1);
+  assert.equal(result.resolved[0].value, "secret-must-not-appear");
+  assert.deepEqual(result.unresolved, []);
+  assert.equal(result.compatibleValuesFound, 1);
   assert.equal(providerCalls, 0);
 });

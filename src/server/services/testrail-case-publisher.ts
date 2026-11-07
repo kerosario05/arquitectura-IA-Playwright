@@ -646,6 +646,22 @@ function normalizeTitle(value: string): string {
   return value.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+/**
+ * A launch gets a fresh id every time, so its scenario ids never match an earlier publication and every re-run
+ * (go back, fix the steps, run again) used to add a second case. The same story and title in the same
+ * project/suite/section is the same scenario: it is the key a later launch uses to find, and update, its case.
+ * A story key the launch invented for itself (`launch-N`) carries no identity.
+ */
+export function stableScenarioKey(
+  scenario: { sourceIssueKey?: string; title: string },
+  ctx: { projectId: number; suiteId?: number; sectionId: number },
+): string | undefined {
+  const story = scenario.sourceIssueKey?.trim();
+  const title = normalizeTitle(scenario.title ?? "");
+  if (!story || /^launch-\d+$/i.test(story) || !title) return undefined;
+  return [story.toLowerCase(), title, ctx.projectId, ctx.suiteId ?? "na", ctx.sectionId].join("|");
+}
+
 function buildAutomationScenarioMarkerId(scenarioId: string, launchId?: string): string | undefined {
   if (!launchId) return undefined;
   const launchShortId = launchId.slice(0, 8);
@@ -831,6 +847,8 @@ export async function publishScenariosToTestRail(
     sourceScenarioId: (s as any).launchScenarioId,
   }));
   console.log(`[testrail-publish] input scenarios count=${ctx.scenarios.length} ids=${scenarioIds.join(",")}`);
+  // Cases already claimed in this batch, so two scenarios with the same story and title never share one case.
+  const stableReusedCaseIds = new Set<number>();
 
   for (const [index, scenario] of ctx.scenarios.entries()) {
     const scenarioId = buildScenarioPreviewScenarioId(scenario, index, {
@@ -839,6 +857,24 @@ export async function publishScenariosToTestRail(
     });
     const key = scenarioCacheKey(scenarioId, ctx.cacheKey, ctx.projectId, ctx.suiteId, ctx.sectionId);
     let existingMapping = store.mappings.find((m) => scenarioCacheKey(m.scenarioId, m.cacheKey, m.projectId, m.suiteId, m.sectionId) === key);
+    const stableKey = stableScenarioKey(scenario, ctx);
+    // Launch execution only: an earlier launch of this same scenario owns a case; update it instead of adding another.
+    if (!existingMapping && stableKey && (ctx as any).launchId && !ctx.recordingBatch) {
+      const earlier = [...store.mappings].reverse().find((m) =>
+        m.stableKey === stableKey && !stableReusedCaseIds.has(m.testRailCaseId));
+      if (earlier) {
+        let remoteCase: RawTestRailCase | undefined;
+        try { remoteCase = await client.getCase(earlier.testRailCaseId); } catch { remoteCase = undefined; }
+        // TestRail sometimes omits section_id; absent is not a mismatch (same rule as the cached-mapping check above).
+        if (remoteCase && (remoteCase.section_id === undefined || Number(remoteCase.section_id) === Number(ctx.sectionId))) {
+          existingMapping = earlier;
+          stableReusedCaseIds.add(earlier.testRailCaseId);
+          console.log(`[testrail-publish] stable scenario reuse scenario=${scenarioId} caseId=${earlier.testRailCaseId} action=update`);
+        } else {
+          console.warn(`[testrail-publish] stable scenario mapping ignored caseId=${earlier.testRailCaseId} reason=${remoteCase ? "section_changed" : "case_not_found"}`);
+        }
+      }
+    }
 
     // A Recording batch's own cached mapping is a hint, never proof — the case it points at may
     // since have been deleted directly in TestRail, or (for a mapping cached before
@@ -1232,6 +1268,7 @@ export async function publishScenariosToTestRail(
           sectionId: ctx.sectionId,
           projectId: ctx.projectId,
       suiteId: ctx.suiteId,
+      ...(stableKey ? { stableKey } : {}),
       updatedAt: new Date().toISOString(),
       source: mappingSource,
     };

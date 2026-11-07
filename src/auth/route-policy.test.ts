@@ -189,6 +189,12 @@ async function main(): Promise<void> {
     );
     assert.strictEqual(findRoutePolicy("GET", "/api/runs/abc")?.path, "/api/runs/:jobId");
     assert.strictEqual(findRoutePolicy("GET", "/api/runs")?.path, "/api/runs");
+    assert.deepStrictEqual(findRoutePolicy("GET", "/api/runs/test-files")?.permissions, ["tests.launch"]);
+    assert.strictEqual(findRoutePolicy("GET", "/api/runs/test-files")?.project, "required");
+    assert.deepStrictEqual(findRoutePolicy("POST", "/api/runs/test-files")?.permissions, ["tests.launch"]);
+    assert.deepStrictEqual(findRoutePolicy("GET", "/api/test-design/files")?.permissions, ["testdesign.view"]);
+    assert.strictEqual(findRoutePolicy("GET", "/api/test-design/files")?.project, "required");
+    assert.deepStrictEqual(findRoutePolicy("POST", "/api/test-design/files")?.permissions, ["testdesign.generate"]);
     assert.deepStrictEqual(findRoutePolicy("GET", "/api/test-design/jira/projects")?.permissions, ["testdesign.view"]);
     assert.deepStrictEqual(findRoutePolicy("GET", "/api/test-design/testrail/projects")?.permissions, ["testdesign.view"]);
     assert.deepStrictEqual(findRoutePolicy("GET", "/api/jira/projects")?.permissions, ["dashboard.view"]);
@@ -201,6 +207,10 @@ async function main(): Promise<void> {
       ["POST", "/api/projects/web"],
       ["DELETE", "/api/projects/kiosko"],
       ["POST", "/api/runs/discovery-batch"],
+      ["GET", "/api/runs/test-files?projectSlug=kiosko"],
+      ["POST", "/api/runs/test-files"],
+      ["GET", "/api/test-design/files?projectSlug=kiosko"],
+      ["POST", "/api/test-design/files"],
       ["GET", "/api/executions"],
       ["POST", "/api/recordings/start"],
       ["GET", "/api/jira/projects"],
@@ -304,6 +314,36 @@ async function main(): Promise<void> {
   await test("nobody but an admin reaches the debug routes", async () => {
     assert.strictEqual((await call("GET", "/api/debug/testrail/status", engineerToken)).status, 403);
     assert.strictEqual((await call("GET", "/api/debug/testrail/status", adminToken)).status, 200);
+  });
+
+  await test("a qa-engineer reads the service catalog but only an editor configures it", async () => {
+    const otp = "/api/service-catalog/projects/kiosko/services/otp.oracle-local-token";
+    assert.strictEqual((await call("GET", "/api/service-catalog", engineerToken)).status, 200);
+    assert.strictEqual((await call("GET", "/api/service-catalog/projects/kiosko/services", engineerToken)).status, 200);
+    const save = await call("PUT", otp, engineerToken, { enabled: true });
+    assert.strictEqual(save.status, 403);
+    assert.deepStrictEqual(save.body.missingPermissions, ["services.edit"]);
+    assert.strictEqual((await call("POST", `${otp}/test`, engineerToken, {})).status, 403);
+    assert.strictEqual((await call("PUT", otp, adminToken, { enabled: true })).status, 200);
+    // Scoped to kiosko: another project's services stay out of reach.
+    const other = await call("GET", "/api/service-catalog/projects/portal-comercial/services", engineerToken);
+    assert.strictEqual(other.status, 403);
+    assert.strictEqual(other.body.error, "project_forbidden");
+  });
+
+  await test("whoever prepares scenarios may bind services, a viewer only reads them", async () => {
+    const owner = { projectSlug: "kiosko", ownerType: "recording", ownerId: "rec-1", targetValueKey: "otp" };
+    const query = "projectSlug=kiosko&ownerType=recording&ownerId=rec-1";
+    assert.strictEqual((await call("PUT", "/api/service-bindings", engineerToken, owner)).status, 200);
+    assert.strictEqual((await call("DELETE", `/api/service-bindings?${query}&targetValueKey=otp`, engineerToken)).status, 200);
+    assert.strictEqual((await call("POST", "/api/service-bindings/view", designerToken, owner)).status, 200);
+    const viewerQuery = "projectSlug=portal-comercial&ownerType=recording&ownerId=rec-1";
+    assert.strictEqual((await call("GET", `/api/service-bindings?${viewerQuery}`, viewerToken)).status, 200);
+    const viewerWrite = await call("PUT", "/api/service-bindings", viewerToken, { ...owner, projectSlug: "portal-comercial" });
+    assert.strictEqual(viewerWrite.status, 403);
+    // Scoped users must name a project they were granted.
+    assert.strictEqual((await call("PUT", "/api/service-bindings", engineerToken, { ...owner, projectSlug: "portal-comercial" })).status, 403);
+    assert.strictEqual((await call("GET", "/api/service-bindings", engineerToken)).body.error, "project_scope_required");
   });
 
   // ------------------------------------------------------------------------

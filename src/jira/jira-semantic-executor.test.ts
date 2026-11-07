@@ -112,6 +112,16 @@ import { compileDeterministicSpec } from "../automations/spec-compiler/determini
 
 const scenario: JiraScenarioInput = { scenarioId: "JIRA-1", sourceIssueKey: "AA-88", title: "Observe gate", steps: ["Presionar \"Solicitar\"", "Validar pantalla de autenticación para iniciar sesión"], expectedResult: "" , authIntent: "gate_observation" };
 function port(calls: string[]): JiraBrowserPort { return { baseUrl: "https://app.example.test/", async navigate() { calls.push("navigate"); }, async navigateTo(url) { calls.push(`navigateTo:${url}`); }, async authenticate() { calls.push("authenticate"); return { success: true }; }, async assertPrecondition(target) { calls.push(`precondition:${target}`); return { observedText: target }; }, async act(step, target) { calls.push(`${step.action}:${target}`); return { strategy: "css", value: "#request" }; }, async assert(target, auth) { calls.push(`assert:${auth}`); return auth ? { stage: "identification_input" } : {}; } }; }
+test("assertion proven by AI evidence promotes the observed visible text as its replay target", async () => {
+  const steps = ['Validar que el formulario se complete con los datos encontrados'];
+  const input = { scenarioId: "JIRA-2", sourceIssueKey: "AA-88", title: "Prose oracle", steps, expectedResult: "" };
+  const browser = { ...port([]), async assert() { return { observedText: "Registro encontrado. Datos autocompletados", replayTarget: "Registro encontrado. Datos autocompletados" }; } };
+  const result = await discoverJiraScenario(input, browser, {});
+  const [step] = result.plan.steps.filter(candidate => candidate.action === "assertVisible");
+  assert.deepEqual(step.target, { strategy: "text", value: "Registro encontrado. Datos autocompletados" });
+  assert.equal(step.description, steps[0]);
+});
+
 test("only explicit validated Jira provenance selects the new engine", () => {
   assert.equal(resolveExecutionEngine({ scenarios: [{ sourceIssueKey: "AA-88" }] }), "legacy");
   const req = { executionEngine: "jira_semantic", scenarioOrigin: { kind: "jira_generated", jiraKey: "AA-88" }, scenarios: [{ scenarioId: "JIRA-1", sourceIssueKey: "AA-88" }] };

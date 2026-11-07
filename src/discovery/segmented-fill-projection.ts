@@ -1,6 +1,9 @@
 /** A source step may contain one literal segment or a redacted whole-field mask. */
 export function isMaskedSegmentValue(value: string): boolean {
-  return /^(?:[•●·*]){2,}$/u.test(value.trim());
+  // Some generated JSON artifacts decode UTF-8 mask bullets as the literal mojibake
+  // token `â€¢`. Recognize that privacy mask as one marker so a six-box value still
+  // projects as one segmented fill; do not broaden this to arbitrary malformed text.
+  return /^(?:[•●·*]|â€¢){2,}$/u.test(value.trim());
 }
 
 export function isSingleSegmentOrMask(value: unknown): value is string {

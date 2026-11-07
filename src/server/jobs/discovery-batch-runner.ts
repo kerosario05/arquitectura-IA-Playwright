@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { reportCaseFailureSafely, runScheduledCaseSafely } from "./case-failure-reporting";
+import { deleteSharedCredentials } from "../../data/launch-shared-credentials";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
@@ -29,6 +30,7 @@ import type { McpRouteProfile } from "../../scenarios/scenario-types";
 import type { PublishedCaseEntry } from "./launch-orchestrator";
 import { jobStore } from "./job-store";
 import { startJiraSemanticRun } from "./jira-semantic-runner";
+import { isJiraDiscoveryOnlyPass, isJiraSpecGenerationEnabled } from "../services/spec-generation-policy";
 import { jiraEvidencePreconditions } from "../../jira/jira-evidence";
 import {
   finalizeLaunchManifest,
@@ -90,6 +92,20 @@ type DiscoveryBatchParams = {
   jiraSemanticCaseIds?: number[];
   jiraSemanticScenarioOrigins?: Record<string, string>;
 };
+
+/**
+ * With spec generation off, a non-Jira (TestRail) case whose discovery passed is a finished case: nothing is promoted, so
+ * "promotion failed" can no longer fail it. Any other discovery state keeps its own outcome.
+ */
+export function isDiscoveryOnlyPassWithSpecsDisabled(input: {
+  specGenerationDisabled: boolean;
+  isJiraChild: boolean;
+  childExitCode: number;
+  discoveryState: string | undefined;
+}): boolean {
+  if (!input.specGenerationDisabled || input.isJiraChild || input.childExitCode !== 0) return false;
+  return ["discovered_passed", "repaired_passed", "discovery_passed", "promoted"].includes(String(input.discoveryState ?? "").toLowerCase());
+}
 
 /** Selects the Jira scenario for a jira_preview published case; undefined keeps the generic discovery path. */
 export function selectJiraSemanticScenario(
@@ -156,7 +172,11 @@ async function runJiraSemanticDiscoveryChild(
     scenarios: [scenario],
     publishedCases: [entry],
     dataOverrides: buildJiraSemanticChildDataOverrides(params, scenario, entry),
-    options: { headed: params.headed === true, autoPromote: true, overwrite: params.overwrite === true },
+    options: {
+      headed: params.headed === true,
+      autoPromote: params.autoPromote !== false && isJiraSpecGenerationEnabled(),
+      overwrite: params.overwrite === true,
+    },
   }, { parentJobId });
   const unsubscribe = jobStore.subscribe(child.id, {
     onLog: line => relayJiraChildProgress(parentJobId, line, String(scenario.scenarioId ?? "")),
@@ -187,21 +207,48 @@ async function runJiraSemanticDiscoveryChild(
 }
 
 /** Relay only the structured lifecycle fields consumed by the parent live panel. */
+/** What the relay remembers about one running child case, so a step event can say which step it is and how long it took. */
+export type JiraRelayCaseState = { steps: string[]; startedAt: Map<number, number> };
+const jiraRelayState = new Map<string, JiraRelayCaseState>();
+
 function relayJiraChildProgress(parentJobId: string, line: string, expectedScenarioId: string): void {
+  const key = `${parentJobId}:${expectedScenarioId}`;
+  const state = jiraRelayState.get(key) ?? { steps: [], startedAt: new Map<number, number>() };
+  jiraRelayState.set(key, state);
+  const projected = projectJiraChildEvent(line, expectedScenarioId, state);
+  if (projected) jobStore.appendLog(parentJobId, JSON.stringify(projected));
+  if (projected?.type === "case_finished") jiraRelayState.delete(key);
+}
+
+/** A failure code is an error class (never a message), so it is safe to show; anything else is dropped. */
+const SAFE_FAILURE_CODE = /^[A-Za-z][A-Za-z0-9_]{2,80}$/;
+
+export function projectJiraChildEvent(
+  line: string,
+  expectedScenarioId: string,
+  state: JiraRelayCaseState,
+  now: number = Date.now(),
+): Record<string, unknown> | undefined {
   let event: Record<string, unknown>;
   try {
     const parsed: unknown = JSON.parse(line);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return undefined;
     event = parsed as Record<string, unknown>;
-  } catch { return; }
-  if (event.executionEngine !== "jira_semantic") return;
+  } catch { return undefined; }
+  if (event.executionEngine !== "jira_semantic") return undefined;
   const caseId = typeof event.caseId === "string" ? event.caseId : "";
-  if (!caseId || caseId !== expectedScenarioId) return;
+  if (!caseId || caseId !== expectedScenarioId) return undefined;
 
+  const stepTextOf = (index: number): string | undefined => {
+    const text = state.steps[index - 1];
+    return typeof text === "string" && text.trim() ? text.trim().slice(0, 160) : undefined;
+  };
   const base = { executionEngine: "jira_semantic", caseId };
   let projected: Record<string, unknown> | undefined;
   if (event.type === "case_started") {
     const steps = Array.isArray(event.steps) ? event.steps.filter((step): step is string => typeof step === "string") : [];
+    state.steps = steps;
+    state.startedAt.clear();
     projected = {
       ...base,
       type: "case_started",
@@ -214,10 +261,20 @@ function relayJiraChildProgress(parentJobId: string, line: string, expectedScena
     const stepIndex = Number(event.stepIndex);
     const phase = typeof event.phase === "string" ? event.phase : "";
     if (Number.isInteger(stepIndex) && stepIndex > 0 && ["resolving", "passed", "failed"].includes(phase)) {
-      projected = { ...base, type: "step_progress", stepIndex, phase };
+      if (phase === "resolving") state.startedAt.set(stepIndex, now);
+      const startedAt = state.startedAt.get(stepIndex);
+      const stepText = stepTextOf(stepIndex);
+      projected = {
+        ...base, type: "step_progress", stepIndex, phase,
+        ...(state.steps.length ? { totalSteps: state.steps.length } : {}),
+        ...(stepText ? { stepText } : {}),
+        ...(phase !== "resolving" && startedAt !== undefined ? { durationMs: Math.max(0, now - startedAt) } : {}),
+      };
     }
   } else if (event.type === "spec_generation_started") {
     projected = { ...base, type: "spec_generation_started" };
+  } else if (event.type === "spec_generation_skipped") {
+    projected = { ...base, type: "spec_generation_skipped", reason: typeof event.reason === "string" ? event.reason : "disabled" };
   } else if (event.type === "case_finished") {
     const failedAtStep = Number(event.failedAtStep);
     projected = {
@@ -225,15 +282,22 @@ function relayJiraChildProgress(parentJobId: string, line: string, expectedScena
       type: "case_finished",
       scenarioId: typeof event.scenarioId === "string" ? event.scenarioId : caseId,
       status: event.status === "passed" ? "passed" : "failed",
+      ...(event.specGenerationStatus === "passed" || event.specGenerationStatus === "skipped"
+        ? { specGenerationStatus: event.specGenerationStatus }
+        : {}),
       ...(Number.isInteger(failedAtStep) && failedAtStep > 0 ? { failedAtStep } : {}),
+      ...(Number.isInteger(failedAtStep) && failedAtStep > 0 && stepTextOf(failedAtStep) ? { failedStepText: stepTextOf(failedAtStep) } : {}),
+      ...(event.status !== "passed" && typeof event.failedReason === "string" && SAFE_FAILURE_CODE.test(event.failedReason)
+        ? { failedReason: event.failedReason } : {}),
       ...(typeof event.title === "string" ? { title: event.title } : {}),
     };
   }
-  if (projected) jobStore.appendLog(parentJobId, JSON.stringify(projected));
+  return projected;
 }
 
 export type JiraSemanticChildOutcome = {
   status: "passed" | "failed";
+  specGenerationStatus?: "passed" | "skipped";
   failedAtStep?: number;
   failedReason?: string;
   failurePhase?: string;
@@ -253,6 +317,9 @@ export function parseJiraSemanticChildOutcome(logs: readonly string[], scenarioI
       || (event.status !== "passed" && event.status !== "failed")) continue;
     return {
       status: event.status,
+      ...(event.specGenerationStatus === "passed" || event.specGenerationStatus === "skipped"
+        ? { specGenerationStatus: event.specGenerationStatus }
+        : {}),
       ...(Number.isInteger(event.failedAtStep) && Number(event.failedAtStep) > 0 ? { failedAtStep: Number(event.failedAtStep) } : {}),
       ...(typeof event.failedReason === "string" && /^[A-Z][A-Z0-9_]+$/.test(event.failedReason) ? { failedReason: event.failedReason } : {}),
       ...(typeof event.failurePhase === "string" && /^[a-z][a-z0-9_]+$/.test(event.failurePhase) ? { failurePhase: event.failurePhase } : {}),
@@ -333,6 +400,7 @@ type ExecutionRoute =
   | "automation_from_case_contract"
   | "targeted_discovery"
   | "full_discovery"
+  | "discovery_passed"
   | "blocked";
 
 type RouteDecision = {
@@ -1604,6 +1672,7 @@ function logRuntimeInputAuthority(jobId: string, params: DiscoveryBatchParams): 
 
 export async function deleteRuntimeContextIfExists(jobId: string, runtimeDir = DISCOVERY_RUNTIME_TMP_DIR): Promise<void> {
   const targetPath = buildRuntimeContextPath(jobId, runtimeDir);
+  deleteSharedCredentials(targetPath);
   try {
     await fs.promises.unlink(targetPath);
   } catch (err) {
@@ -1627,11 +1696,11 @@ export function buildDiscoveryChildEnv(
 export async function readStructuredChildResult(
   resultPath: string,
   caseId: number,
-): Promise<{ status?: string; contextMaterialized: boolean } | undefined> {
+): Promise<{ status?: string; discoveryStatus?: string; contextMaterialized: boolean } | undefined> {
   try {
-    const parsed = JSON.parse(await fs.promises.readFile(resultPath, "utf8")) as { cases?: Array<{ caseId?: number; status?: string; contextMaterialized?: boolean }> };
+    const parsed = JSON.parse(await fs.promises.readFile(resultPath, "utf8")) as { cases?: Array<{ caseId?: number; status?: string; discoveryStatus?: string; contextMaterialized?: boolean }> };
     const entry = parsed.cases?.find((candidate) => candidate.caseId === caseId);
-    return entry ? { status: entry.status, contextMaterialized: entry.contextMaterialized === true } : undefined;
+    return entry ? { status: entry.status, discoveryStatus: entry.discoveryStatus, contextMaterialized: entry.contextMaterialized === true } : undefined;
   } catch {
     return undefined;
   }
@@ -2659,14 +2728,21 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
 
     let jiraSemanticOutcome: JiraSemanticChildOutcome | undefined;
     const runFullDiscoveryForCase = async (currentRoute: RouteDecision): Promise<RouteDecision> => {
-      const fullDiscoveryArgs = buildDiscoveryBatchArgs(fullDiscoveryCommandParams, [caseId]);
+      const jiraScenario = params.contextOnly === true ? undefined : selectJiraSemanticScenario(params, scenarioRef);
+      // One switch (JIRA_SPEC_GENERATION_ENABLED=false) turns spec generation off for every case this runner discovers,
+      // Jira or TestRail: discovery runs without promotion and a passed discovery is the case's result.
+      const specGenerationDisabled = !isJiraSpecGenerationEnabled();
+      const diagnosticCommandParams = specGenerationDisabled
+        ? { ...fullDiscoveryCommandParams, autoPromote: false, autoPom: false }
+        : fullDiscoveryCommandParams;
+      const fullDiscoveryArgs = buildDiscoveryBatchArgs(diagnosticCommandParams, [caseId]);
       let discoveredState: string | undefined;
       let runnerContextMaterialized = false;
       let promotionPersisted = false;
       let discoveryDurationMs = 0;
+      let jiraDiscoveryOnlyPass = false;
       log(jobId, `[run:discovery-batch] caseIds=${caseId} appSlug=${params.appSlug ?? "N/A"}`);
       log(jobId, `[run:discovery-batch] command=${cmd} ${fullDiscoveryArgs.join(" ")}`);
-      const jiraScenario = params.contextOnly === true ? undefined : selectJiraSemanticScenario(params, scenarioRef);
       if (jiraScenario && scenarioRef) log(jobId, `[run:jira-semantic] caseId=${caseId} scenarioId=${String(jiraScenario.scenarioId)} sourceType=jira_preview`);
       let discoveryResult: { exitCode: number };
       if (jiraScenario && scenarioRef) {
@@ -2697,7 +2773,20 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         },
       );
       const structuredChildResult = await readStructuredChildResult(buildBatchResultPath(jobId), caseId);
-      if (jiraScenario && discoveryResult.exitCode === 0) {
+      jiraDiscoveryOnlyPass = isJiraDiscoveryOnlyPass({
+        childExitCode: discoveryResult.exitCode,
+        childStatus: jiraSemanticOutcome?.status,
+        specGenerationStatus: jiraSemanticOutcome?.specGenerationStatus,
+      }) || isDiscoveryOnlyPassWithSpecsDisabled({
+        specGenerationDisabled,
+        isJiraChild: Boolean(jiraScenario),
+        childExitCode: discoveryResult.exitCode,
+        // Promotion is off, so the child reports `not_promoted`; what decides the case is how the discovery itself ended.
+        discoveryState: structuredChildResult?.discoveryStatus ?? structuredChildResult?.status ?? discoveredState,
+      });
+      if (jiraDiscoveryOnlyPass) {
+        discoveredState = "discovery_passed";
+      } else if (jiraScenario && discoveryResult.exitCode === 0) {
         discoveredState = "promoted";
         promotionPersisted = true;
       }
@@ -2708,6 +2797,17 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         ? ` jiraFailureCode=${jiraSemanticOutcome.failedReason ?? "unknown"} failedAtStep=${jiraSemanticOutcome.failedAtStep ?? "unknown"} failurePhase=${jiraSemanticOutcome.failurePhase ?? "unknown"} screenshot=${jiraSemanticOutcome.screenshotPath ?? "none"}`
         : "";
       log(jobId, `[structured-child-result] caseId=${caseId} childStatus=${discoveredState ?? "unknown"} contextMaterialized=${runnerContextMaterialized}${jiraFailureDetails}`);
+
+      if (jiraDiscoveryOnlyPass) {
+        prepareResult = "completed";
+        prepareReason = "discovery_passed_spec_generation_disabled";
+        promotionResult = "skipped";
+        promotionReason = "spec_generation_disabled";
+        log(jobId, `[execution-phase] jobId=${jobId} caseId=${caseId} phase=full_discovery durationMs=${discoveryDurationMs} result=completed reason=spec_generation_disabled`);
+        log(jobId, `[execution-phase] jobId=${jobId} caseId=${caseId} phase=pom durationMs=0 result=skipped reason=spec_generation_disabled`);
+        log(jobId, `[execution-phase] jobId=${jobId} caseId=${caseId} phase=promotion durationMs=0 result=skipped reason=spec_generation_disabled`);
+        return { caseId, appSlug: effectiveAppSlug, route: "discovery_passed", reason: "spec_generation_disabled" };
+      }
 
       if (discoveryResult.exitCode !== 0) {
         const blockedRoute: RouteDecision = {
@@ -2966,6 +3066,57 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
 
     const scenarioId = scenarioRef?.executionScenarioId ?? scenarioRef?.scenarioId ?? `TR-CASE-${caseId}`;
     const scenarioTitle = nonEmptyString(scenarioRef?.title) ?? `C${caseId}`;
+
+    if (route.route === "discovery_passed") {
+      const caseCompletedAt = new Date().toISOString();
+      const durationMs = Math.max(0, Date.now() - caseLifecycleStartedAt);
+      completed += 1;
+      executed += 1;
+      passed += 1;
+      caseResults.push({
+        caseId,
+        status: "passed",
+        completedAt: caseCompletedAt,
+        durationMs,
+        reason: "discovery_passed_spec_generation_disabled",
+        scenarioId,
+        scenarioTitle,
+        sourceType: sourceGroup,
+        appSlug: nonEmptyString(params.appSlug),
+        sectionSlug: nonEmptyString(params.sectionSlug),
+        launchId: nonEmptyString(params.launchId),
+      });
+      log(jobId, `[execution-phase] jobId=${jobId} caseId=${caseId} phase=discovery_only durationMs=${durationMs} result=completed reason=spec_generation_disabled`);
+      if (params.testRunId && isPositiveCaseId(params.testRunId)) {
+        const syncResult = await syncDiscoveryResultToTestRail({
+          runId: params.testRunId,
+          caseId,
+          scenarioId,
+          discoveryStatus: "passed",
+          title: scenarioTitle,
+          launchId: params.launchId,
+          appSlug: params.appSlug,
+          sectionSlug: params.sectionSlug,
+        });
+        if (syncResult.syncStatus === "synced") synced += 1;
+        if (syncResult.syncStatus === "failed") syncFailed += 1;
+        if (params.launchId) {
+          updateLaunchManifestWithResult(params.launchId, {
+            scenarioId,
+            caseId,
+            discoveryStatus: "passed",
+            testRailStatusId: syncResult.statusId,
+            syncStatus: syncResult.syncStatus,
+            syncedAt: syncResult.syncedAt,
+            error: syncResult.error,
+          }, scheduledCases.length);
+        }
+      }
+      log(jobId, `[case-lifecycle] jobId=${jobId} caseId=${caseId} sourceGroup=${sourceGroup} phase=result result=completed durationMs=${Math.max(0, Date.now() - caseLifecycleStartedAt)} reason=discovery_passed_spec_generation_disabled`);
+      log(jobId, `[case-schedule] jobId=${jobId} caseId=${caseId} sourceGroup=${sourceGroup} groupIndex=${scheduledCase.groupIndex} overallIndex=${scheduledCase.overallIndex} action=completed`);
+      updateProgressSummary(caseId);
+      return;
+    }
 
     if (route.route === "blocked") {
       if (route.reason === "context_materialized") {
@@ -3361,6 +3512,33 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
   });
 }
 
+/**
+ * Remember what was typed in the launch form for each case (credentials included, same controlled-QA scope as the replay
+ * table), the moment the job starts: whether the case later passes, fails or never reaches execution, the next launch of
+ * that case can prefill the last values used. Values restored from an earlier launch are not rewritten.
+ */
+export async function persistLaunchValuesForCases(
+  jobId: string,
+  params: Pick<DiscoveryBatchParams, "appSlug" | "runtimeEntriesByCase">,
+  persist: typeof persistRuntimeValuesForExecutedCase = persistRuntimeValuesForExecutedCase,
+): Promise<number> {
+  if (!params.appSlug || !params.runtimeEntriesByCase) return 0;
+  let saved = 0;
+  for (const [caseKey, entries] of Object.entries(params.runtimeEntriesByCase)) {
+    const caseId = Number(caseKey);
+    const typed = (Array.isArray(entries) ? entries : []).filter((entry) =>
+      entry.provenance !== "confirmed_case_runtime" && String(entry.value ?? "").trim() !== "");
+    if (!Number.isSafeInteger(caseId) || caseId <= 0 || typed.length === 0) continue;
+    try {
+      saved += await persist({ projectSlug: params.appSlug, caseId, executionStatus: "failed", entries: typed });
+    } catch (error) {
+      log(jobId, `[runtime-replay] caseId=${caseId} launchValuesPersisted=0 persistenceWarning=${error instanceof Error ? error.message : "unknown_error"}`);
+    }
+  }
+  if (saved > 0) log(jobId, `[runtime-replay] launchValuesPersisted=${saved} valuesLogged=false`);
+  return saved;
+}
+
 export function startDiscoveryBatchRun(jobId: string): void {
   const job = jobStore.getInternal(jobId);
   if (!job) return;
@@ -3371,6 +3549,7 @@ export function startDiscoveryBatchRun(jobId: string): void {
     if (confirmedEntryCount > 0) log(jobId, `[runtime-input-hydration] projectScoped=true confirmedEntries=${confirmedEntryCount} valuesLogged=false`);
     const runtimeContextPath = writeRuntimeContextIfPresent(jobId, params);
     logRuntimeInputAuthority(jobId, params);
+    void persistLaunchValuesForCases(jobId, params);
     if (params.executePromotedSpecs === true) {
       void startDiscoveryBatchExecutionFlow(jobId, params, runtimeContextPath)
         .catch((err: any) => {

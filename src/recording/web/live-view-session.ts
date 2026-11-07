@@ -31,7 +31,10 @@ export type LivePage = {
   url(): string;
   goBack(): Promise<unknown>;
   reload(): Promise<unknown>;
+  bringToFront?(): Promise<unknown>;
 };
+
+export type LiveViewTab = { pageKey: string; url: string; title: string };
 
 export type LiveViewSessionOptions = {
   cdp: () => Promise<LiveCdp>;
@@ -42,6 +45,12 @@ export type LiveViewSessionOptions = {
   maxBufferedBytes?: number;
   /** Keep remote input disabled until the recorder's initial page navigation has completed. */
   ready?: boolean;
+  getTabs?: () => Promise<LiveViewTab[]>;
+  resolveTab?: (pageKey: string) => Promise<{ page: LivePage; createCdp: () => Promise<LiveCdp> } | undefined>;
+  navigateUrl?: (url: string, newTab: boolean, currentPageKey?: string) => Promise<string>;
+  onTabSelected?: (pageKey: string) => void | Promise<void>;
+  onFileUpload?: (files: Array<{ name: string; mimeType: string; buffer: Buffer }>) => Promise<void>;
+  fileChooserState?: () => { available: boolean; pageKey?: string; multiple?: boolean };
   log?: (line: string) => void;
 };
 
@@ -52,6 +61,8 @@ export type LiveClientMessage =
   | { t: "key"; type: "keyDown" | "keyUp"; key: string; code?: string; text?: string; keyCode?: number; modifiers?: number; seq?: number }
   | { t: "text"; text: string; seq?: number }
   | { t: "nav"; action: "back" | "reload" }
+  | { t: "select_tab"; pageKey: string }
+  | { t: "navigate"; url: string; newTab: boolean }
   | { t: "frame_ack"; frameId: number }
   | { t: "ping"; ts: number };
 
@@ -59,6 +70,16 @@ const SOCKET_OPEN = 1;
 const MOUSE_TYPES = new Set(["mousePressed", "mouseReleased", "mouseMoved"]);
 const MOUSE_BUTTONS = new Set(["left", "right", "middle", "none"]);
 const MAX_TEXT_LENGTH = 2_000;
+const FRAME_ACK_TIMEOUT_MS = 2_000;
+const SHORTCUT_COMMANDS: Record<string, string> = { c: "copy", v: "paste", x: "cut", a: "selectAll" };
+const CTRL_OR_META = 2 | 4;
+
+/** Editing command for Ctrl/Cmd+C|V|X|A pressed in the viewer, so copy/paste work against the real page. */
+export function editingCommandFor(message: { type: string; key: string; modifiers?: number }): string | undefined {
+  if (message.type !== "keyDown" && message.type !== "rawKeyDown") return undefined;
+  if (!((message.modifiers ?? 0) & CTRL_OR_META)) return undefined;
+  return SHORTCUT_COMMANDS[message.key.toLowerCase()];
+}
 
 type VisualFrame = { id: number; header: string; image: Buffer };
 type Viewer = {
@@ -66,18 +87,23 @@ type Viewer = {
   canControl: boolean;
   frameAcknowledgements: boolean;
   inFlightFrame?: number;
+  inFlightAt?: number;
   pendingFrame?: VisualFrame;
 };
 
 export class LiveViewSession {
   private readonly viewers = new Set<Viewer>();
   private cdpPromise: Promise<LiveCdp> | null = null;
+  private currentPage: LivePage;
+  private currentCdpFactory: () => Promise<LiveCdp>;
+  private selectedPageKey = "tab-1";
   private screencasting = false;
   private closed = false;
   private ready: boolean;
   private inputQueue: Promise<void> = Promise.resolve();
   private pendingMove?: { viewer: Viewer; data: unknown };
   private nextFrameId = 0;
+  private nudgeTimers: ReturnType<typeof setTimeout>[] = [];
   private lastInputSeq = 0;
   /** Last time a viewer acted or connected -- read by the idle stop. */
   lastActivityAt = Date.now();
@@ -86,6 +112,8 @@ export class LiveViewSession {
 
   constructor(private readonly options: LiveViewSessionOptions) {
     this.ready = options.ready !== false;
+    this.currentPage = options.page;
+    this.currentCdpFactory = options.cdp;
   }
 
   get viewerCount(): number {
@@ -137,9 +165,37 @@ export class LiveViewSession {
       viewport: this.options.viewport,
       canControl: viewer.canControl && this.ready,
       ready: this.ready,
-      url: this.options.page.url(),
+      url: this.currentPage.url(),
+      pageKey: this.selectedPageKey,
+      tabs: await this.getTabs(),
+      ...(this.options.fileChooserState?.().available === true
+        ? {
+            fileChooserAvailable: true,
+            fileChooserPageKey: this.options.fileChooserState?.().pageKey,
+            fileChooserMultiple: this.options.fileChooserState?.().multiple === true,
+          }
+        : { fileChooserAvailable: false, fileChooserMultiple: false }),
     });
     await this.startScreencast();
+  }
+
+  async refreshTabs(): Promise<void> {
+    const tabs = await this.getTabs();
+    for (const viewer of this.viewers) {
+      this.sendJson(viewer.socket, { t: "tabs", tabs, selectedPageKey: this.selectedPageKey });
+    }
+  }
+
+  setFileChooserAvailable(available: boolean, pageKey?: string, multiple = false): void {
+    for (const viewer of this.viewers) {
+      this.sendJson(viewer.socket, { t: "file_chooser", available, multiple: available && multiple, ...(pageKey ? { pageKey } : {}) });
+    }
+  }
+
+  async uploadFiles(files: Array<{ name: string; mimeType: string; buffer: Buffer }>): Promise<void> {
+    if (!this.options.onFileUpload) throw new Error("LIVE_FILE_UPLOAD_UNAVAILABLE");
+    await this.options.onFileUpload(files);
+    this.setFileChooserAvailable(false);
   }
 
   markReady(): void {
@@ -177,7 +233,7 @@ export class LiveViewSession {
 
   private cdp(): Promise<LiveCdp> {
     if (!this.cdpPromise) {
-      this.cdpPromise = this.options.cdp().then((cdp) => {
+      this.cdpPromise = this.currentCdpFactory().then((cdp) => {
         cdp.on("Page.screencastFrame", (frame) => this.onFrame(cdp, frame));
         return cdp;
       });
@@ -185,8 +241,19 @@ export class LiveViewSession {
     return this.cdpPromise;
   }
 
+  /**
+   * Chromium sends no frame for an idle page, so a fresh screencast or a late viewer would keep showing
+   * nothing (or the previous tab). A one-frame opacity flicker forces a frame without any input.
+   */
+  private async requestFrame(): Promise<void> {
+    await (await this.cdp()).send("Runtime.evaluate", {
+      expression: "(()=>{const s=document.documentElement&&document.documentElement.style;if(!s)return;s.opacity='0.999';requestAnimationFrame(()=>requestAnimationFrame(()=>s.removeProperty('opacity')));})()",
+    }).catch(() => undefined);
+  }
+
   private async startScreencast(): Promise<void> {
-    if (this.screencasting || this.closed) return;
+    if (this.screencasting) { await this.requestFrame(); return; }
+    if (this.closed) return;
     this.screencasting = true;
     const { width, height } = this.options.viewport;
     try {
@@ -197,6 +264,7 @@ export class LiveViewSession {
         maxHeight: height,
         everyNthFrame: 3,
       });
+      await this.requestFrame();
     } catch (err) {
       this.screencasting = false;
       this.options.log?.(`[live-view] screencast start failed: ${err instanceof Error ? err.message : String(err)}`);
@@ -227,7 +295,8 @@ export class LiveViewSession {
       w: frame.metadata?.deviceWidth ?? this.options.viewport.width,
       h: frame.metadata?.deviceHeight ?? this.options.viewport.height,
       inputSeq: this.lastInputSeq,
-      url: this.options.page.url(),
+      url: this.currentPage.url(),
+      pageKey: this.selectedPageKey,
     });
     const image = Buffer.from(frame.data, "base64");
     for (const viewer of this.viewers) {
@@ -238,6 +307,8 @@ export class LiveViewSession {
   private sendFrame(viewer: Viewer, frame: VisualFrame): void {
     if (viewer.socket.readyState !== SOCKET_OPEN || this.closed) return;
     const limit = this.options.maxBufferedBytes ?? 512 * 1024;
+    // A lost acknowledgement must not freeze the stream forever: release the slot after a grace period.
+    if (viewer.inFlightFrame !== undefined && Date.now() - (viewer.inFlightAt ?? 0) > FRAME_ACK_TIMEOUT_MS) viewer.inFlightFrame = undefined;
     if (viewer.inFlightFrame !== undefined || viewer.socket.bufferedAmount > limit) {
       // Keep only the latest visual state, never a backlog of obsolete images.
       viewer.pendingFrame = frame;
@@ -245,7 +316,7 @@ export class LiveViewSession {
       return;
     }
     viewer.pendingFrame = undefined;
-    if (viewer.frameAcknowledgements) viewer.inFlightFrame = frame.id;
+    if (viewer.frameAcknowledgements) { viewer.inFlightFrame = frame.id; viewer.inFlightAt = Date.now(); }
     viewer.socket.send(frame.header);
     viewer.socket.send(frame.image, { binary: true });
     this.framesSent += 1;
@@ -266,12 +337,34 @@ export class LiveViewSession {
     this.lastActivityAt = Date.now();
     try {
       await this.dispatch(message);
+      if (!(message.t === "mouse" && message.type === "mouseMoved")) this.scheduleFrameNudges();
     } catch (err) {
       this.options.log?.(`[live-view] input failed: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
+  /** The page often settles after an input (route change, overlay removed) without Chromium emitting a final frame. */
+  private scheduleFrameNudges(): void {
+    for (const timer of this.nudgeTimers) clearTimeout(timer);
+    this.nudgeTimers = [700, 2_000].map((delay) => {
+      const timer = setTimeout(() => { if (this.screencasting && !this.closed) void this.requestFrame(); }, delay);
+      timer.unref?.();
+      return timer;
+    });
+  }
+
   private async dispatch(message: Exclude<LiveClientMessage, { t: "ping" } | { t: "frame_ack" }>): Promise<void> {
+    if (message.t === "select_tab") {
+      await this.selectTab(message.pageKey);
+      return;
+    }
+    if (message.t === "navigate") {
+      if (!this.options.navigateUrl) throw new Error("LIVE_NAVIGATION_UNAVAILABLE");
+      const pageKey = await this.options.navigateUrl(message.url, message.newTab, this.selectedPageKey);
+      if (message.newTab) await this.selectTab(pageKey, false);
+      else await this.refreshTabs();
+      return;
+    }
     const cdp = await this.cdp();
     const clamp = (value: number, max: number) => Math.min(Math.max(0, value), max);
     const { width, height } = this.options.viewport;
@@ -309,6 +402,8 @@ export class LiveViewSession {
           windowsVirtualKeyCode: message.keyCode,
           nativeVirtualKeyCode: message.keyCode,
           modifiers: message.modifiers ?? 0,
+          // CDP key events never run clipboard shortcuts on their own; the editing command has to be named.
+          ...(editingCommandFor(message) ? { commands: [editingCommandFor(message)] } : {}),
         });
         return;
       }
@@ -317,10 +412,35 @@ export class LiveViewSession {
         await cdp.send("Input.insertText", { text: message.text });
         return;
       case "nav":
-        if (message.action === "back") await this.options.page.goBack().catch(() => undefined);
-        else await this.options.page.reload().catch(() => undefined);
+        if (message.action === "back") await this.currentPage.goBack().catch(() => undefined);
+        else await this.currentPage.reload().catch(() => undefined);
         return;
     }
+  }
+
+  private async selectTab(pageKey: string, recordSwitch = true): Promise<void> {
+    if (!this.options.resolveTab) throw new Error("LIVE_TABS_UNAVAILABLE");
+    const target = await this.options.resolveTab(pageKey);
+    if (!target) throw new Error("LIVE_TAB_NOT_FOUND");
+    const changedPage = pageKey !== this.selectedPageKey;
+    await this.stopScreencast();
+    this.currentPage = target.page;
+    this.currentCdpFactory = target.createCdp;
+    this.cdpPromise = null;
+    this.selectedPageKey = pageKey;
+    // A background tab produces no frames, so the viewer would keep showing the previous page.
+    await target.page.bringToFront?.().catch(() => undefined);
+    if (recordSwitch && changedPage) await this.options.onTabSelected?.(pageKey);
+    await this.refreshTabs();
+    for (const viewer of this.viewers) {
+      this.sendJson(viewer.socket, { t: "selected_tab", pageKey, url: this.currentPage.url() });
+    }
+    await this.startScreencast();
+  }
+
+  private async getTabs(): Promise<LiveViewTab[]> {
+    if (this.options.getTabs) return this.options.getTabs().catch(() => []);
+    return [{ pageKey: this.selectedPageKey, url: this.currentPage.url(), title: this.currentPage.url() }];
   }
 
   private sendJson(socket: LiveViewerSocket, payload: unknown): void {
@@ -377,6 +497,15 @@ export function parseClientMessage(data: unknown): LiveClientMessage | undefined
         : undefined;
     case "nav":
       return value.action === "back" || value.action === "reload" ? { t: "nav", action: value.action } : undefined;
+    case "select_tab":
+      return typeof value.pageKey === "string" && /^tab-[1-9][0-9]{0,3}$/.test(value.pageKey)
+        ? { t: "select_tab", pageKey: value.pageKey }
+        : undefined;
+    case "navigate":
+      return typeof value.url === "string" && value.url.trim().length > 0 && value.url.length <= 2048
+        && typeof value.newTab === "boolean"
+        ? { t: "navigate", url: value.url.trim(), newTab: value.newTab }
+        : undefined;
     default:
       return undefined;
   }

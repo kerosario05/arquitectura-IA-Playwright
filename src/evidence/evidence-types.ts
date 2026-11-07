@@ -62,6 +62,10 @@ export interface EvidenceStepRecord {
   screenshotPath?: string;
   /** False means a real observed frame was retained without certifying visual readiness. */
   screenshotSettled?: boolean;
+  /** Post-action frame when a transition is still unsettled; the regular screenshot remains the action's source screen. */
+  postActionScreenshotPath?: string;
+  postActionScreenId?: string;
+  postActionScreenTitle?: string;
   snapshotPath?: string;
   timestamp: string;
   errorMessage?: string;

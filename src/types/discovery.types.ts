@@ -204,6 +204,8 @@ export type ProposedObjectCandidate = {
 export type DiscoveryStepResult = {
   index: number;
   action: string;
+  /** Technical identities carried unchanged from the successful live resolver. */
+  technicalTargetCandidates?: Array<Record<string, unknown>>;
   target?: string;
   pendingDiscovery?: boolean;
   status:

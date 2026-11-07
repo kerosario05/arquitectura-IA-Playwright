@@ -27,6 +27,25 @@ test("Jira Discovery accepts a semantic assertion only with cited visible DOM ev
   }
 });
 
+test("Jira Discovery keeps assertion-relevant evidence from the end of a long page", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    const fields = Array.from({ length: 90 }, (_, index) => `<label>Campo ${index}</label>`).join("");
+    await page.setContent(`<main>${fields}<div class="item"><span>informe-final.pdf · 1 KB</span></div></main>`);
+    __setJiraDomAssertionResolverForTesting(async (_intent, evidence) => {
+      const item = evidence.find(entry => entry.text.includes("informe-final.pdf"));
+      return item ? { supported: true, confidence: 0.96, evidenceIds: [item.id] } : { supported: false, confidence: 0.99, evidenceIds: [] };
+    });
+    const port = createJiraPlaywrightPort(page, "https://fixture.invalid");
+    const result = await port.assert("el informe adjunto aparezca en la lista de informes", false);
+    assert.match(result.observedText ?? "", /informe-final\.pdf/);
+  } finally {
+    __setJiraDomAssertionResolverForTesting(undefined);
+    await browser.close();
+  }
+});
+
 test("Jira column assertion accepts a visible header without weakening the date/time value check", async () => {
   const browser = await chromium.launch({ headless: true });
   try {

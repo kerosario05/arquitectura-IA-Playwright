@@ -1,0 +1,31 @@
+1) automations\apps\portal-comercial\sections\default-section\cases\preview-001-crear-cliente-v2\.candidate-validation-21228-1793365913226.spec.ts:14:5 › Crear Cliente V2
+Error: PROMOTED_FINAL_OUTCOME_UNVERIFIED
+at ..\..\src\automations\runtime\promoted-spec-runtime.ts:3580
+3578 |           `recentFailedResponses=${JSON.stringify(this.recentFailedResponses)}`,
+3579 |         );
+> 3580 |         throw new Error(result);
+|               ^
+3581 |       }
+3582 |       await this.captureEvidenceStep("Validar resultado final del escenario", "passed", undefined, { sourceStepIndex: stepIndex });
+3583 |     } catch (error) {
+at PromotedSpecRuntime.verifyScenarioOutcome (C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\src\automations\runtime\promoted-spec-runtime.ts:3580:15)
+at Proxy.<anonymous> (C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\src\automations\runtime\promoted-spec-runtime.ts:6496:13)
+at C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\automations\apps\portal-comercial\sections\default-section\cases\preview-001-crear-cliente-v2\.candidate-validation-21228-1793365913226.spec.ts:505:5
+attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--58441-3365913226-Crear-Cliente-V2\test-failed-1.png
+────────────────────────────────────────────────────────────────────────────────────────────────
+attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--58441-3365913226-Crear-Cliente-V2\video.webm
+────────────────────────────────────────────────────────────────────────────────────────────────
+Error Context: test-results\apps\portal-comercial-sections--58441-3365913226-Crear-Cliente-V2\error-context.md
+attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--58441-3365913226-Crear-Cliente-V2\trace.zip
+Usage:
+npx playwright show-trace test-results\apps\portal-comercial-sections--58441-3365913226-Crear-Cliente-V2\trace.zip
+────────────────────────────────────────────────────────────────────────────────────────────────
+1 failed
+automations\apps\portal-comercial\sections\default-section\cases\preview-001-crear-cliente-v2\.candidate-validation-21228-1793365913226.spec.ts:14:5 › Crear Cliente V2
+(node:6560) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6560) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)

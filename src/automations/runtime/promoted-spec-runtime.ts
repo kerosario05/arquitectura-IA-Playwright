@@ -1,4 +1,5 @@
 import { isSelectionRuleValue, parseSelectionRule } from "../../recording/dynamic-selection-rule";
+import { isServiceBoundValueKey, resolveServiceBoundValue } from "../../service-catalog/runtime-service-values";
 import fs from "node:fs";
 import { isCredentialRejectionExpectation, resolveFeedbackMessageAssertion } from "../../discovery/feedback-message-resolver";
 import path from "node:path";
@@ -12,13 +13,25 @@ import { waitForStableInteractiveScreen } from "../../runner/execution-plan-exec
 import { waitForPageReady } from "../../browser/page-readiness";
 import { EvidenceRecorder } from "../../evidence/evidence-recorder";
 import { loadEvidenceConfig } from "../../evidence/evidence-types";
+import { waitForVisualSettle } from "../../evidence/screen-settle";
+import { armFileChooserCapture, clearPendingFileChooser, hasPendingFileChooser } from "../../recording/file-chooser-capture";
+import { captureFeedbackBaseline, newNonFailureFeedbackProbe } from "../../recording/upload-completion";
+import { countLiveControlsForPress, pressName, pressNameKey } from "../../recording/repeated-press";
 import { normalizeSemanticText } from "../semantic-text-normalization";
 import { resolveSelectionOption } from "../../discovery/selection-option-policy";
 import { evaluatePromotedScenarioOutcome, type ScenarioOutcomeCheck } from "./promoted-scenario-outcome";
 import { findSemanticTargetMatch, type SemanticMatchOptions } from "./semantic-target-matcher";
-import { attemptVirtualKeyboardPress, resolveActionTarget, resolveFillTarget, recordedLocatorFactory, resolveRecordedStructuralOwner, verificationDigitPosition } from "../../discovery/target-resolver";
+import { attemptVirtualKeyboardPress, resolveActionTarget, resolveSequencedSiblingForRoleRef, resolveFillTarget, resolveSelectionSearchInput, recordedLocatorFactory, resolveRecordedStructuralOwner, verificationDigitPosition } from "../../discovery/target-resolver";
 import { hasCausalSelectionTransition, type InteractiveState } from "../../discovery/selection-state-verification";
+import { coerceToEditableFillTarget } from "../../discovery/editable-fill-target";
+import { settleDependentRequestsAfterFill } from "../../discovery/post-fill-settle";
+import {
+  canVerifyRecordedSelectionByDialogTransition,
+  countVisibleDialogSurfaces,
+  getUniqueVisibleDialogContinuationAnchor,
+} from "../../discovery/selection-dialog-transition";
 import type { RecordedLocator, RecordedTechnicalTarget } from "../../recording/session-trace.types";
+import { captureRecordedApplicationValue as captureRecordedValueFromPage, uploadRecordedFiles as uploadRecordedFilesFromStore, type RecordedRuntimeValueCapture } from "../../recording/recorded-runtime-actions";
 import type { PlaywrightRecorderEvidence, SemanticRuntimeEvidence } from "../../recording/structural-owner-identity";
 import { scanCurrentPage } from "../../explorer/page-scanner";
 import { findUniqueSelectionListRecoveryControl } from "../../scenarios/selection-list-recovery";
@@ -436,6 +449,8 @@ export type PromotedRuntimeConfig = {
   enabled: boolean;
   actionTimeoutMs: number;
   stabilityTimeoutMs: number;
+  /** Wait budget for a click whose contract records a route transition; never repeats the click. */
+  routeTransitionTimeoutMs?: number;
   retryEnabled: boolean;
   captureDiagnostics: boolean;
   evidenceEnabled: boolean;
@@ -551,6 +566,7 @@ export type PromotedFillOptions = {
   fillInPage?: () => Promise<void>;
   ensureEditable?: () => Promise<void>;
   valueKey?: string;
+  selectionQueryOwnerField?: string;
   technicalTargetRefs?: string[];
   playwrightRecorderEvidence?: PlaywrightRecorderEvidence;
   entityScope?: string;
@@ -593,6 +609,24 @@ export function parseSerializedTechnicalTargetString(target: string): RecordedLo
   const value = target.slice(separator + 1).trim();
   if (!KNOWN_RECORDED_LOCATOR_STRATEGIES.has(strategy) || !value) return undefined;
   return { strategy, value };
+}
+
+/**
+ * The QA environment's Bizagi duplicate-case check answers 406 (SOAP security fault) intermittently.
+ * The Portal then silently ignores the pressed action and creates nothing, so it is safe to press
+ * the same control once more; it is not an application defect and must not stop the flow.
+ */
+export function isToleratedQaRejection(label: string): boolean {
+  return /\/Procesos\/MDW\/ConsultarCasosBizagi\w* 406\b/.test(label);
+}
+
+/**
+ * With the credit bureau failing in the QA environment there is no score, so the rates lookup
+ * answers "Score no pertenece a ningun rango valido" and the app shows its generic rates toast.
+ * That toast is a consequence of the tolerated bureau failure, not a defect of the flow.
+ */
+export function isBureauDependentFailureMessage(message: string): boolean {
+  return /tasas relacionadas al producto/i.test(message);
 }
 
 export type PromotedPressOptions = {
@@ -835,6 +869,16 @@ async function readPromotedOutcomeSignals(page: Page, strict = false): Promise<P
   });
 }
 
+/**
+ * Expected URLs may carry `{id}` where the recording captured an identifier generated during that
+ * run (a created entity's numeric id / UUID); it matches any single path segment on replay.
+ */
+export function promotedUrlMatchesExpected(currentUrl: string, expectedUrl: string): boolean {
+  if (!expectedUrl.includes("{id}")) return currentUrl.includes(expectedUrl);
+  const source = expectedUrl.split("{id}").map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[^/?#]+");
+  return new RegExp(source).test(currentUrl);
+}
+
 export function evaluatePromotedAssertionState(
   currentUrl: string,
   descriptor: { polarity?: AssertionPolarity; expectedUrl?: string },
@@ -845,7 +889,7 @@ export function evaluatePromotedAssertionState(
   if (typeof descriptor.expectedUrl !== "string" || descriptor.expectedUrl.trim() === "") {
     throw new Error("PROMOTED_ASSERTION_DESCRIPTOR_UNRESOLVED");
   }
-  const matchesExpected = currentUrl.includes(descriptor.expectedUrl);
+  const matchesExpected = promotedUrlMatchesExpected(currentUrl, descriptor.expectedUrl);
   return descriptor.polarity === "positive" ? matchesExpected : !matchesExpected;
 }
 
@@ -883,6 +927,7 @@ export function loadPromotedRuntimeConfigFromEnv(): PromotedRuntimeConfig {
     enabled: boolFromEnv("PROMOTED_RUNTIME_ENABLED", true),
     actionTimeoutMs: numberFromEnv("PROMOTED_RUNTIME_ACTION_TIMEOUT_MS", 15000),
     stabilityTimeoutMs: numberFromEnv("PROMOTED_RUNTIME_STABILITY_TIMEOUT_MS", 10000),
+    routeTransitionTimeoutMs: numberFromEnv("PROMOTED_RUNTIME_ROUTE_TRANSITION_TIMEOUT_MS", 120000),
     retryEnabled: boolFromEnv("PROMOTED_RUNTIME_RETRY_ENABLED", true),
     captureDiagnostics: boolFromEnv("PROMOTED_RUNTIME_CAPTURE_DIAGNOSTICS", true),
     evidenceEnabled: boolFromEnv("EVIDENCE_ENABLED", true),
@@ -2350,12 +2395,20 @@ export type PromotedClickOptions = PromotedActionOptions & {
    */
   structuralTarget?: RecordedTechnicalTarget;
   /**
+   * Exact ARIA role/name references captured for the same structural owner. The runtime may use
+   * one only when the recorded DOM signature has drifted and that exact reference is unique,
+   * visible, and enabled; it never derives a replacement from scenario prose.
+   */
+  structuralSemanticFallbackRefs?: string[];
+  /**
    * Field-relation hint (e.g. "asociado a X") transported from the scenario/plan for
    * `runtime_resolution_required` clicks only -- never a certification. Lets this click retry
    * via the SAME shared field-scoped resolver (resolveActionTarget's
    * tryFieldScopedStructuralFallback) Discovery's own live walk already used for this step.
    */
   associatedField?: string;
+  /** Re-resolve a validated plain caption to its unique visible checkbox/switch owner. */
+  checkableCaptionOwner?: boolean;
   /** Recorded trigger field for a transient option; used only to prove owner→option causality. */
   selectionActivationField?: string;
   /** Recorded check/uncheck: desired state, so the click is skipped when already in that state. */
@@ -2371,6 +2424,80 @@ export type PromotedClickOptions = PromotedActionOptions & {
   semanticRuntimeEvidence?: SemanticRuntimeEvidence;
   playwrightRecorderEvidence?: PlaywrightRecorderEvidence;
 };
+
+function structuralOwnerAriaRole(target: RecordedTechnicalTarget | undefined): string | undefined {
+  const context = target?.structuralContext;
+  const owner = context?.owner;
+  if (!owner) return undefined;
+  const explicitRole = typeof owner.role === "string" ? owner.role.trim().toLowerCase() : "";
+  if (explicitRole) return explicitRole;
+  const tag = owner.tag?.trim().toLowerCase();
+  if (tag === "a") return "link";
+  if (tag === "button" || tag === "summary") return "button";
+  if (tag === "select") return "combobox";
+  if (tag === "textarea") return "textbox";
+  if (tag === "option") return "option";
+  if (tag === "input") {
+    const inputType = context?.stableDirectAttributes?.type?.trim().toLowerCase();
+    if (inputType === "checkbox" || inputType === "radio" || inputType === "button" || inputType === "submit") {
+      return inputType === "submit" ? "button" : inputType;
+    }
+    return "textbox";
+  }
+  return undefined;
+}
+
+export async function resolveRecordedStructuralSemanticFallback(
+  page: Page,
+  target: RecordedTechnicalTarget | undefined,
+  refs: string[] | undefined,
+  structuralFailureReason: string | undefined,
+  structuralFailureMatchCount?: number,
+): Promise<{ locator: Locator; strategy: string } | undefined> {
+  // A semantic alternate is only valid for a captured structure that no longer matches. Keep
+  // ambiguity, visibility, disabled-owner, and invalid-certificate failures fail-closed.
+  // A captured scope that no longer exists at all (zero matches -- e.g. a framework-generated
+  // `pv_id_N` container id that differs per page load) is that same "structure no longer matches"
+  // case; more than one scope match remains ambiguity and stays fatal.
+  const scopeAbsent = structuralFailureReason === "scoped_scope_not_unique" && structuralFailureMatchCount === 0;
+  if (!scopeAbsent && !["stable_descendant_not_present", "semantic_shape_mismatch"].includes(structuralFailureReason ?? "")) {
+    return undefined;
+  }
+  const expectedRole = structuralOwnerAriaRole(target);
+  if (!expectedRole || !refs?.length) return undefined;
+
+  const resolved: Array<{ locator: Locator; ref: RecordedLocator }> = [];
+  for (const rawRef of [...new Set(refs.map((ref) => ref.trim()).filter(Boolean))]) {
+    const candidate = parseSerializedTechnicalTargetString(rawRef);
+    if (candidate?.strategy !== "role") continue;
+    const separator = candidate.value.indexOf("|");
+    if (separator < 0) continue;
+    const role = candidate.value.slice(0, separator).trim().toLowerCase();
+    const name = candidate.value.slice(separator + 1).trim();
+    if (role !== expectedRole || !name) continue;
+
+    const locator = recordedLocatorFactory(page, candidate, true);
+    if (!locator) continue;
+    const count = await locator.count().catch(() => 0);
+    if (count > 1) {
+      console.log(`[promoted-click-structural] semanticFallback=ambiguous role=${role} matchCount=${count}`);
+      return undefined;
+    }
+    if (count !== 1) continue;
+    const visible = await locator.isVisible().catch(() => false);
+    const enabled = visible && await locator.isEnabled().catch(() => false);
+    if (visible && enabled) resolved.push({ locator, ref: candidate });
+  }
+
+  if (resolved.length !== 1) {
+    if (resolved.length > 1) {
+      console.log(`[promoted-click-structural] semanticFallback=ambiguous role=${expectedRole} uniqueRefs=${resolved.length}`);
+    }
+    return undefined;
+  }
+  console.log(`[promoted-click-structural] semanticFallback=admitted role=${expectedRole} matchCount=1`);
+  return { locator: resolved[0].locator, strategy: "recorded:role-semantic-compatibility" };
+}
 
 type OrdinalSelectionRuntimeCandidate = {
   locator: any;
@@ -2756,7 +2883,10 @@ async function resolveOrdinalSelectionOnPage(
 }
 
 export class PromotedSpecRuntime {
+  private page: Page;
   private readonly config: PromotedRuntimeConfig;
+  private readonly recordedPages = new Map<string, Page>();
+  private readonly attachedPageObservers = new WeakSet<Page>();
   private lastDialogMessage?: string;
   private lastActionOutcome?: {
     stepIndex: number;
@@ -2777,7 +2907,13 @@ export class PromotedSpecRuntime {
   private initialNavigationEnsured = false;
   private initialScreenCapturePromise?: Promise<void>;
   private readonly loginRequests = new Set<Request>();
+  private readonly recordedApplicationValues = new Map<string, string>();
   private readonly pendingScenarioRequests = new Set<Request>();
+  private readonly recentFailedResponses: string[] = [];
+  /** Count of responses matching the QA-environment rejections that must not abort a flow (see isToleratedQaRejection). */
+  private toleratedQaRejections = 0;
+  /** A credit-bureau (TransUnion) API failure was observed in this run: the QA environment lacks a score. */
+  private bureauFailureObserved = false;
   private observedDownloadSequence = 0;
   private readonly authBoundary = {
     loginRequestObserved: false,
@@ -2795,14 +2931,68 @@ export class PromotedSpecRuntime {
     oracleEvaluationStarted: false,
   };
 
-  constructor(private readonly page: Page, config?: Partial<PromotedRuntimeConfig>) {
+  constructor(page: Page, config?: Partial<PromotedRuntimeConfig>) {
+    this.page = page;
+    this.recordedPages.set("tab-1", page);
     this.config = { ...loadPromotedRuntimeConfigFromEnv(), ...config };
-    this.attachAuthBoundaryObserver();
-    this.page.on("download", () => {
+    // Playwright's own default action timeout follows the (very long) test budget, so a bare
+    // click/fill on a control that never becomes actionable would stall for the whole test. Bound it.
+    if (typeof (page as { setDefaultTimeout?: unknown }).setDefaultTimeout === "function") page.setDefaultTimeout(60_000);
+    this.attachPageObservers(page);
+    this.instrumentPhaseTimings();
+
+    // Initialize evidence recorder if EVIDENCE_ENABLED
+    this.evidenceInitPromise = this.initEvidence().catch((err: any) => {
+      this.evidenceInitState = "failed";
+      this.evidenceInitReason = err?.message ?? "unknown_error";
+      console.log(`[evidence] init error: ${this.evidenceInitReason}`);
+    });
+  }
+
+  /**
+   * Selects a tab only when the Recording trace supplies its stable pageKey. A new
+   * tab is admitted only when the same trace says it was opened; existing app-created
+   * popups are reused in creation order, otherwise a fresh isolated-context page is made.
+   */
+  async selectRecordedPage(pageKey: string, opensNewPage = false): Promise<Page> {
+    const normalizedKey = pageKey.trim();
+    if (!/^tab-[1-9]\d*$/.test(normalizedKey)) throw new Error("RECORDED_TAB_KEY_INVALID");
+    let selected = this.recordedPages.get(normalizedKey);
+    if (!selected && opensNewPage) {
+      const initialPage = this.recordedPages.get("tab-1");
+      if (!initialPage || initialPage.isClosed()) throw new Error("RECORDED_TAB_CONTEXT_UNAVAILABLE");
+      const context = initialPage.context();
+      const observedPage = context.pages().find((candidate) =>
+        !candidate.isClosed() && ![...this.recordedPages.values()].includes(candidate),
+      );
+      selected = observedPage ?? await context.newPage();
+      this.recordedPages.set(normalizedKey, selected);
+      this.attachPageObservers(selected);
+      console.log(`[promoted-recording-tab] phase=created pageKey=${normalizedKey} reusedObservedPage=${Boolean(observedPage)}`);
+    }
+    if (!selected) throw new Error("RECORDED_TAB_NOT_AVAILABLE");
+    if (selected.isClosed()) throw new Error("RECORDED_TAB_CLOSED");
+    this.page = selected;
+    return selected;
+  }
+
+  getCurrentPage(): Page {
+    return this.page;
+  }
+
+  currentPageUrl(): string {
+    return this.page.url();
+  }
+
+  private attachPageObservers(page: Page): void {
+    if (this.attachedPageObservers.has(page)) return;
+    this.attachedPageObservers.add(page);
+    this.attachAuthBoundaryObserver(page);
+    page.on("download", () => {
       this.observedDownloadSequence += 1;
       console.log(`[runtime:download] observed=true sequence=${this.observedDownloadSequence}`);
     });
-    this.page.on("dialog", async (dialog) => {
+    page.on("dialog", async (dialog) => {
       this.lastDialogMessage = dialog.message();
       this.activeContainerDiscardReason = "dialog_seen_mark_container_stale";
       const lower = dialog.message().toLowerCase();
@@ -2813,40 +3003,47 @@ export class PromotedSpecRuntime {
         await dialog.accept().catch(() => undefined);
       }
     });
-
-    // Initialize evidence recorder if EVIDENCE_ENABLED
-    this.evidenceInitPromise = this.initEvidence().catch((err: any) => {
-      this.evidenceInitState = "failed";
-      this.evidenceInitReason = err?.message ?? "unknown_error";
-      console.log(`[evidence] init error: ${this.evidenceInitReason}`);
-    });
   }
 
-  private attachAuthBoundaryObserver(): void {
-    this.page.on("request", (request) => {
+  private attachAuthBoundaryObserver(page: Page): void {
+    page.on("request", (request) => {
       if (["fetch", "xhr", "document"].includes(request.resourceType?.())) this.pendingScenarioRequests.add(request);
       if (request.method().toUpperCase() !== "POST" || !this.isLoginRequestUrl(request.url())) return;
       this.loginRequests.add(request);
       if (!this.authBoundary.loginRequestObserved) {
         this.authBoundary.loginRequestObserved = true;
         this.authBoundary.loginRequestStartedAt = Date.now();
-        this.authBoundary.loginPageUrl = this.page.url();
+        this.authBoundary.loginPageUrl = page.url();
       }
     });
-    this.page.on("response", (response) => {
+    page.on("response", (response) => {
       const request = response.request();
+      // Telemetry only: remember the last failing API responses (method, path, status) so a final
+      // business-error verdict can be tied to the endpoint that produced it. No query, body or headers.
+      if (response.status() >= 400 && ["fetch", "xhr"].includes(request.resourceType?.())) {
+        const label = `${request.method()} ${(() => { try { return new URL(response.url()).pathname; } catch { return "unparsable"; } })()} ${response.status()}`;
+        if (isToleratedQaRejection(label)) this.toleratedQaRejections += 1;
+        if (/\/Listas\/MDW\/BuroReporte\w* [45]\d\d\b/.test(label)) this.bureauFailureObserved = true;
+        this.recentFailedResponses.push(label);
+        if (this.recentFailedResponses.length > 8) this.recentFailedResponses.shift();
+        // Short, digit-masked body snippet so the reason for an API rejection is diagnosable.
+        void response.text().then((text) => {
+          const index = this.recentFailedResponses.indexOf(label);
+          if (index >= 0) this.recentFailedResponses[index] = `${label} body=${JSON.stringify(text.replace(/[0-9]/g, "#").replace(/\s+/g, " ").slice(0, 520))}`;
+        }).catch(() => undefined);
+      }
       if (!this.loginRequests.has(request)) return;
       this.authBoundary.loginResponseObserved = true;
       this.authBoundary.loginResponseAt ??= Date.now();
       this.authBoundary.loginStatus ??= response.status();
     });
-    this.page.on("requestfinished", (request) => {
+    page.on("requestfinished", (request) => {
       this.pendingScenarioRequests.delete(request);
       if (!this.loginRequests.has(request)) return;
       this.authBoundary.loginRequestFinished = true;
       this.authBoundary.loginRequestFinishedAt = Date.now();
     });
-    this.page.on("requestfailed", (request) => {
+    page.on("requestfailed", (request) => {
       this.pendingScenarioRequests.delete(request);
       if (!this.loginRequests.has(request)) return;
       this.authBoundary.loginRequestFailed = true;
@@ -2867,6 +3064,34 @@ export class PromotedSpecRuntime {
 
   private isAuthSubmitTarget(target: string): boolean {
     return /continuar|iniciar sesión|iniciar sesion|login|sign in|submit|ingresar/i.test(target);
+  }
+
+  /** Inclusive time per shared phase inside the current step (phases can nest, so they may overlap). */
+  private readonly phaseMs = new Map<string, number>();
+
+  resetPhaseTimings(): void { this.phaseMs.clear(); }
+
+  takePhaseTimings(): string {
+    return [...this.phaseMs.entries()].filter(([, ms]) => ms >= 50).sort((a, b) => b[1] - a[1]).map(([name, ms]) => `${name}:${ms}`).join(",") || "none";
+  }
+
+  private instrumentPhaseTimings(): void {
+    const phases = [
+      "markBoundaryProgress", "ensureInitialEvidence", "dismissSessionExpiringWarningIfPresent",
+      "retryPendingDialogConfirm", "isRepeatedPressSatisfied", "rememberDialogControl", "retryFieldListIfOffered",
+      "waitForPromotedUiStable", "postActionStabilityWithRecordedOptionRetry", "postActionStability",
+      "refreshActiveContainer", "captureClickStep", "captureEvidenceStep",
+    ];
+    const self = this as unknown as Record<string, unknown>;
+    for (const name of phases) {
+      const original = self[name];
+      if (typeof original !== "function") continue;
+      self[name] = async (...args: unknown[]) => {
+        const startedAt = Date.now();
+        try { return await (original as (...a: unknown[]) => unknown).apply(this, args); }
+        finally { this.phaseMs.set(name, (this.phaseMs.get(name) ?? 0) + Date.now() - startedAt); }
+      };
+    }
   }
 
   private async markBoundaryProgress(): Promise<void> {
@@ -3395,7 +3620,13 @@ export class PromotedSpecRuntime {
         && routeOf(this.page.url()) !== routeOf(check.urlBeforeFinalAction!);
       if (finalActionNavigated) console.log(`[promoted-outcome] completion=final_action_route_change stepIndex=${stepIndex} from=${routeOf(check.urlBeforeFinalAction!)} to=${routeOf(this.page.url())}`);
       const result = evaluatePromotedScenarioOutcome({ ...check, finalActionNavigated, failureMessages: signals.failureMessages });
-      if (result !== "verified") throw new Error(result);
+      if (result !== "verified") {
+        console.log(
+          `[promoted-outcome] result=${result} failureMessages=${JSON.stringify(signals.failureMessages.slice(0, 4).map((message) => String(message).replace(/\s+/g, " ").slice(0, 160)))} ` +
+          `recentFailedResponses=${JSON.stringify(this.recentFailedResponses)}`,
+        );
+        throw new Error(result);
+      }
       await this.captureEvidenceStep("Validar resultado final del escenario", "passed", undefined, { sourceStepIndex: stepIndex });
     } catch (error) {
       const code = error instanceof Error ? error.message : "PROMOTED_FINAL_OUTCOME_UNVERIFIED";
@@ -3439,14 +3670,50 @@ export class PromotedSpecRuntime {
 
   async waitForPromotedUiStable(stepIndex: number, target: string): Promise<void> {
     if (!this.config.enabled) return;
+    // A click that opened the file picker is followed by the attach step, not by a UI transition;
+    // the page may legitimately keep syncing in the background meanwhile.
+    if (await hasPendingFileChooser(this.page)) return;
+    // The app's own "uploaded" message after this click is the completion signal; a row that keeps
+    // syncing server-side must not hold the next step.
+    let cancelFeedbackWatch = false;
+    const feedbackArrived = this.clickFeedbackProbe
+      ? (async () => {
+          const probe = this.clickFeedbackProbe!;
+          while (!cancelFeedbackWatch) {
+            if (await probe()) return true;
+            await this.page.waitForTimeout(300).catch(() => undefined);
+          }
+          return false;
+        })()
+      : undefined;
+    try {
+      const stable = this.waitForPromotedUiStableBody(stepIndex, target);
+      if (!feedbackArrived) { await stable; return; }
+      await Promise.race([stable, feedbackArrived.then((arrived) => arrived ? undefined : stable)]);
+    } finally {
+      cancelFeedbackWatch = true;
+    }
+  }
+
+  private clickFeedbackProbe: (() => Promise<boolean>) | undefined;
+
+  private async waitForPromotedUiStableBody(stepIndex: number, target: string): Promise<void> {
     const stability = await waitForStablePageState(this.page, {
       timeoutMs: this.config.stabilityTimeoutMs,
       pollMs: 500,
       stableForMs: 700
     });
     if (!stability.finalStable) {
-      throw new Error(`UI not stable after step ${stepIndex} target="${target}"`);
+      // The action's own outcome is verified elsewhere; background work (uploads, syncing rows)
+      // can keep the page busy beyond the bound. Failing here would also make the callback re-click
+      // a control that already did its job. The next step waits for its own target.
+      console.log(`[runtime:ui-stability] warning=true step=${stepIndex} target=${JSON.stringify(target)} reason=page_still_busy_after_bound`);
+      return;
     }
+    // A slow request can leave a visible loader after the DOM already "settled"; the next step
+    // would then run against a form that is about to be re-rendered. Wait (bounded, never fatal)
+    // for loading indicators to clear, as Discovery's own screen-stability wait does.
+    await waitForVisualSettle(this.page, { quietMs: 700, timeoutMs: 90_000 }).catch(() => undefined);
   }
 
   async handlePromotedDialogOrAlert(): Promise<string | undefined> {
@@ -3620,11 +3887,10 @@ export class PromotedSpecRuntime {
 
   /**
    * Executes a click using a certified structural identity, via the SAME shared
-   * resolveRecordedStructuralOwner resolver Discovery's own recording replay already uses --
-   * never a second/parallel structural resolver, never a fabricated CSS/positional fallback.
-   * Fails closed (throws) if the resolver cannot produce exactly one visible, enabled element;
-   * the caller (clickPromotedTarget) never falls back to the bare ref-based locator/callback
-   * path for this authority once it has been declared.
+   * resolveRecordedStructuralOwner resolver Discovery's own recording replay already uses.
+   * If that captured DOM signature has drifted, only an exact role/name reference also captured
+   * for the same owner may be tried, and only when it remains unique, visible, and enabled.
+   * No selector is inferred from the scenario text and ambiguous targets still fail closed.
    */
   private async clickPromotedTargetViaStructuralAuthority(options: PromotedClickOptions): Promise<void> {
     const previousUrl = this.page.url();
@@ -3650,7 +3916,9 @@ export class PromotedSpecRuntime {
     const resolution = await resolveRecordedStructuralOwner(this.page, options.structuralTarget, (reason, details) => {
       structuralFailureReason = reason;
       structuralFailureMatchCount = details?.matchCount;
-    }, this.config.actionTimeoutMs);
+    // The owner can still be mounting while the page re-renders after a slow request; give the
+    // mount wait a larger (still bounded) window than a single action. It only delays failures.
+    }, Math.max(this.config.actionTimeoutMs, 60_000));
     // A captured option can carry an ephemeral scope ID even though its exact role/name ref and
     // recorded trigger field remain valid. Resolve the recorded owner→option lineage through the
     // shared resolver even when the structural certificate also resolves: the structural locator
@@ -3702,24 +3970,42 @@ export class PromotedSpecRuntime {
       console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} rowCheckboxByState candidates=${total} stateChanging=${stateChanging.length}`);
       if (stateChanging.length === 1) rowCheckboxLocator = stateChanging[0];
     }
+    const semanticFallback = !resolution?.locator && !causalOptionResolution?.locator && !rowCheckboxLocator
+      ? await resolveRecordedStructuralSemanticFallback(
+        this.page,
+        options.structuralTarget,
+        options.structuralSemanticFallbackRefs,
+        structuralFailureReason,
+        structuralFailureMatchCount,
+      )
+      : undefined;
+    // The recording saw ONE such control when this press was captured, but earlier presses of the same
+    // named control already happened in this run and several are still live: take the next unused one.
+    const repeatedPressLocator = !resolution?.locator && !causalOptionResolution?.locator && !rowCheckboxLocator && !semanticFallback?.locator
+      ? await this.nextUnusedRepeatedPress(options.technicalTargetRefs?.[0])
+      : undefined;
     const resolvedLocator = (causalOptionResolution?.status === "resolved" ? causalOptionResolution.locator : undefined)
       ?? resolution?.locator
-      ?? rowCheckboxLocator;
+      ?? rowCheckboxLocator
+      ?? semanticFallback?.locator
+      ?? repeatedPressLocator;
     const resolvedStrategy = (causalOptionResolution?.status === "resolved" ? causalOptionResolution.locatorStrategy : undefined)
       ?? resolution?.strategy
-      ?? (rowCheckboxLocator ? "row_checkbox_by_state" : undefined);
+      ?? (rowCheckboxLocator ? "row_checkbox_by_state" : undefined)
+      ?? semanticFallback?.strategy;
     if (!resolvedLocator) {
       throw new Error(
         `Promoted click failed at step ${options.stepIndex} target="${options.target}". ` +
         `reason=structural_authority_not_unique_or_unresolved ` +
         `structuralFailureReason=${structuralFailureReason ?? "unknown"} ` +
         `structuralFailureMatchCount=${structuralFailureMatchCount ?? "n/a"} ` +
-        `suggestedFix="Certified structural authority did not resolve to exactly one visible, enabled element -- never falls back to a weaker locator, text match, or position."`
+        `suggestedFix="The recorded structural target and its exact accessible reference must resolve to one visible, enabled element."`
       );
     }
     console.log(
       `[promoted-click-structural] stepIndex=${options.stepIndex} strategy=${resolvedStrategy ?? "recorded:structural-owner"} ` +
-      `matchCount=${resolution?.currentMatchCount ?? 1} causalOptionFallback=${Boolean(causalOptionResolution?.status === "resolved")}`
+      `matchCount=${resolution?.currentMatchCount ?? 1} causalOptionFallback=${Boolean(causalOptionResolution?.status === "resolved")} ` +
+      `semanticCompatibilityFallback=${Boolean(semanticFallback)}`
     );
     const selectionStateProbe = resolvedExpectedEffect === "selection_state_change"
       ? await capturePromotedSelectionStateProbe(
@@ -3746,9 +4032,21 @@ export class PromotedSpecRuntime {
     }
     console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} phase=dispatch_start timeoutMs=${this.config.actionTimeoutMs}`);
     const downloadObservationBaseline = this.observedDownloadSequence;
+    const clickedInsideDialog = typeof (resolvedLocator as { evaluate?: unknown }).evaluate === "function"
+      ? await resolvedLocator.evaluate((el: Element) => Boolean(el.closest('[role="dialog"], [role="alertdialog"], dialog'))).catch(() => false)
+      : false;
     await resolvedLocator.click({ timeout: this.config.actionTimeoutMs });
+    this.lastDialogConfirmLocator = clickedInsideDialog === true ? resolvedLocator : undefined;
     console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} phase=dispatch_end currentUrl=${this.page.url()}`);
-    await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField, downloadObservationBaseline);
+    try {
+      await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField, downloadObservationBaseline);
+    } catch (error) {
+      if (!(error instanceof Error) || !error.message.startsWith("QA_ENVIRONMENT_REJECTION_NO_NAVIGATION")) throw error;
+      // Tolerated QA-environment rejection: nothing was created, press the same control once more.
+      console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} phase=qa_environment_rejection_repress`);
+      await resolvedLocator.click({ timeout: this.config.actionTimeoutMs });
+      await this.postActionStabilityWithRecordedOptionRetry(previousUrl, resolvedExpectedEffect, targetIdentity, beforeActionSnapshot, options.target, selectionStateProbe, options.selectionActivationField, downloadObservationBaseline);
+    }
     console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} phase=post_action_stability_complete`);
     if (expectedEffect !== "none") {
       await this.boundedRuntimeBoundary(
@@ -3803,6 +4101,91 @@ export class PromotedSpecRuntime {
     }
   }
 
+  /** The confirm control the previous click pressed inside a dialog (to press again if the dialog stays open). */
+  private lastDialogConfirmLocator?: Locator;
+  /** Role+name refs already pressed in this run (a recorded repeat may find its control gone). */
+  private readonly pressedRoleRefs = new Set<string>();
+
+  /**
+   * A confirm button pressed by the previous step can leave its dialog open (the press only
+   * recalculated dependent values), which then blocks the next action outside that dialog. Mirrors
+   * Discovery: when exactly one dialog is open, the next target is not inside it and the previous
+   * confirm is still there, press that confirm once more.
+   */
+  private async retryPendingDialogConfirm(nextTargetRef: string | undefined): Promise<void> {
+    const confirm = this.lastDialogConfirmLocator;
+    this.lastDialogConfirmLocator = undefined;
+    if (!confirm || typeof (this.page as { locator?: unknown }).locator !== "function") return;
+    try {
+      const dialogs = this.page.locator('[role="dialog"], [role="alertdialog"], dialog');
+      const visible: Locator[] = [];
+      for (let index = 0; index < await dialogs.count().catch(() => 0); index += 1) {
+        if (await dialogs.nth(index).isVisible().catch(() => false)) visible.push(dialogs.nth(index));
+      }
+      if (visible.length !== 1) return;
+      const ref = nextTargetRef?.trim() ?? "";
+      const role = /^role:([a-z]+)\|(.+)$/i.exec(ref);
+      const css = /^css:(.+)$/i.exec(ref);
+      const nextInsideDialog = role
+        ? await visible[0].getByRole(role[1].toLowerCase() as Parameters<Page["getByRole"]>[0], { name: role[2].trim(), exact: true }).count().catch(() => 0)
+        : css ? await visible[0].locator(css[1]).count().catch(() => 0) : 1;
+      if (nextInsideDialog > 0) return;
+      if (await confirm.count().catch(() => 0) !== 1 || !(await confirm.isVisible().catch(() => false)) || !(await confirm.isEnabled().catch(() => false))) return;
+      await confirm.click({ timeout: 3000 }).catch(() => undefined);
+      await this.page.waitForTimeout(800).catch(() => undefined);
+      console.log(`[dialog-recovery] confirmRetried=true reason=dialog_still_open_before_next_action`);
+    } catch { /* recovery only: the action itself reports any real failure */ }
+  }
+
+  private async nextUnusedRepeatedPress(ref: string | undefined): Promise<Locator | undefined> {
+    const key = pressNameKey(ref);
+    const name = pressName(ref);
+    if (!key || !name || !this.pressedRoleRefs.has(key)) return undefined;
+    const sequenced = await resolveSequencedSiblingForRoleRef(this.page, `role:button|${name}`).catch(() => undefined);
+    return sequenced?.status === "resolved" ? sequenced.locator : undefined;
+  }
+
+  /**
+   * A recorded repeat of a press already made in this run, after an attach completed, whose control
+   * is gone (its row moved on to an uploaded/syncing state), has nothing left to press: satisfied.
+   * The first time a ref is seen it is only remembered.
+   */
+  private async isRepeatedPressSatisfied(ref: string | undefined): Promise<boolean> {
+    const key = pressNameKey(ref);
+    if (!key || !ref) return false;
+    if (typeof (this.page as { locator?: unknown }).locator !== "function") return false;
+    if (!this.pressedRoleRefs.has(key)) {
+      this.pressedRoleRefs.add(key);
+      return false;
+    }
+    try {
+      if (await countLiveControlsForPress(this.page, ref) !== 0) return false;
+      const uploadsDone = await this.page.evaluate(() => (window as unknown as { __codexUploadSequence?: number }).__codexUploadSequence ?? 0).catch(() => 0);
+      return uploadsDone > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Before a click: if its recorded role/css ref resolves to ONE visible control inside a dialog,
+   * remember it so the next step can press it again when the dialog stayed open (any click path).
+   */
+  private async rememberDialogControl(ref: string | undefined): Promise<void> {
+    if (typeof (this.page as { locator?: unknown }).locator !== "function") return;
+    try {
+      const text = ref?.trim() ?? "";
+      const role = /^role:([a-z]+)\|(.+)$/i.exec(text);
+      const css = /^css:(.+)$/i.exec(text);
+      const control = role
+        ? this.page.getByRole(role[1].toLowerCase() as Parameters<Page["getByRole"]>[0], { name: role[2].trim(), exact: true })
+        : css ? this.page.locator(css[1]) : undefined;
+      if (!control || await control.count().catch(() => 0) !== 1 || !(await control.isVisible().catch(() => false))) return;
+      const insideDialog = await control.evaluate((el: Element) => Boolean(el.closest('[role="dialog"], [role="alertdialog"], dialog'))).catch(() => false);
+      if (insideDialog === true) this.lastDialogConfirmLocator = control;
+    } catch { /* optional recovery context only */ }
+  }
+
   async clickPromotedTarget(options: PromotedClickOptions): Promise<void> {
     console.log(`[promoted-step] stepIndex=${options.stepIndex} phase=start currentUrl=${this.page.url()} runtimeModuleVersion=${PROMOTED_SPEC_RUNTIME_MODULE_VERSION}`);
     await this.markBoundaryProgress();
@@ -3815,7 +4198,28 @@ export class PromotedSpecRuntime {
     console.log(`[TRACE-1] stepIndex=${options.stepIndex} about_to_call=ensureInitialEvidence`);
     await this.ensureInitialEvidence();
     await this.dismissSessionExpiringWarningIfPresent();
+    // Judge each click on its own: a click that opens the file picker is observable only through the chooser.
+    await armFileChooserCapture(this.page);
+    await clearPendingFileChooser(this.page);
+    // Only inside an upload flow (a file was already attached in this run) does a new message count as completion.
+    const uploadsDone = typeof this.page.evaluate === "function"
+      ? await this.page.evaluate(() => (window as unknown as { __codexUploadSequence?: number }).__codexUploadSequence ?? 0).catch(() => 0)
+      : 0;
+    this.clickFeedbackProbe = uploadsDone > 0 ? newNonFailureFeedbackProbe(this.page, await captureFeedbackBaseline(this.page)) : undefined;
+    await this.retryPendingDialogConfirm(options.technicalTargetRefs?.[0]);
+    if (await this.isRepeatedPressSatisfied(options.technicalTargetRefs?.[0])) {
+      console.log(`[runtime:repeated-press] step=${options.stepIndex} alreadySatisfied=true`);
+      await this.captureClickStep(options.target, "passed", undefined, options.stepIndex);
+      return;
+    }
+    await this.rememberDialogControl(options.technicalTargetRefs?.[0]);
     console.log(`[promoted-step] stepIndex=${options.stepIndex} phase=ensure_initial_evidence_done`);
+    // A virtual-keyboard character whose field a catalog service fills (OTP): the dataset only
+    // carried a placeholder, so take the real value now that the screen is asking for it.
+    if (options.keyboardValue !== undefined && options.valueKey) {
+      const serviceValue = await resolveServiceBoundValue(options.valueKey, { segmentPosition: options.segmentPosition });
+      if (serviceValue !== undefined) options = { ...options, keyboardValue: serviceValue, sensitive: true };
+    }
 
     // Certified structural authority (deterministic compiler, kind=certified_structural with a
     // usable owner) is a SEPARATE, exigent path -- reuses the exact same resolver Discovery's
@@ -3841,6 +4245,16 @@ export class PromotedSpecRuntime {
       && options.technicalTargetRefs.every((ref) => parseSerializedTechnicalTargetString(ref)?.strategy === "text")
       && options.technicalTargetRefs.some((ref) => ref === options.target)
       ? { ...targetIdentity, technicalTargetRefs: options.technicalTargetRefs } : undefined;
+    // A compiled runtime-deferred click can carry an exact-looking text ref only as its display
+    // fallback while captured semantic or recorder evidence is the actual execution authority.
+    // Let the shared evidence resolver run first in that case; retain exact-text fail-closed
+    // behavior for clicks without this explicit deferred evidence.
+    const recorderEvidence = options.playwrightRecorderEvidence;
+    const recorderRuntimeEvidenceOwnsResolution = Boolean(
+      recorderEvidence?.runtimeResolutionRequired === true
+      && ["role", "text", "label", "placeholder", "testid"].includes(recorderEvidence.kind),
+    );
+    const runtimeEvidenceOwnsResolution = Boolean(options.semanticRuntimeEvidence) || recorderRuntimeEvidenceOwnsResolution;
     const resolvedExpectedEffect = effectiveExpectedEffect(expectedEffect, targetIdentity);
 
     const replaySteps = options.previousStepReplays || options.previousSteps;
@@ -4049,6 +4463,7 @@ export class PromotedSpecRuntime {
     let nativeClickSucceeded = false;
     let downloadObservedForAction = false;
     let nativeClickError: string | undefined;
+    let checkableCaptionOwnerResolutionStatus = "not_attempted";
     let callbackAttempted = false;
     let callbackSucceeded = false;
     let callbackError: string | undefined;
@@ -4134,7 +4549,7 @@ export class PromotedSpecRuntime {
         nativeClickAttempted = false;
         nativeClickError = "selection_callback_owns_target_resolution";
       } else {
-      const ordinalResolved = await resolveOrdinalSelectionOnPage(this.page, {
+      const ordinalResolved = options.checkableCaptionOwner ? undefined : await resolveOrdinalSelectionOnPage(this.page, {
         target: options.target,
         actionIntent: options.actionIntent,
         routeProfile: options.routeProfile,
@@ -4202,7 +4617,7 @@ export class PromotedSpecRuntime {
       // or ambiguous matches, never a guess) — unlike getByText/getByRole against `options.target`,
       // which a display label spanning multiple DOM nodes (heading + description concatenated)
       // can never satisfy no matter how long the timeout.
-      const recordedStructuralResolution = targetIdentity?.recordedTechnicalTargets?.length
+      const recordedStructuralResolution = !options.checkableCaptionOwner && targetIdentity?.recordedTechnicalTargets?.length
         ? await resolveActionTarget(
           this.page,
           await scanCurrentPage(this.page),
@@ -4214,7 +4629,7 @@ export class PromotedSpecRuntime {
           },
         ).catch(() => undefined)
         : undefined;
-      const structuredCheckboxResolution = hasStructuredCheckboxReference
+      const structuredCheckboxResolution = !options.checkableCaptionOwner && hasStructuredCheckboxReference
         ? await resolveActionTarget(
           this.page,
           await scanCurrentPage(this.page),
@@ -4236,7 +4651,7 @@ export class PromotedSpecRuntime {
       // (resolveActionTarget -> tryFieldScopedStructuralFallback) Discovery's own live walk
       // already used to pass this step, only attempted when the stronger authorities above
       // didn't resolve. Never certifies/upgrades resolutionState -- a plain retry hint.
-      let exactTextResolution = explicitTextIdentity
+      let exactTextResolution = !options.checkableCaptionOwner && explicitTextIdentity && !runtimeEvidenceOwnsResolution
         ? await resolvePromotedClickableLocator(this.page, options.target, {
           containerLocator: containerSelector, targetIdentity: explicitTextIdentity,
           timeoutMs: this.config.actionTimeoutMs,
@@ -4245,7 +4660,7 @@ export class PromotedSpecRuntime {
       // active container does not make the exact text unique, the recorder's own scope for this
       // action is the authority that disambiguated it at recording time; still fail closed unless
       // the text is unique and actionable inside that scope.
-      if (explicitTextIdentity && !exactTextResolution) {
+      if (!options.checkableCaptionOwner && explicitTextIdentity && !runtimeEvidenceOwnsResolution && !exactTextResolution) {
         const recorderScope = options.playwrightRecorderEvidence?.scopeIdentity;
         const scopeValue = recorderScope?.value?.replace(/"/g, "\\\"");
         const scopeSelector = !recorderScope ? undefined
@@ -4263,28 +4678,50 @@ export class PromotedSpecRuntime {
           }
         }
       }
-      const associatedFieldResolution = !explicitTextIdentity && !recordedStructuralResolution?.locator
+      const allowRuntimeEvidenceResolution = options.checkableCaptionOwner || !explicitTextIdentity || runtimeEvidenceOwnsResolution;
+      if (options.checkableCaptionOwner) {
+        // A late response to the previous action re-renders the form and resets a toggle changed
+        // meanwhile; let in-flight requests finish before flipping the checkable control.
+        await this.page.waitForLoadState("networkidle", { timeout: 60_000 }).catch(() => undefined);
+        await this.waitForPromotedUiStable(options.stepIndex, options.target);
+      }
+      const associatedFieldResolutionOnce = async () => await resolveActionTarget(
+        this.page,
+        await scanCurrentPage(this.page),
+        options.target,
+        {
+          actionType: "action_click",
+          recordingActionType: "click",
+          associatedField: options.selectionActivationField ?? options.associatedField,
+          checkableCaptionOwnerIntent: options.checkableCaptionOwner,
+          recordedTechnicalTargetRefs: options.technicalTargetRefs,
+          // Repeated entity rows share the same column/field: without the recorded entity scope
+          // the grid resolver sees every row's control and fails closed as ambiguous.
+          rowScope: entityRowScope ?? rowScopeFromPromotedRef(parsedTargetRefs.rowRef),
+          entityScope: targetIdentity?.entityScope ?? options.entityScope,
+          rowRelation: targetIdentity?.rowRelation === "added" || targetIdentity?.rowRelation === "next"
+            ? targetIdentity.rowRelation
+            : undefined,
+        },
+      ).catch(() => undefined);
+      let associatedFieldResolution = allowRuntimeEvidenceResolution && !recordedStructuralResolution?.locator
         && !structuredCheckboxResolution?.locator
         && (options.associatedField || options.selectionActivationField)
-        ? await resolveActionTarget(
-          this.page,
-          await scanCurrentPage(this.page),
-          options.target,
-          {
-            actionType: "action_click",
-            recordingActionType: "click",
-            associatedField: options.selectionActivationField ?? options.associatedField,
-            recordedTechnicalTargetRefs: options.technicalTargetRefs,
-            // Repeated entity rows share the same column/field: without the recorded entity scope
-            // the grid resolver sees every row's control and fails closed as ambiguous.
-            rowScope: entityRowScope ?? rowScopeFromPromotedRef(parsedTargetRefs.rowRef),
-            entityScope: targetIdentity?.entityScope ?? options.entityScope,
-            rowRelation: targetIdentity?.rowRelation === "added" || targetIdentity?.rowRelation === "next"
-              ? targetIdentity.rowRelation
-              : undefined,
-          },
-        ).catch(() => undefined)
+        ? await associatedFieldResolutionOnce()
         : undefined;
+      // A checkable caption can render after a slow preceding request (the previous action may
+      // take a minute to answer); re-resolve within a bounded window before failing closed (the
+      // unique-owner proof is unchanged).
+      const captionRetryDeadline = Date.now() + 90_000;
+      for (let attempt = 1; options.checkableCaptionOwner && associatedFieldResolution
+        && associatedFieldResolution.status === "not_found" && Date.now() < captionRetryDeadline; attempt += 1) {
+        await this.page.waitForTimeout(2000).catch(() => undefined);
+        associatedFieldResolution = await associatedFieldResolutionOnce();
+        console.log(`[runtime:checkable-caption-retry] step=${options.stepIndex} attempt=${attempt} status=${associatedFieldResolution?.status ?? "unresolved"}`);
+      }
+      if (options.checkableCaptionOwner) {
+        checkableCaptionOwnerResolutionStatus = associatedFieldResolution?.status ?? "unresolved";
+      }
       if (options.associatedField || options.selectionActivationField) {
         console.log(
           `[runtime:associated-field-resolution] step=${options.stepIndex} status=${associatedFieldResolution?.status ?? "skipped"} ` +
@@ -4296,7 +4733,7 @@ export class PromotedSpecRuntime {
       // runtime evidence, then the generic text/role fallback below. Reuses the SAME shared
       // resolveActionTarget -> resolveSemanticRuntimeTarget chain, never a second implementation.
       // Never certifies/upgrades resolutionState/technicalReady/promotionReady.
-      const semanticRuntimeResolution = !explicitTextIdentity && !recordedStructuralResolution?.locator
+      const semanticRuntimeResolution = !options.checkableCaptionOwner && allowRuntimeEvidenceResolution && !recordedStructuralResolution?.locator
         && !structuredCheckboxResolution?.locator
         && !associatedFieldResolution?.locator
         && options.semanticRuntimeEvidence
@@ -4311,7 +4748,7 @@ export class PromotedSpecRuntime {
           },
         ).catch(() => undefined)
         : undefined;
-      const recorderRuntimeResolution = !explicitTextIdentity && !recordedStructuralResolution?.locator
+      const recorderRuntimeResolution = !options.checkableCaptionOwner && allowRuntimeEvidenceResolution && !recordedStructuralResolution?.locator
         && !structuredCheckboxResolution?.locator
         && !associatedFieldResolution?.locator
         && !semanticRuntimeResolution?.locator
@@ -4327,7 +4764,18 @@ export class PromotedSpecRuntime {
           },
         ).catch(() => undefined)
         : undefined;
-      resolved = recordedStructuralResolution?.status === "resolved" && recordedStructuralResolution.locator
+      resolved = options.checkableCaptionOwner
+        ? associatedFieldResolution?.status === "resolved" && associatedFieldResolution.locator
+          ? {
+            locator: associatedFieldResolution.locator,
+            strategy: associatedFieldResolution.locatorStrategy ?? "unique_checkable_control_in_caption_scope",
+            scope: "page" as const,
+            visible: true,
+            enabled: true,
+            clickable: true,
+          }
+          : undefined
+        : recordedStructuralResolution?.status === "resolved" && recordedStructuralResolution.locator
         ? {
           locator: recordedStructuralResolution.locator,
           strategy: recordedStructuralResolution.locatorStrategy ?? "recorded:structural-owner",
@@ -4374,7 +4822,7 @@ export class PromotedSpecRuntime {
           enabled: true,
           clickable: true,
         }
-        : await resolvePromotedClickableLocator(this.page, options.target, {
+        : options.checkableCaptionOwner ? undefined : await resolvePromotedClickableLocator(this.page, options.target, {
           containerLocator: containerSelector,
           targetIdentity: explicitTextIdentity ?? targetIdentity,
           timeoutMs: this.config.actionTimeoutMs,
@@ -4392,13 +4840,32 @@ export class PromotedSpecRuntime {
         const downloadObservationBaseline = this.observedDownloadSequence;
         const clickResult = await clickPromotedLocatorWithBoundedReresolution(
           resolved,
-          async () => resolvePromotedClickableLocator(this.page, options.target, {
-            containerLocator: exactTextContainerSelector ?? containerSelector,
-            targetIdentity: explicitTextIdentity ?? targetIdentity,
-            timeoutMs: this.config.actionTimeoutMs,
-            actionKind: options.actionIntent as "submit" | "link" | "button" | "action",
-            actionIntent: options.actionIntent,
-          }),
+          async () => {
+            if (options.checkableCaptionOwner && options.associatedField) {
+              const refreshed = await resolveActionTarget(
+                this.page,
+                await scanCurrentPage(this.page),
+                options.target,
+                {
+                  actionType: "action_click",
+                  recordingActionType: "click",
+                  associatedField: options.associatedField,
+                  checkableCaptionOwnerIntent: true,
+                  recordedTechnicalTargetRefs: options.technicalTargetRefs,
+                },
+              ).catch(() => undefined);
+              return refreshed?.status === "resolved" && refreshed.locator
+                ? { locator: refreshed.locator }
+                : undefined;
+            }
+            return resolvePromotedClickableLocator(this.page, options.target, {
+              containerLocator: exactTextContainerSelector ?? containerSelector,
+              targetIdentity: explicitTextIdentity ?? targetIdentity,
+              timeoutMs: this.config.actionTimeoutMs,
+              actionKind: options.actionIntent as "submit" | "link" | "button" | "action",
+              actionIntent: options.actionIntent,
+            });
+          },
           this.config.actionTimeoutMs,
         );
         if (clickResult.reResolved) matchedLocatorStrategy = `${resolved.strategy}:bounded_reresolution`;
@@ -4424,7 +4891,7 @@ export class PromotedSpecRuntime {
       if (isOrdinalSelectionActionIntent(options.actionIntent)) {
         nativeClickError = error instanceof Error ? error.message : String(error);
       }
-      if (typeof resolved !== "undefined" && resolved?.locator) {
+      if (!options.checkableCaptionOwner && typeof resolved !== "undefined" && resolved?.locator) {
         const canSafeForceClick = await shouldUseSafeForceClick(this.page, resolved.locator, options, error);
         if (canSafeForceClick) {
           try {
@@ -4492,8 +4959,37 @@ export class PromotedSpecRuntime {
       }
     }
 
+    // This marker comes only from a validated Discovery plan that proved the caption's unique
+    // checkable owner. If the same relation cannot be proved on the promoted page, never click
+    // the stale recorded input, the caption text, or a generic callback target.
+    if (options.checkableCaptionOwner && !nativeClickSucceeded) {
+      throw new Error(
+        `checkable_caption_owner_not_uniquely_resolved: step=${options.stepIndex} ` +
+        `field=${JSON.stringify(options.associatedField ?? "")} resolutionStatus=${checkableCaptionOwnerResolutionStatus} ` +
+        `clickError=${JSON.stringify(nativeClickError ?? "not_dispatched")}`,
+      );
+    }
+
     if (explicitTextIdentity && !nativeClickSucceeded) {
       throw new Error(`promoted_recorded_text_click_failed: step=${options.stepIndex} reason=${nativeClickError ?? "exact_target_not_unique_or_actionable"}`);
+    }
+
+    // A bare role+name ref that matches several live siblings (one "Cargar" per document row) is
+    // consumed in document order, exactly as Discovery replayed the recorded sequence.
+    let sequencedSiblingLocator: Locator | undefined;
+    if (!nativeClickSucceeded && (options.technicalTargetRefs?.length ?? 0) === 1 && /^role:(?:button|link)\|/i.test(options.technicalTargetRefs![0])) {
+      // The control may be rendered by server-side work still in progress (e.g. a document row that
+      // only offers its button once generated): wait, bounded, for the recorded role+name to appear.
+      const roleRef = /^role:([a-z]+)\|(.+)$/i.exec(options.technicalTargetRefs![0].trim());
+      if (roleRef) {
+        const roleRefLocator = this.page.getByRole(roleRef[1].toLowerCase() as Parameters<Page["getByRole"]>[0], { name: roleRef[2].trim(), exact: true });
+        const waitStartedAt = Date.now();
+        const countBefore = await roleRefLocator.count().catch(() => -1);
+        await roleRefLocator.first().waitFor({ state: "visible", timeout: 900_000 }).catch(() => undefined);
+        console.log(`[runtime:role-ref-wait] step=${options.stepIndex} ref=${JSON.stringify(options.technicalTargetRefs![0])} countBefore=${countBefore} waitedMs=${Date.now() - waitStartedAt} countAfter=${await roleRefLocator.count().catch(() => -1)}`);
+      }
+      const sequenced = await resolveSequencedSiblingForRoleRef(this.page, options.technicalTargetRefs![0]).catch(() => undefined);
+      if (sequenced?.status === "resolved" && sequenced.locator) sequencedSiblingLocator = sequenced.locator;
     }
 
     // Step 2: If native click didn't succeed, try callback POM fallback
@@ -4504,7 +5000,7 @@ export class PromotedSpecRuntime {
         if (resolvedExpectedEffect === "selection_state_change") {
           console.log(`[selection-runtime] phase=before_callback snapshot="${selectionRuntimeSnapshot(selectionStateProbe ? await readPromotedInteractiveState(selectionStateProbe.locator, { includeRenderedText: selectionStateProbe.strategy.startsWith("recorded-selection-owner:") }) : undefined)}"`);
         }
-        await withTimeout(options.action(), this.config.actionTimeoutMs, "click callback");
+        await withTimeout(sequencedSiblingLocator ? sequencedSiblingLocator.click() : options.action(), this.config.actionTimeoutMs, "click callback");
         clickPath = "pom_callback";
         fallbackUsed = "callback";
         matchedLocatorStrategy = matchedLocatorStrategy === "unknown" ? "callback" : matchedLocatorStrategy;
@@ -4517,7 +5013,16 @@ export class PromotedSpecRuntime {
       } catch (error) {
         callbackError = error instanceof Error ? error.message : String(error);
         console.log(`[runtime:click-callback-failure] step=${options.stepIndex} target="${options.target}" error="${callbackError}"`);
-        
+
+        // A click that opens the file picker changes nothing in the DOM; the opened chooser (or the
+        // detached file input the app tried to open) IS its observable outcome, consumed by the
+        // following upload step. Never repeat that click.
+        if (await hasPendingFileChooser(this.page)) {
+          console.log(`[runtime:click-effect] step=${options.stepIndex} outcome=file_chooser_opened`);
+          clickPath = "pom_callback";
+          callbackSucceeded = true;
+          effectDetected = true;
+        } else
         // Retry if enabled and not sensitive
         if (this.config.retryEnabled && !options.sensitive && !retryAttempted) {
           retryAttempted = true;
@@ -4679,11 +5184,20 @@ export class PromotedSpecRuntime {
     await this.markBoundaryProgress();
     await this.ensureInitialEvidence();
     await this.dismissSessionExpiringWarningIfPresent();
+    // Fields a catalog service fills (OTP) get their real value at this step, never before.
+    const serviceValue = await resolveServiceBoundValue(options.valueKey);
+    if (serviceValue !== undefined) options = { ...options, value: serviceValue, sensitive: true };
     if (options.playwrightRecorderEvidence?.kind === "segmented_input") {
       await this.fillSegmentedInput(options);
       return;
     }
     const resolvedField = resolvePromotedFieldTarget(options);
+    const selectionQueryResolution = options.selectionQueryOwnerField?.trim()
+      ? await resolveSelectionSearchInput(this.page, await scanCurrentPage(this.page), options.selectionQueryOwnerField.trim()).catch(() => undefined)
+      : undefined;
+    if (options.selectionQueryOwnerField?.trim() && !selectionQueryResolution) {
+      throw new Error(`Promoted selection query field is not uniquely editable in its recorded selection surface at step ${options.stepIndex}.`);
+    }
     const masked = maskIfSensitive(options.value, options.sensitive);
     const targetIdentity = resolvePromotedFieldIdentityFromPersistedContract(options.stepIndex, resolvedField, {
       valueKey: options.valueKey,
@@ -4764,7 +5278,8 @@ export class PromotedSpecRuntime {
     let matchedLocatorStrategy = "unknown";
 
     // Step 1: Try native runtime fill with resolved locator
-    if (recorderRuntimeResolution?.status === "resolved"
+    if (selectionQueryResolution?.locator
+      || recorderRuntimeResolution?.status === "resolved"
       || unboundGridFieldResolution?.status === "resolved"
       || (refresh.best && refresh.best.matchingFieldFound)
       || targetIdentity.technicalTargetRefs.length > 0) {
@@ -4837,7 +5352,8 @@ export class PromotedSpecRuntime {
             ).catch(() => undefined);
             if (gridFillResolution?.status === "resolved"
               && gridFillResolution.locator
-              && gridFillResolution.locatorStrategy?.startsWith("grid_cell_")
+              && (gridFillResolution.locatorStrategy?.startsWith("grid_cell_")
+                || gridFillResolution.locatorStrategy === "label_group_control")
               && await validateFillableCandidate(gridFillResolution.locator)) {
               activatedStructuralResolution = {
                 status: "resolved",
@@ -4851,7 +5367,16 @@ export class PromotedSpecRuntime {
               console.log(`[promoted-fill-state] stepIndex=${options.stepIndex} gridCellFillResolved=false status=${gridFillResolution?.status ?? "unavailable"} strategy=${resultStrategy} editableCandidates=${candidateCount} rowScope=${entityRowScope ?? rowScopeFromPromotedRef(parsedTargetRefs.rowRef) ?? "none"}`);
             }
           }
-          const resolved = (recorderRuntimeResolution?.status === "resolved" && recorderRuntimeResolution.locator
+          const resolved = selectionQueryResolution?.locator
+            ? {
+              locator: selectionQueryResolution.locator,
+              strategy: selectionQueryResolution.strategy,
+              scope: "page" as const,
+              visible: true,
+              enabled: true,
+              editable: true,
+            }
+            : (recorderRuntimeResolution?.status === "resolved" && recorderRuntimeResolution.locator
             && await validateFillableCandidate(recorderRuntimeResolution.locator))
             ? {
               locator: recorderRuntimeResolution.locator,
@@ -4925,6 +5450,71 @@ export class PromotedSpecRuntime {
       }
     }
 
+    // A plain recorded field can lack a technical locator even though Discovery observed its
+    // editable control beside the field caption. If the promoted runtime's lighter locator
+    // strategies cannot fill it, reuse CORE's live fill resolver against a fresh page snapshot
+    // before trying the generated callback (which may resolve the caption to a nearby button).
+    // It applies to page-level fields too (e.g. a caption whose label has no `for` association).
+    // This recovery is deliberately limited to unbound, non-grid fields: recorded targets,
+    // recorder evidence, selection searches and row/entity relations retain their own authority.
+    const parsedTargetRefsForRecovery = parseTechnicalTargetRefs(targetIdentity.technicalTargetRefs);
+    const canRecoverFromObservedField = !nativeFillSucceeded
+      && targetIdentity.technicalTargetRefs.length === 0
+      && !options.playwrightRecorderEvidence
+      && !selectionQueryResolution
+      && !recorderRuntimeResolution
+      && !parsedTargetRefsForRecovery.rowRef;
+    if (canRecoverFromObservedField) {
+      try {
+        const observedResolution = await resolveFillTarget(
+          this.page,
+          await scanCurrentPage(this.page),
+          resolvedField,
+        );
+        const resolvedObservedLocator = observedResolution.status === "resolved" ? observedResolution.locator : undefined;
+        // The shared resolver can land on the field's wrapper; fill the single editable control inside it.
+        const observedLocator = resolvedObservedLocator && (await resolvedObservedLocator.count().catch(() => 0)) === 1
+          ? await coerceToEditableFillTarget(resolvedObservedLocator)
+          : resolvedObservedLocator;
+        const observedCount = observedLocator ? await observedLocator.count().catch(() => 0) : 0;
+        const observedVisible = observedCount === 1 && await observedLocator!.isVisible().catch(() => false);
+        const observedEnabled = observedVisible && await observedLocator!.isEnabled().catch(() => false);
+        const observedEditable = observedEnabled && await observedLocator!.isEditable().catch(() => false);
+        if (!(observedLocator && observedCount === 1 && observedVisible && observedEnabled && observedEditable)) {
+          console.log(
+            `[promoted-fill-recovery] stepIndex=${options.stepIndex} result=skipped status=${observedResolution.status} ` +
+            `count=${observedCount} visible=${observedVisible} enabled=${observedEnabled} editable=${observedEditable}`,
+          );
+        }
+        if (observedLocator && observedCount === 1 && observedVisible && observedEnabled && observedEditable) {
+          nativeFillAttempted = true;
+          await withTimeout(observedLocator.fill(options.value), this.config.actionTimeoutMs, "observed field fill");
+          nativeFillSucceeded = true;
+          nativeFillError = undefined;
+          fillPath = "native_runtime";
+          fallbackUsed = observedResolution.fillDiagnostics?.activeContainerUsed ? "active_container" : "page";
+          matchedLocatorStrategy = `shared_fill_resolver:${observedResolution.locatorStrategy ?? "observed_field"}`;
+          console.log(`[promoted-fill-recovery] stepIndex=${options.stepIndex} result=filled strategy=${observedResolution.locatorStrategy ?? "observed_field"}`);
+
+          if (!options.sensitive) {
+            verificationAttempted = true;
+            try {
+              const filledValue = await observedLocator.inputValue({ timeout: 2000 });
+              verificationSucceeded = filledValue === options.value;
+              if (!verificationSucceeded) verificationSkippedReason = "value_mismatch";
+            } catch {
+              verificationSkippedReason = "verification_unavailable";
+            }
+          } else {
+            verificationSkippedReason = "sensitive_value";
+          }
+        }
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : String(error);
+        console.log(`[promoted-fill-recovery] stepIndex=${options.stepIndex} result=unresolved reason=${detail.includes("Timeout") ? "fill_timeout" : "resolver_or_fill_failed"}`);
+      }
+    }
+
     // Step 2: If native fill didn't succeed, try callback POM fallback
     if (!nativeFillSucceeded) {
       callbackAttempted = true;
@@ -4988,6 +5578,12 @@ export class PromotedSpecRuntime {
       }
     } catch {
       // Blur is a best-effort commit signal; fill success remains authoritative.
+    }
+    // Dependent fields (rates, totals) are often computed from requests that start just after
+    // blur; the next click would otherwise be rejected by the app while they are still empty.
+    const postFillSettle = await settleDependentRequestsAfterFill(this.page).catch(() => undefined);
+    if (postFillSettle && postFillSettle.requestsStarted > 0) {
+      console.log(`[promoted-post-fill-settle] stepIndex=${options.stepIndex} requestsStarted=${postFillSettle.requestsStarted} settled=${postFillSettle.settled} waitedMs=${postFillSettle.waitedMs}`);
     }
 
     // Step 3: Wait for UI stability
@@ -5064,6 +5660,76 @@ export class PromotedSpecRuntime {
     });
   }
 
+  async captureRecordedApplicationValue(capture: RecordedRuntimeValueCapture): Promise<void> {
+    const sourcePage = capture.sourcePageKey
+      ? this.recordedPages.get(capture.sourcePageKey)
+      : this.page;
+    if (!sourcePage || sourcePage.isClosed()) {
+      throw new Error("RECORDED_VALUE_SOURCE_TAB_UNAVAILABLE");
+    }
+    const value = await captureRecordedValueFromPage(sourcePage, capture);
+    this.recordedApplicationValues.set(capture.sourceEventRef, value);
+    console.log(`[recording-runtime-value] captured=true sourceEventRef=${capture.sourceEventRef} sourcePageKey=${capture.sourcePageKey ?? "current"} length=${value.length}`);
+  }
+
+  resolveCapturedApplicationValue(sourceEventRef: string): string {
+    const value = this.recordedApplicationValues.get(sourceEventRef);
+    if (value === undefined) throw new Error("recorded_runtime_value_not_captured");
+    return value;
+  }
+
+  async uploadRecordedFiles(input: {
+    stepIndex: number;
+    projectSlug: string;
+    technicalTargetRefs: string[];
+    fileAssets: import("../../recording/session-trace.types").RecordedFileAssetRef[];
+    fileSetValueKey?: string;
+  }): Promise<void> {
+    await this.markBoundaryProgress();
+    await this.ensureInitialEvidence();
+    await this.dismissSessionExpiringWarningIfPresent();
+    const fileSetValue = input.fileSetValueKey ? resolvePromotedRuntimeValue(input.fileSetValueKey) : undefined;
+    if (input.fileSetValueKey && !fileSetValue) throw new Error("recorded_file_set_runtime_value_missing");
+    await uploadRecordedFilesFromStore(this.page, { ...input, ...(fileSetValue ? { fileSetValue } : {}) });
+    // Attaching is the whole step: the file is set on the input. Anything the app does afterwards
+    // (confirm control, "uploaded" message, a row syncing server-side) belongs to the next recorded
+    // step, which waits for its own target. Only a short settle lets the attach render.
+    await this.page.waitForTimeout(500).catch(() => undefined);
+    this.lastActionOutcome = {
+      stepIndex: input.stepIndex,
+      previousUrl: this.page.url(),
+      currentUrl: this.page.url(),
+      actionOutcomeObserved: true,
+    };
+    await this.captureClickStep("archivo adjunto", "passed", undefined, input.stepIndex);
+  }
+
+  /**
+   * Record the native file-picker activation as fulfilled by its immediately following upload
+   * step. Native file inputs are often hidden behind a visible label/button; replaying the click
+   * would open a desktop chooser or fail visibility checks, while uploadRecordedFiles performs
+   * the deterministic project-backed setInputFiles operation for the same captured field.
+   */
+  async completeRecordedFilePickerClick(input: {
+    stepIndex: number;
+    target: string;
+    uploadStepIndex: number;
+  }): Promise<void> {
+    await this.markBoundaryProgress();
+    await this.ensureInitialEvidence();
+    this.lastActionOutcome = {
+      stepIndex: input.stepIndex,
+      previousUrl: this.page.url(),
+      currentUrl: this.page.url(),
+      actionOutcomeObserved: true,
+    };
+    console.log(
+      `[recorded-file-picker] activationDelegated=true stepIndex=${input.stepIndex} ` +
+      `uploadStepIndex=${input.uploadStepIndex} target=${JSON.stringify(input.target)}`,
+    );
+    await this.captureClickStep(input.target, "passed", undefined, input.stepIndex);
+  }
+
   /** Execute one recorder-captured segmented component after revalidating its unique scope and
    * exact homogeneous segment count. Segment order is the component contract, never a locator
    * authority; no positional selector is emitted or persisted. */
@@ -5125,7 +5791,7 @@ export class PromotedSpecRuntime {
     console.log(`[promoted-segmented-input] stepIndex=${options.stepIndex} segmentCount=${segmentCount} inputReadback=verified valueKey=${options.valueKey ?? "none"}`);
     const resolvedField = resolvePromotedFieldTarget(options);
     const displayField = evidenceTargetLabel(resolvedField);
-    const sensitiveValue = isSensitiveEvidenceField(resolvedField, options.valueKey);
+    const sensitiveValue = isSensitiveEvidenceField(resolvedField, options.valueKey) || isServiceBoundValueKey(options.valueKey);
     const stepText = sensitiveValue
       ? `Ingreso del valor protegido en "${displayField}".`
       : `Ingreso de "${options.value}" en "${displayField}".`;
@@ -5326,6 +5992,53 @@ export class PromotedSpecRuntime {
     };
   }
 
+  /**
+   * A list that failed to load is often rendered with its own retry control next to the field
+   * (a button named "retry", "reintentar", "recargar"...). When the field owns exactly one such
+   * visible control, press it and let the reload settle. Returns whether a control was pressed.
+   */
+  private async retryFieldListIfOffered(fieldLabel: string): Promise<boolean> {
+    if (!fieldLabel || typeof (this.page as { evaluate?: unknown }).evaluate !== "function") return false;
+    try {
+      const marked = await this.page.evaluate((label: string) => {
+        // tsx/esbuild wraps named functions with __name, which does not exist in the page context.
+        (globalThis as { __name?: unknown }).__name ??= (fn: unknown) => fn;
+        const norm =(s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
+        const retryName = /(reintent|reintento|retry|try again|recargar|reload|volver a (?:intentar|cargar|buscar))/i;
+        const visible = (el: Element) => {
+          const r = (el as HTMLElement).getBoundingClientRect();
+          const s = getComputedStyle(el as HTMLElement);
+          return r.width > 0 && r.height > 0 && s.visibility !== "hidden" && s.display !== "none";
+        };
+        document.querySelectorAll("[data-codex-list-retry]").forEach((el) => el.removeAttribute("data-codex-list-retry"));
+        const want = norm(label);
+        const labelEl = Array.from(document.querySelectorAll("label, span, p, div, legend"))
+          .find((el) => el.children.length === 0 && visible(el) && norm(el.textContent || "") === want);
+        let scope: Element | null = labelEl?.parentElement ?? null;
+        for (let depth = 0; scope && depth < 4; depth += 1, scope = scope.parentElement) {
+          const retries = Array.from(scope.querySelectorAll("button, [role='button']")).filter((el) =>
+            visible(el) && retryName.test([el.getAttribute("aria-label"), el.getAttribute("title"), el.textContent].join(" ")));
+          const hasOtherField = scope.querySelectorAll("label").length > 1;
+          if (retries.length === 1 && !hasOtherField) {
+            retries[0].setAttribute("data-codex-list-retry", "1");
+            return true;
+          }
+          if (retries.length > 0) return false;
+        }
+        return false;
+      }, fieldLabel);
+      if (!marked) return false;
+      await this.page.locator("[data-codex-list-retry='1']").first().click({ timeout: 5000 });
+      console.log(`[runtime:list-retry] field=${JSON.stringify(fieldLabel)} pressed=true`);
+      await this.page.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => undefined);
+      await waitForVisualSettle(this.page, { quietMs: 700, timeoutMs: 20_000 }).catch(() => undefined);
+      return true;
+    } catch (error) {
+      console.log(`[runtime:list-retry] field=${JSON.stringify(fieldLabel)} pressed=false error=${JSON.stringify(String(error).slice(0, 160))}`);
+      return false;
+    }
+  }
+
   async selectPromotedItem(options: PromotedActionOptions): Promise<void> {
     // Track selection step for post-selection detail verification
     this.lastSelectionStep = {
@@ -5392,7 +6105,7 @@ export class PromotedSpecRuntime {
         await this.page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur?.()).catch(() => undefined);
       }
       const previousUrl = this.page.url();
-      const structuredResolution = await resolveActionTarget(
+      const resolveSelectionOnce = async () => resolveActionTarget(
         this.page,
         await scanCurrentPage(this.page),
         options.target,
@@ -5412,6 +6125,84 @@ export class PromotedSpecRuntime {
           associatedField: options.associatedField?.trim() || selectionField,
         },
       ).catch(() => undefined);
+      const visibleDialogsBefore = await countVisibleDialogSurfaces(this.page);
+      // A list that failed to load offers its own retry control: use it before looking for options.
+      for (let attempt = 0; attempt < 3 && await this.retryFieldListIfOffered(selectionField); attempt += 1) { /* each press reloads the list */ }
+      let structuredResolution = await resolveSelectionOnce();
+      // Still no options after the first resolution: the list may have failed to load meanwhile.
+      for (let attempt = 0; attempt < 3 && !structuredResolution?.selectionApplied && await this.retryFieldListIfOffered(selectionField); attempt += 1) {
+        structuredResolution = await resolveSelectionOnce();
+      }
+      // The selection owner can mount after a slow page transition; re-resolve within a bounded
+      // window before giving up (the resolver's own uniqueness checks are unchanged).
+      const ownerRetryDeadline = Date.now() + 30_000;
+      let stateRetries = 0;
+      let surfaceRetries = 0;
+      while (!structuredResolution?.selectionApplied
+        && (structuredResolution?.matchReason === "selection_owner_unresolved"
+          // The value can reach the field a moment after the option click; picking the same option
+          // again is idempotent, so a few bounded re-attempts are safe.
+          || (structuredResolution?.matchReason === "selection_state_not_verified" && stateRetries < 3)
+          // A dependent list (options loaded from another answer) may not open until its data arrives:
+          // opening it again after a short wait is what a person does; nothing is chosen until it opens.
+          || (structuredResolution?.matchReason === "selection_surface_not_observed" && surfaceRetries < 4))
+        && Date.now() < ownerRetryDeadline) {
+        if (structuredResolution?.matchReason === "selection_state_not_verified") stateRetries += 1;
+        if (structuredResolution?.matchReason === "selection_surface_not_observed") {
+          surfaceRetries += 1;
+          await this.page.waitForLoadState("networkidle", { timeout: 6000 }).catch(() => undefined);
+          await this.page.waitForTimeout(1000 * surfaceRetries).catch(() => undefined);
+        }
+        await this.page.waitForTimeout(2000).catch(() => undefined);
+        structuredResolution = await resolveSelectionOnce();
+        console.log(`[runtime:selection-owner-retry] step=${options.stepIndex} status=${structuredResolution?.status ?? "none"} applied=${structuredResolution?.selectionApplied === true}`);
+      }
+      if (!structuredResolution?.selectionApplied) {
+        console.log(
+          `[runtime:selection-resolution] step=${options.stepIndex} applied=false status=${structuredResolution?.status ?? "none"} `
+          + `reason=${structuredResolution?.matchReason ?? "none"} failure=${structuredResolution?.selectionDiagnostics?.failureReason ?? "none"} field=${JSON.stringify(selectionField)}`,
+        );
+      }
+      // A recorded custom select can commit by opening the next form surface instead of keeping a
+      // value in its field (the field is then hidden behind the new dialog). Same rule Discovery
+      // uses: accept it only when the exact recorded option click was dispatched and exactly one
+      // new interactive dialog appeared. selectionApplied keeps the click from being repeated.
+      if (!labelOnlySelectionField
+        && structuredResolution
+        && !structuredResolution.selectionApplied
+        && structuredResolution.matchReason === "selection_state_not_verified") {
+        const diagnostics = structuredResolution.selectionDiagnostics;
+        const visibleDialogsAfter = await countVisibleDialogSurfaces(this.page);
+        const dialogTransitionVerified = canVerifyRecordedSelectionByDialogTransition({
+          recordingExecutionContractPresent: true,
+          currentActionIsRecordedSelection: true,
+          currentValueBacked: Boolean(runtimeValue),
+          selectionFailureReason: diagnostics?.failureReason ?? structuredResolution.matchReason,
+          requestedOptionExactlyMatched: diagnostics?.selectedOptionExactlyMatchesRequestedValue === true,
+          optionClickDispatched: diagnostics?.optionClickDispatched === true,
+          visibleDialogsBefore,
+          visibleDialogsAfter,
+        });
+        const dialogAnchor = dialogTransitionVerified ? await getUniqueVisibleDialogContinuationAnchor(this.page) : undefined;
+        console.log(
+          `[runtime:selection-resolution] phase=dialog_transition verified=${Boolean(dialogAnchor)} `
+          + `dialogsBefore=${visibleDialogsBefore} dialogsAfter=${visibleDialogsAfter} `
+          + `exactOption=${diagnostics?.selectedOptionExactlyMatchesRequestedValue === true} clickDispatched=${diagnostics?.optionClickDispatched === true}`,
+        );
+        if (dialogAnchor) {
+          structuredResolution = {
+            ...structuredResolution,
+            status: "resolved",
+            locator: dialogAnchor,
+            selectionApplied: true,
+            matchReason: "recorded_selection_option_dialog_transition_verified",
+          };
+          // The successor dialog loads its own data; let it settle before the next recorded action
+          // looks for its controls.
+          await this.page.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => undefined);
+          await this.waitForPromotedUiStable(options.stepIndex, options.target);
+        }
+      }
       if (options.playwrightRecorderEvidence?.nativeSelection && !structuredResolution?.selectionApplied) {
         throw new Error("Recorded native selection was not applied and verified");
       }
@@ -5582,7 +6373,7 @@ export class PromotedSpecRuntime {
         // Playwright's URL signal for positive route assertions instead of sampling once;
         // negative assertions and already-satisfied routes retain their immediate behavior.
         if (!stateMatches && options.polarity === "positive") {
-          await this.page.waitForURL((url) => url.href.includes(expectedUrl), {
+          await this.page.waitForURL((url) => promotedUrlMatchesExpected(url.href, expectedUrl), {
             timeout: this.config.actionTimeoutMs,
           }).catch(() => undefined);
           stateMatches = evaluatePromotedAssertionState(this.page.url(), options);
@@ -5753,6 +6544,26 @@ export class PromotedSpecRuntime {
     );
   }
 
+  private async focusedCheckableIsChecked(): Promise<boolean> {
+    if (typeof (this.page as { locator?: unknown }).locator !== "function") return false;
+    try {
+      const focused = this.page.locator(":focus");
+      if (await focused.count() !== 1) return false;
+      const verdict = await focused.evaluate((active: HTMLElement) => {
+        // tsx/esbuild wraps named functions with __name, which does not exist in the page context.
+        (globalThis as { __name?: unknown }).__name ??= (fn: unknown) => fn;
+        const checkable = active.matches('input[type="radio"], input[type="checkbox"], [role="radio"], [role="checkbox"], [role="switch"]')
+          ? active
+          : active.closest('[role="radio"], [role="checkbox"], [role="switch"]');
+        if (!checkable) return "no";
+        return (checkable as HTMLInputElement).checked === true || checkable.getAttribute("aria-checked") === "true" ? "focused-checkable-checked" : "no";
+      });
+      return verdict === "focused-checkable-checked";
+    } catch {
+      return false;
+    }
+  }
+
   private async postActionStability(
     previousUrl: string,
     expectedEffect: PromotedExpectedEffect,
@@ -5776,9 +6587,27 @@ export class PromotedSpecRuntime {
     const startedAt = Date.now();
     let lastOutcome: PromotedActionOutcome | undefined;
     let selectionObservationLogged = false;
-    while (Date.now() - startedAt < this.config.stabilityTimeoutMs) {
+    const toleratedRejectionsBefore = this.toleratedQaRejections;
+    // A route transition recorded for this click can land late (the destination is created
+    // server-side); wait for it within a longer, bounded budget. The click is never repeated and
+    // the wait ends as soon as the route changes.
+    const waitBudgetMs = expectedEffect === "navigation"
+      ? Math.max(this.config.stabilityTimeoutMs, this.config.routeTransitionTimeoutMs ?? 0)
+      : this.config.stabilityTimeoutMs;
+    while (Date.now() - startedAt < waitBudgetMs) {
       if (downloadObservationBaseline !== undefined && this.observedDownloadSequence > downloadObservationBaseline) {
         console.log(`[runtime:post-action] target="${target ?? "unknown"}" expectedEffect=${expectedEffect} signal=browser_download`);
+        return;
+      }
+      // The file picker may open a moment after the click; it is that click's observable outcome.
+      if (await hasPendingFileChooser(this.page)) {
+        console.log(`[runtime:post-action] target="${target ?? "unknown"}" expectedEffect=${expectedEffect} signal=file_chooser_opened`);
+        return;
+      }
+      // A radio/checkbox/switch left focused and checked by the click has taken its state; that is
+      // the click's outcome even when nothing else on the page changed (e.g. it was already set).
+      if ((expectedEffect === "ui_change" || expectedEffect === "selection_state_change") && await this.focusedCheckableIsChecked()) {
+        console.log(`[runtime:post-action] target="${target ?? "unknown"}" expectedEffect=${expectedEffect} signal=focused_checkable_checked`);
         return;
       }
       if (expectedEffect === "selection_state_change") {
@@ -5836,7 +6665,7 @@ export class PromotedSpecRuntime {
         await this.page.waitForTimeout(100);
         continue;
       }
-      const snapshotRemainingMs = this.config.stabilityTimeoutMs - (Date.now() - startedAt);
+      const snapshotRemainingMs = waitBudgetMs - (Date.now() - startedAt);
       const currentOutcome = await capturePromotedActionSurfaceSnapshotBounded(
         this.page,
         target ?? "",
@@ -5917,10 +6746,17 @@ export class PromotedSpecRuntime {
           return;
         }
       }
+      if (expectedEffect === "navigation" && this.toleratedQaRejections > toleratedRejectionsBefore) {
+        throw new Error(`QA_ENVIRONMENT_REJECTION_NO_NAVIGATION target="${target ?? "unknown"}" previousUrl="${previousUrl}"`);
+      }
       await this.page.waitForTimeout(100);
     }
     if (downloadObservationBaseline !== undefined && this.observedDownloadSequence > downloadObservationBaseline) {
       console.log(`[runtime:post-action] target="${target ?? "unknown"}" expectedEffect=${expectedEffect} signal=browser_download`);
+      return;
+    }
+    if (await hasPendingFileChooser(this.page)) {
+      console.log(`[runtime:post-action] target="${target ?? "unknown"}" expectedEffect=${expectedEffect} signal=file_chooser_opened`);
       return;
     }
     const reason = targetIdentity?.expectedRouteTransition
@@ -5928,6 +6764,18 @@ export class PromotedSpecRuntime {
       : targetIdentity?.expectedInPlaceTransition
         ? "expected_in_place_transition_not_observed"
         : "no_observable_post_action_outcome";
+    // Failure telemetry only (never changes the verdict): what the app was showing when the
+    // expected outcome did not arrive.
+    try {
+      const alertTexts = (await this.page.locator('[role="alert"]').allInnerTexts())
+        .map((text) => text.replace(/\s+/g, " ").trim().slice(0, 160))
+        .filter(Boolean)
+        .slice(0, 4);
+      console.log(`[runtime:post-action-failure] target="${target ?? "unknown"}" expectedEffect=${expectedEffect} waitBudgetMs=${waitBudgetMs} visibleAlerts=${JSON.stringify(alertTexts)} recentFailedResponses=${JSON.stringify(this.recentFailedResponses)}`);
+      await this.page.screenshot({ path: path.join(process.cwd(), ".artifacts", "promoted-runtime", `post-action-failure-${Date.now()}.png`), timeout: 5000 });
+    } catch {
+      // diagnostics are best-effort
+    }
     throw new Error(
       `Post-click stability check failed. expectedEffect=${expectedEffect} reason=${reason} ` +
       `target="${target ?? "unknown"}" previousUrl="${previousUrl}" currentUrl="${lastOutcome?.url ?? this.page.url()}"`,
@@ -5983,6 +6831,13 @@ export const PROMOTED_SPEC_RUNTIME_PUBLIC_METHODS = [
   "fillPromotedField",
   "pressPromotedTarget",
   "selectPromotedItem",
+  "captureRecordedApplicationValue",
+  "resolveCapturedApplicationValue",
+  "uploadRecordedFiles",
+  "completeRecordedFilePickerClick",
+  "selectRecordedPage",
+  "getCurrentPage",
+  "currentPageUrl",
   "expectPromotedVisible",
   "waitForPromotedUiStable",
   "handlePromotedDialogOrAlert",
@@ -6000,7 +6855,7 @@ export function createPromotedSpecRuntime(page: Page, config?: Partial<PromotedR
   const runtime = new PromotedSpecRuntime(page, config);
   // Track public scenario calls, not internal recovery/setup calls. Existing promoted specs
   // already finalize evidence through this API, so their lineage need not be rewritten.
-  const actions = new Set(["clickPromotedTarget", "fillPromotedField", "pressPromotedTarget", "selectPromotedItem"]);
+  const actions = new Set(["clickPromotedTarget", "fillPromotedField", "pressPromotedTarget", "selectPromotedItem", "uploadRecordedFiles", "completeRecordedFilePickerClick"]);
   let sequence = 0;
   let lastAction = 0;
   let lastAssertion = 0;
@@ -6030,11 +6885,16 @@ export function createPromotedSpecRuntime(page: Page, config?: Partial<PromotedR
         lastStepIndex = args[0]?.stepIndex ?? lastStepIndex;
         if (actions.has(name)) {
           lastAction = callSequence;
-          urlBeforeLastAction = page.url();
+          urlBeforeLastAction = target.currentPageUrl();
           expectedVisibleTargets = [];
         }
+        const stepStartedAt = Date.now();
+        target.resetPhaseTimings();
+        const logStepDuration = (status: "passed" | "failed") =>
+          console.log(`[step-timing] stepIndex=${args[0]?.stepIndex ?? lastStepIndex ?? "n/a"} action=${name} status=${status} durationMs=${Date.now() - stepStartedAt} phases=${target.takePhaseTimings()}`);
         try {
           const result = await member.apply(target, args);
+          logStepDuration("passed");
           if (name === "expectPromotedVisible") {
             lastAssertion = callSequence;
             const assertion = args[0] as PromotedAssertOptions;
@@ -6044,7 +6904,7 @@ export function createPromotedSpecRuntime(page: Page, config?: Partial<PromotedR
             }
           }
           return result;
-        } catch (error) { executionFailed = true; throw error; }
+        } catch (error) { logStepDuration("failed"); executionFailed = true; throw error; }
       };
     },
   });

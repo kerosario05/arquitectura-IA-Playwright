@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { normalizeAuthoredJiraStep } from "../jira/jira-authored-step-format";
 import { deriveJiraInputRequirements } from "../jira/jira-input-requirements";
+import { parseJiraWorkflowStep } from "../jira/jira-workflow";
+import { parseStepIntent } from "../discovery/step-intent-parser";
 import type {
   TestDesignPriority,
   TestDesignScenario,
@@ -63,8 +65,11 @@ function normalizeData(raw: unknown, path: string): TestDesignDatum[] {
       key,
       ...(typeof d.label === "string" && d.label.trim() ? { label: text(d.label, `${path}[${i}].label`, 300) } : {}),
       // Not trimmed: a datum may legitimately start or end with spaces.
-      value: typeof d.value === "string" ? d.value.slice(0, 500) : "",
+      value: typeof d.value === "string" ? d.value.slice(0, d.controlType === "file-set" ? 24000 : 500) : "",
+      ...(typeof d.controlType === "string" ? { controlType: d.controlType.slice(0, 40) } : {}),
       sensitive: d.sensitive === true,
+      ...(typeof d.application === "string" ? { application: d.application } : {}),
+      ...(typeof d.required === "boolean" ? { required: d.required } : {}),
       description: text(d.description, `${path}[${i}].description`, 300),
       ...(condition ? { condition } : {}),
     });
@@ -124,8 +129,15 @@ export function normalizeScenario(
     : "functional";
   const origin = s.origin === "manual" || s.origin === "ai" ? s.origin : defaults.origin ?? "manual";
   const id = typeof s.id === "string" && s.id.trim() ? s.id.trim() : randomUUID();
-  const inputRequirements = Array.isArray(s.inputRequirements)
-    ? deriveJiraInputRequirements(steps.map(step => step.action), s.inputRequirements) : undefined;
+  const hasDeclaredRequirements = Array.isArray(s.inputRequirements) && s.inputRequirements.length > 0;
+  const needsJiraInputs = origin === "ai" || hasDeclaredRequirements || steps.some(step =>
+    Boolean(parseJiraWorkflowStep(step.action)) || parseStepIntent(step.action).some(intent => intent.actionVerb === "upload"),
+  );
+  // Preserve ordinary manual-case data semantics. Jira-generated cases and explicit
+  // workflow/upload actions share the launch input contract, including file sets.
+  const inputRequirements = needsJiraInputs
+    ? deriveJiraInputRequirements(steps.map(step => step.action), s.inputRequirements)
+    : undefined;
   const data = normalizeData(s.data, `${path}.data`);
   const boundData = new Set<TestDesignDatum>();
   const runtimeData = inputRequirements?.map(requirement => {
@@ -134,7 +146,7 @@ export function normalizeScenario(
     const unique = inputRequirements.filter(other => other.label === requirement.label).length === 1;
     const datum = exact ?? (unique && matching.length === 1 ? matching[0] : undefined);
     if (datum) boundData.add(datum);
-    return { ...datum, key: requirement.key, label: requirement.label, value: datum?.value ?? "",
+    return { ...datum, key: requirement.key, label: requirement.label, value: datum?.value ?? "", controlType: requirement.controlType, application: requirement.application, required: requirement.required,
       sensitive: requirement.sensitive || datum?.sensitive === true, description: datum?.description ?? "",
       ...(requirement.dataCondition ? { condition: requirement.dataCondition } : {}) };
   });

@@ -5,6 +5,7 @@ import { clientIpOf } from "../local-agent/agent-endpoint";
 import { localAgentRegistry, LocalAgentError, type ConnectedAgent, type PairingResult } from "../local-agent/agent-registry";
 import { DOWNLOADS_URL_PREFIX } from "../local-agent/chromium-package";
 import { AGENT_DOWNLOADS, AGENT_INSTALLER, agentPackage } from "../local-agent/agent-package";
+import { AGENT_VERSION, isOlderAgentVersion } from "../../local-agent/version";
 
 /**
  * Lo que el panel consulta del agente de SU equipo (`/api/local-agent/*`) y las
@@ -27,7 +28,18 @@ function agentView(agent: ConnectedAgent, requiredRevision: string | undefined) 
     machine: agent.machine,
     windowsUser: agent.windowsUser,
     agentVersion: agent.agentVersion,
+    // El agente no se actualiza solo: el panel ofrece reinstalarlo (el instalador actualiza en el sitio).
+    latestVersion: AGENT_VERSION,
+    updateAvailable: isOlderAgentVersion(agent.agentVersion, AGENT_VERSION),
     chromiumInstalled: localAgentRegistry.hasChromium(agent, requiredRevision),
+    androidReady: localAgentRegistry.hasAndroid(agent),
+    android: agent.android ?? null,
+    // managed: el agente instala y arranca Appium solo; si no, el usuario debe abrirlo.
+    appium: {
+      managed: localAgentRegistry.appiumSupported(agent),
+      installed: localAgentRegistry.hasAppium(agent),
+      install: localAgentRegistry.appiumInstallState(agent.agentId) ?? null,
+    },
   };
 }
 
@@ -38,6 +50,7 @@ export function describePairing(pairing: PairingResult, requiredRevision: string
       pairing: "found" as const,
       agent,
       install: localAgentRegistry.installState(pairing.agent.agentId) ?? null,
+      emulator: localAgentRegistry.emulatorState(pairing.agent.agentId) ?? null,
       ready: Boolean(requiredRevision) && agent.chromiumInstalled,
     };
   }
@@ -46,23 +59,37 @@ export function describePairing(pairing: PairingResult, requiredRevision: string
     agent: null,
     candidates: pairing.status === "ambiguous" ? pairing.candidates.map((a) => agentView(a, requiredRevision)) : undefined,
     install: null,
+    emulator: null,
     ready: false,
   };
 }
 
 function sendError(res: Response, err: unknown): void {
   if (err instanceof LocalAgentError) {
-    const status = err.code === "LOCAL_AGENT_NOT_FOUND" ? 404 : 409;
+    const status = err.code === "LOCAL_AGENT_NOT_FOUND" ? 404 : err.code === "LOCAL_AGENT_BAD_REQUEST" ? 400 : 409;
     res.status(status).json({ ok: false, error: err.code, errorCode: err.code, message: err.message });
     return;
   }
   res.status(500).json({ ok: false, error: "LOCAL_AGENT_ERROR", errorCode: "LOCAL_AGENT_ERROR", message: err instanceof Error ? err.message : String(err) });
 }
 
-// GET /api/local-agent/status — ¿tiene mi equipo agente y Chromium listos para grabar?
+function pairedAgentId(req: Request): string {
+  const pairing = localAgentRegistry.findForUser(panelUser(req), clientIpOf(req));
+  if (pairing.status !== "found") {
+    throw new LocalAgentError(
+      pairing.status === "none" ? "LOCAL_AGENT_NOT_FOUND" : "LOCAL_AGENT_AMBIGUOUS",
+      pairing.status === "none" ? "No hay un agente de QA Lab conectado desde tu equipo" : "Hay varios equipos en tu red: elige el tuyo",
+    );
+  }
+  return pairing.agent.agentId;
+}
+
+// GET /api/local-agent/status — ¿tiene mi equipo agente, Chromium y Android Studio listos?
 localAgentRouter.get("/status", (req, res) => {
   const requiredRevision = localAgentRegistry.chromiumPackage.requiredRevision();
   const pairing = localAgentRegistry.findForUser(panelUser(req), clientIpOf(req));
+  // El panel consulta seguido: así ve los emuladores que el usuario abre o cierra por su cuenta.
+  if (pairing.status === "found") localAgentRegistry.refreshStatus(pairing.agent.agentId);
   res.json({ ok: true, requiredRevision: requiredRevision ?? null, ...describePairing(pairing, requiredRevision) });
 });
 
@@ -83,6 +110,30 @@ localAgentRouter.post("/install", (req, res) => {
   }
 });
 
+// POST /api/local-agent/android/emulator { avd } — arranca un emulador de mi equipo.
+localAgentRouter.post("/android/emulator", (req, res) => {
+  try {
+    const avd = String(req.body?.avd ?? "").trim();
+    if (!avd) throw new LocalAgentError("LOCAL_AGENT_BAD_REQUEST", "Indica el emulador (avd)");
+    const emulator = localAgentRegistry.requestEmulator(pairedAgentId(req), avd);
+    res.status(202).json({ ok: true, emulator });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
+// POST /api/local-agent/android/emulator/stop { serial } — apaga un emulador de mi equipo.
+localAgentRouter.post("/android/emulator/stop", (req, res) => {
+  try {
+    const serial = String(req.body?.serial ?? "").trim();
+    if (!serial) throw new LocalAgentError("LOCAL_AGENT_BAD_REQUEST", "Indica el emulador (serial)");
+    localAgentRegistry.stopEmulator(pairedAgentId(req), serial);
+    res.status(202).json({ ok: true });
+  } catch (err) {
+    sendError(res, err);
+  }
+});
+
 // POST /api/local-agent/select { agentId } — elegir equipo cuando hay varios en la misma IP.
 localAgentRouter.post("/select", (req, res) => {
   try {
@@ -97,7 +148,7 @@ localAgentRouter.post("/select", (req, res) => {
 
 const SAFE_FILE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
 
-// GET /descargas/:file — Chromium y el agente (se arman la primera vez) y el instalador de TI.
+// GET /descargas/:file — Chromium, Appium y el agente (se arman la primera vez) y el instalador de TI.
 downloadsRouter.get("/:file", async (req, res) => {
   const file = req.params.file;
   if (!SAFE_FILE.test(file) || file.endsWith(".tmp.zip")) {
@@ -109,6 +160,9 @@ downloadsRouter.get("/:file", async (req, res) => {
   try {
     if (revision && file === `chromium-${revision}.zip`) await pkg.ensure();
     if (AGENT_DOWNLOADS.has(file)) await agentPackage.ensure();
+    const appium = localAgentRegistry.appiumPackage;
+    const appiumVersion = appium?.requiredVersion();
+    if (appium && appiumVersion && file === `appium-${appiumVersion}.zip`) await appium.ensure();
   } catch (err) {
     res.status(503).json({ ok: false, errorCode: "SERVER_CHROMIUM_MISSING", message: err instanceof Error ? err.message : String(err) });
     return;

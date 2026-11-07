@@ -1,0 +1,256 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "createdAt": "2026-10-27T13:11:58.414Z",
+  "scenario": {
+    "source": "jira",
+    "externalId": "AA-113:jira:2",
+    "title": "Consultar un RNC con datos encontrados en Cámara de Comercio"
+  },
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Project entry",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "navigate",
+      "description": "Abrir la aplicación configurada del proyecto",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "fill [usuario_negocios]",
+      "valueKey": "usuario_negocios",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"usuario\"]"
+      }
+    },
+    {
+      "index": 4,
+      "action": "fill",
+      "description": "fill [contrasena_negocios]",
+      "valueKey": "contrasena_negocios",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"clave\"]"
+      }
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"iniciar sesión\"",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"btn-login\"]"
+      }
+    },
+    {
+      "index": 6,
+      "action": "click",
+      "description": "Presionar \"Solicitudes\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Solicitudes",
+        "exact": true
+      }
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar \"Nueva solicitud\"",
+      "target": {
+        "strategy": "role",
+        "role": "link",
+        "name": "Nueva solicitud",
+        "exact": true
+      }
+    },
+    {
+      "index": 8,
+      "action": "fill",
+      "description": "fill [rnc_camara_comercio]",
+      "valueKey": "rnc_camara_comercio",
+      "target": {
+        "strategy": "css",
+        "value": "[id=\"idNumero\"]"
+      }
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Presionar \"consultar el RNC\"",
+      "target": {
+        "strategy": "role",
+        "role": "button",
+        "name": "Consultar",
+        "exact": true
+      }
+    },
+    {
+      "index": 10,
+      "action": "assertVisible",
+      "description": "Validar que se muestre \"Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto.\"",
+      "target": {
+        "strategy": "text",
+        "value": "Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+      }
+    },
+    {
+      "index": 11,
+      "action": "assertVisible",
+      "description": "Validar Se muestra el resultado de Cámara de Comercio que indica que se encontraron datos y que fueron autocompletados.",
+      "target": {
+        "strategy": "text",
+        "value": "Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+      }
+    }
+  ],
+  "requiredData": [
+    {
+      "key": "usuario_negocios",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "contrasena_negocios",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    },
+    {
+      "key": "rnc_camara_comercio",
+      "required": true,
+      "resolved": true,
+      "sensitive": true
+    }
+  ],
+  "sourceScenario": {
+    "title": "Consultar un RNC con datos encontrados en Cámara de Comercio",
+    "steps": [
+      {
+        "index": 1,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 2,
+        "action": "navigate",
+        "description": "APP_BASE_URL"
+      },
+      {
+        "index": 3,
+        "action": "fill",
+        "valueKey": "usuario_negocios",
+        "technicalTargetRefs": [
+          "css:[id=\"usuario\"]"
+        ]
+      },
+      {
+        "index": 4,
+        "action": "fill",
+        "valueKey": "contrasena_negocios",
+        "technicalTargetRefs": [
+          "css:[id=\"clave\"]"
+        ]
+      },
+      {
+        "index": 5,
+        "action": "click",
+        "technicalTargetRefs": [
+          "css:[id=\"btn-login\"]"
+        ]
+      },
+      {
+        "index": 6,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Solicitudes"
+        ]
+      },
+      {
+        "index": 7,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:link|Nueva solicitud"
+        ]
+      },
+      {
+        "index": 8,
+        "action": "fill",
+        "valueKey": "rnc_camara_comercio",
+        "technicalTargetRefs": [
+          "css:[id=\"idNumero\"]"
+        ]
+      },
+      {
+        "index": 9,
+        "action": "click",
+        "technicalTargetRefs": [
+          "role:button|Consultar"
+        ]
+      },
+      {
+        "index": 10,
+        "action": "assertVisible",
+        "description": "Validar que se muestre \"Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto.\"",
+        "technicalTargetRefs": [
+          "text:Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+        ]
+      },
+      {
+        "index": 11,
+        "action": "assertVisible",
+        "description": "Validar Se muestra el resultado de Cámara de Comercio que indica que se encontraron datos y que fueron autocompletados.",
+        "technicalTargetRefs": [
+          "text:Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+        ]
+      }
+    ],
+    "observableOracles": [
+      {
+        "id": "jira-oracle-10",
+        "requirement": "Validar que se muestre \"Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto.\"",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 10,
+        "target": "Datos de Cámara de Comercio\nRegistro encontrado. Datos autocompletados; se creará como Nuevo Prospecto.",
+        "evidence": [
+          "live-step-10"
+        ],
+        "details": {
+          "observedText": "Datos de Cámara de Comercio\nRegistro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+        }
+      },
+      {
+        "id": "jira-oracle-11",
+        "requirement": "Validar Se muestra el resultado de Cámara de Comercio que indica que se encontraron datos y que fueron autocompletados.",
+        "type": "literal_visible_text",
+        "backed": true,
+        "source": "discovery",
+        "stepIndex": 11,
+        "target": "Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto.",
+        "evidence": [
+          "live-step-11"
+        ],
+        "details": {
+          "observedText": "Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto.",
+          "replayTarget": "Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+        }
+      }
+    ],
+    "auth": {
+      "required": false,
+      "gateDetected": false
+    },
+    "expectedResult": "Se muestra el resultado de Cámara de Comercio que indica que se encontraron datos y que fueron autocompletados."
+  }
+}

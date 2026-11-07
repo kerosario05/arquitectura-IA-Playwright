@@ -1,0 +1,28 @@
+1) automations\apps\portal-comercial\sections\demoblaze\cases\preview-001-prestamos-personales-faciles\.candidate-validation-30472-1793794879178.spec.ts:14:5 › Prestamos Personales Faciles
+Error: Promoted click failed at step 43 target="24 - PRESTAMOS PERSONALES FACILES". failureClass=ACTION_CALLBACK_TIMEOUT exactRuntimeError="Retry failed: click retry timed out after 15000ms" currentUrl=https://srvqacgowb01.local.bsc.com:5000/requests/11253/edit clickPath=failed nativeClickAttempted=false nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true 
+at ..\..\src\automations\runtime\promoted-spec-runtime.ts:5155
+5153 |       const exactRuntimeError = callbackError ?? nativeClickError ?? "unknown";
+5154 |       console.log(`[promoted-step] stepIndex=${options.stepIndex} phase=failed failureClass=${failureClass} currentUrl=${finalUrl}`);
+> 5155 |       throw new Error(
+|             ^
+5156 |         `Promoted click failed at step ${options.stepIndex} target="${options.target}". ` +
+5157 |         `failureClass=${failureClass} exactRuntimeError=${JSON.stringify(exactRuntimeError)} currentUrl=${finalUrl} ` +
+5158 |         `clickPath=${clickPath} nativeClickAttempted=${nativeClickAttempted} nativeClickSucceeded=${nativeClickSucceeded} ` +
+at PromotedSpecRuntime.clickPromotedTarget (C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\src\automations\runtime\promoted-spec-runtime.ts:5155:13)
+at PromotedSpecRuntime.selectPromotedItem (C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\src\automations\runtime\promoted-spec-runtime.ts:6320:5)
+at Proxy.<anonymous> (C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\src\automations\runtime\promoted-spec-runtime.ts:6886:26)
+at C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\automations\apps\portal-comercial\sections\demoblaze\cases\preview-001-prestamos-personales-faciles\.candidate-validation-30472-1793794879178.spec.ts:450:5
+attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--349b9-restamos-Personales-Faciles\test-failed-1.png
+────────────────────────────────────────────────────────────────────────────────────────────────
+attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--349b9-restamos-Personales-Faciles\video.webm
+────────────────────────────────────────────────────────────────────────────────────────────────
+Error Context: test-results\apps\portal-comercial-sections--349b9-restamos-Personales-Faciles\error-context.md
+attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--349b9-restamos-Personales-Faciles\trace.zip
+Usage:
+npx playwright show-trace test-results\apps\portal-comercial-sections--349b9-restamos-Personales-Faciles\trace.zip
+────────────────────────────────────────────────────────────────────────────────────────────────
+1 failed
+automations\apps\portal-comercial\sections\demoblaze\cases\preview-001-prestamos-personales-faciles\.candidate-validation-30472-1793794879178.spec.ts:14:5 › Prestamos Personales Faciles

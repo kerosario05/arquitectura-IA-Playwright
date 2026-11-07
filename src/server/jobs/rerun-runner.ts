@@ -4,12 +4,14 @@ import type { McpScenario } from "../../scenarios/scenario-types";
 import { deriveScenarioRequiredData } from "../../scenarios/mobile-scenario-generator";
 import type { VirtualCase } from "../../types/scenario-preview.types";
 import type { MobileLaunchExecutionParams } from "./mobile-launch-execution-runner";
+import { loadRerunSecrets } from "./rerun-secrets";
 import { loadMobileRouteProfile } from "../../mobile/mobile-route-profile";
 import {
   readMobileExecutionManifest,
   readMobileExecutionResults,
 } from "./mobile-rerun-artifacts";
-import { findOwningAppSlug, loadScenarios } from "../../recording/recording-store";
+import { findOwningAppSlug, loadScenarios, loadSemanticRecording, loadTrace } from "../../recording/recording-store";
+import { hydratePersistedScenarios } from "../../recording/persisted-scenario-hydration";
 import { resolveSpecForScenario } from "../../automations/recording-automation-resolution";
 import type { RecordedScenario } from "../../recording/trace-to-scenario";
 import { toSharedMcpScenario, reconcileRecordingExecutionContractLineage } from "../../recording/canonical-recording-contract";
@@ -390,6 +392,40 @@ function virtualCaseToScenario(vc: VirtualCase): McpScenario {
 }
 
 /**
+ * The source job's snapshot (`preview-scenarios.json`) is a copy taken at launch. When the recording it came from
+ * has been corrected since (steps, targets, data), re-running the snapshot repeats the old defects. A scenario that
+ * carries recording lineage (recordingId + recordedScenarioId, the same stable identity reuse resolution uses) takes
+ * its structured authority from that recording's CURRENT hydrated scenario, exactly as a fresh `/execute` of it
+ * would; identity fields of the snapshot (issue key, target app) are kept. Without lineage, or when the recording
+ * or scenario no longer exists, the snapshot is used unchanged.
+ */
+function withCurrentRecordingAuthority(vc: VirtualCase, snapshot: McpScenario): McpScenario {
+  if (!vc.recordingId || !vc.recordedScenarioId || !vc.appSlug) return snapshot;
+  try {
+    const trace = loadTrace(vc.appSlug, vc.recordingId);
+    const current = hydratePersistedScenarios(
+      loadScenarios(vc.appSlug, vc.recordingId),
+      loadSemanticRecording(vc.appSlug, vc.recordingId),
+      trace,
+    ).find((scenario) => scenario.scenarioId === vc.recordedScenarioId);
+    if (!current) return snapshot;
+    const fresh = toSharedMcpScenario(current, vc.appSlug, current.runtimeDataset?.resolvedValues ?? {});
+    console.log(`[runs:rerun] recordingAuthority=current recordingId=${vc.recordingId} scenarioId=${vc.recordedScenarioId}`);
+    // The fresh scenario replaces the snapshot as a whole (a field the snapshot has and the fresh one lacks must not
+    // survive from the old copy); only the launch identity of the original job is carried over.
+    return {
+      ...fresh,
+      sourceIssueKey: snapshot.sourceIssueKey ?? fresh.sourceIssueKey,
+      ...(snapshot.targetAppSlug ? { targetAppSlug: snapshot.targetAppSlug } : {}),
+      ...(snapshot.targetAppName ? { targetAppName: snapshot.targetAppName } : {}),
+    } as McpScenario;
+  } catch (error) {
+    console.log(`[runs:rerun] recordingAuthority=snapshot reason=${error instanceof Error ? error.message : String(error)}`);
+    return snapshot;
+  }
+}
+
+/**
  * Resolves promoted-spec reuse authority per scenario using ONLY the stable, canonical lineage
  * already captured in the original preview-scenarios.json snapshot (recordingId +
  * recordedScenarioId) — title and array position are never used to link a rerun scenario back
@@ -549,9 +585,16 @@ async function prepareRerunFromDiscoveryBatchJob(
     };
   }
 
-  const requestedIds = Array.isArray(result.args?.caseIds)
-    ? result.args.caseIds.map(positiveCaseId).filter((id): id is number => id !== undefined)
+  // The batch result file is rewritten by every case's child run, so after a multi-case job it describes only the LAST
+  // case. The job's own parameters are the authority for which cases it selected.
+  const jobCaseIds = Array.isArray(record?.params?.caseIds)
+    ? (record!.params!.caseIds as unknown[]).map(positiveCaseId).filter((id): id is number => id !== undefined)
     : [];
+  const requestedIds = jobCaseIds.length > 0
+    ? jobCaseIds
+    : Array.isArray(result.args?.caseIds)
+      ? result.args.caseIds.map(positiveCaseId).filter((id): id is number => id !== undefined)
+      : [];
   const selectedEntries = (result.cases ?? []).filter((entry) => entry.selected === true && positiveCaseId(entry.caseId) !== undefined);
   const allIds = requestedIds.length > 0
     ? [...new Set(requestedIds)]
@@ -593,6 +636,15 @@ async function prepareRerunFromDiscoveryBatchJob(
   const projectId = positiveCaseId(sourceParams.testRailProjectId) ?? positiveCaseId(launchTestRail?.projectId);
   const suiteId = positiveCaseId(sourceParams.testRailSuiteId) ?? positiveCaseId(launchTestRail?.suiteId);
   const sectionId = positiveCaseId(sourceParams.testRailSectionId ?? sourceParams.sectionId) ?? positiveCaseId(launchTestRail?.sectionId);
+  const sourceEntries = sourceParams.runtimeEntriesByCase ?? loadRerunSecrets(sourceJobId);
+  const scopedRuntimeEntries = sourceEntries && typeof sourceEntries === "object" && !Array.isArray(sourceEntries)
+    ? (() => {
+      const picked = Object.fromEntries(Object.entries(sourceEntries as Record<string, unknown>)
+        .filter(([caseId, entries]) => selectedIds.includes(Number(caseId)) && Array.isArray(entries)
+          && (entries as Array<{ value?: unknown }>).some((entry) => typeof entry?.value === "string" && entry.value !== "")));
+      return Object.keys(picked).length > 0 ? picked : undefined;
+    })()
+    : undefined;
   const discoveryParams: Record<string, unknown> = {
     caseIds: selectedIds,
     appSlug,
@@ -606,6 +658,10 @@ async function prepareRerunFromDiscoveryBatchJob(
     // Do not reuse launchId: the discovery runner treats it as the active launch and would
     // overwrite the original launch manifest with this rerun's job/result pointers.
     ...(scopedPublishedCases?.length ? { publishedCases: scopedPublishedCases } : {}),
+    // Values the person typed in the launch wizard (credentials included) live only in the running engine's memory (the job
+    // store never writes them to disk). A rerun from that same live job reuses them for the selected cases, so nothing has to
+    // be typed twice; once the engine restarted, nothing is left to reuse and the rerun carries none.
+    ...(scopedRuntimeEntries ? { runtimeEntriesByCase: scopedRuntimeEntries } : {}),
     overwrite: true,
     autoPromote: sourceParams.autoPromote === false || result.args?.autoPromote === false ? false : true,
     autoPom: sourceParams.autoPom === false || result.args?.autoPom === false ? false : true,
@@ -876,7 +932,7 @@ async function prepareRerunFromScenarioPreviewRoot(
   }
 
   const scenarios: McpScenario[] = selectedVcs.map((vc) => ({
-    ...virtualCaseToScenario(vc),
+    ...withCurrentRecordingAuthority(vc, virtualCaseToScenario(vc)),
     // Canonical identity, preserved through so a reuse-eligible scenario can still be matched
     // to its persisted case.spec.ts by runs.ts without re-deriving lineage from title/index.
     scenarioId: vc.recordedScenarioId ?? vc.displayId ?? vc.id,

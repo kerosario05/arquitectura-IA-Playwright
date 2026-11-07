@@ -18,7 +18,7 @@ export type DataKeyResolution = {
   oracleSource?: string;
 };
 
-type RuntimeEntryInput = { key: string; value: string; source?: string; generated?: boolean; verified?: boolean; provenance?: string; valueRole?: string; oracleSource?: string };
+type RuntimeEntryInput = { key: string; fieldLabel?: string; value: string; source?: string; generated?: boolean; verified?: boolean; provenance?: string; valueRole?: string; oracleSource?: string };
 
 const SENSITIVE_KEYS = [
   "password", "contrasena", "contraseña", "clave", "pin", "token", "otp", "secret",
@@ -65,11 +65,13 @@ export function detectCredentialRole(key: string): keyof typeof CREDENTIAL_ROLE_
 export type CredentialRole = keyof typeof CREDENTIAL_ROLE_SOURCES;
 
 /** Bind a field label to its explicit case input without guessing synonyms or suffixes. */
-export function runtimeInputKeyForField(field: string, entries: ReadonlyArray<{ key: string }>): string | undefined {
+export function runtimeInputKeyForField(field: string, entries: ReadonlyArray<{ key: string; fieldLabel?: string }>): string | undefined {
   const normalizeField = (value: string) => normalizeKey(value).replace(/_+/g, "_").replace(/^_|_$/g, "");
   const normalized = normalizeField(field);
   if (!normalized) return undefined;
-  const matches = entries.filter(entry => normalizeField(entry.key) === normalized);
+  const labeled = entries.filter(entry => entry.fieldLabel && normalizeField(entry.fieldLabel) === normalized);
+  if (labeled.length) return labeled.length === 1 ? labeled[0].key : undefined;
+  const matches = entries.filter(entry => !entry.fieldLabel && normalizeField(entry.key) === normalized);
   if (matches.length > 0) return matches.length === 1 ? matches[0].key : undefined;
   // Authored labels include grammatical connectors omitted by generated data keys.
   // Preserve every semantic token (including invalid/expired qualifiers) and require uniqueness.
@@ -95,6 +97,78 @@ export function runtimeCredentialRoleKeyForField(field: string, entries: Readonl
 export function runtimeCredentialRoleInputCountForField(field: string, entries: ReadonlyArray<{ key: string }>): number {
   const role = detectCredentialRole(field);
   return role ? entries.filter((entry) => detectCredentialRole(entry.key) === role).length : 0;
+}
+
+/**
+ * A launch wizard keys the value of an authored step by its POSITION (`jira_step_N`, `jira_edit_<revision>_N`), so the key
+ * says nothing about the field. When step N fills a credential field ("Usuario", "Contraseña", ...), that value is the
+ * credential of that role: expose it under the role's canonical key as a sensitive, user-provided credential so the secure
+ * resolver and its masking treat it like any other credential. Only a position that matches exactly one entry and one
+ * credential-role step is aliased; an existing canonical entry is never overridden, and nothing is guessed by order.
+ */
+export function aliasPositionalCredentialEntries<T extends RuntimeEntryInput>(
+  entries: readonly T[] | undefined,
+  steps: ReadonlyArray<{ index: number; label?: string; actionType?: string }>,
+): T[] | undefined {
+  if (!entries?.length) return entries as T[] | undefined;
+  const positional = /^(?:jira_step_|jira_edit_[a-f0-9]{8,}_)(\d+)$/i;
+  const aliases: T[] = [];
+  for (const step of steps) {
+    if (step.actionType && step.actionType !== "action_fill") continue;
+    const role = detectCredentialRole(step.label ?? "");
+    if (!role) continue;
+    const canonical = CREDENTIAL_ROLE_SOURCES[role].testDataKey;
+    if (entries.some((entry) => normalizeKey(entry.key) === normalizeKey(canonical))
+      || aliases.some((alias) => normalizeKey(alias.key) === normalizeKey(canonical))) continue;
+    const labeledCredentials = entries.filter(entry => entry.fieldLabel && detectCredentialRole(entry.fieldLabel) === role);
+    const atStep = labeledCredentials.length ? labeledCredentials : entries.filter((entry) => {
+      if (entry.fieldLabel) return false;
+      const position = positional.exec(entry.key)?.[1];
+      return position !== undefined && Number(position) === step.index
+        && typeof entry.value === "string" && entry.value.trim() !== "";
+    });
+    if (atStep.length !== 1) continue;
+    aliases.push({ ...atStep[0], key: canonical, source: "user_provided_qa_credentials", sensitive: true } as T);
+  }
+  return aliases.length ? [...entries, ...aliases] : entries as T[];
+}
+
+/**
+ * A wizard key keeps the number of the scenario revision that created it, so its suffix is not always the step position
+ * (`jira_edit_<rev>_7` can belong to step 9). When the steps that still lack a value and the position-keyed entries still
+ * unused are the SAME number, they pair up in ascending order (authoring order is preserved across revisions); the
+ * pairing is exposed as `jira_step_<stepIndex>` aliases. Any other counts assign nothing: nothing is guessed.
+ */
+export function alignOrderedPositionalEntries<T extends RuntimeEntryInput>(
+  entries: readonly T[] | undefined,
+  steps: ReadonlyArray<{ index: number; label?: string; actionType?: string; hasLiteralValue?: boolean }>,
+): T[] | undefined {
+  if (!entries?.length) return entries as T[] | undefined;
+  const positional = /^(?:jira_step_|jira_edit_[a-f0-9]{8,}_)(\d+)$/i;
+  const suffix = (entry: T): number | undefined => {
+    const n = positional.exec(entry.key)?.[1];
+    return n === undefined ? undefined : Number(n);
+  };
+  const needing = steps
+    .filter((step) => (step.actionType === "action_fill" || step.actionType === "action_select")
+      && !step.hasLiteralValue && !detectCredentialRole(step.label ?? ""))
+    .map((step) => step.index);
+  const usedPositions = new Set(entries.map(suffix).filter((n): n is number => n !== undefined));
+  const unmatchedSteps = needing.filter((index) => !usedPositions.has(index)).sort((a, b) => a - b);
+  // Positions of credential steps belong to the credential aliasing, never to this pairing.
+  const claimedPositions = new Set([
+    ...needing,
+    ...steps.filter((step) => step.actionType === "action_fill" && detectCredentialRole(step.label ?? "")).map((step) => step.index),
+  ]);
+  const unusedEntries = entries
+    .filter((entry) => !entry.fieldLabel && entry.source !== "user_provided_qa_credentials"
+      && !entries.some(auth => detectCredentialRole(auth.key) && auth.value === entry.value)
+      && suffix(entry) !== undefined && !claimedPositions.has(suffix(entry)!)
+      && typeof entry.value === "string" && entry.value.trim() !== "")
+    .sort((a, b) => suffix(a)! - suffix(b)!);
+  if (unmatchedSteps.length === 0 || unmatchedSteps.length !== unusedEntries.length) return entries as T[];
+  const aliases = unmatchedSteps.map((stepIndex, i) => ({ ...unusedEntries[i], key: `jira_step_${stepIndex}` }) as T);
+  return [...entries, ...aliases];
 }
 
 /** Return the generic secure-data key for a semantic credential field label. */

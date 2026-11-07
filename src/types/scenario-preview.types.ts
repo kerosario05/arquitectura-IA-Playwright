@@ -53,6 +53,8 @@ export type VirtualCase = {
   canonicalInteractions?: Array<Record<string, unknown>>;
   entityActionBlocks?: Array<Record<string, unknown>>;
   runtimeInputRequirements?: Array<Record<string, unknown>>;
+  /** Runtime values reserved for the first promoted spec; Discovery uses the recording values. */
+  promotionDatasetValues?: Record<string, string>;
   technicalKnowledgeRefs?: string[];
   executionReadinessAudit?: Record<string, unknown>;
   recordingExecutionContract?: RecordingExecutionContract;

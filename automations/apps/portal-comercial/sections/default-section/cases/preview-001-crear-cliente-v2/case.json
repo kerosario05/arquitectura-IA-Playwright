@@ -1,0 +1,10 @@
+{
+  "id": "preview-001-crear-cliente-v2",
+  "externalId": "PREVIEW-001",
+  "caseId": 0,
+  "title": "Crear Cliente V2",
+  "source": "discovery",
+  "appSlug": "portal-comercial",
+  "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+  "createdAt": "2026-10-30T13:18:06.664Z"
+}

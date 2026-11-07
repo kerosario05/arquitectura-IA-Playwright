@@ -49,7 +49,7 @@ test("1/statusEligible. the fallback eligibility condition covers not_found, not
 
 test("2/fieldRelationEligible. the fallback receives the real associatedField authority, never the raw target positionally", () => {
   const fn = resolveFillTargetSource();
-  assert.match(fn, /tryFieldScopedStructuralFallback\(page, gridContext\.associatedField \?\? target, "editable", "fill"\)/);
+  assert.match(fn, /tryFieldScopedStructuralFallback\([\s\S]*?gridContext\.associatedField \?\? target,[\s\S]*?"editable",[\s\S]*?"fill",[\s\S]*?fallbackScope[\s\S]*?\)/);
 });
 
 test("3/noParallelResolver. no second/duplicate field-scoped resolver was introduced -- the SAME existing helper is reused", () => {
@@ -59,11 +59,11 @@ test("3/noParallelResolver. no second/duplicate field-scoped resolver was introd
   assert.doesNotMatch(fn, /function\s+tryFieldScoped\w*Fallback2?\(/i, "no second fallback function defined inline");
 });
 
-test("4/gridScopedUnaffected. grid-scoped fills and fills with recorded technical targets still skip the fallback entirely, unaffected by the widened status set", () => {
+test("4/gridScopedUnaffected. grid-scoped fills still skip the plain field fallback", () => {
   const fn = resolveFillTargetSource();
-  assert.match(fn, /const isGridScoped = gridContext\.rowScope !== undefined \|\| Boolean\(gridContext\.entityScope\);/);
-  assert.match(fn, /if \(isGridScoped\) return result;/);
-  assert.match(fn, /recordedTechnicalTargetRefs\?\.length \?\? 0\) > 0 \|\| \(gridContext\.recordedTechnicalTargets\?\.length \?\? 0\) > 0\) return result;/);
+  assert.match(fn, /if \(gridContext\.rowScope !== undefined\) return result;/);
+  assert.match(fn, /if \(entityScopedOnly && visibleDialogs\.length !== 1\) return result;/);
+  assert.doesNotMatch(fn, /recordedTechnicalTargetRefs\?\.length \?\? 0\) > 0 \|\| \(gridContext\.recordedTechnicalTargets\?\.length \?\? 0\) > 0\) return result;/, "a failed captured locator must allow the independently re-proved associatedField relation");
 });
 
 test("5/resolvedAndAmbiguousUnaffected. a genuinely resolved or ambiguous status is never routed into the fallback -- only the three explicit statuses are", () => {

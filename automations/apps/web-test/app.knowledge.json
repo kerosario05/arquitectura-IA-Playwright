@@ -2,7 +2,7 @@
   "version": 1,
   "appSlug": "web-test",
   "createdAt": "2026-10-23T23:56:44.417Z",
-  "updatedAt": "2026-10-26T07:44:48.338Z",
+  "updatedAt": "2026-10-27T13:11:58.429Z",
   "items": [],
   "jiraRoutes": [
     {
@@ -6294,6 +6294,220 @@
         "scenario-1-step-10.png"
       ],
       "observables": []
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "4d5c2a79209e253ce6f7c3218b3e0fe7dc115047661a9d860baba933c7480304",
+      "profileRevision": "b0c14ffc729f0afec98159511d6764461eb5c3b4b1b4bf614f276fa66fcc516b",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "AA-113:jira:regression-flow-clause",
+      "jobId": "785d4f41-05a5-4925-86fc-0577e2171f0b",
+      "validatedAt": "2026-10-27T01:39:08.189Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "usuario",
+          "dataRef": "usuario_negocios"
+        },
+        {
+          "action": "fill",
+          "field": "contraseña",
+          "dataRef": "contrasena_negocios"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"la pantalla de nueva solicitud\"",
+          "target": "Visible heading and nearby content: Nueva solicitud Solicitud sin guardar · RNC —"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "8fcecd8d4b07a10adbad8363f081217b3ba1bca6b76793ed2eb6d3e6db729246",
+      "profileRevision": "b0c14ffc729f0afec98159511d6764461eb5c3b4b1b4bf614f276fa66fcc516b",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "AA-113:jira:4",
+      "jobId": "1d39015f-bb71-49bb-8c85-ef34370a8d09",
+      "validatedAt": "2026-10-27T12:36:01.466Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc_camara"
+        },
+        {
+          "action": "click",
+          "field": "consultar el RNC",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar que se muestre \"datos encontrados en Cámara de Comercio\"",
+          "target": "Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+        },
+        {
+          "requirement": "Validar que el formulario se complete con los datos encontrados en Cámara de Comercio",
+          "target": "Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+        },
+        {
+          "requirement": "Validar Se muestran datos encontrados en Cámara de Comercio y el formulario se completa con esos datos.",
+          "target": "Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "web-test",
+      "id": "c8bbdc57f4bd88bbd9a2c22874e84ccdd356086b2bd51a01fb32712252e0add4",
+      "profileRevision": "b0c14ffc729f0afec98159511d6764461eb5c3b4b1b4bf614f276fa66fcc516b",
+      "sourceIssueKey": "AA-113",
+      "scenarioId": "AA-113:jira:2",
+      "jobId": "3531a721-33f4-4f71-b1c3-8c025d14ebc0",
+      "validatedAt": "2026-10-27T13:11:58.416Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario_negocios"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena_negocios"
+        },
+        {
+          "action": "click",
+          "field": "iniciar sesión",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Solicitudes",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "RNC",
+          "dataRef": "rnc_camara_comercio"
+        },
+        {
+          "action": "click",
+          "field": "consultar el RNC",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png"
+      ],
+      "observables": [
+        {
+          "requirement": "Validar Se muestra el resultado de Cámara de Comercio que indica que se encontraron datos y que fueron autocompletados.",
+          "target": "Datos de Cámara de Comercio Registro encontrado. Datos autocompletados; se creará como Nuevo Prospecto."
+        }
+      ]
     }
   ]
 }

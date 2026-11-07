@@ -1,35 +1,20 @@
 {
-  "name": "KIOSKO",
+  "appProfile": {
+    "appSlug": "kiosko",
+    "source": "default",
+    "name": "4",
+    "baseUrl": "https://172.27.4.50/",
+    "baseUrlHash": "74df3c0e992c",
+    "createdAt": "2026-10-29T16:55:29.918Z",
+    "updatedAt": "2026-10-29T16:55:29.919Z",
+    "ignoreHTTPSErrors": true
+  },
   "baseUrl": "https://172.27.4.50/",
-  "loginMode": "no_login",
+  "loginMode": "password",
   "testData": {},
   "testDataAliases": {},
-  "missingInputBehavior": "fail",
-  "ignoreHTTPSErrors": false,
-  "routeProfile": {
-    "routes": [
-      {
-        "from": "entry",
-        "intermediates": [
-          "Explora nuestros productos"
-        ]
-      },
-      {
-        "from": "Explora nuestros productos",
-        "intermediates": [
-          "el primer elemento visible del listado"
-        ]
-      }
-    ],
-    "intermediates": {
-      "entry": [
-        "Explora nuestros productos"
-      ],
-      "Explora nuestros productos": [
-        "el primer elemento visible del listado"
-      ]
-    },
-    "entrySteps": [],
-    "updatedAt": "2026-10-24T00:13:59.556Z"
-  }
+  "testDataRefs": {},
+  "missingInputBehavior": "auto_generate",
+  "ignoreHTTPSErrors": true,
+  "updatedAt": "2026-10-29T16:55:29.918Z"
 }

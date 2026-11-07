@@ -41,7 +41,27 @@ function sanitizeVisibleText(value: string, maxLength = 180): string {
     .replace(/\s+/g, " ").trim().slice(0, maxLength);
 }
 
-async function collectVisibleEvidence(page: Page): Promise<Evidence[]> {
+const MAX_EVIDENCE = 60;
+
+/**
+ * Evidence arrives in DOM order, so a plain cut drops content at the end of a long page (for example a
+ * documents list below a long form). Past the cap, keep the snippets that share terms with the assertion
+ * first, fill with the remaining ones, and restore DOM order. Under the cap nothing changes.
+ */
+function capEvidence(texts: string[], intent: string): string[] {
+  if (texts.length <= MAX_EVIDENCE) return texts;
+  const terms = [...new Set(norm(intent).split(/[^a-z0-9]+/).filter(word => word.length >= 4 && !FILLER.has(word)))];
+  const score = (text: string) => {
+    if (/^Visible (heading and nearby content|table)/.test(text)) return Infinity;
+    const words = norm(text).split(/[^a-z0-9]+/).filter(Boolean);
+    return terms.filter(term => words.some(word => sameWord(word, term))).length;
+  };
+  const keep = new Set(texts.map((text, index) => ({ index, score: score(text) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index).slice(0, MAX_EVIDENCE).map(item => item.index));
+  return texts.filter((_, index) => keep.has(index));
+}
+
+async function collectVisibleEvidence(page: Page, intent: string): Promise<Evidence[]> {
   const content = await page.locator("main,[role='main']").count() ? "main,[role='main']" : "body";
   const collected = await page.locator(content).evaluateAll(roots => {
     const collected = new Set<string>();
@@ -164,7 +184,7 @@ async function collectVisibleEvidence(page: Page): Promise<Evidence[]> {
   });
   const evidence = collected.map(text => sanitizeVisibleText(text, /^Visible (heading and nearby content|table)/.test(text) ? 900 : 180))
     .filter(text => text.length >= 3);
-  const unique = [...new Set(evidence)].slice(0, 60);
+  const unique = capEvidence([...new Set(evidence)], intent);
   return unique.map((text, index) => ({
     id: `e-${createHash("sha256").update(`${index}:${text}`).digest("hex").slice(0, 10)}`,
     text,
@@ -192,8 +212,7 @@ async function askConfiguredProvider(intent: string, evidence: Evidence[]): Prom
         { role: "user", content: JSON.stringify({ assertion: sanitizeVisibleText(intent), evidence }) },
       ],
     });
-    const parsed = response.parsedJson;
-    if (!parsed || !["supported", "not_supported", "ambiguous"].includes(String(parsed.decision))
+    const parsed = response.parsedJson;    if (!parsed || !["supported", "not_supported", "ambiguous"].includes(String(parsed.decision))
     || typeof parsed.confidence !== "number" || parsed.confidence < 0 || parsed.confidence > 1 || !Array.isArray(parsed.evidenceIds)) return undefined;
     return {
       supported: parsed.decision === "supported",
@@ -269,7 +288,7 @@ function matchTablePresence(intent: string, evidence: Evidence[]): "none" | "amb
  * assertion only from sanitized text currently visible in the app's main area.
  */
 export async function resolveJiraDomAssertion(page: Page, intent: string, options: { skipAiWhenNoTable?: boolean; aiBudget?: { remaining: number } } = {}): Promise<JiraDomAssertionResult> {
-  const evidence = await collectVisibleEvidence(page);
+  const evidence = await collectVisibleEvidence(page, intent);
   if (!intent.trim() || !evidence.length) return { supported: false, evidenceTexts: [] };
   const table = matchTablePresence(intent, evidence);
   if (table === "ambiguous") return { supported: false, evidenceTexts: [] };

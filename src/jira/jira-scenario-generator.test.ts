@@ -97,6 +97,16 @@ test('large-story coverage batches still audit and repair initial executable syn
 
 const issue: JiraIssueSource = {key:"HU-1",summary:"Acceso y operación",description:"El usuario inicia sesión y autoriza una operación con otro código.",acceptanceCriteria:"",labels:[],components:[],status:"Open",issueType:"Story"};
 
+test('Jira generation prompt sends identical description and acceptance criteria once without losing parsed clauses', () => {
+ const text='AC1 — Resumen\nSe muestra "Resumen".';
+ const source={...issue,description:text,acceptanceCriteria:text};
+ const [,user]=buildJiraScenarioMessages([source],'fixture-profile');
+ const payload=JSON.parse(user.content);
+ assert.equal(payload.issues[0].description,text);
+ assert.equal(payload.issues[0].acceptanceCriteria,null);
+ assert.deepEqual(payload.issues[0].acceptanceClauses.map((clause:{id:string;text:string})=>clause),jiraAcceptanceClauses(source));
+});
+
 test('generation audits, repairs and revalidates negative authentication before delivering the journey',async()=>{
  for(const [user,password,login,area] of [['Usuario','Contraseña','Iniciar sesión','Transferencias'],['Username','Password','Sign in','Inventory']]) {
   for(const repair of [true,false]) {
@@ -151,8 +161,9 @@ test("Jira output instructions require one structured response with inline conte
   assert.match(systemPrompt, /Treat each new row independently/);
   assert.match(systemPrompt, /If the source explicitly describes filling the first row and then adding a second row, treat the first row as already present/);
   assert.match(systemPrompt, /To test an incomplete newly added row, first complete the pre-existing row/);
-  assert.match(systemPrompt, /Keep each scenario within one user identity\/session and one coherent business objective/);
-  assert.match(systemPrompt, /never combine logout and login as one step or continue one scenario under a different role/);
+  assert.match(systemPrompt, /If the source requires the same request to move between applications or roles for approval, preserve that end-to-end journey in one scenario/);
+  assert.doesNotMatch(systemPrompt, /When an acceptance workflow changes authenticated roles or user identities, split it into separate self-contained scenarios/);
+  assert.match(systemPrompt, /Do not combine logout and login into one UI action/);
   assert.match(systemPrompt, /Field-level validation is supported only with this exact syntax: Validar que el campo/);
   assert.match(systemPrompt, /uniquely identified control is invalid and has an associated visible or ARIA-linked error/);
   assert.match(systemPrompt, /Do not assert structural row counts or empty-row structure as simple visible text/);

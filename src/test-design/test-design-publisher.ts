@@ -109,7 +109,7 @@ export function mapPriorities(priorities: TestRailPriority[]): Partial<Record<Te
 export function fillPlaceholders(text: string, data: TestDesignScenario["data"]): string {
   return text.replace(/\{\{\s*([^}]+?)\s*\}\}/g, (whole, key: string) => {
     const datum = data.find((d) => d.key.toLowerCase() === key.toLowerCase());
-    return datum && !datum.sensitive && datum.value ? datum.value : whole;
+    return datum && !datum.controlType?.startsWith("file") && !datum.sensitive && datum.value ? datum.value : whole;
   });
 }
 

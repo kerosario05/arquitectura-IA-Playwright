@@ -1,0 +1,241 @@
+{
+  "version": "1.0",
+  "recordingId": "0796abf1-ea09-4fbb-b5d0-ecc3210f92c5",
+  "projectSlug": "jira-regression-lab",
+  "appSlug": "jira-regression-lab",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "Crear una solicitud, aprobarla en la segunda aplicacion y adjuntar documentos",
+    "normalizedGoal": "Crear una solicitud, aprobarla en la segunda aplicacion y adjuntar documentos",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "9a0424e878a9",
+      "title": "Iniciar sesión",
+      "url": "http://127.0.0.1:4173/",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "9a0424e878a9"
+    }
+  ],
+  "semanticComponents": [],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "observe",
+      "screenIdentity": "9a0424e878a9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    }
+  ],
+  "datasets": [],
+  "technicalObservations": [
+    {
+      "observationId": "screen-9a0424e878a9-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "Empresarial",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Empresarial",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9a0424e878a9:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9a0424e878a9-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "Personal",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "button"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Personal",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9a0424e878a9:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9a0424e878a9-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "label": "RNC",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "login-rnc",
+        "name": "login-rnc",
+        "type": "text"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "login-rnc",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9a0424e878a9:control:3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-9a0424e878a9-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "label": "Usuario",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "login-user",
+        "name": "login-user",
+        "type": "text"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "login-user",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9a0424e878a9:control:4",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-9a0424e878a9-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "login-password",
+        "name": "login-password",
+        "type": "password"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "login-password",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9a0424e878a9:control:5",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-9a0424e878a9-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "9a0424e878a9",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "submit"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Iniciar sesión",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9a0424e878a9:control:6",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "pageKey": "tab-1",
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "http://127.0.0.1:4173/",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    }
+  ],
+  "gridMetadata": {
+    "detected": true,
+    "grids": 4,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace"
+}

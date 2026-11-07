@@ -2,13 +2,14 @@ import type { IncomingMessage, Server } from "node:http";
 import type { Duplex } from "node:stream";
 import { timingSafeEqual } from "node:crypto";
 import { WebSocketServer, type RawData, type WebSocket } from "ws";
-import { AGENT_CDP_PATH, AGENT_CONTROL_PATH } from "../../local-agent/protocol";
+import { AGENT_CDP_PATH, AGENT_CONTROL_PATH, AGENT_STREAM_PATH } from "../../local-agent/protocol";
 import { localAgentRegistry, type LocalAgentRegistry } from "./agent-registry";
 
 /**
  * WebSockets de los agentes locales:
  *  - `/api/local-agent/control`: canal permanente de órdenes y estado;
- *  - `/api/local-agent/cdp?session=&token=`: tubería CDP de un navegador abierto.
+ *  - `/api/local-agent/cdp?session=&token=`: tubería CDP de un navegador abierto;
+ *  - `/api/local-agent/stream?stream=&token=`: una conexión TCP al adb o al Appium del PC.
  *
  * El agente no tiene sesión de usuario: se identifica con `x-qalab-agent-id` y,
  * si el servidor define `LOCAL_AGENT_KEY`, debe presentar esa clave en
@@ -81,7 +82,7 @@ export function attachLocalAgentEndpoint(server: Server, registry: LocalAgentReg
 
   server.on("upgrade", (request: IncomingMessage, socket: Duplex, head: Buffer) => {
     const url = new URL(request.url ?? "/", "http://motor.local");
-    if (url.pathname !== AGENT_CONTROL_PATH && url.pathname !== AGENT_CDP_PATH) return;
+    if (url.pathname !== AGENT_CONTROL_PATH && url.pathname !== AGENT_CDP_PATH && url.pathname !== AGENT_STREAM_PATH) return;
 
     const agentId = header(request, HEADER_ID) ?? "";
     if (!AGENT_ID.test(agentId)) {
@@ -105,6 +106,20 @@ export function attachLocalAgentEndpoint(server: Server, registry: LocalAgentReg
         ws.on("close", () => handlers.onClose());
         ws.on("error", () => ws.terminate());
       });
+      return;
+    }
+
+    if (url.pathname === AGENT_STREAM_PATH) {
+      const acceptStream = registry.acceptStreamChannel({
+        streamId: url.searchParams.get("stream") ?? "",
+        token: url.searchParams.get("token") ?? "",
+        agentId,
+      });
+      if (!acceptStream) {
+        reject(socket, 403, "Forbidden");
+        return;
+      }
+      dataWss.handleUpgrade(request, socket, head, (ws: WebSocket) => acceptStream(ws));
       return;
     }
 

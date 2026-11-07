@@ -1,0 +1,8 @@
+{
+  "appSlug": "web-test",
+  "sectionSlug": "jira-aa-113",
+  "sourceScenarioId": "AA-113:jira:40",
+  "title": "Restablecer datos, crear y aprobar una solicitud y adjuntar documentación complementaria",
+  "generatedAt": "2026-10-27T22:46:44.646Z",
+  "executionEngine": "jira_semantic"
+}

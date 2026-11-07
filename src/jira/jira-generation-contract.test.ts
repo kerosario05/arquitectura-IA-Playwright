@@ -251,6 +251,12 @@ test('drops invented search submit after a fill unless the story declares a subm
  assert.equal(repairUnbackedFilterSubmitActions(draft,explicit),draft);
  assert.equal(jiraGenerationContractErrors(draft,explicit).includes('JIRA_FILTER_RESULT_EVIDENCE_MISSING'),false);
 });
+test('a captured-row action counts as result evidence for a search fill',()=>{
+ const issue={description:'El usuario busca la solicitud capturada y presiona Aprobar en su fila.'} as JiraIssueSource;
+ const steps=['Capturar el valor de "Número de solicitud" como "solicitudId"','Ingresar el valor capturado "solicitudId" en "Buscar solicitud"','Presionar "Aprobar" en la fila del valor capturado "solicitudId" en "Solicitudes pendientes de aprobación"','Validar que se muestre "Solicitud aprobada."'];
+ assert.equal(jiraGenerationContractErrors({steps},issue).includes('JIRA_FILTER_RESULT_EVIDENCE_MISSING'),false);
+ assert.ok(jiraGenerationContractErrors({steps:[steps[1],steps[3]]},issue).includes('JIRA_FILTER_RESULT_EVIDENCE_MISSING'));
+});
 test('filtered-list assertions require a declared row fixture or in-journey record setup',()=>{
  const issue={description:'El usuario selecciona un estado, filtra las solicitudes y valida que las solicitudes mostradas correspondan al estado seleccionado.'} as JiraIssueSource;
  const steps=[

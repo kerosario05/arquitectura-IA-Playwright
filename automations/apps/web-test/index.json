@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-10-26T17:12:15.871Z",
+  "updatedAt": "2026-10-28T16:00:52.903Z",
   "automations": [
     {
       "id": "aa-114-jira-1-rechazar-credenciales-invalidas",
@@ -11412,6 +11412,605 @@
       "promotionPersisted": true,
       "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-001-regresion-negocios-alta-parcial-y-navegacion\\case.spec.ts",
       "promotedSpecHash": "0db092e94d161a4fb6d88c85c0a3aa29bae21178f7bef9596ab8546327387c2f"
+    },
+    {
+      "id": "preview-001-regresion-negocios-recorrido-v3",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "REGRESION Negocios recorrido v3",
+      "planPath": "automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-001-regresion-negocios-recorrido-v3\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-001-regresion-negocios-recorrido-v3\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "createdAt": "2026-10-26T22:57:06.574Z",
+      "updatedAt": "2026-10-26T22:57:06.574Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-26T22-54-40-446Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-26T22-54-40-446Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 77446,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-001-regresion-negocios-recorrido-v3\\case.spec.ts",
+          "specHash": "93f10fecc55b7b30e1a127908aae6c5d7f900c0e57dd303f3eaf6f3f315784d2",
+          "specSource": "generatedSpec"
+        }
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-001-regresion-negocios-recorrido-v3\\case.spec.ts",
+      "promotedSpecHash": "93f10fecc55b7b30e1a127908aae6c5d7f900c0e57dd303f3eaf6f3f315784d2"
+    },
+    {
+      "id": "aa-113-jira-4-consulta-de-prospecto-encontrado-en-camara-de-comercio",
+      "externalId": "AA-113:jira:4",
+      "title": "Consulta de prospecto encontrado en Cámara de Comercio",
+      "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-4-consulta-de-prospecto-encontrado-en-camara-de-comercio\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-4-consulta-de-prospecto-encontrado-en-camara-de-comercio\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "baseUrlHash": "4e1194428e74",
+      "createdAt": "2026-10-27T01:34:20.385Z",
+      "updatedAt": "2026-10-27T12:37:20.476Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-113-jira-2-consultar-un-rnc-con-datos-encontrados-en-camara-de-comercio",
+      "externalId": "AA-113:jira:2",
+      "title": "Consultar un RNC con datos encontrados en Cámara de Comercio",
+      "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-2-consultar-un-rnc-con-datos-encontrados-en-camara-de-comercio\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-2-consultar-un-rnc-con-datos-encontrados-en-camara-de-comercio\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "baseUrlHash": "4e1194428e74",
+      "createdAt": "2026-10-27T13:13:08.585Z",
+      "updatedAt": "2026-10-27T13:13:08.585Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      },
+      "caseId": 56419,
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-2-consultar-un-rnc-con-datos-encontrados-en-camara-de-comercio\\case.spec.ts",
+      "promotedSpecHash": "466f8aab5633fc4ef316b79703edf23fc74a20275f7c24fdb685a1178cc5210d"
+    },
+    {
+      "id": "aa-113-jira-8-adjuntar-el-archivo-de-prueba-en-una-nueva-solicitud",
+      "externalId": "AA-113:jira:8",
+      "title": "Adjuntar el archivo de prueba en una nueva solicitud",
+      "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-8-adjuntar-el-archivo-de-prueba-en-una-nueva-solicitud\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-8-adjuntar-el-archivo-de-prueba-en-una-nueva-solicitud\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "baseUrlHash": "4e1194428e74",
+      "createdAt": "2026-10-27T18:06:35.537Z",
+      "updatedAt": "2026-10-27T18:06:35.537Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      },
+      "caseId": 56494,
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-8-adjuntar-el-archivo-de-prueba-en-una-nueva-solicitud\\case.spec.ts",
+      "promotedSpecHash": "599ecdaa898ca3c7393fa32f1113da60875d4350e3f81fb2d14ffadfd78cc5e6"
+    },
+    {
+      "id": "44919556-ed19-4e58-b1f0-33d33481884f-adjuntar-un-documento-en-gestion-documental",
+      "externalId": "44919556-ed19-4e58-b1f0-33d33481884f",
+      "title": "Adjuntar un documento en Gestión Documental",
+      "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\44919556-ed19-4e58-b1f0-33d33481884f-adjuntar-un-documento-en-gestion-documental\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\44919556-ed19-4e58-b1f0-33d33481884f-adjuntar-un-documento-en-gestion-documental\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "baseUrlHash": "4e1194428e74",
+      "createdAt": "2026-10-27T19:20:30.950Z",
+      "updatedAt": "2026-10-27T19:20:30.951Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      },
+      "caseId": 56495,
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\44919556-ed19-4e58-b1f0-33d33481884f-adjuntar-un-documento-en-gestion-documental\\case.spec.ts",
+      "promotedSpecHash": "3c59b8523fe99779a92624c4fa9637539b53eba2f46abb54cb1b7bedac759de8"
+    },
+    {
+      "id": "aa-113-jira-ac22-pilot-aprobar-una-solicitud-y-guardar-su-documentacion-complementaria",
+      "externalId": "AA-113:jira:ac22-pilot",
+      "title": "Aprobar una solicitud y guardar su documentación complementaria",
+      "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-ac22-pilot-aprobar-una-solicitud-y-guardar-su-documentacion-complementaria\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-ac22-pilot-aprobar-una-solicitud-y-guardar-su-documentacion-complementaria\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "baseUrlHash": "4e1194428e74",
+      "createdAt": "2026-10-27T21:43:39.053Z",
+      "updatedAt": "2026-10-27T21:43:39.054Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-113-jira-40-restablecer-datos-crear-y-aprobar-una-solicitud-y-adjuntar-documentacion-complementaria",
+      "externalId": "AA-113:jira:40",
+      "title": "Restablecer datos, crear y aprobar una solicitud y adjuntar documentación complementaria",
+      "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-40-restablecer-datos-crear-y-aprobar-una-solicitud-y-adjuntar-documentacion-complementaria\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-40-restablecer-datos-crear-y-aprobar-una-solicitud-y-adjuntar-documentacion-complementaria\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "baseUrlHash": "4e1194428e74",
+      "createdAt": "2026-10-27T22:46:44.672Z",
+      "updatedAt": "2026-10-27T22:46:44.674Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      },
+      "caseId": 56508,
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-40-restablecer-datos-crear-y-aprobar-una-solicitud-y-adjuntar-documentacion-complementaria\\case.spec.ts",
+      "promotedSpecHash": "389a2e173bc9b1df98f73035f3ce455abd4c6d1d1ec262aa86badf86d13af751"
+    },
+    {
+      "id": "preview-001-adjuntar-documentos",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Adjuntar Documentos",
+      "planPath": "automations\\apps\\web-test\\sections\\api-tests\\cases\\preview-001-adjuntar-documentos\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\api-tests\\cases\\preview-001-adjuntar-documentos\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "createdAt": "2026-10-28T13:36:13.893Z",
+      "updatedAt": "2026-10-28T16:00:52.903Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-28T15-58-58-337Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-28T15-58-58-337Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 49375,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [
+            "step_index_not_explicit_in_spec:1"
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": true,
+            "hash": "323205ed5174f6f709a1eabe3bca60c344d8aee177d1b5f653a9af52921d7592",
+            "lastModifiedAt": "2026-10-28T15:51:22.783Z"
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\web-test\\sections\\api-tests\\cases\\preview-001-adjuntar-documentos\\case.spec.ts",
+          "specHash": "323205ed5174f6f709a1eabe3bca60c344d8aee177d1b5f653a9af52921d7592",
+          "specSource": "generatedSpec"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\web-test\\sections\\api-tests\\cases\\preview-001-adjuntar-documentos\\plan.json",
+        "previousStatus": "active"
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\web-test\\sections\\api-tests\\cases\\preview-001-adjuntar-documentos\\case.spec.ts",
+      "promotedSpecHash": "323205ed5174f6f709a1eabe3bca60c344d8aee177d1b5f653a9af52921d7592"
     }
   ]
 }

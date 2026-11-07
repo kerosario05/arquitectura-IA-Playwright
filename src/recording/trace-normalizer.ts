@@ -41,6 +41,61 @@ export function isGenericUnresolvedLabel(value: string | undefined): boolean {
   return !normalized || GENERIC_UNRESOLVED_LABELS.has(normalized);
 }
 
+/**
+ * A dropdown's empty-state prompt ("Seleccione una opción", "Select…") is not a field name. Kept
+ * apart from isGenericUnresolvedLabel on purpose: that contract gates identity admission for every
+ * control, while this one only decides whether a selection's field label must be re-derived.
+ * Self-contained so it can be serialized into the browser instrumentation.
+ */
+export function isPlaceholderPrompt(value: string | undefined): boolean {
+  const normalized = (value ?? "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/…/g, "...")
+    .replace(/\.+$/g, "")
+    .trim();
+  return /^(seleccion\w*|select|elij\w*|elegir|choose)(\s+(una|un|uno|an?|the|su))?(\s+(opcion|valor|option|value|item|elemento))?$/.test(normalized);
+}
+
+/** "Seleccione una opción (2)" -> "Seleccione una opción": the ordinal is a dataset marker, not page text. */
+export function stripPlaceholderOrdinal(field: string): string {
+  const match = /^(.*\S)\s*\(\d+\)$/.exec(field.trim());
+  return match && isPlaceholderPrompt(match[1]) ? match[1] : field;
+}
+
+/**
+ * Same-prompt selects ("Seleccione una opción" x3) share one field name and therefore one dataset
+ * slot. When capture could not recover each field's real label, number the later ones so every
+ * selection owns its own value key; the first keeps the plain name.
+ */
+export function disambiguatePlaceholderSelectionFields(events: readonly RecordedEvent[]): RecordedEvent[] {
+  const seen = new Map<string, number>();
+  return events.map((event) => {
+    const field = event.target?.associatedField;
+    if (!event.target || event.target.compoundRole !== "selection" || !field || !isPlaceholderPrompt(field)) return event;
+    const key = field.trim().toLowerCase();
+    const occurrence = (seen.get(key) ?? 0) + 1;
+    seen.set(key, occurrence);
+    return occurrence === 1 ? event : { ...event, target: { ...event.target, associatedField: `${field.trim()} (${occurrence})` } };
+  });
+}
+
+const PASSIVE_TEXT_TAGS = new Set([
+  "p", "h1", "h2", "h3", "h4", "h5", "h6", "span", "form",
+  // Definition-list values and inline emphasis are what users select to copy; selecting is not a replayable click.
+  "dd", "dt", "strong", "em", "small", "b", "i", "blockquote", "figcaption",
+]);
+
+function isPassiveTextTag(tag: string | undefined): boolean {
+  return Boolean(tag && PASSIVE_TEXT_TAGS.has(tag));
+}
+
+/** A role-less target whose tag is passive text: a pointer on it may be a click or a text selection. */
+export function isPassiveTextTapTarget(target: Pick<NonNullable<RecordedEvent["target"]>, "tag" | "role"> | undefined): boolean {
+  return isPassiveTextTag(target?.tag?.trim().toLowerCase()) && !target?.role?.trim();
+}
+
 /** A dialog is an observation container, not an actionable control. */
 export function isNonActionableContainerTap(event: Pick<RecordedEvent, "kind" | "target">): boolean {
   if (event.kind !== "tap") return false;
@@ -54,8 +109,15 @@ export function isNonActionableContainerTap(event: Pick<RecordedEvent, "kind" | 
   // that identifies the target itself. This is tag/interaction evidence only: no app wording,
   // route, recording, or project assumptions.
   const tag = target?.tag?.trim().toLowerCase();
-  const passiveCopyTags = new Set(["p", "h1", "h2", "h3", "h4", "h5", "h6", "span", "form"]);
-  if (tag && passiveCopyTags.has(tag) && !role) {
+  // The recorder saw a lone click (not repeated clicks nor a copy) on this text: it is a real action on a
+  // handler the capture could not attribute to the leaf, so keep it for replay instead of calling it a selection.
+  if (target?.copySelectionGesture === false && isPassiveTextTag(tag) && !role) return false;
+  // Repeated clicks or a copy right after, on a role-less block with no action owner of its own (a card header
+  // whose text was selected), are a text selection as well, not only the passive text tags.
+  if (target?.copySelectionGesture === true && !role && tag && !["button", "a", "input", "select", "textarea", "label", "img"].includes(tag)
+    && target.actionOwner !== true && target.interactionType !== "click"
+    && !["NATIVE_ACTIONABLE", "SEMANTIC_ACTIONABLE", "FRAMEWORK_ACTIONABLE"].includes(String(target.actionability ?? ""))) return true;
+  if (tag && isPassiveTextTag(tag) && !role) {
     const hasActionOwner = target?.actionOwner === true
       || target?.interactionType === "click"
       || target?.actionability === "NATIVE_ACTIONABLE"
@@ -1028,14 +1090,22 @@ export function normalizeEvents(
     };
   });
 
-  const promoted = promoteSelectionNotes(cleaned);
+  const promoted = disambiguatePlaceholderSelectionFields(promoteSelectionNotes(cleaned));
   const normalizedSeqByRecordedSeq = new Map(promoted.map((event, index) => [event.seq, index] as const));
+  // A copy-paste link names its source by the recorded position ("event-N" = recorded seq N-1). Dropping events above
+  // shifts positions, so the link must follow its source to the normalized position or the capture never matches.
+  const remapDependsOn = (ref: string | undefined): string | undefined => {
+    const recordedSeq = Number(/^event-(\d+)$/.exec(ref ?? "")?.[1]) - 1;
+    const normalized = Number.isInteger(recordedSeq) ? normalizedSeqByRecordedSeq.get(recordedSeq) : undefined;
+    return normalized === undefined ? ref : `event-${normalized + 1}`;
+  };
   return promoted.map((event, index) => {
-    const target = event.target;
+    const withLink = event.dependsOnEventRef ? { ...event, dependsOnEventRef: remapDependsOn(event.dependsOnEventRef) } : event;
+    const target = withLink.target;
     const sourceSeqs = target?.sourceTechnicalEventSeqs;
-    if (!target || !sourceSeqs?.length) return { ...event, seq: index };
+    if (!target || !sourceSeqs?.length) return { ...withLink, seq: index };
     return {
-      ...event,
+      ...withLink,
       seq: index,
       target: {
         ...target,

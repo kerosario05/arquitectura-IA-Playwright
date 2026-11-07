@@ -26,3 +26,19 @@ test("preserves expected values structurally attached to separated steps", () =>
 
   assert.deepEqual(parsed.steps.map((step) => step.expected), ["First result", undefined, "Third result"]);
 });
+
+test("keeps a verb-like quoted label inside its step but still splits glued steps", () => {
+  const labelled = normalizeTestRailCase({
+    id: 9903,
+    title: "Quoted label",
+    custom_steps: 'Presionar "Nueva solicitud"\nIngresar el archivo de prueba en "Seleccionar documento"\nPresionar "Cargar documento"',
+  });
+  assert.deepEqual(labelled.steps.map((step) => step.action), [
+    'Presionar "Nueva solicitud"',
+    'Ingresar el archivo de prueba en "Seleccionar documento"',
+    'Presionar "Cargar documento"',
+  ]);
+
+  const glued = normalizeTestRailCase({ id: 9904, title: "Glued", custom_steps: 'Abrir "A"Seleccionar "B"' });
+  assert.equal(glued.steps.length, 2);
+});

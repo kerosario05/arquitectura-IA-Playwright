@@ -107,7 +107,21 @@ class DefectChecklistStore {
   private save(): void {
     const dir = path.dirname(this.filePath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(this.filePath, JSON.stringify(this.cache, null, 2), "utf-8");
+    // Windows can briefly lock the file (antivirus/indexer/another process). The checklist is secondary data:
+    // retry, then keep the in-memory copy instead of aborting the run that triggered the save.
+    const body = JSON.stringify(this.cache, null, 2);
+    for (let attempt = 1; ; attempt++) {
+      try {
+        fs.writeFileSync(this.filePath, body, "utf-8");
+        return;
+      } catch (error) {
+        if (attempt >= 4) {
+          console.warn(`[defect-checklist-store] could not persist ${this.filePath}: ${error instanceof Error ? error.message : String(error)}`);
+          return;
+        }
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 150 * attempt);
+      }
+    }
   }
 
   getOrCreate(issueKey: string, title?: string): Checklist {

@@ -2,7 +2,7 @@
   "version": 1,
   "appSlug": "kiosko",
   "createdAt": "2026-09-14T21:56:29.312Z",
-  "updatedAt": "2026-10-15T00:28:35.559Z",
+  "updatedAt": "2026-10-15T00:28:35.554Z",
   "items": [
     {
       "id": "37eadc898e82",
@@ -99,76 +99,6 @@
       "createdAt": "2026-10-09T15:12:25.316Z",
       "lastSeenAt": "2026-10-09T15:40:43.913Z",
       "lastValidatedAt": "2026-10-09T15:40:43.913Z"
-    },
-    {
-      "id": "route_edge_kiosko_54f67g",
-      "source": "scenario_derived",
-      "coverageRefs": [
-        "learned_navigation_path",
-        "relation:child_route"
-      ],
-      "steps": [
-        "Clic en \"Explora nuestros productos\"."
-      ],
-      "clickTargets": [
-        "Explora nuestros productos"
-      ],
-      "assertionTargets": [],
-      "negativeAssertions": [],
-      "optionLabels": [],
-      "authTerms": [],
-      "manual": false,
-      "confidence": "scenario_derived",
-      "createdAt": "2026-10-09T15:40:54.626Z",
-      "updatedAt": "2026-10-09T15:40:54.626Z",
-      "lastSeenAt": "2026-10-09T15:40:54.626Z",
-      "runCount": 1,
-      "validationStatus": "pending",
-      "trustedForReuse": false,
-      "successCount": 1,
-      "confidenceScore": 0.9999999999999999,
-      "knowledgeKind": "route_functional_observed",
-      "destinationUrl": "https://172.27.4.50/product-catalog",
-      "routeFrom": "entry",
-      "actionTarget": "Explora nuestros productos",
-      "transitionValidated": true,
-      "sourceTechnicalScreenKey": "f0d2d7a8ac5d7c2f",
-      "destinationTechnicalScreenKey": "e669463c64993a22"
-    },
-    {
-      "id": "route_edge_kiosko_cva3k0",
-      "source": "scenario_derived",
-      "coverageRefs": [
-        "learned_navigation_path",
-        "relation:child_route"
-      ],
-      "steps": [
-        "Clic en \"el primer elemento visible del listado\"."
-      ],
-      "clickTargets": [
-        "el primer elemento visible del listado"
-      ],
-      "assertionTargets": [],
-      "negativeAssertions": [],
-      "optionLabels": [],
-      "authTerms": [],
-      "manual": false,
-      "confidence": "scenario_derived",
-      "createdAt": "2026-10-09T15:40:54.630Z",
-      "updatedAt": "2026-10-09T15:40:54.630Z",
-      "lastSeenAt": "2026-10-09T15:40:54.630Z",
-      "runCount": 1,
-      "validationStatus": "pending",
-      "trustedForReuse": false,
-      "successCount": 1,
-      "confidenceScore": 0.9999999999999999,
-      "knowledgeKind": "route_functional_observed",
-      "destinationUrl": "https://172.27.4.50/product-catalog",
-      "routeFrom": "Explora nuestros productos",
-      "actionTarget": "el primer elemento visible del listado",
-      "transitionValidated": true,
-      "sourceTechnicalScreenKey": "fbb49d696e7128b2",
-      "destinationTechnicalScreenKey": "fbb49d696e7128b2"
     }
   ],
   "jiraRoutes": [

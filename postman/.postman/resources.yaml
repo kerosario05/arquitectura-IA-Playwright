@@ -1,0 +1,9 @@
+# Use this workspace to collaborate
+workspace:
+  id: 5ea247e5-11f4-457d-8f54-7cc7f181a809
+
+localResources:
+  collections:
+    - ../Portal-Comercial-QA-Cancelar-Solicitudes.postman_collection.json
+  environments:
+    - ../Portal-Comercial-QA.postman_environment.json

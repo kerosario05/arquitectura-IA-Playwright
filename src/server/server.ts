@@ -18,6 +18,10 @@ import { internalOtpRouter } from "./routes/internal-otp";
 import { projectsRouter } from "./routes/projects";
 import { recordingsRouter } from "./routes/recordings";
 import { testDesignRouter } from "./routes/test-design";
+import { testPlanningRouter } from "./routes/test-planning";
+import { serviceCatalogRouter } from "./routes/service-catalog";
+import { serviceBindingsRouter } from "./routes/service-bindings";
+import { testFilesRouter } from "./routes/test-files";
 import { downloadsRouter, localAgentRouter, DOWNLOADS_URL_PREFIX } from "./routes/local-agent";
 import { sweepOrphanFrames } from "../recording/recording-store";
 import { resolveServerPort } from "./config";
@@ -29,6 +33,7 @@ import { rolesRouter, permissionsRouter } from "./routes/roles";
 import { attachPrincipal, isPublicPath, requireFullScope } from "./middleware/auth";
 import { enforceRoutePolicy } from "./middleware/route-policy";
 import { resolveAuthConfig } from "../auth/config";
+import { dataCedulasRouter } from "./routes/data-cedulas";
 
 const PORT = resolveServerPort(process.env as Record<string, string | undefined>);
 const HOST = process.env.API_HOST || "0.0.0.0";
@@ -84,6 +89,9 @@ app.use("/api/roles", rolesRouter);
 app.use("/api/permissions", permissionsRouter);
 app.use("/api/jira", jiraRouter);
 app.use("/api/testrail", testrailRouter);
+// Register the static fixture endpoint before `/api/runs/:jobId` so
+// `/api/runs/test-files` is not interpreted as a job lookup.
+app.use(testFilesRouter);
 app.use("/api/runs", runsRouter);
 app.use("/api/scenarios", scenariosRouter);
 app.use("/api/mobile", mobileRouter);
@@ -91,10 +99,14 @@ app.use("/api/internal/otp", internalOtpRouter);
 app.use("/api/projects", projectsRouter);
 app.use("/api/recordings", recordingsRouter);
 app.use("/api/test-design", testDesignRouter);
+app.use("/api/test-planning", testPlanningRouter);
+app.use("/api/service-catalog", serviceCatalogRouter);
+app.use("/api/service-bindings", serviceBindingsRouter);
 app.use("/api/local-agent", localAgentRouter);
 app.use(checklistRouter);
 app.use(executionsRouter);
 app.use(runtimeInputsRouter);
+app.use(dataCedulasRouter);
 
 const isDebugEnabled =
   process.env.NODE_ENV !== "production" ||
@@ -136,6 +148,7 @@ const server = app.listen(PORT, HOST, () => {
   console.log(`  POST /api/recordings/:recordingId/derive`);
   console.log(`  GET  /api/recordings/:recordingId/scenarios`);
   console.log(`  PUT  /api/recordings/:recordingId/scenario-value`);
+  console.log(`  POST /api/recordings/:recordingId/scenario-step/remove`);
   console.log(`  POST /api/recordings/:recordingId/execute`);
   console.log(`  POST /api/recordings/:recordingId/testrail`);
   console.log(`  POST /api/runs/scenario-preview`);
@@ -153,6 +166,8 @@ const server = app.listen(PORT, HOST, () => {
   console.log(`  GET  /api/mobile/emulator/status`);
   console.log(`  POST /api/mobile/emulator/stop`);
   console.log(`  GET  /api/mobile/appium/status`);
+  console.log(`  GET  /api/data-cedulas/databases`);
+  console.log(`  GET  /api/data-cedulas/clientes/nuevo?db=QA1`);
   console.log(`  POST /api/mobile/tests/run  { apkPath|appPackage, appActivity?, steps, dataOverrides? }`);
   console.log(`  POST /api/mobile/scenarios/preview  { projectKey, sprintId|activeSprint, status }`);
   console.log(`  POST /api/mobile/scenarios/generation  { projectKey, sprintId|activeSprint, status, appSlug, selectedIssueKeys? }`);

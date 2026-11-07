@@ -29,14 +29,19 @@ import type { TestScenario } from "../types/testrail.types";
  */
 
 function scenarioWithRecordingActions(actions: Array<Record<string, unknown>>): TestScenario {
+  const authoredActions = actions.map((action) => {
+    if (action.actionType === "press") return `Presionar "${action.key}" en "${action.targetRef}"`;
+    if (action.actionType === "fill") return `Ingresar [${action.valueKey ?? "value"}] en "${action.targetRef}"`;
+    return String(action.humanStep ?? "");
+  });
   return {
     source: "testrail",
     externalId: "external",
     caseId: 1,
     title: "scenario",
-    steps: [{ index: 1, action: "placeholder", dataHints: [] }],
+    steps: authoredActions.map((action, index) => ({ index: index + 1, action, dataHints: [] })),
     recordingExecutionContract: {
-      actions,
+      actions: actions.map((action, index) => ({ ...action, humanStep: authoredActions[index] })),
       runtimeInputRequirements: [],
     },
   } as unknown as TestScenario;

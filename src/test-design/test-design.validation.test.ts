@@ -45,6 +45,27 @@ test("accepts plain-string steps and drops blank rows", () => {
   ]);
 });
 
+test("keeps ordinary manual input steps as authored while deriving dynamic document groups", () => {
+  const manual = normalizeScenario({
+    title: "Manual case",
+    origin: "manual",
+    steps: [{ action: 'Ingresar datos en "Referencia"', expected: "" }],
+    data: [{ key: "reference", label: "Referencia", value: "local-only", sensitive: false, description: "" }],
+  }, 0);
+  assert.equal(manual.inputRequirements, undefined);
+  assert.equal(manual.data[0].value, "local-only");
+
+  const workflow = normalizeScenario({
+    title: "Attach observed documents",
+    origin: "manual",
+    steps: [{ action: 'Adjuntar los documentos requeridos en "Documentación"', expected: "" }],
+  }, 1);
+  assert.equal(workflow.inputRequirements?.length, 1);
+  assert.equal(workflow.inputRequirements?.[0].controlType, "file-set");
+  assert.equal(workflow.inputRequirements?.[0].required, true);
+  assert.equal(workflow.data[0].controlType, "file-set");
+});
+
 test("accepts TestRail ids written as C1234", () => {
   assert.equal(normalizeScenario({ title: "x", testRailCaseId: "C1234" }, 0).testRailCaseId, 1234);
   assert.throws(() => normalizeScenario({ title: "x", testRailCaseId: "abc" }, 0), TestDesignValidationError);

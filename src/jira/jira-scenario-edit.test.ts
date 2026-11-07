@@ -20,6 +20,12 @@ test('Jira edited steps receive a revision and uniquely unchanged fields retain 
  assert.equal(again.scenarioId,edited.scenarioId);
  assert.equal(original.steps.length,3);
 });
+test('an unchanged file step keeps its file control type when another step is edited',async()=>{
+ const upload:EditableJiraScenario={...original,steps:['Abrir la aplicación configurada del proyecto','Ingresar el archivo de prueba en "Documento"','Validar que se muestre "Resultado"']};
+ upload.inputRequirements=deriveJiraInputRequirements(upload.steps).map(field=>({...field,controlType:'file' as const}));
+ const [edited]=await reviewEditedJiraScenarios(issue,[upload],upload.scenarioId,{title:upload.title,steps:[upload.steps[0],upload.steps[1],'Validar que se muestre "Otro resultado"'],expectedResult:upload.expectedResult});
+ assert.equal(edited.inputRequirements.find(field=>field.label==='Documento')?.controlType,'file');
+});
 test('full_authentication is dropped on review only when the project has no AuthFlow; step wording never decides',async()=>{
  const withIntent:EditableJiraScenario={...original,authIntent:'full_authentication'};
  const same={title:withIntent.title,steps:withIntent.steps,expectedResult:withIntent.expectedResult};

@@ -1,0 +1,24 @@
+{
+  "requestedStrategy": "auto",
+  "autoPomEnabled": true,
+  "selectedStrategy": "pom",
+  "reason": "spec_generation_validation_failed",
+  "blockers": [
+    "spec_generation_validation_failed"
+  ],
+  "availablePageObjects": [
+    "ProductListPage",
+    "OperationsMenuPage",
+    "LoginPage",
+    "FormPage"
+  ],
+  "requiredPageMethods": [],
+  "missingPageMethods": [],
+  "autoPomAttempted": false,
+  "autoPomCreatedMethods": [],
+  "fallbackUsed": false,
+  "requirePomRuntime": false,
+  "specPath": "automations\\apps\\portal-comercial\\sections\\api-tests\\cases\\preview-001-prueba-qa\\case.spec.ts",
+  "specHash": "17527d3bb797a6c96740d73ccb82957bb2aa01790846a9654446ef1d424cd033",
+  "specSource": "ai_candidate"
+}

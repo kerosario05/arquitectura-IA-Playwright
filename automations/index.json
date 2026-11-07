@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "updatedAt": "2026-10-26T21:41:17.958Z",
+  "updatedAt": "2026-11-06T23:47:02.881Z",
   "automations": [
     {
       "id": "c10002-test-automation-plan",
@@ -43861,15 +43861,15 @@
       "id": "c-e2e-1-deterministic-compiler-in-repo-e2e",
       "externalId": "C-E2E-1",
       "title": "Deterministic compiler in-repo e2e",
-      "planPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-production-e2e-15304\\sections\\default-section\\cases\\c-e2e-1-deterministic-compiler-in-repo-e2e\\plan.json",
-      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-production-e2e-15304\\sections\\default-section\\cases\\c-e2e-1-deterministic-compiler-in-repo-e2e\\case.spec.ts",
-      "appSlug": "zzz-temp-production-e2e-15304",
-      "appConfigPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-production-e2e-15304\\app.config.json",
+      "planPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-production-e2e-5464\\sections\\default-section\\cases\\c-e2e-1-deterministic-compiler-in-repo-e2e\\plan.json",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-production-e2e-5464\\sections\\default-section\\cases\\c-e2e-1-deterministic-compiler-in-repo-e2e\\case.spec.ts",
+      "appSlug": "zzz-temp-production-e2e-5464",
+      "appConfigPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-production-e2e-5464\\app.config.json",
       "status": "spec_failed",
       "source": "discovery",
-      "appProfile": "zzz-temp-production-e2e-15304",
+      "appProfile": "zzz-temp-production-e2e-5464",
       "createdAt": "2026-09-19T19:23:50.041Z",
-      "updatedAt": "2026-09-20T13:12:37.367Z",
+      "updatedAt": "2026-11-06T23:46:22.627Z",
       "pomStatus": "needs_manual_review",
       "inlineDebugMode": false,
       "specVerificationStatus": "failed",
@@ -43897,7 +43897,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 39082,
+          "durationMs": 47231,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -43969,8 +43969,8 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false,
-          "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-production-e2e-15304\\sections\\default-section\\cases\\c-e2e-1-deterministic-compiler-in-repo-e2e\\case.spec.ts",
-          "specHash": "96c14ed3402f696f4594225ac7d490f9e5764564808e8c488d617f5ce75600ad",
+          "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-production-e2e-5464\\sections\\default-section\\cases\\c-e2e-1-deterministic-compiler-in-repo-e2e\\case.spec.ts",
+          "specHash": "5cf49a2b8f61b510170ae05da544cdfa01c19f3b8af1f39be97f66683ab4b0ef",
           "specSource": "ai_candidate"
         }
       }
@@ -43979,15 +43979,15 @@
       "id": "c-section-a-section-slug-normalization",
       "externalId": "C-SECTION-A",
       "title": "Section slug normalization",
-      "planPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-a-33544\\sections\\default-section\\cases\\c-section-a-section-slug-normalization\\plan.json",
-      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-a-33544\\sections\\default-section\\cases\\c-section-a-section-slug-normalization\\case.spec.ts",
-      "appSlug": "zzz-temp-section-slug-c-section-a-33544",
-      "appConfigPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-a-33544\\app.config.json",
+      "planPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-a-30112\\sections\\default-section\\cases\\c-section-a-section-slug-normalization\\plan.json",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-a-30112\\sections\\default-section\\cases\\c-section-a-section-slug-normalization\\case.spec.ts",
+      "appSlug": "zzz-temp-section-slug-c-section-a-30112",
+      "appConfigPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-a-30112\\app.config.json",
       "status": "spec_failed",
       "source": "discovery",
-      "appProfile": "zzz-temp-section-slug-c-section-a-33544",
+      "appProfile": "zzz-temp-section-slug-c-section-a-30112",
       "createdAt": "2026-09-19T20:19:48.478Z",
-      "updatedAt": "2026-09-20T01:58:46.705Z",
+      "updatedAt": "2026-11-06T23:46:22.292Z",
       "pomStatus": "needs_manual_review",
       "inlineDebugMode": false,
       "specVerificationStatus": "failed",
@@ -44015,7 +44015,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 34486,
+          "durationMs": 39320,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -44087,8 +44087,8 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false,
-          "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-a-33544\\sections\\default-section\\cases\\c-section-a-section-slug-normalization\\case.spec.ts",
-          "specHash": "ebbe2de3a775a3a08776ba6e010e5dda242d00bf7a0d0b01d145bb004f70a309",
+          "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-a-30112\\sections\\default-section\\cases\\c-section-a-section-slug-normalization\\case.spec.ts",
+          "specHash": "8886777f1b2962070d20f048c9f931597cb7bbc0e6f692b2a17ad96a26f5af3a",
           "specSource": "ai_candidate"
         }
       }
@@ -44097,15 +44097,15 @@
       "id": "c-section-b-section-slug-normalization",
       "externalId": "C-SECTION-B",
       "title": "Section slug normalization",
-      "planPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-b-33544\\sections\\default-section\\cases\\c-section-b-section-slug-normalization\\plan.json",
-      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-b-33544\\sections\\default-section\\cases\\c-section-b-section-slug-normalization\\case.spec.ts",
-      "appSlug": "zzz-temp-section-slug-c-section-b-33544",
-      "appConfigPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-b-33544\\app.config.json",
+      "planPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-b-30112\\sections\\default-section\\cases\\c-section-b-section-slug-normalization\\plan.json",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-b-30112\\sections\\default-section\\cases\\c-section-b-section-slug-normalization\\case.spec.ts",
+      "appSlug": "zzz-temp-section-slug-c-section-b-30112",
+      "appConfigPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-b-30112\\app.config.json",
       "status": "spec_failed",
       "source": "discovery",
-      "appProfile": "zzz-temp-section-slug-c-section-b-33544",
+      "appProfile": "zzz-temp-section-slug-c-section-b-30112",
       "createdAt": "2026-09-19T20:19:54.400Z",
-      "updatedAt": "2026-09-20T01:59:04.924Z",
+      "updatedAt": "2026-11-06T23:46:43.358Z",
       "pomStatus": "needs_manual_review",
       "inlineDebugMode": false,
       "specVerificationStatus": "failed",
@@ -44133,7 +44133,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 17975,
+          "durationMs": 20885,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -44205,8 +44205,8 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false,
-          "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-b-33544\\sections\\default-section\\cases\\c-section-b-section-slug-normalization\\case.spec.ts",
-          "specHash": "68769865f8c8beacf8cdb838673cf5c9a274d6726bd7591175132d9b9b813445",
+          "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-b-30112\\sections\\default-section\\cases\\c-section-b-section-slug-normalization\\case.spec.ts",
+          "specHash": "4d28e03d78c9f672e48bfc8f94c1f9d0f65fa605605dc7b4121266c768aa282e",
           "specSource": "ai_candidate"
         }
       }
@@ -44215,15 +44215,15 @@
       "id": "c-section-c-section-slug-normalization",
       "externalId": "C-SECTION-C",
       "title": "Section slug normalization",
-      "planPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-c-33544\\sections\\automatizacion-1\\cases\\c-section-c-section-slug-normalization\\plan.json",
-      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-c-33544\\sections\\automatizacion-1\\cases\\c-section-c-section-slug-normalization\\case.spec.ts",
-      "appSlug": "zzz-temp-section-slug-c-section-c-33544",
-      "appConfigPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-c-33544\\app.config.json",
+      "planPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-c-30112\\sections\\automatizacion-1\\cases\\c-section-c-section-slug-normalization\\plan.json",
+      "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-c-30112\\sections\\automatizacion-1\\cases\\c-section-c-section-slug-normalization\\case.spec.ts",
+      "appSlug": "zzz-temp-section-slug-c-section-c-30112",
+      "appConfigPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-c-30112\\app.config.json",
       "status": "spec_failed",
       "source": "discovery",
-      "appProfile": "zzz-temp-section-slug-c-section-c-33544",
+      "appProfile": "zzz-temp-section-slug-c-section-c-30112",
       "createdAt": "2026-09-19T20:20:00.541Z",
-      "updatedAt": "2026-09-20T01:59:18.874Z",
+      "updatedAt": "2026-11-06T23:47:02.881Z",
       "pomStatus": "needs_manual_review",
       "inlineDebugMode": false,
       "specVerificationStatus": "failed",
@@ -44251,7 +44251,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 13741,
+          "durationMs": 19375,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -44323,8 +44323,8 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false,
-          "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-c-33544\\sections\\automatizacion-1\\cases\\c-section-c-section-slug-normalization\\case.spec.ts",
-          "specHash": "7689f22fd75b01cfa962ffac2e23a1c75112e1015e4e9e4ab9079de3e82a1957",
+          "specPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\zzz-temp-section-slug-c-section-c-30112\\sections\\automatizacion-1\\cases\\c-section-c-section-slug-normalization\\case.spec.ts",
+          "specHash": "5ca740443fcb24d4c2a90e67a66080370dfe66d85cda455d7fbd8ee7dceef12b",
           "specSource": "ai_candidate"
         }
       }
@@ -44593,21 +44593,21 @@
       "externalId": "PREVIEW-001",
       "caseId": 0,
       "title": "Login",
-      "planPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login\\plan.json",
-      "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login\\case.spec.ts",
-      "appSlug": "fenix",
-      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "planPath": "automations\\apps\\kiosko\\sections\\api-tests\\cases\\preview-001-login\\plan.json",
+      "specPath": "automations\\apps\\kiosko\\sections\\api-tests\\cases\\preview-001-login\\case.spec.ts",
+      "appSlug": "kiosko",
+      "appConfigPath": "automations\\apps\\kiosko\\app.config.json",
       "status": "active",
       "source": "discovery",
-      "appProfile": "fenix",
+      "appProfile": "kiosko",
       "createdAt": "2026-09-23T14:54:40.254Z",
-      "updatedAt": "2026-10-05T18:51:53.584Z",
-      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-05T18-49-37-810Z\\discovered-plans.pending.json",
+      "updatedAt": "2026-10-29T16:55:29.988Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-29T16-52-36-520Z\\discovered-plans.pending.json",
       "pomStatus": "promoted",
       "inlineDebugMode": false,
       "specVerificationStatus": "passed",
       "metadata": {
-        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-05T18-49-37-810Z",
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-29T16-52-36-520Z",
         "pomDiagnostics": {
           "status": "promoted",
           "inlineFallbackUsed": false,
@@ -44631,7 +44631,7 @@
           },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 72628,
+          "durationMs": 141396,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -44662,12 +44662,10 @@
           "failedGatesAttempt1": [],
           "regressedGates": [],
           "missingRequirements": [],
-          "oracleTypes": [
-            "navigation_transition"
-          ],
+          "oracleTypes": [],
           "errors": [],
           "warnings": [
-            "step_index_not_explicit_in_spec:9"
+            "step_index_not_explicit_in_spec:1"
           ],
           "finalSpec": {
             "origin": "deterministic_compiler",
@@ -44682,9 +44680,9 @@
           },
           "specWritten": true,
           "previousSpec": {
-            "existed": true,
-            "hash": "56c67747e05728d8f0ac2ba509a496175d8266a521549d224e104a3a9b4a8de7",
-            "lastModifiedAt": "2026-10-03T20:39:38.762Z"
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
           }
         },
         "promotionStrategyDiagnostics": {
@@ -44695,7 +44693,8 @@
           "blockers": [],
           "availablePageObjects": [
             "ProductListPage",
-            "OperationsMenuPage"
+            "OperationsMenuPage",
+            "CategoryPage"
           ],
           "requiredPageMethods": [],
           "missingPageMethods": [],
@@ -44703,17 +44702,14 @@
           "autoPomCreatedMethods": [],
           "fallbackUsed": false,
           "requirePomRuntime": false,
-          "specPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login\\case.spec.ts",
-          "specHash": "07d8ab15fa364a5fe6fb74a9a5d6586c38e4c712f572d196d59dcd51f227a541",
+          "specPath": "automations\\apps\\kiosko\\sections\\api-tests\\cases\\preview-001-login\\case.spec.ts",
+          "specHash": "36679c4979703f87d840d623199b0aeb63e0a31527df0cf3622043f7577a5ac7",
           "specSource": "generatedSpec"
-        },
-        "overwritten": true,
-        "previousAutomationPath": "automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login\\plan.json",
-        "previousStatus": "active"
+        }
       },
       "promotionPersisted": true,
-      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\fenix\\sections\\default-section\\cases\\preview-001-login\\case.spec.ts",
-      "promotedSpecHash": "07d8ab15fa364a5fe6fb74a9a5d6586c38e4c712f572d196d59dcd51f227a541"
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\kiosko\\sections\\api-tests\\cases\\preview-001-login\\case.spec.ts",
+      "promotedSpecHash": "36679c4979703f87d840d623199b0aeb63e0a31527df0cf3622043f7577a5ac7"
     },
     {
       "id": "preview-001-fuck",
@@ -50129,44 +50125,29 @@
       "id": "jira-a-gate-a",
       "externalId": "JIRA-a",
       "title": "Gate a",
-      "planPath": "automations\\apps\\jira-fixture-nzncbv\\sections\\jira-aa-88\\cases\\jira-a-gate-a\\plan.json",
-      "specPath": "automations\\apps\\jira-fixture-nzncbv\\sections\\jira-aa-88\\cases\\jira-a-gate-a\\case.spec.ts",
-      "appSlug": "jira-fixture-nzncbv",
-      "appConfigPath": "automations\\apps\\jira-fixture-nzncbv\\app.config.json",
+      "planPath": "automations\\apps\\jira-fixture-yb8kuc\\sections\\jira-aa-88\\cases\\jira-a-gate-a\\plan.json",
+      "specPath": "automations\\apps\\jira-fixture-yb8kuc\\sections\\jira-aa-88\\cases\\jira-a-gate-a\\case.spec.ts",
+      "appSlug": "jira-fixture-yb8kuc",
+      "appConfigPath": "automations\\apps\\jira-fixture-yb8kuc\\app.config.json",
       "status": "active",
-      "source": "manual",
-      "appProfile": "jira-fixture-nzncbv",
-      "baseUrlHash": "0fc6e0d49614",
+      "source": "discovery",
+      "appProfile": "jira-fixture-yb8kuc",
+      "baseUrlHash": "efeadc0af864",
       "createdAt": "2026-10-09T13:58:01.610Z",
-      "updatedAt": "2026-10-09T14:16:39.547Z",
-      "pomStatus": "promoted",
-      "inlineDebugMode": false,
+      "updatedAt": "2026-10-27T22:46:21.848Z",
       "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
       "metadata": {
-        "pomDiagnostics": {
-          "status": "promoted",
-          "inlineFallbackUsed": false,
-          "reason": "promoted",
-          "requiredDataUsed": [],
-          "generatedPageObjects": [],
-          "generatedMethods": [],
-          "missingPageObjects": [],
-          "missingMethods": [],
-          "generatedCandidates": 0
-        },
         "specGeneration": {
           "mode": "deterministic",
           "provider": null,
           "model": null,
-          "skill": {
-            "name": null,
-            "version": null,
-            "hash": null,
-            "loaded": false
-          },
           "invocations": 0,
           "invocationsConsumed": 0,
-          "durationMs": 26899,
+          "durationMs": 0,
           "usage": {
             "inputTokens": null,
             "cachedInputTokens": null,
@@ -50179,11 +50160,10 @@
             "credits": null
           },
           "validation": {
-            "schema": "skipped",
+            "schema": "passed",
             "structure": "passed",
-            "traceFidelity": "skipped",
-            "typescript": "passed",
-            "playwrightDiscovery": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
             "semanticCoverage": "passed",
             "functionalExecution": "passed"
           },
@@ -50191,61 +50171,11 @@
           "specsRequested": 1,
           "specsValidated": 1,
           "specsRejected": 0,
-          "specGenerationAttempts": 0,
-          "specRepairAttempts": 0,
-          "firstPassPromotion": true,
-          "failedGatesAttempt1": [],
-          "regressedGates": [],
-          "missingRequirements": [],
-          "oracleTypes": [
-            "auth_gate"
-          ],
-          "errors": [],
-          "warnings": [
-            "step_index_not_explicit_in_spec:1"
-          ],
-          "finalSpec": {
-            "origin": "deterministic_compiler",
-            "generatedBy": "core",
-            "strategy": "deterministic_compiler",
-            "fallback": null
-          },
-          "runtimeGate": {
-            "decision": "promote",
-            "promotionStatus": "promoted",
-            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
-          },
           "specWritten": true,
-          "previousSpec": {
-            "existed": false,
-            "hash": null,
-            "lastModifiedAt": null
-          }
-        },
-        "promotionStrategyDiagnostics": {
-          "requestedStrategy": "auto",
-          "autoPomEnabled": true,
-          "selectedStrategy": "pom",
-          "reason": "promoted",
-          "blockers": [],
-          "availablePageObjects": [
-            "ProductListPage",
-            "OperationsMenuPage"
-          ],
-          "requiredPageMethods": [],
-          "missingPageMethods": [],
-          "autoPomAttempted": false,
-          "autoPomCreatedMethods": [],
-          "fallbackUsed": false,
-          "requirePomRuntime": false,
-          "specPath": "automations\\apps\\jira-fixture-nzncbv\\sections\\jira-aa-88\\cases\\jira-a-gate-a\\case.spec.ts",
-          "specHash": "0952f73a2b8a12a1fbe0dc67e5fd9187965c8a9bb2467788dc832128356886b2",
-          "specSource": "generatedSpec"
+          "errors": [],
+          "warnings": []
         }
-      },
-      "promotionPersisted": true,
-      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\jira-fixture-nzncbv\\sections\\jira-aa-88\\cases\\jira-a-gate-a\\case.spec.ts",
-      "promotedSpecHash": "0952f73a2b8a12a1fbe0dc67e5fd9187965c8a9bb2467788dc832128356886b2"
+      }
     },
     {
       "id": "preview-001-redirigir-estados-de-cuenta-a-la-autenticacion-del-kiosco",
@@ -65058,6 +64988,1220 @@
       "baseUrlHash": "2a7bf6928b41",
       "createdAt": "2026-10-26T21:41:17.948Z",
       "updatedAt": "2026-10-26T21:41:17.957Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "preview-001-regresion-negocios-recorrido-v3",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "REGRESION Negocios recorrido v3",
+      "planPath": "automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-001-regresion-negocios-recorrido-v3\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-001-regresion-negocios-recorrido-v3\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "createdAt": "2026-10-26T22:57:06.574Z",
+      "updatedAt": "2026-10-26T22:57:06.599Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-26T22-54-40-446Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-26T22-54-40-446Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 77446,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [],
+          "errors": [],
+          "warnings": [],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-001-regresion-negocios-recorrido-v3\\case.spec.ts",
+          "specHash": "93f10fecc55b7b30e1a127908aae6c5d7f900c0e57dd303f3eaf6f3f315784d2",
+          "specSource": "generatedSpec"
+        }
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\web-test\\sections\\portal-comercial\\cases\\preview-001-regresion-negocios-recorrido-v3\\case.spec.ts",
+      "promotedSpecHash": "93f10fecc55b7b30e1a127908aae6c5d7f900c0e57dd303f3eaf6f3f315784d2"
+    },
+    {
+      "id": "aa-113-jira-4-consulta-de-prospecto-encontrado-en-camara-de-comercio",
+      "externalId": "AA-113:jira:4",
+      "title": "Consulta de prospecto encontrado en Cámara de Comercio",
+      "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-4-consulta-de-prospecto-encontrado-en-camara-de-comercio\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-4-consulta-de-prospecto-encontrado-en-camara-de-comercio\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "baseUrlHash": "4e1194428e74",
+      "createdAt": "2026-10-27T01:34:20.385Z",
+      "updatedAt": "2026-10-27T12:37:20.521Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-113-jira-2-consultar-un-rnc-con-datos-encontrados-en-camara-de-comercio",
+      "externalId": "AA-113:jira:2",
+      "title": "Consultar un RNC con datos encontrados en Cámara de Comercio",
+      "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-2-consultar-un-rnc-con-datos-encontrados-en-camara-de-comercio\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-2-consultar-un-rnc-con-datos-encontrados-en-camara-de-comercio\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "baseUrlHash": "4e1194428e74",
+      "createdAt": "2026-10-27T13:13:08.585Z",
+      "updatedAt": "2026-10-27T13:13:08.600Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-113-jira-8-adjuntar-el-archivo-de-prueba-en-una-nueva-solicitud",
+      "externalId": "AA-113:jira:8",
+      "title": "Adjuntar el archivo de prueba en una nueva solicitud",
+      "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-8-adjuntar-el-archivo-de-prueba-en-una-nueva-solicitud\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-8-adjuntar-el-archivo-de-prueba-en-una-nueva-solicitud\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "baseUrlHash": "4e1194428e74",
+      "createdAt": "2026-10-27T18:06:35.537Z",
+      "updatedAt": "2026-10-27T18:06:35.557Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "44919556-ed19-4e58-b1f0-33d33481884f-adjuntar-un-documento-en-gestion-documental",
+      "externalId": "44919556-ed19-4e58-b1f0-33d33481884f",
+      "title": "Adjuntar un documento en Gestión Documental",
+      "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\44919556-ed19-4e58-b1f0-33d33481884f-adjuntar-un-documento-en-gestion-documental\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\44919556-ed19-4e58-b1f0-33d33481884f-adjuntar-un-documento-en-gestion-documental\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "baseUrlHash": "4e1194428e74",
+      "createdAt": "2026-10-27T19:20:30.950Z",
+      "updatedAt": "2026-10-27T19:20:30.961Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-113-jira-ac22-pilot-aprobar-una-solicitud-y-guardar-su-documentacion-complementaria",
+      "externalId": "AA-113:jira:ac22-pilot",
+      "title": "Aprobar una solicitud y guardar su documentación complementaria",
+      "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-ac22-pilot-aprobar-una-solicitud-y-guardar-su-documentacion-complementaria\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-ac22-pilot-aprobar-una-solicitud-y-guardar-su-documentacion-complementaria\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "baseUrlHash": "4e1194428e74",
+      "createdAt": "2026-10-27T21:43:39.053Z",
+      "updatedAt": "2026-10-27T21:43:39.076Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "aa-113-jira-40-restablecer-datos-crear-y-aprobar-una-solicitud-y-adjuntar-documentacion-complementaria",
+      "externalId": "AA-113:jira:40",
+      "title": "Restablecer datos, crear y aprobar una solicitud y adjuntar documentación complementaria",
+      "planPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-40-restablecer-datos-crear-y-aprobar-una-solicitud-y-adjuntar-documentacion-complementaria\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\jira-aa-113\\cases\\aa-113-jira-40-restablecer-datos-crear-y-aprobar-una-solicitud-y-adjuntar-documentacion-complementaria\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "baseUrlHash": "4e1194428e74",
+      "createdAt": "2026-10-27T22:46:44.672Z",
+      "updatedAt": "2026-10-27T22:46:44.689Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "preview-001-adjuntar-documentos",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Adjuntar Documentos",
+      "planPath": "automations\\apps\\web-test\\sections\\api-tests\\cases\\preview-001-adjuntar-documentos\\plan.json",
+      "specPath": "automations\\apps\\web-test\\sections\\api-tests\\cases\\preview-001-adjuntar-documentos\\case.spec.ts",
+      "appSlug": "web-test",
+      "appConfigPath": "automations\\apps\\web-test\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "web-test",
+      "createdAt": "2026-10-28T13:36:13.893Z",
+      "updatedAt": "2026-10-28T16:00:52.941Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-28T15-58-58-337Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-28T15-58-58-337Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 49375,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [
+            "step_index_not_explicit_in_spec:1"
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": true,
+            "hash": "323205ed5174f6f709a1eabe3bca60c344d8aee177d1b5f653a9af52921d7592",
+            "lastModifiedAt": "2026-10-28T15:51:22.783Z"
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\web-test\\sections\\api-tests\\cases\\preview-001-adjuntar-documentos\\case.spec.ts",
+          "specHash": "323205ed5174f6f709a1eabe3bca60c344d8aee177d1b5f653a9af52921d7592",
+          "specSource": "generatedSpec"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\web-test\\sections\\api-tests\\cases\\preview-001-adjuntar-documentos\\plan.json",
+        "previousStatus": "active"
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\web-test\\sections\\api-tests\\cases\\preview-001-adjuntar-documentos\\case.spec.ts",
+      "promotedSpecHash": "323205ed5174f6f709a1eabe3bca60c344d8aee177d1b5f653a9af52921d7592"
+    },
+    {
+      "id": "preview-001-crear-cliente-v2",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Crear Cliente V2",
+      "planPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-crear-cliente-v2\\plan.json",
+      "specPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-crear-cliente-v2\\case.spec.ts",
+      "appSlug": "portal-comercial",
+      "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "portal-comercial",
+      "createdAt": "2026-10-29T18:50:12.518Z",
+      "updatedAt": "2026-10-30T13:18:06.803Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-30T13-04-18-819Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-10-30T13-04-18-819Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 502064,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "failed"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "functionalExecution"
+          ],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [],
+          "errors": [
+            "functional_execution_failed:exitCode=1",
+            "functional_execution_error:[selection-field-locator-skipped] field=\"Producto\" reason=not_selection_trigger tag=li role=menuitem"
+          ],
+          "warnings": [
+            "functional_execution_screenshots=47",
+            "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "block",
+            "promotionStatus": "blocked",
+            "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 2)."
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage",
+            "LoginPage",
+            "FormPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-crear-cliente-v2\\case.spec.ts",
+          "specHash": "a2101c38e7354fcb1171c76057853f926d46f41b93f05a470e37b68b37d76bbe",
+          "specSource": "ai_candidate"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-crear-cliente-v2\\plan.json",
+        "previousStatus": "spec_failed"
+      }
+    },
+    {
+      "id": "preview-001-prueba-qa",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "prueba qa",
+      "planPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-prueba-qa\\plan.json",
+      "specPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-prueba-qa\\case.spec.ts",
+      "appSlug": "portal-comercial",
+      "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "portal-comercial",
+      "createdAt": "2026-10-31T15:30:44.552Z",
+      "updatedAt": "2026-11-01T21:10:38.658Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-01T20-39-05-397Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-01T20-39-05-397Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 1404262,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [
+            "step_index_not_explicit_in_spec:82",
+            "step_index_not_explicit_in_spec:84"
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage",
+            "LoginPage",
+            "FormPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-prueba-qa\\case.spec.ts",
+          "specHash": "7a7f892f29a154724ea303aac57e13502a5b0513a21b978f932cf31d54bcdd56",
+          "specSource": "generatedSpec"
+        },
+        "overwritten": true,
+        "previousAutomationPath": "automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-prueba-qa\\plan.json",
+        "previousStatus": "spec_failed"
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-comercial\\sections\\default-section\\cases\\preview-001-prueba-qa\\case.spec.ts",
+      "promotedSpecHash": "7a7f892f29a154724ea303aac57e13502a5b0513a21b978f932cf31d54bcdd56"
+    },
+    {
+      "id": "aa-97-jira-10-edited-9b813e14b2c6f01f-confirmar-el-comprobante-de-una-transferencia-exitosa",
+      "externalId": "AA-97:jira:10:edited-9b813e14b2c6f01f",
+      "title": "Confirmar el comprobante de una transferencia exitosa",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-10-edited-9b813e14b2c6f01f-confirmar-el-comprobante-de-una-transferencia-exitosa\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-10-edited-9b813e14b2c6f01f-confirmar-el-comprobante-de-una-transferencia-exitosa\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-11-02T16:09:13.535Z",
+      "updatedAt": "2026-11-02T16:09:13.549Z",
+      "specVerificationStatus": "passed",
+      "tags": [
+        "jira_semantic",
+        "jira_generated"
+      ],
+      "metadata": {
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 0,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "passed",
+            "structure": "passed",
+            "typescript": "skipped",
+            "playwrightDiscovery": "skipped",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specWritten": true,
+          "errors": [],
+          "warnings": []
+        }
+      }
+    },
+    {
+      "id": "preview-001-login-v2",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Login V2",
+      "planPath": "automations\\apps\\portal-comercial\\sections\\api-tests\\cases\\preview-001-login-v2\\plan.json",
+      "specPath": "automations\\apps\\portal-comercial\\sections\\api-tests\\cases\\preview-001-login-v2\\case.spec.ts",
+      "appSlug": "portal-comercial",
+      "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "portal-comercial",
+      "createdAt": "2026-11-02T19:44:47.894Z",
+      "updatedAt": "2026-11-02T19:44:47.935Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-02T19-41-59-559Z\\discovered-plans.pending.json",
+      "pomStatus": "promoted",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "passed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-02T19-41-59-559Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 111809,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "passed"
+          },
+          "promotionAllowed": true,
+          "specsRequested": 1,
+          "specsValidated": 1,
+          "specsRejected": 0,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": true,
+          "failedGatesAttempt1": [],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [],
+          "warnings": [
+            "step_index_not_explicit_in_spec:1"
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "promote",
+            "promotionStatus": "promoted",
+            "reason": "runtime_all_required_steps_passed: 1 required step(s) passed."
+          },
+          "specWritten": true,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "promoted",
+          "blockers": [],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage",
+            "LoginPage",
+            "FormPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-comercial\\sections\\api-tests\\cases\\preview-001-login-v2\\case.spec.ts",
+          "specHash": "ef8c1a685e7e7c7458ca4b3b880930085c5f2701bb6fbcd9c7f118626425aed4",
+          "specSource": "generatedSpec"
+        }
+      },
+      "promotionPersisted": true,
+      "promotedSpecPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\automations\\apps\\portal-comercial\\sections\\api-tests\\cases\\preview-001-login-v2\\case.spec.ts",
+      "promotedSpecHash": "ef8c1a685e7e7c7458ca4b3b880930085c5f2701bb6fbcd9c7f118626425aed4"
+    },
+    {
+      "id": "preview-001-prestamos-personales-faciles",
+      "externalId": "PREVIEW-001",
+      "caseId": 0,
+      "title": "Prestamos Personales Faciles",
+      "planPath": "automations\\apps\\portal-comercial\\sections\\demoblaze\\cases\\preview-001-prestamos-personales-faciles\\plan.json",
+      "specPath": "automations\\apps\\portal-comercial\\sections\\demoblaze\\cases\\preview-001-prestamos-personales-faciles\\case.spec.ts",
+      "appSlug": "portal-comercial",
+      "appConfigPath": "automations\\apps\\portal-comercial\\app.config.json",
+      "status": "spec_failed",
+      "source": "discovery",
+      "appProfile": "portal-comercial",
+      "createdAt": "2026-11-03T19:27:17.351Z",
+      "updatedAt": "2026-11-04T12:27:58.218Z",
+      "lastPromotedFrom": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-04T12-02-48-294Z\\discovered-plans.pending.json",
+      "pomStatus": "needs_manual_review",
+      "inlineDebugMode": false,
+      "specVerificationStatus": "failed",
+      "metadata": {
+        "discoveryDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-04T12-02-48-294Z",
+        "pomDiagnostics": {
+          "status": "promoted",
+          "inlineFallbackUsed": false,
+          "reason": "promoted",
+          "requiredDataUsed": [],
+          "generatedPageObjects": [],
+          "generatedMethods": [],
+          "missingPageObjects": [],
+          "missingMethods": [],
+          "generatedCandidates": 0
+        },
+        "specGeneration": {
+          "mode": "deterministic",
+          "provider": null,
+          "model": null,
+          "skill": {
+            "name": null,
+            "version": null,
+            "hash": null,
+            "loaded": false
+          },
+          "invocations": 0,
+          "invocationsConsumed": 0,
+          "durationMs": 508376,
+          "usage": {
+            "inputTokens": null,
+            "cachedInputTokens": null,
+            "cacheWriteInputTokens": null,
+            "nonCachedInputTokens": null,
+            "outputTokens": null,
+            "reasoningOutputTokens": null,
+            "totalPhysicalTokens": null,
+            "durationMs": null,
+            "credits": null
+          },
+          "validation": {
+            "schema": "skipped",
+            "structure": "passed",
+            "traceFidelity": "skipped",
+            "typescript": "passed",
+            "playwrightDiscovery": "passed",
+            "semanticCoverage": "passed",
+            "functionalExecution": "failed"
+          },
+          "promotionAllowed": false,
+          "specsRequested": 1,
+          "specsValidated": 0,
+          "specsRejected": 1,
+          "specGenerationAttempts": 0,
+          "specRepairAttempts": 0,
+          "firstPassPromotion": false,
+          "failedGatesAttempt1": [
+            "functionalExecution"
+          ],
+          "regressedGates": [],
+          "missingRequirements": [],
+          "oracleTypes": [
+            "navigation_transition"
+          ],
+          "errors": [
+            "functional_execution_failed:exitCode=1",
+            "functional_execution_error:Error: Promoted click failed at step 43 target=\"24 - PRESTAMOS PERSONALES FACILES\". failureClass=ACTION_CALLBACK_TIMEOUT exactRuntimeError=\"Retry failed: click retry timed out after 15000ms\" currentUrl=https://srvqacgowb01.local.bsc.com:5000/requests/11253/edit clickPath=failed nativeClickAttempted=false nativeClickSucceeded=false callbackAttempted=true callbackSucceeded=false retryAttempted=true diagnostics={\"currentUrl\":\"https://srvqacgowb01.local.bsc.com:5000/requests/11253/edit\",\"actionIntent\":\"select\",\"target\":\"24 - PRESTAMOS PERSONALES FACILES\",\"stepIndex\":43,\"timeoutMs\":15000,\"stability\":{\"currentUrl\":\"https://srvqacgowb01.local.bsc.com:5000/requests/11253/edit\",\"title\":\"Banco Santa Cruz - Portal Comercial\",\"visibleHeadings\":[],\"visibleButtons\":[\"Configuración\",\"Sesión\",\"Añadir relacionado\",\"Salir\",\"Cancelar\",\"Guardar\",\"Gestión Documental\",\"Continuar\",\"Precalificar\",\"Cancelar\"],\"visibleTexts\":[\"Portal Comercial\",\"Websocket\",\"Conectado\",\"General\",\"Inicio\",\"Información\",\"Documentos\",\"Documentos en curso\",\"Configuracion\",\"Jornadas\",\"Nueva jornada\",\"Jornadas en curso\",\"Reasignación\",\"Auditoria de reasignación\",\"Configuración\",\"Solicitudes\",\"Campañas\",\"Solicitud multiproducto\",\"Solicitudes en curso\",\"Configuraciones\"],\"loadingDetected\":false,\"skeletonDetected\":false,\"listReadiness\":{\"cardsVisible\":0,\"listItemsVisible\":0,\"loadingDetected\":false,\"zeroProductsDetected\":false,\"hasEntityContainers\":true,\"visibleHeadings\":[],\"visibleButtons\":[\"Portal Comercial\",\"Configuración\",\"Sesión\",\"Inicio\",\"Información\",\"Documentos en curso\",\"Configuracion\",\"Nueva jornada\",\"Jornadas en curso\",\"Reasignación\"],\"ready\":true},\"diagnosticStatus\":\"completed\"},\"retryAttempted\":true,\"clickPath\":\"failed\",\"nativeClickAttempted\":false,\"nativeClickSucceeded\":false,\"nativeClickError\":\"selection_callback_owns_target_resolution\",\"callbackAttempted\":true,\"callbackSucceeded\":false,\"callbackError\":\"Retry failed: click retry timed out after 15000ms\",\"expectedEffect\":\"selection_state_change\",\"effectDetected\":false,\"fallbackUsed\":\"none\",\"matchedLocatorStrategy\":\"unknown\",\"screenshotPath\":\"C:\\\\MisProyectos\\\\arquitectura-IA-Playwright-feature-auth-gate\\\\.artifacts\\\\promoted-runtime\\\\step-043.png\"}"
+          ],
+          "warnings": [
+            "functional_execution_screenshots=41",
+            "runtime_gate:blocked:runtime_required_step_failed: 1 required step(s) did not pass (steps 43)."
+          ],
+          "finalSpec": {
+            "origin": "deterministic_compiler",
+            "generatedBy": "core",
+            "strategy": "deterministic_compiler",
+            "fallback": null
+          },
+          "runtimeGate": {
+            "decision": "block",
+            "promotionStatus": "blocked",
+            "reason": "runtime_required_step_failed: 1 required step(s) did not pass (steps 43)."
+          },
+          "specWritten": false,
+          "previousSpec": {
+            "existed": false,
+            "hash": null,
+            "lastModifiedAt": null
+          }
+        },
+        "promotionStrategyDiagnostics": {
+          "requestedStrategy": "auto",
+          "autoPomEnabled": true,
+          "selectedStrategy": "pom",
+          "reason": "spec_generation_validation_failed",
+          "blockers": [
+            "spec_generation_validation_failed"
+          ],
+          "availablePageObjects": [
+            "ProductListPage",
+            "OperationsMenuPage",
+            "LoginPage",
+            "FormPage"
+          ],
+          "requiredPageMethods": [],
+          "missingPageMethods": [],
+          "autoPomAttempted": false,
+          "autoPomCreatedMethods": [],
+          "fallbackUsed": false,
+          "requirePomRuntime": false,
+          "specPath": "automations\\apps\\portal-comercial\\sections\\demoblaze\\cases\\preview-001-prestamos-personales-faciles\\case.spec.ts",
+          "specHash": "7c89cb39b3b6288e9b065ab559406435c69b20da0cc0fa81879c5630338d7083",
+          "specSource": "ai_candidate"
+        }
+      }
+    },
+    {
+      "id": "aa-97-jira-3-edited-5192a81f2d8cb837-rechazo-de-credenciales-empresariales-no-validas",
+      "externalId": "AA-97:jira:3:edited-5192a81f2d8cb837",
+      "title": "Rechazo de credenciales empresariales no válidas",
+      "planPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-3-edited-5192a81f2d8cb837-rechazo-de-credenciales-empresariales-no-validas\\plan.json",
+      "specPath": "automations\\apps\\fenix\\sections\\jira-aa-97\\cases\\aa-97-jira-3-edited-5192a81f2d8cb837-rechazo-de-credenciales-empresariales-no-validas\\case.spec.ts",
+      "appSlug": "fenix",
+      "appConfigPath": "automations\\apps\\fenix\\app.config.json",
+      "status": "active",
+      "source": "discovery",
+      "appProfile": "fenix",
+      "baseUrlHash": "2a7bf6928b41",
+      "createdAt": "2026-11-05T16:27:23.008Z",
+      "updatedAt": "2026-11-05T16:27:23.020Z",
       "specVerificationStatus": "passed",
       "tags": [
         "jira_semantic",

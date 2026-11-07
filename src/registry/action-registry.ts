@@ -37,6 +37,14 @@ export const actionRegistry: ActionRegistry = {
       description: "Fills a field with literal value or valueKey."
     },
     {
+      action: "uploadFile",
+      requiresTarget: true,
+      requiresValue: true,
+      requiresExpected: false,
+      allowsValueKey: true,
+      description: "Attaches a project-scoped test file to an observed file input."
+    },
+    {
       action: "select",
       requiresTarget: true,
       requiresValue: true,

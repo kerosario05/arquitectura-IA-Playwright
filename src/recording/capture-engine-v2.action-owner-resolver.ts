@@ -61,6 +61,7 @@ function toOwner(candidate: CaptureOwnerCandidate, classification: "editable" | 
     classification,
     technicalRefs: candidate.technicalRefs,
     associatedField: candidate.associatedField,
+    selectionTriggerEvidence: candidate.selectionTriggerEvidence,
     groupEvidence: candidate.groupEvidence,
     disabled: candidate.disabled,
     accessibleName: candidate.accessibleName,

@@ -1,4 +1,5 @@
 import { parseStepIntent } from "../discovery/step-intent-parser";
+import { parseJiraWorkflowStep } from "./jira-workflow";
 import type { JiraInputRequirement } from "./jira-input-requirements";
 
 /** Generator-only contract; the existing parser/runtime remain authoritative. */
@@ -122,6 +123,7 @@ export function repairSourceBackedRejectionMessages(steps: string[], sourceText:
 
 export function auditJiraStepDelivery(steps: string[], fields: JiraInputRequirement[], sourceText = '') {
   return steps.flatMap((step, offset) => {
+    if (parseJiraWorkflowStep(step)) return [];
     const operations = parseStepIntent(step).filter(intent => OPERATIONS.has(intent.type));
     const issue = (reason: string) => [{ reason, stepIndex: offset + 1, step }];
     const sourceLabels = [...sourceText.matchAll(/["“]([^"”]+)["”]/g)]

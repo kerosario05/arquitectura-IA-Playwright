@@ -1,5 +1,6 @@
 import { spawn } from "child_process";
 import { evidenceActorEnvironment } from "../../auth/report-attribution";
+import { materializeServiceBindingsEnv, type RuntimeServiceBinding } from "../../service-catalog/runtime-service-values";
 import path from "path";
 import fs from "fs";
 import { randomUUID, createHash } from "crypto";
@@ -18,6 +19,8 @@ import {
 import { config, requireTestRailConfig } from "../../config/env";
 import { TestRailClient } from "../../clients/testrail.client";
 import { defectChecklistStore } from "../services/defect-checklist-store";
+import { freshRecordingCedulas } from "../services/recording-fresh-cedulas";
+import { isJiraSpecGenerationEnabled } from "../services/spec-generation-policy";
 import type { EvidenceScenarioRecord } from "../../evidence/evidence-types";
 
 function safeUrlForLog(value: unknown): string {
@@ -581,6 +584,7 @@ export async function startReuseExistingPromotedSpecRun(
         // through verbatim so it takes precedence over the app-global fallback, never the other
         // way around.
         scenarioRuntimeValues: scenario.runtimeValues,
+        serviceBindings: job.params.serviceBindings as RuntimeServiceBinding[] | undefined,
       },
       // FIRST_LOSS fix: verifyPromotedSpec's child stdout/stderr was fully buffered -- the
       // existing Live Log/SSE channel (jobStore.appendLog, already streamed by runs.ts's
@@ -1203,6 +1207,18 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     (s) => s.mcpExecutable === true && s.validation?.valid !== false
   );
   const recordingReplay = isRecordingReplayRequest(p, validScenarios);
+  const recordingSpecGenerationEnabled = !["false", "0", "off", "no", "disabled"].includes(
+    (process.env.RECORDING_SPEC_GENERATION_ENABLED ?? "true").trim().toLowerCase(),
+  );
+  // Scenario runs that are not recording replays are the Jira scenario engine: they have their own switch.
+  const jiraSpecGenerationEnabled = isJiraSpecGenerationEnabled();
+  const specGenerationEnabledForRun = recordingReplay ? recordingSpecGenerationEnabled : jiraSpecGenerationEnabled;
+  if (recordingReplay && !recordingSpecGenerationEnabled) {
+    jobStore.appendLog(jobId, "[recording-spec-generation] enabled=false source=RECORDING_SPEC_GENERATION_ENABLED");
+  }
+  if (!recordingReplay && !jiraSpecGenerationEnabled) {
+    jobStore.appendLog(jobId, "[jira-spec-generation] enabled=false source=JIRA_SPEC_GENERATION_ENABLED");
+  }
 
   if (validScenarios.length === 0) {
     recordQaLabDiagnosticPhase(diagnosticManifestPath, "completed", "failed", { reason: "no_valid_scenarios" });
@@ -1582,6 +1598,43 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
       `[run:scenario-preview] normalized ${vc.displayId} beforeSteps=${stats.beforeSteps} afterSteps=${stats.afterSteps} entryDeduped=${stats.entryDeduped} canonicalizedLabels=${stats.canonicalizedLabels}`,
     );
     normalizedCases.push(normalized);
+  }
+
+  // Keep spec-only values out of Discovery. Recording batches key by recording+scenario,
+  // while the single-recording route keys by scenario id; accept both forms without allowing
+  // a value to cross into a different scenario.
+  const promotionValuesByScenario = (pRecord.specDatasetValuesByScenario ?? {}) as Record<string, Record<string, string>>;
+  if (specGenerationEnabledForRun && promotionValuesByScenario && typeof promotionValuesByScenario === "object") {
+    for (const [caseIndex, vc] of normalizedCases.entries()) {
+      const scenario = normalizedScenarios[caseIndex] as any;
+      const keys = [
+        scenario?.scenarioId,
+        scenario?.recordingId && scenario?.recordedScenarioId
+          ? `${scenario.recordingId}\u0000${scenario.recordedScenarioId}`
+          : undefined,
+        vc.recordingId && vc.recordedScenarioId
+          ? `${vc.recordingId}\u0000${vc.recordedScenarioId}`
+          : undefined,
+      ].filter((key): key is string => typeof key === "string" && key.length > 0);
+      const values = keys.map((key) => promotionValuesByScenario[key]).find((candidate) => candidate && typeof candidate === "object");
+      if (values && Object.keys(values).length > 0) {
+        vc.promotionDatasetValues = values;
+        jobStore.appendLog(jobId, `[promotion-runtime-values] scenario=${vc.displayId} keys=${Object.keys(values).join(",")}`);
+      } else if (vc.recordingId && vc.recordedScenarioId) {
+        // Discovery consumes its identification (the flow creates the customer), so the promoted
+        // spec cannot reuse it: without spec values from the caller, take a distinct fresh one.
+        try {
+          const canonical = loadScenarios(vc.appSlug ?? appSlug, vc.recordingId).find((candidate) => candidate.scenarioId === vc.recordedScenarioId);
+          const fresh = canonical ? await freshRecordingCedulas(vc.appSlug ?? appSlug, canonical, true) : undefined;
+          if (fresh && Object.keys(fresh.specValues).length > 0) {
+            vc.promotionDatasetValues = fresh.specValues;
+            jobStore.appendLog(jobId, `[promotion-runtime-values] scenario=${vc.displayId} keys=${Object.keys(fresh.specValues).join(",")} source=fresh_distinct`);
+          }
+        } catch (error) {
+          jobStore.appendLog(jobId, `[promotion-runtime-values] scenario=${vc.displayId} fresh_distinct_failed=${error instanceof Error ? error.message.slice(0, 120) : "error"}`);
+        }
+      }
+    }
   }
 
   const scenarioBranches = normalizedScenarios
@@ -2272,6 +2325,8 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   }
 
   const opts = p.options ?? {};
+  const autoPromote = opts.autoPromote !== false && specGenerationEnabledForRun;
+  const autoPom = opts.autoPom !== false && specGenerationEnabledForRun;
   const headed = opts.headed === true || process.env.QA_LAB_DISCOVERY_HEADED?.trim().toLowerCase() === "true";
   const isWin = process.platform === "win32";
   const cmd = isWin ? "npm.cmd" : "npm";
@@ -2287,8 +2342,8 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
   ];
 
   if (opts.overwrite !== false) args.push("--overwrite");
-  if (opts.autoPromote !== false) args.push("--auto-promote");
-  if (opts.autoPom !== false) args.push("--auto-pom");
+  if (autoPromote) args.push("--auto-promote");
+  if (autoPom) args.push("--auto-pom");
   if (opts.rerunActive !== false) args.push("--rerun-active");
   if (headed) args.push("--headed");
 
@@ -2401,6 +2456,9 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
       ...process.env,
       EVIDENCE_RUN_ID: evidenceRunId,
       ...evidenceActorEnvironment(job.params),
+      // Catalog services (OTP...) bound to this run's fields; discovery replay and the promoted
+      // spec it spawns resolve them at the step that types the value.
+      ...materializeServiceBindingsEnv(job.params.serviceBindings as RuntimeServiceBinding[] | undefined),
       AUTOMATION_SOURCE: "qalab",
       AUTOMATION_HEADLESS: headed ? "false" : "true",
       HEADLESS: headed ? "false" : "true",
@@ -2727,6 +2785,7 @@ export async function startScenarioPreviewRun(jobId: string): Promise<void> {
     // Save log files
     saveLogFile(artifactDir, "stdout.log", stdoutBuffer);
     saveLogFile(artifactDir, "stderr.log", stderrBuffer);
+    if (jobStore.getInternal(jobId)?.cancellationRequested || jobStore.get(jobId)?.status === "cancelled") return;
 
     recordQaLabDiagnosticPhase(diagnosticManifestPath, "execution", code === 0 ? "completed" : "failed", {
       exitCode: code,

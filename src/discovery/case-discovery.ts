@@ -1,5 +1,19 @@
+import { detailCaptureOwnsAction } from "./action-evidence-policy";
+import { readClickOwnerClassTokens } from "./click-owner-state";
+import { shouldClearActiveContainer } from "./active-container-surface";
 import path from "node:path";
+import { resolveServiceBoundValue } from "../service-catalog/runtime-service-values";
 import { runtimeFillValuesMatch, type RuntimeFillFormat } from "./runtime-fill-value";
+import { coerceToEditableFillTarget } from "./editable-fill-target";
+import { waitForRecordedPressTransition } from "./recorded-press-stability";
+import { settleDependentRequestsAfterFill } from "./post-fill-settle";
+import { FilledInputRegistry, isButtonTargetDisabled, isSecretInput, typeLikeUser } from "./filled-input-repair";
+import { clickRetryBudget, isRetryableLookupClick } from "./lookup-click-retry";
+import {
+  canVerifyRecordedSelectionByDialogTransition,
+  countVisibleDialogSurfaces,
+  getUniqueVisibleDialogContinuationAnchor,
+} from "./selection-dialog-transition";
 import { classifyAssertionPolarity } from "../scenarios/canonical-scenario";
 import { findActionServerError, isTerminalAuthenticationClientError } from "./action-http-outcome";
 import { isCredentialRejectionExpectation, isCredentialRejectionMessage } from "./feedback-message-resolver";
@@ -20,14 +34,20 @@ import {
   compareGridCollection,
   shouldInvokeAiAssistedDiscovery,
   resolveFillTarget,
+  recordedLocatorFactory,
   verificationDigitPosition,
   classifyRecordedSurfaceCompatibility,
   releaseAcceptedScopeMarker,
   attemptSegmentedInputFill,
   attemptVirtualKeyboardPress,
+  resolveSequencedSiblingForRoleRef,
   type ActiveContainerContext,
   type FillTargetResolutionResult
 } from "./target-resolver";
+import { captureRecordedApplicationValue, fillRecordedValue, uploadRecordedFiles, type RecordedRuntimeValueCapture } from "../recording/recorded-runtime-actions";
+import { waitForVisualSettle } from "../evidence/screen-settle";
+import { hasPendingFileChooser } from "../recording/file-chooser-capture";
+import { countLiveControlsForPress, pressName, pressNameKey } from "../recording/repeated-press";
 import {
   isProductCardTarget,
   findProductCardClickCandidates,
@@ -74,6 +94,8 @@ import {
   type FillValueSource,
   normalizeParsedTarget
 } from "./step-intent-parser";
+import { matchCapturedValueForLabel } from "./captured-value-label";
+import { isTargetTextVisibleInSnapshot } from "./target-text-visibility";
 import type {
   CaseDiscoveryResult,
   DiscoveryStepResult,
@@ -91,7 +113,7 @@ import type { TestDataMap, TestDataValue, MissingInputBehavior, ExpectedResultMo
 import { config as envConfig } from "../config/env";
 import { detectAuthGate, declaredActionsOwnAuthStage, type AuthGateDetection } from "./auth-gate-detector";
 import { resolveAuthInputs, validateRequiredInputs, logAuthResolution, type AuthInputResolverConfig } from "./auth-input-resolver";
-import { loadRouteProfile } from "../automations/app-profile";
+import { loadPromotedAppConfigSync, loadRouteProfile } from "../automations/app-profile";
 import { resolveMissingIntermediateStep, type MissingIntermediateStepResolution, type DiscoveryCandidate, type DiscoverySnapshot } from "./missing-intermediate-step-resolver";
 import { observeRouteTransition, observeRouteCompletionSuccess, saveRouteProfileSuggestions, applyRouteProfileSuggestions, type RouteProfileSuggestion, type RouteProfileLearningConfig } from "./route-profile-learning";
 import { appendRouteSuggestionToKnowledge } from "../scenarios/app-knowledge-writer";
@@ -111,7 +133,8 @@ import { parseProductConditionTarget, matchesProductCondition, type ProductCondi
 import { detectTransientScreen } from "./transient-screen-detector";
 import { evaluateEarlyCompletionPolicy, type EarlyCompletionPolicyResult } from "./early-completion-policy";
 import { detectSelectionSuccess, isSelectionLikeTarget, isSubmitLikeTarget, promoteToClickableAncestor, type SelectionDiagnostics } from "./selection-state-detector";
-import { resolveDataKey, formatDataKeyForLog, credentialRoleKeyForField, runtimeCredentialRoleInputCountForField, runtimeCredentialRoleKeyForField, runtimeInputKeyForField, type DataKeyResolution } from "../data/data-key-resolver";
+import { aliasPositionalCredentialEntries, alignOrderedPositionalEntries, resolveDataKey, formatDataKeyForLog, credentialRoleKeyForField, runtimeCredentialRoleInputCountForField, runtimeCredentialRoleKeyForField, runtimeInputKeyForField, type DataKeyResolution } from "../data/data-key-resolver";
+import { fillMissingLaunchCredentials, publishLaunchCredentials } from "../data/launch-shared-credentials";
 import { type AutoGenerateConfig } from "../data/auto-test-data-generator";
 import {
   captureAssertionObservationSnapshot,
@@ -130,10 +153,12 @@ import {
 import type { AssertionPolarity } from "../scenarios/canonical-scenario";
 import { extractTestRailInputRequirements } from "../testrail/testrail-input-requirements-adapter";
 import { isPendingOracleAuthority } from "./oracle-authority";
-import { canToleratePostActionLoadingTimeout, resolvePostActionSynchronization } from "./post-action-synchronization";
+import { canToleratePostActionLoadingTimeout, hasCrossFieldLookupRefreshEffect, hasNewVisibleApplicationError, hasRecordedSuccessorSurfaceProof, matchesObservedActionSurface, matchesObservedRecordedDestination, resolvePostActionSynchronization } from "./post-action-synchronization";
 import { deduplicateActionTargetsBySource } from "./action-target-equivalence";
-import { verifySelectionState, hasCausalSelectionTransition, booleanState, shouldPromoteStatefulControlToClickableAncestor, type InteractiveState } from "./selection-state-verification";
+import { verifySelectionState, hasCausalSelectionTransition, hasCausalSelectionClassTransition, booleanState, shouldPromoteStatefulControlToClickableAncestor, type InteractiveState } from "./selection-state-verification";
 import { resolveClickRetryPolicy } from "./click-retry-policy";
+import { shouldSkipClickAfterVerifiedSelection } from "./resolved-selection-click";
+import { hasPageTransition, type PageState } from "./page-transition-detection";
 import { shouldReapplyAuthFields } from "./auth-reapply-policy";
 import { createHash } from "node:crypto";
 import { deriveRouteAuthority, type LearnedRouteAuthority } from "../db/recording-route-observation-repository";
@@ -467,7 +492,6 @@ const RECORDED_SURFACE_STABLE_PROBES = 8;
 // Bounded re-click attempts when a recorded post-action surface is still pending after the
 // normal wait. One retry was confirmed insufficient by physical replay; kept small and bounded
 // (never unbounded/looping) since a real navigation failure must still surface as a failure.
-const POST_ACTION_CLICK_RETRY_LIMIT = 3;
 
 export type InitialNavigationErrorInfo = {
   errorType: string;
@@ -720,6 +744,37 @@ export function classifyAuthenticationOutcome(input: {
   };
 }
 
+/** How long a login that the server accepted may keep showing the login surface while the app finishes loading. */
+export const AUTH_TRANSITION_GRACE_MS = 15_000;
+
+/**
+ * A login the server accepted (a response was seen, no error surface) is still moving to the business surface while the
+ * login page remains in the DOM for a moment. Re-classify on a short interval until it reaches the business surface or
+ * the grace period ends; only a login surface that outlives the grace period stays a navigation failure.
+ */
+export async function settleAuthenticationTransition(
+  outcome: AuthenticationOutcome,
+  reclassify: () => Promise<AuthenticationOutcome>,
+  options: { graceMs?: number; pollMs?: number; wait?: (ms: number) => Promise<void>; now?: () => number } = {},
+): Promise<AuthenticationOutcome> {
+  const graceMs = options.graceMs ?? AUTH_TRANSITION_GRACE_MS;
+  const pollMs = options.pollMs ?? 1000;
+  const wait = options.wait ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
+  const now = options.now ?? Date.now;
+  const deadline = now() + graceMs;
+  let current = outcome;
+  while (
+    current.classification === "POST_AUTH_NAVIGATION_FAILURE"
+    && current.authResponseObserved
+    && !current.errorSurfaceObserved
+    && now() < deadline
+  ) {
+    await wait(pollMs);
+    current = await reclassify();
+  }
+  return current;
+}
+
 export function shouldClassifyAuthenticationBoundary(input: {
   authDetectedBeforeAction: boolean;
   authenticationBoundaryCompleted: boolean;
@@ -754,15 +809,29 @@ const failureCategory = (message: string): SafeNetworkEvent["failureCategory"] =
   return "browser_error";
 };
 
+function isExpectedQaLookupClientError(event: SafeNetworkEvent): boolean {
+  // QA's SQL bureau lookup intentionally answers 406 when it has no QA record. Treat that
+  // response as settled lookup feedback so it cannot hold a recorded successor probe open;
+  // other client errors, including 406 from any other endpoint, remain terminal.
+  return event.status === 406
+    && event.method.toUpperCase() === "POST"
+    && ["xhr", "fetch"].includes(event.resourceType)
+    && /(?:^|\/)ConsultarCasosBizagiSQL\/?$/i.test(event.path);
+}
+
 export type NetworkObservationWindow = {
   stop(options?: { passiveTail?: boolean }): Promise<SafeNetworkEvent[]>;
   waitForPassiveTail(): Promise<void>;
   hasPending(): boolean;
+  hasPendingActionRequest(): boolean;
   getProgressState(): {
     active: boolean;
     progressed: boolean;
     signal?: string;
     pendingCount: number;
+    pendingFiniteCount?: number;
+    sameOriginRequestFailed?: boolean;
+    pendingActionRequest?: boolean;
     responseObserved: boolean;
     terminalClientError?: { sameOrigin?: boolean; method: string; resourceType: string; state: "completed" | "pending" | "failed"; status?: number };
     requestFailed: boolean;
@@ -822,6 +891,8 @@ export function startNetworkObservation(page: Page, stepIndex: number, maxEvents
   let progressRevisionRead = 0;
   let lastProgressAt = Date.now();
   let lastProgressSignal: string | undefined;
+  const pollCounts = new Map<string, number>();
+  const backgroundPoll = new WeakSet<object>();
   const noteProgress = (signal: string) => {
     progressRevision += 1;
     lastProgressAt = Date.now();
@@ -924,6 +995,9 @@ export function startNetworkObservation(page: Page, stepIndex: number, maxEvents
   const responseShapeDiagnosticEnabled = process.env.NETWORK_RESPONSE_SHAPE_DIAGNOSTIC === "true";
   const snapshot = () => Array.from(events.values());
   const hasPending = () => snapshot().some((event) => event.state === "pending");
+  const hasPendingActionRequest = () => snapshot().some((event) => event.state === "pending" && event.sameOrigin === true
+    && ["xhr", "fetch", "document"].includes(event.resourceType)
+    && !["GET", "HEAD", "OPTIONS"].includes(event.method.toUpperCase()));
   const finish = (reason?: "diagnostic_timeout") => {
     if (stopped) return snapshot();
     stopped = true;
@@ -989,7 +1063,13 @@ export function startNetworkObservation(page: Page, stepIndex: number, maxEvents
       event.sameOrigin = new URL(String(request.url())).origin === new URL(page.url()).origin;
     } catch { /* Unknown origin supplies no application-error authority. */ }
     events.set(key, event);
-    noteProgress("request_started");
+    // The same XHR/fetch repeated while the page waits is background polling (shared-state refresh, heartbeats),
+    // not the action's own work: it must not keep the screen "in progress". The first two occurrences still count.
+    const pollKey = `${event.method} ${event.path}`;
+    const occurrences = (pollCounts.get(pollKey) ?? 0) + 1;
+    pollCounts.set(pollKey, occurrences);
+    if ((event.resourceType === "xhr" || event.resourceType === "fetch") && occurrences > 2) backgroundPoll.add(key);
+    if (!backgroundPoll.has(key)) noteProgress("request_started");
     const redirectedFrom = request.redirectedFrom?.() as object | undefined;
     if (redirectedFrom) {
       const hop = redirectHops.find((candidate) => candidate.source === redirectedFrom && !candidate.followup);
@@ -1007,7 +1087,7 @@ export function startNetworkObservation(page: Page, stepIndex: number, maxEvents
     const key = response.request?.() as object;
     const event = events.get(key);
     if (!event) return;
-    noteProgress("response_received");
+    if (!backgroundPoll.has(key)) noteProgress("response_received");
     event.state = "completed";
     event.status = Number(response.status?.() ?? 0);
     event.statusCategory = statusCategory(event.status);
@@ -1042,7 +1122,7 @@ export function startNetworkObservation(page: Page, stepIndex: number, maxEvents
     const key = request as object;
     const event = events.get(key);
     if (!event) return;
-    noteProgress("request_failed");
+    if (!backgroundPoll.has(key)) noteProgress("request_failed");
     event.state = "failed";
     event.durationMs = Math.max(0, Date.now() - (startedAt.get(key) ?? Date.now()));
     event.failureCategory = failureCategory(String(request.failure?.()?.errorText ?? ""));
@@ -1057,7 +1137,7 @@ export function startNetworkObservation(page: Page, stepIndex: number, maxEvents
     const key = request as object;
     const event = events.get(key);
     if (!event || event.state !== "pending") return;
-    noteProgress("request_finished");
+    if (!backgroundPoll.has(key)) noteProgress("request_finished");
     event.state = "completed";
     event.durationMs = Math.max(0, Date.now() - (startedAt.get(key) ?? Date.now()));
     settleIfComplete();
@@ -1068,6 +1148,7 @@ export function startNetworkObservation(page: Page, stepIndex: number, maxEvents
   page.on("requestfailed", onRequestFailed);
   return {
     hasPending: () => hasPending(),
+    hasPendingActionRequest,
     getProgressState: () => {
       const progressed = progressRevision > progressRevisionRead;
       progressRevisionRead = progressRevision;
@@ -1075,12 +1156,19 @@ export function startNetworkObservation(page: Page, stepIndex: number, maxEvents
         && ["xhr", "fetch", "document"].includes(event.resourceType)
         && !["GET", "HEAD", "OPTIONS"].includes(event.method.toUpperCase())
         && event.state === "completed"
-        && event.status !== undefined && event.status >= 400 && event.status < 500);
+        && event.status !== undefined && event.status >= 400 && event.status < 500
+        && !isExpectedQaLookupClientError(event));
       return {
         active: snapshot().some((event) => event.state === "pending" && isRelevantEvent(event)),
         progressed,
         signal: lastProgressSignal,
         pendingCount: snapshot().filter((event) => event.state === "pending" && isRelevantEvent(event)).length,
+        pendingFiniteCount: snapshot().filter((event) => event.state === "pending" && ["xhr", "fetch", "document"].includes(event.resourceType)).length,
+        sameOriginRequestFailed: snapshot().some((event) => event.state === "failed" && event.sameOrigin === true
+          && ["xhr", "fetch", "document"].includes(event.resourceType)
+          && event.failureCategory !== "cancelled"
+          && !(event.failureCategory === "browser_error" && event.status !== undefined && event.status >= 200 && event.status < 300)),
+        pendingActionRequest: hasPendingActionRequest(),
         responseObserved: snapshot().some((event) => event.state === "completed" && isRelevantEvent(event)),
         ...(terminalClientError ? { terminalClientError: {
           sameOrigin: terminalClientError.sameOrigin,
@@ -1133,6 +1221,14 @@ export type RuntimeFillObservation = {
 };
 
 async function readCommittedEditableValue(locator: Locator, verificationLocator?: Locator): Promise<string> {
+  // The element that was written is a real form control: its own value is the committed value. A
+  // wrapper's innerText (label + value) is only meaningful for grid cells whose editor is replaced.
+  // A detached/rematerialized editor times out quickly and falls through to the wrapper-based reads.
+  const ownControlValue = await locator.evaluate((element) => {
+    const tag = element.tagName.toLowerCase();
+    return tag === "input" || tag === "textarea" || tag === "select" ? String((element as HTMLInputElement).value ?? "") : undefined;
+  }, undefined, { timeout: 500 }).catch(() => undefined);
+  if (typeof ownControlValue === "string" && ownControlValue.length > 0) return ownControlValue;
   const editableDescendants = verificationLocator?.locator(
     "input, textarea, select, [contenteditable='true'], [role='textbox'], [role='combobox']",
   );
@@ -1264,6 +1360,8 @@ async function commitAndVerifyRuntimeFill(locator: Locator, value: string, verif
  * it only uses the resolved control, a bounded DOM snapshot, and sanitized
  * network metadata.
  */
+export { coerceToEditableFillTarget };
+
 export async function fillAndObserveRuntimeInput(input: {
   page: Page;
   locator: Locator;
@@ -1273,14 +1371,15 @@ export async function fillAndObserveRuntimeInput(input: {
   observe?: boolean;
   waitMs?: number;
 }): Promise<RuntimeFillObservation> {
+  const fillLocator = await coerceToEditableFillTarget(input.locator);
   if (!input.observe) {
-    await commitAndVerifyRuntimeFill(input.locator, input.value, input.verificationLocator);
+    await commitAndVerifyRuntimeFill(fillLocator, input.value, input.verificationLocator);
     return { networkEvents: [], committedBy: "blur" };
   }
 
   const before = await captureAssertionObservationSnapshot(input.page).catch(() => undefined);
   const observation = startNetworkObservation(input.page, input.stepIndex, 100, { diagnosticMs: input.waitMs ?? 1500 });
-  await commitAndVerifyRuntimeFill(input.locator, input.value, input.verificationLocator);
+  await commitAndVerifyRuntimeFill(fillLocator, input.value, input.verificationLocator);
   await input.page.waitForTimeout(input.waitMs ?? 1500);
   const networkEvents = await observation.stop({ passiveTail: false });
   const after = await captureAssertionObservationSnapshot(input.page).catch(() => undefined);
@@ -2122,7 +2221,7 @@ export type ExecutableStep = {
   stepIndex: number;
   originalText: string;
   type: "assertion" | "action_fill" | "action_click" | "action_select" | "action_press" | "optional_action" | "navigation_segment" | "skip";
-  recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "system_observation";
+  recordingActionType?: "fill" | "select" | "click" | "check" | "uncheck" | "press" | "navigation" | "tab_switch" | "upload" | "system_observation";
   target?: string;
   value?: string;
   /** The discrete command key a `"press"` action sends (e.g. "Enter"). Absent for every other action type. */
@@ -2139,6 +2238,7 @@ export type ExecutableStep = {
   rowRelation?: "next" | "added";
   associatedField?: string;
   selectionActivationField?: string;
+  selectionQueryOwnerField?: string;
   expectedValueKey?: string;
   triggerStepIndex?: number;
   controlIdentity?: ControlIdentity;
@@ -2152,6 +2252,13 @@ export type ExecutableStep = {
   recordedSameSurfaceAction?: boolean;
   /** Structured source-interaction lineage (RecordingExecutionAction.interactionId). */
   sourceInteractionId?: string;
+  fileAssets?: Array<{ fileRef: string; filename: string; contentType: string; size: number; sha256: string }>;
+  fileSetValueKey?: string;
+  navigationUrl?: string;
+  pageKey?: string;
+  opensNewPage?: boolean;
+  runtimeDerivedSourceEventRef?: string;
+  runtimeValueCaptureEventRefs?: string[];
 };
 
 export function projectScenarioInputMetadata(step: {
@@ -2195,7 +2302,7 @@ export function isUnboundSemanticFillTarget(
 export function bindAuthoredRuntimeField(
   scenario: Pick<TestScenario, "source" | "recordingId" | "recordedScenarioId" | "recordingExecutionContract">,
   target: Pick<ActionTargetItem, "actionType" | "target" | "selectionField" | "associatedField" | "valueKey" | "valueSource" | "value" | "entityScope" | "rowScope">
-    & Partial<Pick<ActionTargetItem, "action">>,
+    & Partial<Pick<ActionTargetItem, "action" | "index">>,
   entries: ReadonlyArray<{ key: string }>,
 ): boolean {
   if (scenario.recordingId || scenario.recordedScenarioId || scenario.recordingExecutionContract
@@ -2213,9 +2320,20 @@ export function bindAuthoredRuntimeField(
   const describedKey = authoredValue && runtimeInputKeyForField(field, [{ key: authoredValue[2] }])
     ? runtimeInputKeyForField(authoredValue[1], entries)
     : undefined;
+  // The launch wizard keys a value by its step position (`jira_step_N`, `jira_edit_<revision>_N`): when no name matches,
+  // the entry for exactly this step is this step's value. Never by order or nearness, only the same position, exactly one.
+  const positionalKey = (() => {
+    if (typeof target.index !== "number") return undefined;
+    const atStep = entries.filter((entry) => {
+      const position = /^(?:jira_step_|jira_edit_[a-f0-9]{8,}_)(\d+)$/i.exec(entry.key)?.[1];
+      return position !== undefined && Number(position) === target.index;
+    });
+    return atStep.length === 1 ? atStep[0].key : undefined;
+  })();
   const key = runtimeInputKeyForField(field, entries)
     ?? describedKey
-    ?? runtimeCredentialRoleKeyForField(field, entries);
+    ?? runtimeCredentialRoleKeyForField(field, entries)
+    ?? positionalKey;
   if (!key) return false;
   target.valueKey = key;
   target.valueSource = "test_data";
@@ -2250,6 +2368,178 @@ export async function executePressActionTarget(
   } catch (err) {
     return { ok: false, reason: `press_failed:${err instanceof Error ? err.message : String(err)}` };
   }
+}
+
+/** Inspect only selections whose action is still pending. */
+export async function readPendingSelectionTag(
+  locator: { evaluate: (read: (element: Element) => string) => Promise<string> },
+  state: { runtimeBacked: boolean; selectionApplied: boolean; dynamicSelectionApplied: boolean },
+): Promise<string> {
+  // A verified selection can remove its option from the DOM. Reading that locator
+  // again would wait for the default timeout even though the action is complete.
+  if (!state.runtimeBacked || state.selectionApplied || state.dynamicSelectionApplied) return "";
+  return locator.evaluate((element) => element.tagName.toLowerCase()).catch(() => "");
+}
+
+export type RecordedSelectionSuccessorDialogEvidence = {
+  recordingExecutionContractPresent: boolean;
+  currentActionIsRecordedSelection: boolean;
+  currentValueBacked: boolean;
+  selectionFailureReason?: string;
+  requestedOptionExactlyMatched: boolean;
+  optionClickDispatched: boolean;
+  visibleDialogsBefore: number;
+  visibleDialogsAfter: number;
+  successorActionRecorded: boolean;
+  successorOwnerUnique: boolean;
+  successorOwnerEnabled: boolean;
+};
+
+/**
+ * A recorded selection may be verified by its immediate successor only when
+ * the exact option click opens a new dialog and the next recorded action has a
+ * unique, enabled owner there. The next action may open a field before selecting
+ * its option, so it need not itself be an option click. This is fail-closed.
+ */
+export function canVerifyRecordedSelectionBySuccessorDialog(
+  evidence: RecordedSelectionSuccessorDialogEvidence,
+): boolean {
+  return evidence.recordingExecutionContractPresent
+    && evidence.currentActionIsRecordedSelection
+    && evidence.currentValueBacked
+    && evidence.selectionFailureReason === "selection_state_not_verified"
+    && evidence.requestedOptionExactlyMatched
+    && evidence.optionClickDispatched
+    && evidence.visibleDialogsBefore === 0
+    && evidence.visibleDialogsAfter === 1
+    && evidence.successorActionRecorded
+    && evidence.successorOwnerUnique
+    && evidence.successorOwnerEnabled;
+}
+
+export type RecordedSelectionSuccessorControlEvidence = {
+  recordingExecutionContractPresent: boolean;
+  currentActionIsRecordedSelection: boolean;
+  currentValueBacked: boolean;
+  selectionFailureReason?: string;
+  requestedOptionExactlyMatched: boolean;
+  optionClickDispatched: boolean;
+  successorActionRecorded: boolean;
+  successorOwnerReadyBefore: boolean;
+  successorOwnerUniqueAfter: boolean;
+  successorOwnerEnabledAfter: boolean;
+};
+
+/**
+ * Some recorded option selections move into a new form surface that omits
+ * dialog ARIA semantics. The selection is still verifiable when its exact
+ * recorded option was clicked and the next recorded control becomes uniquely
+ * visible and enabled. Requiring that control not to have been ready before
+ * the click prevents an unrelated pre-existing field from certifying the
+ * transition.
+ */
+export function canVerifyRecordedSelectionBySuccessorControl(
+  evidence: RecordedSelectionSuccessorControlEvidence,
+): boolean {
+  return evidence.recordingExecutionContractPresent
+    && evidence.currentActionIsRecordedSelection
+    && evidence.currentValueBacked
+    && evidence.selectionFailureReason === "selection_state_not_verified"
+    && evidence.requestedOptionExactlyMatched
+    && evidence.optionClickDispatched
+    && evidence.successorActionRecorded
+    && !evidence.successorOwnerReadyBefore
+    && evidence.successorOwnerUniqueAfter
+    && evidence.successorOwnerEnabledAfter;
+}
+
+/**
+ * Some recorded option clicks commit by opening the next workflow dialog rather
+ * than leaving a selected value in the original control. The exact recorded
+ * option click plus a single newly opened dialog is sufficient to certify that
+ * selection action; subsequent steps still have to execute and verify against
+ * the dialog normally.
+ */
+export { canVerifyRecordedSelectionByDialogTransition, getUniqueVisibleDialogContinuationAnchor };
+
+/**
+ * A recorded semantic selection can be represented by a native select event
+ * or by clicking the uniquely recorded option in a custom dropdown. For the
+ * custom form, require the recorded option to match the selected value when
+ * one is supplied; this prevents an arbitrary click from certifying a modal
+ * transition as a completed selection.
+ */
+export function isRecordedSelectionAction(input: {
+  actionType?: ActionTargetItem["actionType"];
+  recordingActionType?: ActionTargetItem["recordingActionType"];
+  technicalTargetRefs?: string[];
+  requestedOption?: string;
+}): boolean {
+  if (input.actionType !== "action_select") return false;
+  if (input.recordingActionType === "select") return true;
+  const recordedOptions = (input.technicalTargetRefs ?? [])
+    .map((ref) => ref.match(/^role:option\|(.*)$/i)?.[1]?.trim())
+    .filter((value): value is string => Boolean(value));
+  if (recordedOptions.length !== 1) return false;
+  return input.requestedOption === undefined
+    || normalizeText(recordedOptions[0]) === normalizeText(input.requestedOption);
+}
+
+export async function hasUniqueEnabledRecordedSelectionOwnerInDialog(
+  page: Page,
+  recordedOwnerNames: string[],
+): Promise<{ unique: boolean; enabled: boolean; locator?: Locator }> {
+  const expectedNames = [...new Set(recordedOwnerNames.map(normalizeText).filter(Boolean))];
+  if (expectedNames.length === 0) return { unique: false, enabled: false };
+  const dialogs = page.locator('[role="dialog"], [aria-modal="true"]').filter({ visible: true });
+  if (await dialogs.count().catch(() => 0) !== 1) return { unique: false, enabled: false };
+  return findUniqueEnabledRecordedSelectionOwner(dialogs.first(), expectedNames);
+}
+
+export async function hasUniqueEnabledRecordedSelectionOwner(
+  page: Page,
+  recordedOwnerNames: string[],
+): Promise<{ unique: boolean; enabled: boolean; locator?: Locator }> {
+  const expectedNames = [...new Set(recordedOwnerNames.map(normalizeText).filter(Boolean))];
+  if (expectedNames.length === 0) return { unique: false, enabled: false };
+  return findUniqueEnabledRecordedSelectionOwner(page, expectedNames);
+}
+
+async function findUniqueEnabledRecordedSelectionOwner(
+  scope: Page | Locator,
+  expectedNames: string[],
+): Promise<{ unique: boolean; enabled: boolean; locator?: Locator }> {
+  const controls = scope.locator('select, [role="combobox"], [aria-haspopup="listbox"]').filter({ visible: true });
+  const count = await controls.count().catch(() => 0);
+  const matching: Locator[] = [];
+  for (let index = 0; index < count; index += 1) {
+    const control = controls.nth(index);
+    const names = await control.evaluate((element) => {
+      const node = element as HTMLInputElement;
+      const labelledBy = (element.getAttribute("aria-labelledby") || "")
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((id) => document.getElementById(id)?.textContent || "");
+      const explicitLabels = Array.from((node.labels || [])).map((label) => label.textContent || "");
+      return [
+        element.getAttribute("aria-label") || "",
+        element.getAttribute("placeholder") || "",
+        element.getAttribute("title") || "",
+        node.value || "",
+        element.textContent || "",
+        ...labelledBy,
+        ...explicitLabels,
+      ];
+    }).catch(() => [] as string[]);
+    if (names.some((name) => expectedNames.includes(normalizeText(name)))) matching.push(control);
+  }
+  const unique = matching.length === 1;
+  const enabled = unique && await matching[0].isEnabled().catch(() => false);
+  return {
+    unique,
+    enabled,
+    ...(enabled ? { locator: matching[0] } : {}),
+  };
 }
 
 /** Product-card escalation requires positive card/detail evidence. */
@@ -2428,8 +2718,12 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
       );
       return intent ? [{ stepIndex: step.index, sourceText, intent }] : [];
     });
+    // A navigation that opens a second tab is an authored business step ("Abrir una pestaña nueva…");
+    // only the initial application navigation stays outside the executable sequence.
     const executableRecordedActions = actionsWithIntents.filter(({ action }) =>
-      !["navigation", "system_observation"].includes(action.actionType)
+      action.actionType === "navigation"
+        ? action.opensNewPage === true
+        : action.actionType !== "system_observation"
     );
     const recordedActionMatchesSourceIntent = (
       actionType: string,
@@ -2437,6 +2731,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
       recordedAction?: typeof executableRecordedActions[number]["action"],
     ): boolean => sourceIntentType === "action_fill"
       ? actionType === "fill"
+        || actionType === "upload"
         || (actionType === "click"
           && recordedAction?.playwrightRecorderEvidence?.kind === "virtual_keyboard"
           && Boolean(recordedAction.valueKey?.trim())
@@ -2446,7 +2741,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           && (recordedAction.playwrightRecorderEvidence.keyLabels?.length ?? 0) >= 10)
       : sourceIntentType === "action_select"
         ? actionType === "select" || actionType === "fill"
-        : ["click", "check", "uncheck", "press"].includes(actionType);
+        : ["click", "check", "uncheck", "press", "navigation", "tab_switch"].includes(actionType);
     const sourceMatchesRecordedVirtualKeyboardAction = (
       source: typeof executableSourceSteps[number],
       recorded: typeof executableRecordedActions[number],
@@ -2504,10 +2799,32 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
       .replace(/^_+|_+$/g, "");
     const intentField = (intent: ParsedStepIntent | undefined) =>
       intent?.selectionField?.trim() || intent?.actionTarget?.trim();
+    const isRecordedOptionAction = (action: typeof executableRecordedActions[number]["action"] | undefined): boolean => Boolean(action && (
+      action.technicalTargetRef?.trim().startsWith("role:option|")
+      || action.technicalTargetRefs?.some((ref) => /^role:option\|/i.test(ref.trim()))
+      || action.playwrightRecorderEvidence?.kind === "role" && action.playwrightRecorderEvidence.role === "option"
+      || /\|role\|option\|/i.test(action.targetRef ?? "")
+    ));
+    const selectionQueryOwnerField = (action: typeof executableRecordedActions[number]["action"]): string | undefined => {
+      if (action.actionType !== "fill" || !Number.isInteger(action.stepIndex)) return undefined;
+      const position = executableRecordedActions.findIndex((candidate) => candidate.action === action);
+      if (position <= 0 || position >= executableRecordedActions.length - 1) return undefined;
+      const previous = executableRecordedActions[position - 1].action;
+      const next = executableRecordedActions[position + 1].action;
+      const ownerField = previous.semanticField?.trim() || previous.associatedField?.trim();
+      const nextField = next.semanticField?.trim() || next.associatedField?.trim();
+      if (previous.actionType !== "click" || isRecordedOptionAction(previous)
+        || next.actionType !== "click" || !isRecordedOptionAction(next)
+        || !ownerField || !nextField || normalizedKey(ownerField) !== normalizedKey(nextField)) return undefined;
+      return ownerField;
+    };
     const compatibleIntentTypes = (sourceType: string | undefined, candidateType: string | undefined) =>
       sourceType === candidateType
       || (sourceType === "action_click" && candidateType === "action_click");
 
+    // Repeated entities select the same field/value more than once (e.g. two addresses): the
+    // recorded steps run in order, so each takes the next requirement not yet bound.
+    const boundSelectionRequirementKeys = new Map<number, string>();
     const enrichFromRecording = (item: ActionTargetItem, stepIndex: number) => {
       const sourceStep = scenarioForIndex.get(stepIndex);
       const sourceText = sourceStep?.action?.trim() ?? "";
@@ -2600,8 +2917,8 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           return intent.type === "action_select"
             && (action.actionType === "select" || action.actionType === "fill");
         }
-        if (sourceIntent.type === "action_fill") return intent.type === "action_fill" && action.actionType === "fill";
-        return intent.type === "action_click" && ["click", "check", "uncheck", "press"].includes(action.actionType);
+        if (sourceIntent.type === "action_fill") return intent.type === "action_fill" && ["fill", "upload"].includes(action.actionType);
+        return intent.type === "action_click" && ["click", "check", "uncheck", "press", "navigation", "tab_switch"].includes(action.actionType);
       });
       const orderedMatch = orderedRecordingActionBySourceIndex.get(stepIndex);
       const orderedMatchField = orderedMatch?.action.associatedField?.trim()
@@ -2670,11 +2987,49 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
       const uniqueSemanticSelectMatch = uniqueSemanticSelectMatches.length === 1
         ? uniqueSemanticSelectMatches[0]
         : undefined;
+      // Repeated same-field selections (one block per repeated entity) pair with their recorded
+      // actions by order when both sides repeat the field the same number of times.
+      const sourceSelectOccurrences = sourceIntent.type === "action_select" && sourceField
+        ? sourceSteps.filter((step) => parseStepIntent(step.action?.trim() ?? "").some((intent) =>
+          intent.type === "action_select" && normalizedKey(intentField(intent)) === normalizedKey(sourceField)))
+        : [];
+      // The recorded selection is either a `select` action or the option click itself.
+      const recordedSelectOccurrences = sourceSelectOccurrences.length > 1
+        ? actionsWithIntents.filter(({ action }, position) => {
+          if (normalizedKey(action.semanticField ?? action.associatedField) === normalizedKey(sourceField) && action.actionType === "select") return true;
+          const optionName = action.technicalTargetRef?.trim().match(/^role:option\|(.*)$/i)?.[1]
+            ?? action.playwrightRecorderEvidence?.normalizedName;
+          if (action.actionType !== "click" || !optionName || normalizedKey(optionName) !== normalizedKey(sourceIntent.value)) return false;
+          // An option click may carry its own name as field: the owner is the click just before it.
+          const owner = actionsWithIntents[position - 1]?.action;
+          return Boolean(owner) && owner.actionType === "click" && !owner.technicalTargetRef
+            && normalizedKey(owner.semanticField ?? owner.associatedField) === normalizedKey(sourceField);
+        })
+        : [];
+      const repeatedFieldSelectMatch = recordedSelectOccurrences.length === sourceSelectOccurrences.length
+        && recordedSelectOccurrences.length > 1
+        ? recordedSelectOccurrences[sourceSelectOccurrences.findIndex((step) => step.index === stepIndex)]
+        : undefined;
       const match = orderedMatchMatchesSource
         ? orderedMatch
-        : repeatedExactMatch ?? samePositionFieldMatch ?? uniqueSemanticSelectMatch ?? (compatible.length === 1 ? compatible[0] : undefined);
+        : repeatedExactMatch ?? samePositionFieldMatch ?? uniqueSemanticSelectMatch ?? repeatedFieldSelectMatch ?? (compatible.length === 1 ? compatible[0] : undefined);
+      if (sourceIntent.type === "action_select") {
+        console.log(`[recording-replay] selectionMatchDiagnostic stepIndex=${stepIndex} field=${JSON.stringify(sourceField)} exact=${exactTextMatch.length} compatible=${compatible.length} semanticSelects=${uniqueSemanticSelectMatches.length} sourceOccurrences=${sourceSelectOccurrences.length} recordedOccurrences=${recordedSelectOccurrences.length} ordered=${orderedMatchMatchesSource} matched=${Boolean(match)}`);
+      }
       if (match) {
         const { action, technicalRoleName } = match;
+        const queryOwnerField = selectionQueryOwnerField(action);
+        if (queryOwnerField && sourceIntent.type === "action_fill") {
+          // Search inputs inside custom selections can be announced using a transient
+          // live-region result count. Bind the query to its recorded field only when the
+          // adjacent owner activation and exact option action establish that relationship.
+          // Keep the original value/valueKey and locator evidence; only the semantic field
+          // relation changes, so no selector or project-specific rule is invented.
+          item.target = queryOwnerField;
+          item.associatedField = queryOwnerField;
+          item.selectionQueryOwnerField = queryOwnerField;
+          console.log(`[recording-replay] selectionQueryFillRebound=true actionIndex=${action.stepIndex ?? "unknown"} field=${JSON.stringify(queryOwnerField)} evidence=adjacent_owner_and_option_actions`);
+        }
         item.recordingActionType = action.actionType as ActionTargetItem['recordingActionType'];
         // A TestRail field-value step can summarize one character entered through a
         // recorded virtual keyboard. Keep it on the keyboard replay path only when the
@@ -2790,6 +3145,15 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         }
         if (action.value !== undefined && item.value === undefined) item.value = action.value;
         if (action.interactionId) item.sourceInteractionId = action.interactionId;
+        // Files, tabs and captured values are not click/fill evidence: carry them from the matched contract
+        // action exactly as the structured path does, so the upload/new-tab/tab-switch steps can execute.
+        if (action.fileAssets) item.fileAssets = action.fileAssets.map((asset) => ({ ...asset }));
+        if (action.fileSetValueKey) item.fileSetValueKey = action.fileSetValueKey;
+        if (action.navigationUrl) item.navigationUrl = action.navigationUrl;
+        if (action.pageKey) item.pageKey = action.pageKey;
+        if (action.opensNewPage) item.opensNewPage = true;
+        if (action.runtimeDerivedSourceEventRef) item.runtimeDerivedSourceEventRef = action.runtimeDerivedSourceEventRef;
+        if (action.runtimeValueCaptureEventRefs) item.runtimeValueCaptureEventRefs = [...action.runtimeValueCaptureEventRefs];
         if (action.expectedRouteBefore) item.expectedRouteBefore = action.expectedRouteBefore;
         if (action.expectedRouteAfter) item.expectedRouteAfter = action.expectedRouteAfter;
         if (action.expectedOutcomeKind) item.expectedOutcomeKind = action.expectedOutcomeKind;
@@ -2802,7 +3166,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
           item.selectionField = sourceField;
           item.associatedField = sourceField;
         } else if (sourceIntent.type === "action_fill") {
-          item.associatedField = sourceField;
+          item.associatedField = queryOwnerField ?? sourceField;
         }
         const exactTargetIdentity = action.technicalTargetRef
           && normalizedKey(technicalRoleName) === normalizedKey(sourceField);
@@ -2856,8 +3220,19 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
             && normalizedKey(typeof requirement?.semanticField === "string" ? requirement.semanticField : undefined) === normalizedKey(sourceField)
             && normalizeText(typeof requirement?.value === "string" ? requirement.value : "") === normalizeText(requestedSelectionValue ?? "");
         });
-        if (selectionValueMatches.length === 1) {
-          const requirement = selectionValueMatches[0];
+        const requirementKeyOf = (requirement: any): string =>
+          typeof requirement.valueKey === "string" ? requirement.valueKey.trim() : requirement.key.trim();
+        const orderedSelectionMatch = selectionValueMatches.length === 1
+          ? selectionValueMatches[0]
+          : selectionValueMatches.length > 1
+            ? [...selectionValueMatches]
+              .sort((left: any, right: any) => (left.stepIndex ?? 0) - (right.stepIndex ?? 0))
+              .find((requirement: any) => boundSelectionRequirementKeys.get(stepIndex) === requirementKeyOf(requirement)
+                || ![...boundSelectionRequirementKeys.values()].includes(requirementKeyOf(requirement)))
+            : undefined;
+        if (orderedSelectionMatch) {
+          const requirement = orderedSelectionMatch;
+          boundSelectionRequirementKeys.set(stepIndex, requirementKeyOf(requirement));
           item.valueKey = typeof requirement.valueKey === "string" ? requirement.valueKey.trim() : requirement.key.trim();
           item.valueSource = "test_data";
           if (typeof requirement.entityScope === "string" && requirement.entityScope.trim()) {
@@ -3002,7 +3377,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
       if (step.type === "action_fill" || step.type === "action_select" || step.type === "action_click") {
         const projectedItem = projected.actionTargets.find((item) => item.index === step.stepIndex);
         if (projectedItem) {
-          for (const key of ["target", "recordingActionType", "key", "valueKey", "segmentPosition", "value", "valueSource", "selectionField", "selectionActivationField", "associatedField", "entityScope", "rowScope", "rowRelation", "technicalTargetRef", "technicalTargetRefs", "technicalTargetCandidates", "semanticRuntimeEvidence", "playwrightRecorderEvidence", "sourceInteractionId", "expectedRouteBefore", "expectedRouteAfter", "expectedOutcomeKind", "recordedSameSurfaceAction"] as const) {
+      for (const key of ["target", "recordingActionType", "key", "valueKey", "fileSetValueKey", "segmentPosition", "value", "valueSource", "selectionField", "selectionActivationField", "selectionQueryOwnerField", "associatedField", "entityScope", "rowScope", "rowRelation", "technicalTargetRef", "technicalTargetRefs", "technicalTargetCandidates", "semanticRuntimeEvidence", "playwrightRecorderEvidence", "sourceInteractionId", "expectedRouteBefore", "expectedRouteAfter", "expectedOutcomeKind", "recordedSameSurfaceAction", "fileAssets", "navigationUrl", "pageKey", "opensNewPage", "runtimeDerivedSourceEventRef", "runtimeValueCaptureEventRefs"] as const) {
             if (projectedItem[key] !== undefined) (step as any)[key] = projectedItem[key];
           }
           if (projectedItem.actionType === "action_press") step.type = "action_press";
@@ -3016,29 +3391,63 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
   if (recordingContract?.actions?.length) {
     console.log(`[recording-replay] structuredContractReceived=true structuredActionReceived=${recordingContract.actions.length} legacyParserInvoked=false`);
     const contractActionIndexes = recordingContract.actions
-      .filter((action) => action.actionType !== "navigation" && action.actionType !== "system_observation")
+      .filter((action) => action.actionType !== "system_observation")
       .map((action) => action.stepIndex);
     const contractIndexesAreMonotonic = contractActionIndexes.every((index, position) =>
       Number.isInteger(index) && index === position + 1
     );
+    const orderedRecordingActions = [...recordingContract.actions]
+      .filter((action) => action.actionType !== "system_observation")
+      .sort((left, right) => (left.stepIndex ?? 0) - (right.stepIndex ?? 0));
     if (!contractIndexesAreMonotonic) {
       console.log(`[recording-replay] structuredStepIndexRepair=true reason=contract_indices_not_unique_monotonic authority=contract_action_order`);
     }
     let executableActionOrder = 0;
     for (const structuredAction of recordingContract.actions) {
-      if (["navigation", "system_observation"].includes(structuredAction.actionType)) continue;
+      if (structuredAction.actionType === "system_observation") continue;
+      const actionPosition = orderedRecordingActions.indexOf(structuredAction);
+      const previousRecordedAction = actionPosition > 0 ? orderedRecordingActions[actionPosition - 1] : undefined;
+      const nextRecordedAction = orderedRecordingActions[actionPosition + 1];
+      const hasRecordedOptionIdentity = (action: typeof structuredAction | undefined): boolean => Boolean(action && (
+        action.technicalTargetRef?.trim().startsWith("role:option|")
+        || action.technicalTargetRefs?.some((ref) => /^role:option\|/i.test(ref.trim()))
+        || action.playwrightRecorderEvidence?.kind === "role" && action.playwrightRecorderEvidence.role === "option"
+        || /\|role\|option\|/i.test(action.targetRef ?? "")
+      ));
+      const precedingSelectionField = previousRecordedAction?.actionType === "click"
+        && !hasRecordedOptionIdentity(previousRecordedAction)
+        ? previousRecordedAction.semanticField?.trim()
+        : undefined;
+      // Search typing in a custom select is often captured under a transient
+      // live-region name such as “N results available”. Preserve that query as
+      // a fill, but bind it to the owner field only when the immediately
+      // preceding action opened that field and the following recorded action
+      // selects an option from that same field.
+      const queryForRecordedSelectionField = structuredAction.actionType === "fill"
+        && precedingSelectionField
+        && nextRecordedAction?.actionType === "click"
+        && hasRecordedOptionIdentity(nextRecordedAction)
+        && normalizeText(nextRecordedAction.semanticField ?? "") === normalizeText(precedingSelectionField)
+        ? precedingSelectionField
+        : undefined;
       // FIRST_LOSS fix: "press" used to fall through to the "action_click" default -- silently
       // converting a recorded keyboard press into a click intent for Recording Replay. Never
       // conflated with click now: it gets its own, distinct tag, carrying the pressed key
       // through separately (never inside `value`, which stays exclusively a fill/select value).
       const recordedActionIntent = parseStepIntent(structuredAction.humanStep ?? "")
         .find((intent) => intent.type === "action_fill" || intent.type === "action_select");
-      const actionType = structuredAction.actionType === "fill"
+      const actionType = structuredAction.actionType === "tab_switch"
+        ? "action_click"
+        : structuredAction.actionType === "fill"
         && recordedActionIntent?.type === "action_select"
         && recordedActionIntent.valueKey === structuredAction.valueKey
         ? "action_select"
         : structuredAction.actionType === "fill"
         ? "action_fill"
+        : structuredAction.actionType === "upload"
+          ? "action_fill"
+        : structuredAction.actionType === "navigation"
+          ? "action_click"
         : structuredAction.actionType === "select"
           ? "action_select"
           : structuredAction.actionType === "press"
@@ -3092,11 +3501,14 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         && (recordedActionIntent.type === "action_select"
           || normalizedFieldKey(humanActionField) === normalizedFieldKey(structuredAction.valueKey))
       );
-      const reconciledActionField = fillFieldIsCorroborated ? humanActionField : undefined;
+      const reconciledActionField = queryForRecordedSelectionField
+        || (fillFieldIsCorroborated ? humanActionField : undefined);
       if (reconciledActionField) {
         console.log(`[recording-replay] fillFieldReconciled=true actionIndex=${stepIndex} evidence=matchingRecordedFieldAndValueKey targetRefRepeatsSemanticField=${targetRefIsGenericSemanticField} technicalIdentity=false`);
       }
-      const target = reconciledActionField
+      const target = structuredAction.actionType === "navigation"
+        ? structuredAction.navigationUrl ?? "Aplicación registrada"
+        : reconciledActionField
         || roleTargetOwnName
         || structuredAction.semanticField?.trim()
         || technicalTargetRef
@@ -3117,6 +3529,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         ...(actionType === "action_select" && (reconciledActionField || structuredAction.semanticField)
           ? { selectionField: reconciledActionField ?? structuredAction.semanticField }
           : {}),
+        ...(queryForRecordedSelectionField ? { selectionQueryOwnerField: queryForRecordedSelectionField } : {}),
         ...(structuredAction.entityScope ? { entityScope: structuredAction.entityScope } : {}),
         ...(structuredAction.rowRelation ? { rowRelation: structuredAction.rowRelation } : {}),
         // FIRST_LOSS fix: `RecordingExecutionAction.associatedField` (the real field-relation
@@ -3140,6 +3553,13 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         ...(structuredAction.recordedSameSurfaceAction ? { recordedSameSurfaceAction: true } : {}),
         ...(structuredAction.controlIdentity ? { recordedControlIdentity: structuredAction.controlIdentity } : {}),
         ...(structuredAction.dynamicTargetLabel === true ? { dynamicTargetLabel: true } : {}),
+        ...(structuredAction.fileAssets ? { fileAssets: structuredAction.fileAssets.map((asset) => ({ ...asset })) } : {}),
+        ...(structuredAction.fileSetValueKey ? { fileSetValueKey: structuredAction.fileSetValueKey } : {}),
+        ...(structuredAction.navigationUrl ? { navigationUrl: structuredAction.navigationUrl } : {}),
+        ...(structuredAction.pageKey ? { pageKey: structuredAction.pageKey } : {}),
+        ...(structuredAction.opensNewPage ? { opensNewPage: true } : {}),
+        ...(structuredAction.runtimeDerivedSourceEventRef ? { runtimeDerivedSourceEventRef: structuredAction.runtimeDerivedSourceEventRef } : {}),
+        ...(structuredAction.runtimeValueCaptureEventRefs ? { runtimeValueCaptureEventRefs: [...structuredAction.runtimeValueCaptureEventRefs] } : {}),
         ...(structuredAction.interactionId ? { sourceInteractionId: structuredAction.interactionId } : {}),
       } as ActionTargetItem;
       if (structuredAction.actionType === "click" && structuredAction.technicalTargetRefs?.some((ref) => /^css:.*:has\(\s*select\b/i.test(ref))) {
@@ -3153,7 +3573,7 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
       orderedSteps.push({
         stepIndex,
         originalText: structuredAction.humanStep ?? structuredAction.actionType,
-        type: actionType,
+        type: structuredAction.actionType === "navigation" ? "navigation_segment" : actionType,
         recordingActionType: structuredAction.actionType,
         target,
         ...(structuredAction.valueKey ? { valueKey: structuredAction.valueKey } : {}),
@@ -3164,11 +3584,19 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
         ...(actionType === "action_select" && (reconciledActionField || structuredAction.semanticField)
           ? { selectionField: reconciledActionField ?? structuredAction.semanticField }
           : {}),
+        ...(queryForRecordedSelectionField ? { selectionQueryOwnerField: queryForRecordedSelectionField } : {}),
         ...(structuredAction.entityScope ? { entityScope: structuredAction.entityScope } : {}),
         ...(structuredAction.rowRelation ? { rowRelation: structuredAction.rowRelation } : {}),
         ...((reconciledActionField ?? structuredAction.associatedField) ? { associatedField: reconciledActionField ?? structuredAction.associatedField } : {}),
         ...(structuredAction.technicalTargetCandidates ? { technicalTargetCandidates: structuredAction.technicalTargetCandidates as any } : {}),
         ...(structuredAction.technicalTargetRefs ? { technicalTargetRefs: structuredAction.technicalTargetRefs } : {}),
+        ...(structuredAction.fileAssets ? { fileAssets: structuredAction.fileAssets.map((asset) => ({ ...asset })) } : {}),
+        ...(structuredAction.fileSetValueKey ? { fileSetValueKey: structuredAction.fileSetValueKey } : {}),
+        ...(structuredAction.navigationUrl ? { navigationUrl: structuredAction.navigationUrl } : {}),
+        ...(structuredAction.pageKey ? { pageKey: structuredAction.pageKey } : {}),
+        ...(structuredAction.opensNewPage ? { opensNewPage: true } : {}),
+        ...(structuredAction.runtimeDerivedSourceEventRef ? { runtimeDerivedSourceEventRef: structuredAction.runtimeDerivedSourceEventRef } : {}),
+        ...(structuredAction.runtimeValueCaptureEventRefs ? { runtimeValueCaptureEventRefs: [...structuredAction.runtimeValueCaptureEventRefs] } : {}),
         ...(structuredAction.expectedRouteBefore ? { expectedRouteBefore: structuredAction.expectedRouteBefore } : {}),
         ...(structuredAction.expectedRouteAfter ? { expectedRouteAfter: structuredAction.expectedRouteAfter } : {}),
         ...(structuredAction.expectedOutcomeKind ? { expectedOutcomeKind: structuredAction.expectedOutcomeKind } : {}),
@@ -3493,12 +3921,6 @@ export function parseScenarioStepsForDiscovery(scenario: TestScenario): {
   };
 }
 
-type PageState = {
-  url: string;
-  bodyText: string;
-  elementCount: number;
-};
-
 async function capturePageState(page: Page): Promise<PageState> {
   const url = page.url();
   const bodyText = await page.evaluate(() => {
@@ -3513,13 +3935,26 @@ async function capturePageState(page: Page): Promise<PageState> {
   return { url, bodyText, elementCount };
 }
 
+/** Neutral target text given to a recorded click that has no name (see `hasStableStructuralClickOwner`). */
+const UNNAMED_RECORDED_CONTROL = "recorded control";
+
+/** Names of controls whose only job is to dismiss something that may close on its own (a toast, a notice). */
+const DISMISS_CONTROL_NAME = /^(?:cerrar|close|dismiss|descartar)$/i;
+
+/** Settled, loader-free rounds after which a missing recorded click target stops being waited for. */
+const PENDING_WORK_QUIET_ROUNDS = 3;
+
 /**
  * Dismiss one obstructing dialog only when the next action is outside it and
  * the dialog exposes exactly one generic close control. This is structural
  * recovery for transient overlays; it does not inspect application labels or
  * infer a business action from dialog text.
  */
-async function dismissObstructingDialog(page: Page, nextTarget: string): Promise<boolean> {
+export async function dismissObstructingDialog(page: Page, nextTarget: string): Promise<boolean> {
+  // A next step that has no name of its own (the neutral placeholder given to a structural click, e.g. a card whose text
+  // is run data) cannot be placed inside or outside the dialog by name: it may well be one of the dialog's own controls.
+  const normalizedNext = nextTarget.trim().toLowerCase();
+  if (!normalizedNext || normalizedNext === UNNAMED_RECORDED_CONTROL) return false;
   const dialogs = page.locator('[role="dialog"], [role="alertdialog"], dialog');
   const visibleDialogs: Locator[] = [];
   for (let index = 0; index < await dialogs.count(); index++) {
@@ -3528,7 +3963,13 @@ async function dismissObstructingDialog(page: Page, nextTarget: string): Promise
   }
   if (visibleDialogs.length !== 1) return false;
   const dialog = visibleDialogs[0];
-  const targetInsideDialog = await dialog.getByText(nextTarget, { exact: false }).count().catch(() => 0);
+  // The next target can be an icon-only control (its name is an aria-label/title, with no text node): it is still
+  // inside the dialog, and when it IS the dialog's own close control it must be left for the step that names it.
+  const targetName = nextTarget.trim();
+  const targetInsideDialog = await dialog.getByText(nextTarget, { exact: false }).count().catch(() => 0)
+    + (targetName ? await dialog.getByRole("button", { name: targetName, exact: false }).count().catch(() => 0) : 0)
+    + (targetName ? await dialog.getByLabel(targetName, { exact: false }).count().catch(() => 0) : 0)
+    + (targetName ? await dialog.getByTitle(targetName, { exact: false }).count().catch(() => 0) : 0);
   if (targetInsideDialog > 0) return false;
 
   const namedClose = dialog.getByRole("button", { name: /^(?:close|cerrar|dismiss|descartar|x|×)$/i });
@@ -3544,6 +3985,30 @@ async function dismissObstructingDialog(page: Page, nextTarget: string): Promise
   await close.click({ timeout: 3000 });
   await page.waitForTimeout(250);
   console.log(`[dialog-recovery] dismissed=true reason=obstructing_dialog nextActionTargetPresent=${Boolean(nextTarget.trim())}`);
+  return true;
+}
+
+/**
+ * A confirm button clicked by the previous step can leave its dialog open (the click only
+ * recalculated dependent values). When the current target is outside that single open dialog,
+ * press the same confirm once more. Returns whether it was pressed.
+ */
+async function retryPendingDialogConfirm(page: Page, previousTarget: string | undefined, currentTarget: string): Promise<boolean> {
+  const confirmText = previousTarget?.trim();
+  if (!confirmText) return false;
+  const dialogs = page.locator('[role="dialog"], [role="alertdialog"], dialog');
+  const visibleDialogs: Locator[] = [];
+  for (let index = 0; index < await dialogs.count().catch(() => 0); index++) {
+    if (await dialogs.nth(index).isVisible().catch(() => false)) visibleDialogs.push(dialogs.nth(index));
+  }
+  if (visibleDialogs.length !== 1) return false;
+  const dialog = visibleDialogs[0];
+  if (await dialog.getByRole("button", { name: currentTarget, exact: true }).count().catch(() => 0) > 0) return false;
+  const confirm = dialog.getByRole("button", { name: confirmText, exact: true });
+  if (await confirm.count().catch(() => 0) !== 1 || !(await confirm.isVisible().catch(() => false)) || !(await confirm.isEnabled().catch(() => false))) return false;
+  await confirm.click({ timeout: 3000 }).catch(() => undefined);
+  await page.waitForTimeout(800);
+  console.log(`[dialog-recovery] confirmRetried=true reason=dialog_still_open_before_next_action`);
   return true;
 }
 
@@ -3869,44 +4334,6 @@ export function evaluateEarlyCompletion(
   };
 }
 
-function hasPageTransition(before: PageState, after: PageState, targetText: string): boolean {
-  if (before.url !== after.url) {
-    return true;
-  }
-
-  const normalizedTarget = normalizeText(targetText);
-  const targetDisappeared = !after.bodyText.includes(normalizedTarget);
-  if (targetDisappeared) {
-    return true;
-  }
-
-  const bodyDiffRatio = computeTextDiffRatio(before.bodyText, after.bodyText);
-  if (bodyDiffRatio > 0.05) {
-    return true;
-  }
-
-  if (Math.abs(before.elementCount - after.elementCount) > 5) {
-    return true;
-  }
-
-  return false;
-}
-
-function computeTextDiffRatio(text1: string, text2: string): number {
-  const maxLen = Math.max(text1.length, text2.length);
-  if (maxLen === 0) return 0;
-
-  let diffChars = 0;
-  const len = Math.max(text1.length, text2.length);
-  for (let i = 0; i < len; i++) {
-    if (text1[i] !== text2[i]) {
-      diffChars++;
-    }
-  }
-
-  return diffChars / maxLen;
-}
-
 async function scanAndCollectObjects(
   page: Page,
   stepIndex: number,
@@ -3979,6 +4406,7 @@ async function waitForFillTargetReadiness(
     rowRelation?: "next" | "added";
     entityScope?: string;
     associatedField?: string;
+    selectionQueryOwnerField?: string;
     recordedTechnicalTargets?: unknown;
     recordedTechnicalTargetRefs?: string[];
   },
@@ -4048,6 +4476,8 @@ export type CaseDiscoveryOptions = {
   scenarioSuggestedData?: Record<string, string>;
   /** Reconcile workflow evidence before the first final blocking/status calculation. */
   beforeFinalStatusCalculation?: (steps: DiscoveryStepResult[]) => number | Promise<number>;
+  /** Capture the stable app surface reached by the initial configured navigation. */
+  onInitialNavigationCompleted?: (url: string) => void;
   /** This run's job id. Used as `sourceExecutionId` for replay-kind RecordingRouteObservation rows. */
   runId?: string;
   executionMode?: string;
@@ -5095,7 +5525,9 @@ export function loadProjectAuthProfile(appSlug: string): { profile: any | null; 
 }
 
 export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<CaseDiscoveryResult> {
-  const { page, scenario, evidenceDir, pendingObjectsPath, pendingPlansPath, appBaseUrl, testData, loginAction } = options;
+  const { scenario, evidenceDir, pendingObjectsPath, pendingPlansPath, appBaseUrl, testData, loginAction } = options;
+  let page = options.page;
+  const recordingPages = new Map<string, typeof page>([["tab-1", page]]);
   // Learned route-family authority lineage: (recordingId, controlIdentity, actionKind).
   // Both recordingId and runId already reach here through existing transport (scenario.recordingId
   // from the recording's own scenario JSON; runId forwarded from CaseDiscoveryWorkflowOptions.runId,
@@ -5116,6 +5548,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   
   // Load route profile for ordinal selection and route completion
   const discoveryAppSlug = resolveCaseDiscoveryAppSlug(options);
+  const configuredNonBlockingApplicationErrors = loadPromotedAppConfigSync({ appSlug: discoveryAppSlug })
+    ?.nonBlockingApplicationErrorTextFragments;
+  const nonBlockingApplicationErrorTextFragments = Array.isArray(configuredNonBlockingApplicationErrors)
+    ? configuredNonBlockingApplicationErrors.filter((text): text is string => typeof text === "string" && text.trim().length > 0)
+    : [];
+  if (nonBlockingApplicationErrorTextFragments.length > 0) {
+    console.log(`[discovery:case] configured non-blocking application error fragments=${nonBlockingApplicationErrorTextFragments.length}`);
+  }
   const explicitRouteProfile = (options.scenario as any)?.routeProfile;
   const routeProfile = options.aiAssistedDiscovery?.config?.routeCompletion?.useAppProfile !== false ? loadRouteProfile(discoveryAppSlug, explicitRouteProfile) : undefined;
   if (routeProfile) {
@@ -5124,7 +5564,30 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
   const steps: DiscoveryStepResult[] = [];
   const allDiscoveredObjects: DiscoveredObject[] = [];
-  let activePlanInputMetadata: Pick<ExecutionPlanStep, "inputIntent" | "requirementRefs" | "controlIdentity"> = {};
+  const recordedRuntimeValues = new Map<string, string>();
+  // The element the previous click landed on. A control repeated across groups (a "No" in every question row) is told
+  // apart by the group the person was just working in.
+  let previousClickedLocator: Locator | undefined;
+  // Visible text this run typed into non-sensitive fields. Used only to recognise, on the page, the item that shows the
+  // data the run just entered (a card/row for the record being created); never logged, never persisted.
+  const runEnteredTextValues = new Set<string>();
+  const rememberEnteredValue = (label: string | undefined, value: unknown): void => {
+    if (typeof value !== "string") return;
+    const text = value.trim();
+    if (text.length < 4 || text.length > 80) return;
+    if (/contrase|password|clave|secret|token|otp|pin\b|tarjeta|card|cvv|cvc/i.test(label ?? "")) return;
+    runEnteredTextValues.add(text);
+  };
+  const recordingRuntimeCaptures = new Map<string, RecordedRuntimeValueCapture>(
+    (((options.scenario as any)?.recordingExecutionContract?.runtimeValueCaptures ?? []) as Array<RecordedRuntimeValueCapture & { captureBeforeInteractionId?: string }>)
+      .map((capture) => [capture.sourceEventRef, {
+        sourceEventRef: capture.sourceEventRef,
+        ...(capture.sourcePageKey ? { sourcePageKey: capture.sourcePageKey } : {}),
+        technicalTargetRefs: [...capture.technicalTargetRefs],
+        valueSelection: { ...capture.valueSelection },
+      }]),
+  );
+  let activePlanInputMetadata: Pick<ExecutionPlanStep, "inputIntent" | "requirementRefs" | "controlIdentity" | "sourceInteractionId" | "recordingActionType" | "fileAssets" | "fileSetValueKey" | "technicalTargetRefs" | "navigationUrl" | "pageKey" | "opensNewPage" | "runtimeDerivedSourceEventRef" | "runtimeValueCaptures"> = {};
   const planSteps: ExecutionPlanStep[] = new Proxy([] as ExecutionPlanStep[], {
     get(target, property, receiver) {
       if (property === "push") {
@@ -5149,6 +5612,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   // Evidence capture helper
   const evidenceRec = options.evidenceRecorder;
   let evidenceStepIndex = 0;
+  let liveProgressStepIndex: number | undefined;
   const captureEvStep = async (text: string, status: "passed" | "failed" | "skipped", error?: string, indexOverride?: number): Promise<void> => {
     if (!evidenceRec) return;
 
@@ -5169,7 +5633,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       const target = text.match(/"([^"]+)"/)?.[1];
       await evidenceRec.captureStep(page, evidenceStepIndex, text, { target, status, errorMessage: error });
       console.log(`[critical-path] phase=evidence_end step=${evidenceStepIndex} durationMs=${Math.round(performance.now() - evidenceStartedAt)}`);
-      console.log(`[evidence] step ${evidenceStepIndex}: "${text.substring(0, 60)}" status=${status}`);
+      const liveStepNumber = liveProgressStepIndex ?? evidenceStepIndex;
+      console.log(`[evidence] step ${liveStepNumber}: "${text.substring(0, 60)}" status=${status} evidenceIndex=${evidenceStepIndex}`);
     } catch {
       // evidence errors are non-fatal
     }
@@ -5187,8 +5652,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   let authGateDetectedAtStepIndex: number | undefined;
   let authGateDetectedStage: string | undefined; // Stage at which the auth gate was detected
   let activeContainer: ActiveContainerContext | undefined;
+  let activeContainerPageUrl: string | undefined;
+  // The last click whose outcome opened a modal/dialog: the app may close it on its own mid-sequence.
+  let lastDialogOpenerTarget: string | undefined;
+  let dialogVisibleBeforeClick = false;
   const resolvedDataKeys = new Set<string>();
   const runtimeAuthFieldValues = new Map<string, { target: string; value: string }>();
+  const filledInputs = new FilledInputRegistry();
   const runtimeFieldIdentities = new Map<string, string>();
   const runtimeFieldControlIdentities = new Map<string, ControlIdentity>();
   const runtimeFieldLabels = new Map<string, string>();
@@ -5289,6 +5759,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     throw error;
   }
   console.log(`[initial-readiness] phase=complete ready=true durationMs=${Date.now() - readinessStartedAt} reason=none`);
+  options.onInitialNavigationCompleted?.(page.url());
 
   if (evidenceRec && !(await evidenceRec.captureInitialScreen(page, "full_discovery"))) {
     return {
@@ -5308,6 +5779,28 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
   allDiscoveredObjects.push(...initialScan.objects);
 
   const parsed = parseScenarioStepsForDiscovery(scenario);
+  // Values the launch wizard keyed by step position become the credential of the field that step fills.
+  const credentialAliased = aliasPositionalCredentialEntries(
+    options.runtimeEntries,
+    parsed.actionTargets.map((item) => ({ index: item.index, label: item.target, actionType: item.actionType })),
+  );
+  const credentialShared = fillMissingLaunchCredentials(
+    process.env.DISCOVERY_RUNTIME_CONTEXT,
+    credentialAliased,
+    parsed.actionTargets.map((item) => ({ label: item.target, actionType: item.actionType })),
+  );
+  const aliasedRuntimeEntries = alignOrderedPositionalEntries(
+    credentialShared,
+    parsed.actionTargets.map((item) => ({
+      index: item.index, label: item.target, actionType: item.actionType,
+      hasLiteralValue: typeof item.value === "string" && item.value.trim() !== "",
+    })),
+  );
+  if (aliasedRuntimeEntries && aliasedRuntimeEntries.length !== (options.runtimeEntries?.length ?? 0)) {
+    console.log(`[runtime-field-binding] positionalCredentialAliases=${aliasedRuntimeEntries.length - (options.runtimeEntries?.length ?? 0)} source=explicit_case_input`);
+    options.runtimeEntries = aliasedRuntimeEntries;
+  }
+  publishLaunchCredentials(process.env.DISCOVERY_RUNTIME_CONTEXT, options.runtimeEntries);
   const preserveRecordedOrder = Boolean(scenario.recordingExecutionContract?.actions?.length);
   const recordingSetupIntents = parsed.setupIntents.filter((intent) =>
     !(preserveRecordedOrder && intent.type === "navigation_path")
@@ -6005,12 +6498,34 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
   let currentSnapshot = initialScan.snapshot;
   const recordedSurfaceRecoveryAttempts = new Set<number>();
+  let lastObservedRouteTransition: {
+    actionIndex: number;
+    page: Page;
+    urlBefore: string;
+    urlAfter: string;
+  } | undefined;
   const recoverRecordedPreActionSurface = async (
     actionTarget: ActionTargetItem,
     actionIndex: number,
   ): Promise<boolean> => {
     const expectedRouteBefore = actionTarget.expectedRouteBefore?.trim();
     if (!expectedRouteBefore) {
+      return true;
+    }
+    if (lastObservedRouteTransition
+      && lastObservedRouteTransition.actionIndex < actionIndex
+      && matchesObservedActionSurface({
+        previousActionSucceeded: true,
+        sameBrowserPage: lastObservedRouteTransition.page === page,
+        previousUrlBefore: lastObservedRouteTransition.urlBefore,
+        previousUrlAfter: lastObservedRouteTransition.urlAfter,
+        currentUrl: page.url(),
+        expectedRouteBefore,
+      })) {
+      console.log(
+        `[recorded-precondition] actionIndex=${actionIndex} source=observed_route_transition ` +
+        `previousActionIndex=${lastObservedRouteTransition.actionIndex} samePage=true`
+      );
       return true;
     }
     let stableProbes = 0;
@@ -6140,6 +6655,22 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
         const visible = await resolution.locator.isVisible().catch(() => false);
         if (!visible) continue;
+
+        // The field is looked up again by its label on a screen that is no longer the login page; a loose match
+        // (a stale DOM id carried from the previous step) can land on an unrelated input and overwrite what the
+        // run typed there (the password written into a weight field). Re-apply only to the same control that
+        // received this value originally: same element identity, and a secret stays in a secret input.
+        const originalIdentity = runtimeFieldIdentities.get(valueKey);
+        if (originalIdentity) {
+          const currentIdentity = await captureRuntimeFieldIdentity(resolution.locator);
+          if (currentIdentity !== originalIdentity) {
+            console.log(`[auth-reapply] skipped=true reason=control_identity_changed valueKey=${valueKey}`);
+            continue;
+          }
+        } else if (/(^|[^a-z])(pass(word)?|contrase|pwd|secret)/i.test(valueKey) && !(await isSecretInput(resolution.locator))) {
+          console.log(`[auth-reapply] skipped=true reason=secret_value_for_non_secret_input valueKey=${valueKey}`);
+          continue;
+        }
 
         await resolution.locator.fill(field.value);
       } catch {
@@ -6842,13 +7373,80 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     console.log(`[discovery:case] authGateState after setupIntents: ${authGateState ? 'set' : 'not set'}`);
   }
 
+  const failRecordedAction = async (actionTarget: ActionTargetItem, reason: string) => {
+    failedAtStep = actionTarget.index;
+    failedTarget = actionTarget.target;
+    failedReason = reason;
+    steps.push({
+      index: actionTarget.index,
+      action: actionTarget.action,
+      status: "not_found",
+      targetText: actionTarget.target,
+      snapshotUrl: page.url(),
+      snapshotTitle: await page.title().catch(() => ""),
+      elementsFound: 0,
+      error: reason,
+    } as any);
+    await captureEvStep(actionTarget.action, "failed", reason);
+    return buildFailureResult(
+      scenario, steps, allDiscoveredObjects, planSteps,
+      pendingObjectsPath, pendingPlansPath, evidenceDir,
+      failedAtStep, failedTarget, failedReason, allDiscoveredObjects,
+    );
+  };
+
   for (const orderedItem of orderedItems) {
+    liveProgressStepIndex = orderedItem.index;
+    console.log(`[critical-path] step=${orderedItem.index} phase=action_start`);
     const sourceMetadata = orderedItem.type === "action"
       ? orderedItem.actionTarget
       : orderedItem.executableStep;
+    if (scenario.recordingExecutionContract?.actions?.length
+      && orderedItem.type === "action"
+      && orderedItem.actionTarget?.pageKey) {
+      const { pageKey, opensNewPage } = orderedItem.actionTarget;
+      let recordedPage = recordingPages.get(pageKey);
+      if (!recordedPage && opensNewPage === true) {
+        recordedPage = await options.page.context().newPage();
+        recordingPages.set(pageKey, recordedPage);
+      }
+      if (!recordedPage || recordedPage.isClosed()) {
+        return failRecordedAction(orderedItem.actionTarget, "RECORDED_TAB_NOT_AVAILABLE");
+      }
+      if (page !== recordedPage) {
+        page = recordedPage;
+        const selectedPage = await scanAndCollectObjects(page, orderedItem.index, evidenceDir);
+        currentSnapshot = selectedPage.snapshot;
+        allDiscoveredObjects.push(...selectedPage.objects);
+        console.log(`[recording-replay] selectedRecordedTab=true pageKey=${pageKey} created=${opensNewPage === true}`);
+        // Evidence follows the web the step runs on: close the previous web's screen group with its own image and
+        // start the next one from this tab, so the document lists all images of one web before the next.
+        await evidenceRec?.prepareForAction(page);
+      }
+    }
+    if (activeContainer && shouldClearActiveContainer(activeContainerPageUrl, page.url())) {
+      activeContainer = undefined;
+      activeContainerPageUrl = undefined;
+      console.log(`[active-container] cleared=true reason=page_surface_changed step=${orderedItem.index}`);
+    }
     activePlanInputMetadata = sourceMetadata ? {
       ...projectScenarioInputMetadata(sourceMetadata),
       ...(sourceMetadata.controlIdentity ? { controlIdentity: sourceMetadata.controlIdentity } : {}),
+      ...(sourceMetadata.sourceInteractionId ? { sourceInteractionId: sourceMetadata.sourceInteractionId } : {}),
+      ...(sourceMetadata.recordingActionType ? { recordingActionType: sourceMetadata.recordingActionType } : {}),
+      ...(sourceMetadata.fileAssets ? { fileAssets: sourceMetadata.fileAssets.map((asset) => ({ ...asset })) } : {}),
+      ...(sourceMetadata.fileSetValueKey ? { fileSetValueKey: sourceMetadata.fileSetValueKey } : {}),
+      ...(sourceMetadata.technicalTargetRefs ? { technicalTargetRefs: [...sourceMetadata.technicalTargetRefs] } : {}),
+      ...(sourceMetadata.navigationUrl ? { navigationUrl: sourceMetadata.navigationUrl } : {}),
+      ...(sourceMetadata.pageKey ? { pageKey: sourceMetadata.pageKey } : {}),
+      ...(sourceMetadata.opensNewPage ? { opensNewPage: true } : {}),
+      ...(sourceMetadata.runtimeDerivedSourceEventRef ? { runtimeDerivedSourceEventRef: sourceMetadata.runtimeDerivedSourceEventRef } : {}),
+      ...(sourceMetadata.runtimeValueCaptureEventRefs?.length ? {
+        runtimeValueCaptures: sourceMetadata.runtimeValueCaptureEventRefs.flatMap((sourceEventRef) => {
+          const capture = recordingRuntimeCaptures.get(sourceEventRef);
+          return capture ? [{ ...capture, technicalTargetRefs: [...capture.technicalTargetRefs], valueSelection: { ...capture.valueSelection } }] : [];
+        }),
+      } : {}),
     } : {};
     const currentActionOrder = orderedItem.type === "action" && orderedItem.actionTarget
       ? actionOrderIndexByTarget.get(orderedItem.actionTarget)
@@ -8065,7 +8663,8 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       continue;
     }
 
-    if (!(await recoverRecordedPreActionSurface(actionTarget, orderedItem.index))) {
+    // A tab switch changes the surface by definition; its recorded "before" route belongs to the tab being left.
+    if (actionTarget.recordingActionType !== "tab_switch" && !(await recoverRecordedPreActionSurface(actionTarget, orderedItem.index))) {
       failedAtStep = actionTarget.index;
       failedTarget = actionTarget.target;
       failedReason = "RECORDED_PRECONDITION_NOT_REACHED";
@@ -8078,10 +8677,225 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       );
     }
 
+    const requiredCaptureRefs = actionTarget.runtimeValueCaptureEventRefs ?? [];
+    const availableCaptures = requiredCaptureRefs.flatMap((sourceEventRef) => {
+      const capture = recordingRuntimeCaptures.get(sourceEventRef);
+      return capture ? [capture] : [];
+    });
+    if (availableCaptures.length !== requiredCaptureRefs.length) {
+      return failRecordedAction(actionTarget, "RECORDED_VALUE_CAPTURE_CONTRACT_MISSING");
+    }
+    try {
+      for (const capture of availableCaptures) {
+        // The copied value lives where it was copied, which may be another tab than the one using it
+        // (copy in tab A, paste in tab B): try the current page first, then the other recorded pages.
+        let value: string;
+        try {
+          value = await captureRecordedApplicationValue(page, capture);
+        } catch (currentPageError) {
+          let fromOtherPage: string | undefined;
+          for (const candidatePage of recordingPages.values()) {
+            if (candidatePage === page || candidatePage.isClosed()) continue;
+            try { fromOtherPage = await captureRecordedApplicationValue(candidatePage, capture); break; } catch { /* try the next page */ }
+          }
+          if (fromOtherPage === undefined) throw currentPageError;
+          value = fromOtherPage;
+        }
+        recordedRuntimeValues.set(capture.sourceEventRef, value);
+        console.log(`[recording-runtime-value] captured=true sourceEventRef=${capture.sourceEventRef} length=${value.length}`);
+      }
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "RECORDED_VALUE_CAPTURE_FAILED";
+      return failRecordedAction(actionTarget, reason);
+    }
+
+    if (actionTarget.recordingActionType === "tab_switch") {
+      try {
+        // Returning to a tab activates it, as a user does: the page gets its focus/visibility events (apps refresh on them).
+        await page.bringToFront().catch(() => undefined);
+        await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+        allDiscoveredObjects.push(...scan.objects);
+        executedStepIndices.add(actionTarget.index);
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "found",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+        });
+        planSteps.push({
+          index: planSteps.length + 1,
+          action: "noop",
+          description: actionTarget.action,
+          recordingActionType: "tab_switch",
+          pageKey: actionTarget.pageKey,
+          ...(actionTarget.sourceInteractionId ? { sourceInteractionId: actionTarget.sourceInteractionId } : {}),
+        });
+        continue;
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : "RECORDED_TAB_SWITCH_FAILED";
+        return failRecordedAction(actionTarget, reason);
+      }
+    }
+
+    if (actionTarget.recordingActionType === "navigation") {
+      let destination: URL;
+      try {
+        destination = new URL(actionTarget.navigationUrl ?? "");
+      } catch {
+        return failRecordedAction(actionTarget, "RECORDED_NAVIGATION_URL_INVALID");
+      }
+      if (!["http:", "https:"].includes(destination.protocol) || destination.username || destination.password) {
+        return failRecordedAction(actionTarget, "RECORDED_NAVIGATION_URL_UNSAFE");
+      }
+      try {
+        await page.goto(destination.toString(), { waitUntil: "domcontentloaded" });
+        await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+        allDiscoveredObjects.push(...scan.objects);
+        executedStepIndices.add(actionTarget.index);
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "found",
+          targetText: "Aplicación de destino grabada",
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+        });
+        planSteps.push({
+          index: planSteps.length + 1,
+          action: "navigate",
+          description: actionTarget.action,
+          target: { strategy: "url", value: destination.toString() },
+          navigationUrl: destination.toString(),
+          recordingActionType: "navigation",
+          ...(actionTarget.sourceInteractionId ? { sourceInteractionId: actionTarget.sourceInteractionId } : {}),
+        });
+        continue;
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : "RECORDED_NAVIGATION_FAILED";
+        return failRecordedAction(actionTarget, reason);
+      }
+    }
+
+    if (actionTarget.recordingActionType === "upload") {
+      try {
+        // The dataset value is the user's current file set for this step (edited in the scenario card);
+        // the recorded asset is only the default when nothing was changed.
+        const fileSetValue = actionTarget.fileSetValueKey
+          ? options.runtimeEntries?.find((entry) => entry.key.trim().toLowerCase() === actionTarget.fileSetValueKey!.trim().toLowerCase())?.value
+          : undefined;
+        console.log(`[recording-replay] uploadStep refs=${actionTarget.technicalTargetRefs?.length ?? 0} assets=${actionTarget.fileAssets?.length ?? 0} datasetFileSet=${fileSetValue !== undefined} project=${discoveryAppSlug ? "set" : "missing"}`);
+        await uploadRecordedFiles(page, {
+          projectSlug: discoveryAppSlug,
+          technicalTargetRefs: actionTarget.technicalTargetRefs ?? [],
+          fileAssets: actionTarget.fileAssets ?? [],
+          ...(fileSetValue !== undefined ? { fileSetValue } : {}),
+        });
+        await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 });
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+        allDiscoveredObjects.push(...scan.objects);
+        executedStepIndices.add(actionTarget.index);
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "found",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+        });
+        planSteps.push({
+          index: planSteps.length + 1,
+          action: "uploadFile",
+          description: actionTarget.action,
+          target: { strategy: "semantic", value: actionTarget.target },
+          value: actionTarget.fileAssets?.[0]?.fileRef,
+          recordingActionType: "upload",
+          fileAssets: actionTarget.fileAssets?.map((asset) => ({ ...asset })) ?? [],
+          ...(actionTarget.fileSetValueKey ? { fileSetValueKey: actionTarget.fileSetValueKey } : {}),
+          technicalTargetRefs: [...(actionTarget.technicalTargetRefs ?? [])],
+          ...(actionTarget.sourceInteractionId ? { sourceInteractionId: actionTarget.sourceInteractionId } : {}),
+        });
+        continue;
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : "RECORDED_FILE_UPLOAD_FAILED";
+        console.log(`[recording-replay] uploadStepFailed reason=${reason}`);
+        return failRecordedAction(actionTarget, reason);
+      }
+    }
+
     const normalizedActionTarget = normalizeParsedTarget<ActionTargetItem>(actionTarget);
     if (!normalizedActionTarget.target) {
       console.log(`[value-source] missing target context phase=action stepIndex=${orderedItem.index} targetText=none source=parser`);
       continue;
+    }
+
+    // A click whose visible text is the kind of value transported earlier in this run (a request number copied
+    // from another tab) names that value, not the literal recorded last time: use this run's value and resolve it
+    // from the live page. The literal's technical refs point at the recorded run's element, so they are dropped.
+    let capturedValueTargetText: string | undefined;
+    if (!actionTarget.runtimeDerivedSourceEventRef && actionTarget.actionType === "action_click" && actionTarget.target) {
+      const dynamicLabel = matchCapturedValueForLabel(actionTarget.target, recordingRuntimeCaptures, recordedRuntimeValues);
+      if (dynamicLabel && dynamicLabel.value !== actionTarget.target.trim()) {
+        const recordedLabel = actionTarget.target.trim();
+        console.log(`[recording-runtime-value] dynamicLabelBound=true sourceEventRef=${dynamicLabel.sourceEventRef} length=${dynamicLabel.value.length}`);
+        const dynamicTarget = actionTarget as ActionTargetItem & Record<string, unknown>;
+        dynamicTarget.action = dynamicTarget.action.split(recordedLabel).join(dynamicLabel.value);
+        dynamicTarget.target = dynamicLabel.value;
+        capturedValueTargetText = dynamicLabel.value;
+        dynamicTarget.capturedValueTarget = true;
+        dynamicTarget.technicalTargetRefs = [];
+        delete dynamicTarget.technicalTargetCandidates;
+        delete dynamicTarget.playwrightRecorderEvidence;
+        delete dynamicTarget.semanticRuntimeEvidence;
+      }
+    }
+
+    if (actionTarget.runtimeDerivedSourceEventRef) {
+      const value = recordedRuntimeValues.get(actionTarget.runtimeDerivedSourceEventRef);
+      if (value === undefined) return failRecordedAction(actionTarget, "RECORDED_RUNTIME_VALUE_SOURCE_NOT_CAPTURED");
+      try {
+        await fillRecordedValue(page, actionTarget.technicalTargetRefs ?? [], value);
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+        allDiscoveredObjects.push(...scan.objects);
+        executedStepIndices.add(actionTarget.index);
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "found",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+        });
+        planSteps.push({
+          index: planSteps.length + 1,
+          action: "fill",
+          description: actionTarget.action,
+          target: { strategy: "semantic", value: actionTarget.target },
+          recordingActionType: "fill",
+          runtimeDerivedSourceEventRef: actionTarget.runtimeDerivedSourceEventRef,
+          technicalTargetRefs: [...(actionTarget.technicalTargetRefs ?? [])],
+          ...(actionTarget.sourceInteractionId ? { sourceInteractionId: actionTarget.sourceInteractionId } : {}),
+        });
+        continue;
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : "RECORDED_RUNTIME_FILL_FAILED";
+        return failRecordedAction(actionTarget, reason);
+      }
     }
 
     // Jira/TestRail-authored fill steps can name a credential field without embedding a
@@ -8318,7 +9132,30 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         resolvedDataKeys.add(normalizedActionTarget.valueKey);
       }
 
-      const fillValue = dataResolution.value!;
+      // A field a catalog service fills (OTP) carried only a placeholder through the dataset;
+      // its real value is fetched now, when the screen asks for it.
+      const serviceFillValue = await resolveServiceBoundValue(normalizedActionTarget.valueKey, {
+        segmentPosition: normalizedActionTarget.segmentPosition,
+        // The service's own params (e.g. the cédula) come from this run's data, through the
+        // same resolver every fill uses -- never auto-generated for a key the run lacks.
+        readValue: (key) => {
+          const resolution = resolveDataKey(key, {
+            testData: testDataMap,
+            testDataAliases,
+            env: envVars,
+            missingInputBehavior: "skip",
+            autoGenerateConfig,
+            field: key,
+            context: scenario.title,
+            overrides,
+            suggestedData,
+            runtimeEntries: options.runtimeEntries,
+            credentialEnvAliases,
+          });
+          return resolution.status === "resolved" && typeof resolution.value === "string" ? resolution.value : undefined;
+        },
+      });
+      const fillValue = serviceFillValue ?? dataResolution.value!;
       if (normalizedActionTarget.playwrightRecorderEvidence?.kind === "virtual_keyboard") {
         const keyboardResult = await attemptVirtualKeyboardPress(
           page,
@@ -8420,6 +9257,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           if (verifiedForm) {
             activeContainer = { type: "form", reason: "form_opened", containerLocator: verifiedForm,
               verifiedSegmentedInput: true, detectedAt: new Date().toISOString() };
+            activeContainerPageUrl = page.url();
           }
           console.log(`[discovery:case] Segmented input filled: target=${normalizedActionTarget.target} segmentCount=${segmentedResult.segmentCount}`);
           const postFillScan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
@@ -8479,11 +9317,17 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         );
       }
 
+      console.log(
+        `[fill-action-context] step=${actionTarget.index} ` +
+        `selectionQueryOwnerPresent=${Boolean(normalizedActionTarget.selectionQueryOwnerField?.trim())} ` +
+        `associatedFieldPresent=${Boolean(normalizedActionTarget.associatedField?.trim())}`,
+      );
       let resolution = await resolveFillTarget(page, currentSnapshot, normalizedActionTarget.target, activeContainer, {
         rowScope: normalizedActionTarget.rowScope,
         rowRelation: normalizedActionTarget.rowRelation,
         entityScope: normalizedActionTarget.entityScope,
         associatedField: normalizedActionTarget.associatedField,
+        selectionQueryOwnerField: normalizedActionTarget.selectionQueryOwnerField,
         recordedTechnicalTargets: normalizedActionTarget.technicalTargetCandidates as any,
         recordedTechnicalTargetRefs: normalizedActionTarget.technicalTargetRefs,
       });
@@ -8508,6 +9352,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           rowRelation: normalizedActionTarget.rowRelation,
           entityScope: normalizedActionTarget.entityScope,
           associatedField: normalizedActionTarget.associatedField,
+          selectionQueryOwnerField: normalizedActionTarget.selectionQueryOwnerField,
           recordedTechnicalTargets: normalizedActionTarget.technicalTargetCandidates as any,
           recordedTechnicalTargetRefs: normalizedActionTarget.technicalTargetRefs,
         });
@@ -8584,6 +9429,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             rowRelation: actionTarget.rowRelation,
             entityScope: actionTarget.entityScope,
             associatedField: actionTarget.associatedField,
+            selectionQueryOwnerField: actionTarget.selectionQueryOwnerField,
             recordedTechnicalTargets: actionTarget.technicalTargetCandidates as any,
             recordedTechnicalTargetRefs: actionTarget.technicalTargetRefs,
           });
@@ -8851,7 +9697,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         );
       }
 
-      console.log(`[discovery:case] Filling target: ${actionTarget.target} (strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
+      console.log(`[discovery:case] Filling target: ${actionTarget.target} (step=${actionTarget.index}; strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
       const fillObservationCandidate = canonicalAssertionAfterAction(actionTarget.index);
       const observeRuntimeFill = actionTarget.rowScope !== undefined
         && Boolean(fillObservationCandidate?.canonicalAssertion
@@ -8870,6 +9716,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           stepIndex: actionTarget.index,
           observe: observeRuntimeFill,
         });
+        rememberEnteredValue(actionTarget.target, fillValue);
+        const nextAfterFill = parsed.actionTargets.find((candidate) => candidate.index > actionTarget.index);
+        if (nextAfterFill && /^(presionar|click|clic|hacer clic)/i.test(nextAfterFill.action.trim())) {
+          const settle = await settleDependentRequestsAfterFill(page);
+          console.log(`[post-fill-settle] actionIndex=${actionTarget.index} requestsStarted=${settle.requestsStarted} settled=${settle.settled} waitedMs=${settle.waitedMs}`);
+        }
         const fillControlIdentity = await captureRuntimeControlIdentity(resolution.locator);
         const fillIdentity = await captureRuntimeFieldIdentity(resolution.locator);
         if (normalizedActionTarget.valueKey) {
@@ -8885,8 +9737,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           networkEvents: runtimeFillObservation.networkEvents,
         });
         await recordRuntimeFillObservation({ actionTarget, observation: runtimeFillObservation });
+        // Grid editors can disappear after the committed value was verified; bound this optional inspection.
+        const typedLocator = await coerceToEditableFillTarget(resolution.locator, { timeoutMs: 300 });
+        if (!(await isSecretInput(typedLocator))) {
+          filledInputs.remember({ stepIndex: actionTarget.index, label: actionTarget.target, locator: typedLocator, value: fillValue });
+        }
         await reapplyResolvedRuntimeAuthFields();
       } catch (err) {
+        console.log(`[fill-failed] actionIndex=${actionTarget.index} error=${JSON.stringify((err instanceof Error ? err.message : String(err)).replace(/\s+/g, " ").slice(0, 400))}`);
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
@@ -8960,6 +9818,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
         semanticRole: actionTarget.semanticRole,
         relationContext: actionTarget.relationContext,
+        ...(actionTarget.selectionQueryOwnerField ? { selectionQueryOwnerField: actionTarget.selectionQueryOwnerField } : {}),
         controlIdentity: normalizedActionTarget.valueKey
           ? runtimeFieldControlIdentities.get(normalizedActionTarget.valueKey)
           : undefined,
@@ -8980,7 +9839,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         target: { strategy: "text", value: actionTarget.target, exact: false },
         ...(actionTarget.valueKey
           ? { valueKey: actionTarget.valueKey }
-          : { value: fillValue })
+          : { value: fillValue }),
+        ...(actionTarget.selectionQueryOwnerField
+          ? { selectionQueryOwnerField: actionTarget.selectionQueryOwnerField, associatedField: actionTarget.selectionQueryOwnerField }
+          : {})
       });
 
       continue;
@@ -9012,8 +9874,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         recordedTechnicalTargets: actionTarget.technicalTargetCandidates as any,
         recordedTechnicalTargetRefs: actionTarget.technicalTargetRefs,
       });
+      const pressExpectedRoute = actionTarget.expectedRouteAfter?.trim();
+      const pressRequiresRouteTransition = Boolean(pressExpectedRoute && !recordedPostActionSurfaceReached(page.url(), pressExpectedRoute));
+      const pressNetworkObservation = pressRequiresRouteTransition ? startNetworkObservation(page, actionTarget.index) : undefined;
       const pressResult = await executePressActionTarget(actionTarget.key, pressResolution);
       if (!pressResult.ok) {
+        await pressNetworkObservation?.stop({ passiveTail: false });
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
@@ -9086,7 +9952,14 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       // POST-stabilization surface, not the one captured immediately after `.press()`.
       {
         const { waitForStableInteractiveScreen } = await import("../runner/execution-plan-executor");
-        const pressStability = await waitForStableInteractiveScreen(page);
+        const pressStability = pressNetworkObservation && pressExpectedRoute
+          ? await waitForRecordedPressTransition(page, () => recordedPostActionSurfaceReached(page.url(), pressExpectedRoute), () => {
+              const progress = pressNetworkObservation.getProgressState();
+              const pendingCount = progress.pendingFiniteCount ?? 0;
+              return { ...progress, active: pendingCount > 0, pendingCount, requestFailed: progress.sameOriginRequestFailed === true };
+            })
+          : await waitForStableInteractiveScreen(page);
+        await pressNetworkObservation?.stop({ passiveTail: false });
         console.log(
           `[screen-stability] phase=after_press target="${actionTarget.target}" key="${actionTarget.key}" ` +
           `stable=${pressStability.stable} signals=${pressStability.signals.join(",") || "none"} ` +
@@ -9100,7 +9973,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         // that had nothing to do with the actual target. Fail closed here instead, exactly like
         // the sibling `!pressResult.ok` branch above -- same generic, multiproject failure
         // reporting, no new status/reason vocabulary, no app-specific exception.
-        if (!pressStability.stable && pressStability.terminationReason === "request_failed") {
+        if (!pressStability.stable && (pressStability.terminationReason === "request_failed" || pressRequiresRouteTransition)) {
           const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
           currentSnapshot = scan.snapshot;
 
@@ -9162,6 +10035,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         rowRelation: actionTarget.rowRelation,
         entityScope: actionTarget.entityScope,
         associatedField: actionTarget.associatedField,
+        selectionQueryOwnerField: actionTarget.selectionQueryOwnerField,
         recordedTechnicalTargets: actionTarget.technicalTargetCandidates as any,
         recordedTechnicalTargetRefs: actionTarget.technicalTargetRefs,
       });
@@ -9185,6 +10059,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           rowRelation: actionTarget.rowRelation,
           entityScope: actionTarget.entityScope,
           associatedField: actionTarget.associatedField,
+          selectionQueryOwnerField: actionTarget.selectionQueryOwnerField,
           recordedTechnicalTargets: actionTarget.technicalTargetCandidates as any,
           recordedTechnicalTargetRefs: actionTarget.technicalTargetRefs,
         });
@@ -9397,7 +10272,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         );
       }
 
-      console.log(`[discovery:case] Filling target: ${actionTarget.target} (strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
+      console.log(`[discovery:case] Filling target: ${actionTarget.target} (step=${actionTarget.index}; strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
       const literalFillObservationCandidate = canonicalAssertionAfterAction(actionTarget.index);
       const observeLiteralRuntimeFill = actionTarget.rowScope !== undefined
         && Boolean(literalFillObservationCandidate?.canonicalAssertion
@@ -9416,6 +10291,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           stepIndex: actionTarget.index,
           observe: observeLiteralRuntimeFill,
         });
+        rememberEnteredValue(actionTarget.target, actionTarget.value);
         await captureCanonicalFillObservation({
           actionTarget,
           before: runtimeFillObservation.before ?? literalFillObservationBefore,
@@ -9425,6 +10301,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         });
         await recordRuntimeFillObservation({ actionTarget, observation: runtimeFillObservation });
       } catch (err) {
+        console.log(`[fill-failed] actionIndex=${actionTarget.index} error=${JSON.stringify((err instanceof Error ? err.message : String(err)).replace(/\s+/g, " ").slice(0, 400))}`);
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
@@ -9803,6 +10680,30 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       if (selectionResolution.status === "resolved") {
         selectionValue = selectionResolution.value;
         resolvedDataKeys.add(actionTarget.valueKey);
+        // Same-label selects share one valueKey (one dataset slot). The slot value belongs to the
+        // first step that uses it; a later step recorded with a different option keeps its own.
+        const recordedOptionOf = (refs?: string[]) => refs?.map((ref) => /^role:option\|(.+)$/.exec(ref)?.[1])
+          .find((option): option is string => Boolean(option));
+        const contractInteractions: any[] = (scenario as any).canonicalInteractions
+          ?? (scenario.recordingExecutionContract as any)?.canonicalInteractions ?? [];
+        const recordedOptionFor = (candidate: { technicalTargetRefs?: string[]; sourceInteractionId?: string }) =>
+          recordedOptionOf(candidate.technicalTargetRefs)
+          ?? (candidate.sourceInteractionId
+            ? contractInteractions.find((interaction) => interaction.id === candidate.sourceInteractionId)?.recordedValue as string | undefined
+            : undefined);
+        const ownRecordedOption = recordedOptionFor(actionTarget);
+        const slotOwner = parsed.actionTargets.find((candidate) => candidate.actionType === "action_select"
+          && candidate.valueKey === actionTarget.valueKey);
+        const ownerRecordedOption = slotOwner && slotOwner.index < actionTarget.index
+          ? recordedOptionFor(slotOwner)
+          : undefined;
+        console.log(`[recording-replay] sharedSelectionKeyCheck valueKey=${actionTarget.valueKey} step=${actionTarget.index} ownerStep=${slotOwner?.index ?? "none"} ownOptionKnown=${Boolean(ownRecordedOption)} ownerOptionKnown=${Boolean(ownerRecordedOption)} interactions=${contractInteractions.length} sourceId=${(actionTarget as any).sourceInteractionId ?? "none"}`);
+        if (ownRecordedOption && ownerRecordedOption
+          && normalizeText(ownRecordedOption) !== normalizeText(ownerRecordedOption)
+          && normalizeText(ownRecordedOption) !== normalizeText(selectionValue ?? "")) {
+          console.log(`[recording-replay] sharedSelectionKeyOwnValue=true valueKey=${actionTarget.valueKey} step=${actionTarget.index}`);
+          selectionValue = ownRecordedOption;
+        }
       }
     }
 
@@ -9841,6 +10742,24 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         `[target-resolver] candidates target="${actionTarget.target}" count=${postResumeCandidates.length} ` +
         `top=${JSON.stringify(postResumeCandidates.slice(0, 5).map((candidate: any) => candidate.label))}`
       );
+    }
+
+    // A dialog can clear an input the run filled earlier (it recomputes when another field changes).
+    // Say which step noticed it, and when the button this step must press is disabled, type the
+    // cleared values again before resolving it.
+    await filledInputs.reportCleared(actionTarget.index, console.log);
+    // The same repair applies when the target is simply not on the page: an option that only appears
+    // once an earlier input is accepted (insurer cards need the weight) stays hidden while it is empty.
+    const clickTargetText = actionTarget.actionType === "action_click" ? actionTarget.target?.trim() : undefined;
+    const clickTargetBlocked = Boolean(clickTargetText) && (
+      await isButtonTargetDisabled(page, clickTargetText!)
+      || !(await page.getByText(clickTargetText!, { exact: false }).first().isVisible().catch(() => false))
+    );
+    if (clickTargetBlocked) {
+      await filledInputs.describe(console.log);
+      const repaired = await filledInputs.repairCleared(typeLikeUser, console.log);
+      console.log(`[fill-repair] step=${actionTarget.index} targetDisabled=true repaired=${repaired.length}`);
+      if (repaired.length > 0) await page.waitForTimeout(1000);
     }
 
     const resolutionStartedAt = performance.now();
@@ -9899,7 +10818,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       rowRelation: actionTarget.rowRelation,
       entityScope: actionTarget.entityScope,
       associatedField: actionTarget.associatedField,
-      dynamicTargetLabel: actionTarget.dynamicTargetLabel,
+      // A click recorded without any name (a card whose text is run data) is dynamic by nature.
+      dynamicTargetLabel: actionTarget.dynamicTargetLabel
+        ?? (actionTarget.recordingActionType === "click" && actionTarget.target?.trim().toLowerCase() === UNNAMED_RECORDED_CONTROL ? true : undefined),
+      capturedValueTarget: actionTarget.capturedValueTarget,
+      previousClickedLocator,
+      runEnteredValues: [...runEnteredTextValues],
       recordedControlIdentity: actionTarget.recordedControlIdentity,
       activeContainer,
       routeProfile,
@@ -9924,7 +10848,139 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       learnedRouteAuthority: currentSurfaceRouteAuthority ?? undefined,
       expectedTarget: detailTarget && finalProductClickStepIndex === actionTarget.index ? detailTarget : undefined,
     };
+    const currentActionIsRecordedSelection = isRecordedSelectionAction({
+      actionType: actionTarget.actionType,
+      recordingActionType: actionTarget.recordingActionType,
+      technicalTargetRefs: actionTarget.technicalTargetRefs,
+      requestedOption: selectionValue,
+    });
+    const canObserveSelectionSuccessor = currentActionIsRecordedSelection
+      && Boolean(scenario.recordingExecutionContract?.actions?.length)
+      && Boolean(selectionValue?.trim());
+    const currentPosition = orderedItems.indexOf(orderedItem);
+    const successorItem = canObserveSelectionSuccessor
+      ? orderedItems
+        .slice(currentPosition + 1)
+        .find((item: any) => item.type === "action" || item.type === "navigation")
+      : undefined;
+    const successorActionTarget = (successorItem as any)?.actionTarget as ActionTargetItem | undefined;
+    const successorInteractionId = successorActionTarget?.sourceInteractionId?.trim();
+    const successorActionRecorded = Boolean(successorInteractionId
+      && scenario.recordingExecutionContract?.actions?.some((action) => action.interactionId === successorInteractionId));
+    const successorOwnerNames = [
+      successorActionTarget?.selectionField,
+      successorActionTarget?.associatedField,
+      successorActionTarget?.target,
+      ...(successorActionTarget?.technicalTargetRefs ?? [])
+        .map((ref) => ref.match(/^role:combobox\|(.*)$/i)?.[1]?.trim()),
+    ].filter((value): value is string => Boolean(value?.trim()));
+    const successorOwnerBefore = canObserveSelectionSuccessor
+      ? await hasUniqueEnabledRecordedSelectionOwner(page, successorOwnerNames)
+      : { unique: false, enabled: false };
+    const selectionSuccessorDialogCountBefore = canObserveSelectionSuccessor
+      ? await countVisibleDialogSurfaces(page)
+      : -1;
     let resolution = await resolveActionTarget(page, currentSnapshot, actionTarget.target, currentTargetOptions);
+    // The target is this run's transported value (a case number) and it appears on several controls, for example one
+    // inbox row per process of the same case. The recording opened the first one: do the same, in page order, and
+    // say so in the log. Only for a value taken from the run's own capture, never for a literal label.
+    if (capturedValueTargetText && resolution.status === "ambiguous") {
+      const sameTextControls = page.getByText(capturedValueTargetText, { exact: true }).locator("visible=true");
+      const sameTextCount = await sameTextControls.count().catch(() => 0);
+      if (sameTextCount >= 1) {
+        console.log(`[recording-runtime-value] dynamicLabelAmbiguousFirst=true matches=${sameTextCount}`);
+        resolution = {
+          status: "resolved", target: actionTarget.target, locator: sameTextControls.first(), locatorStrategy: "text:captured-value-first",
+          confidence: 0.6, matchReason: "captured_value_first_visible_match", candidateText: capturedValueTargetText, candidates: [],
+        } as typeof resolution;
+      }
+    }
+    // Some recorded custom selects commit by opening the next form surface instead
+    // of retaining a value in the original field. Accept that transition only
+    // when the exact recorded option was clicked and the immediate recorded
+    // successor is uniquely enabled; ARIA dialog semantics are not required.
+    // Run this before any retry can press Escape or reopen the previous field.
+    if (canObserveSelectionSuccessor && resolution.matchReason === "selection_state_not_verified") {
+      const selectionSuccessorDialogCountAfter = await countVisibleDialogSurfaces(page);
+      const successorOwnerInDialog = selectionSuccessorDialogCountAfter === 1
+        ? await hasUniqueEnabledRecordedSelectionOwnerInDialog(page, successorOwnerNames)
+        : { unique: false, enabled: false };
+      const successorOwnerAfter = await hasUniqueEnabledRecordedSelectionOwner(page, successorOwnerNames);
+      const selectionDiagnostics = resolution.selectionDiagnostics;
+      const selectionFailureReason = selectionDiagnostics?.failureReason ?? resolution.matchReason;
+      const verifiedBySuccessorDialog = canVerifyRecordedSelectionBySuccessorDialog({
+        recordingExecutionContractPresent: Boolean(scenario.recordingExecutionContract?.actions?.length),
+        currentActionIsRecordedSelection,
+        currentValueBacked: Boolean(selectionValue?.trim()),
+        selectionFailureReason,
+        requestedOptionExactlyMatched: selectionDiagnostics?.selectedOptionExactlyMatchesRequestedValue === true,
+        optionClickDispatched: selectionDiagnostics?.optionClickDispatched === true,
+        visibleDialogsBefore: selectionSuccessorDialogCountBefore,
+        visibleDialogsAfter: selectionSuccessorDialogCountAfter,
+        successorActionRecorded,
+        successorOwnerUnique: successorOwnerInDialog.unique,
+        successorOwnerEnabled: successorOwnerInDialog.enabled,
+      });
+      const verifiedBySuccessorControl = canVerifyRecordedSelectionBySuccessorControl({
+        recordingExecutionContractPresent: Boolean(scenario.recordingExecutionContract?.actions?.length),
+        currentActionIsRecordedSelection,
+        currentValueBacked: Boolean(selectionValue?.trim()),
+        selectionFailureReason,
+        requestedOptionExactlyMatched: selectionDiagnostics?.selectedOptionExactlyMatchesRequestedValue === true,
+        optionClickDispatched: selectionDiagnostics?.optionClickDispatched === true,
+        successorActionRecorded,
+        successorOwnerReadyBefore: successorOwnerBefore.unique && successorOwnerBefore.enabled,
+        successorOwnerUniqueAfter: successorOwnerAfter.unique,
+        successorOwnerEnabledAfter: successorOwnerAfter.enabled,
+      });
+      const verifiedByOptionDialogTransition = canVerifyRecordedSelectionByDialogTransition({
+        recordingExecutionContractPresent: Boolean(scenario.recordingExecutionContract?.actions?.length),
+        currentActionIsRecordedSelection,
+        currentValueBacked: Boolean(selectionValue?.trim()),
+        selectionFailureReason,
+        requestedOptionExactlyMatched: selectionDiagnostics?.selectedOptionExactlyMatchesRequestedValue === true,
+        optionClickDispatched: selectionDiagnostics?.optionClickDispatched === true,
+        visibleDialogsBefore: selectionSuccessorDialogCountBefore,
+        visibleDialogsAfter: selectionSuccessorDialogCountAfter,
+      });
+      const dialogTransitionAnchor = verifiedByOptionDialogTransition
+        ? await getUniqueVisibleDialogContinuationAnchor(page)
+        : undefined;
+      const verifiedByDialogTransition = verifiedByOptionDialogTransition && Boolean(dialogTransitionAnchor);
+      console.log(`[recorded-selection-successor] verified=${verifiedBySuccessorDialog} dialogCountBefore=${selectionSuccessorDialogCountBefore} dialogCountAfter=${selectionSuccessorDialogCountAfter} exactOption=${selectionDiagnostics?.selectedOptionExactlyMatchesRequestedValue === true} clickDispatched=${selectionDiagnostics?.optionClickDispatched === true} successorActionRecorded=${successorActionRecorded} ownerUnique=${successorOwnerInDialog.unique} ownerEnabled=${successorOwnerInDialog.enabled}`);
+      console.log(`[recorded-selection-successor-control] verified=${verifiedBySuccessorControl} readyBefore=${successorOwnerBefore.unique && successorOwnerBefore.enabled} ownerUnique=${successorOwnerAfter.unique} ownerEnabled=${successorOwnerAfter.enabled} exactOption=${selectionDiagnostics?.selectedOptionExactlyMatchesRequestedValue === true} clickDispatched=${selectionDiagnostics?.optionClickDispatched === true} successorActionRecorded=${successorActionRecorded}`);
+      console.log(`[recorded-selection-dialog-transition] verified=${verifiedByDialogTransition} exactOption=${selectionDiagnostics?.selectedOptionExactlyMatchesRequestedValue === true} clickDispatched=${selectionDiagnostics?.optionClickDispatched === true} dialogCountBefore=${selectionSuccessorDialogCountBefore} dialogCountAfter=${selectionSuccessorDialogCountAfter} interactiveDialog=${Boolean(dialogTransitionAnchor)}`);
+      const verifiedDialogAnchor = verifiedBySuccessorDialog ? successorOwnerInDialog.locator : verifiedByDialogTransition ? dialogTransitionAnchor : undefined;
+      const verifiedContinuationAnchor = (verifiedBySuccessorControl ? successorOwnerAfter.locator : undefined) ?? verifiedDialogAnchor;
+      if (verifiedContinuationAnchor && selectionDiagnostics && (verifiedBySuccessorControl || verifiedBySuccessorDialog || verifiedByDialogTransition)) {
+        resolution = {
+          ...resolution,
+          status: "resolved",
+          // The selected option may replace its value owner with a new dialog. Keep the
+          // uniquely verified successor control when available; otherwise use the unique
+          // interactive dialog as a read-only continuation anchor. selectionApplied prevents
+          // the already-dispatched selection from being clicked a second time.
+          locator: verifiedContinuationAnchor,
+          confidence: 0.98,
+          matchReason: verifiedBySuccessorControl
+            ? "recorded_selection_successor_control_verified"
+            : verifiedBySuccessorDialog
+            ? "recorded_selection_successor_dialog_verified"
+            : "recorded_selection_option_dialog_transition_verified",
+          candidateText: actionTarget.target,
+          selectionApplied: true,
+          selectionDiagnostics: {
+            ...selectionDiagnostics,
+            stateVerified: true,
+            verificationMethod: verifiedBySuccessorControl
+              ? "successor_control_transition"
+              : verifiedBySuccessorDialog ? "successor_dialog" : "option_dialog_transition",
+            overlayClosed: false,
+            failureReason: undefined,
+          },
+        };
+      }
+    }
     // A custom selection popup can close between the owner click's post-action probe and the
     // next recorded option action. If the exact recorded option is now absent, reopen only the
     // immediately preceding recorded selection owner, then retry through the same resolver.
@@ -9994,6 +11050,168 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         candidateText: "",
         candidates: [],
       };
+    }
+    // A dependent dropdown's option list can still be loading (the app fetches it after the previous
+    // field changed, often debounced, so the previous step's post-action sync saw no request yet).
+    // One bounded retry after the page goes quiet; the retry must still verify the selection state, so
+    // a genuinely missing option still fails. Generic: no app/field/value knowledge.
+    if (actionTarget.actionType === "action_select" && selectionValue?.trim() && resolution.status === "not_found") {
+      console.log(`[recorded-selection-retry] phase=settle_data target=${JSON.stringify(actionTarget.target)} reason=${resolution.matchReason ?? "not_found"}`);
+      await page.keyboard.press("Escape").catch(() => undefined);
+      await page.waitForTimeout(1500).catch(() => undefined);
+      await waitForPageReady(page, { networkIdleTimeoutMs: 6000, stabilizationMs: 500 }).catch(() => undefined);
+      const settledSnapshot = await scanCurrentPage(page).catch(() => currentSnapshot);
+      const settledResolution = await resolveActionTarget(page, settledSnapshot, actionTarget.target, currentTargetOptions);
+      const settledVerified = settledResolution.status === "resolved"
+        && settledResolution.selectionApplied === true
+        && settledResolution.selectionDiagnostics?.stateVerified === true;
+      console.log(`[recorded-selection-retry] phase=settle_data_result status=${settledResolution.status} verified=${settledVerified}`);
+      if (settledVerified) {
+        currentSnapshot = settledSnapshot;
+        resolution = settledResolution;
+      }
+    }
+    // A recorded repeat of a control press that was already made earlier in this run, after which an
+    // attach completed and the control is gone (its row moved on to an uploaded/syncing state), has
+    // nothing left to press: the recorded press is already satisfied. Same rule as the promoted runtime.
+    const repeatedRoleRef = actionTarget.recordingActionType === "click" && resolution.status === "not_found"
+      ? actionTarget.technicalTargetRefs?.find((ref) => pressNameKey(ref) !== undefined)
+      : undefined;
+    if (repeatedRoleRef) {
+      const repeatedKey = pressNameKey(repeatedRoleRef);
+      const repeatedTemplate = [...planSteps].reverse().find((planStep) =>
+        planStep.action === "click" && planStep.technicalTargetRefs?.some((ref) => pressNameKey(ref) === repeatedKey));
+      const uploadsDone = await page.evaluate(() => (window as unknown as { __codexUploadSequence?: number }).__codexUploadSequence ?? 0).catch(() => 0);
+      const liveCount = await countLiveControlsForPress(page, repeatedRoleRef);
+      console.log(`[recording-replay] repeatedPressCheck ref=${JSON.stringify(repeatedRoleRef)} key=${repeatedKey} template=${Boolean(repeatedTemplate)} uploadsDone=${uploadsDone} liveCount=${liveCount}`);
+      // The recording saw ONE such control when this press was captured (so it counts as unique), but
+      // earlier presses of the same named control already happened and several are still live: take the
+      // next unused one, as for the earlier presses of that group.
+      if (repeatedTemplate && liveCount >= 2) {
+        const groupName = pressName(repeatedRoleRef);
+        const sequenced = groupName ? await resolveSequencedSiblingForRoleRef(page, `role:button|${groupName}`).catch(() => undefined) : undefined;
+        if (sequenced?.status === "resolved" && sequenced.locator) {
+          console.log(`[recording-replay] repeatedPressSequenced=true name=${JSON.stringify(groupName)} liveSiblings=${liveCount}`);
+          resolution = sequenced;
+        }
+      }
+      if (repeatedTemplate && uploadsDone > 0 && liveCount === 0) {
+        console.log(`[recording-replay] repeatedPressAlreadySatisfied=true ref=${JSON.stringify(repeatedRoleRef)} uploadsCompleted=${uploadsDone}`);
+        const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
+        currentSnapshot = scan.snapshot;
+        allDiscoveredObjects.push(...scan.objects);
+        executedStepIndices.add(actionTarget.index);
+        steps.push({
+          index: actionTarget.index,
+          action: actionTarget.action,
+          status: "found",
+          targetText: actionTarget.target,
+          snapshotUrl: scan.url,
+          snapshotTitle: scan.title,
+          elementsFound: scan.elementsCount,
+          evidencePath: path.join(evidenceDir, `step-${actionTarget.index}-snapshot.json`),
+        });
+        planSteps.push({ ...repeatedTemplate, index: planSteps.length + 1, description: actionTarget.action });
+        continue;
+      }
+    }
+    // The same opener name repeats once per field ("Mostrar opciones") and the recording could not tell them apart, but
+    // the next recorded step picks a named option. The opener that offers that option is the one: open each in turn, keep
+    // the first that shows the option, close it again (the normal click below reopens it).
+    if (actionTarget.recordingActionType === "click" && resolution.status === "not_found") {
+      const nextStep = parsed.actionTargets.find((candidate) => candidate.index > actionTarget.index);
+      const nextOptionText = nextStep?.recordingActionType === "click"
+        && nextStep.technicalTargetRefs?.some((ref) => /^role:option\|/i.test(ref.trim()))
+        ? nextStep.target?.trim() : undefined;
+      const openerName = actionTarget.technicalTargetRefs?.map((ref) => /^role:button\|(.+)$/i.exec(ref.trim())?.[1]?.trim()).find(Boolean);
+      if (nextOptionText && openerName) {
+        const openers = page.getByRole("button", { name: openerName, exact: true }).locator("visible=true");
+        const openerCount = await openers.count().catch(() => 0);
+        for (let index = 0; openerCount >= 2 && openerCount <= 12 && index < openerCount; index += 1) {
+          const opener = openers.nth(index);
+          await opener.click({ timeout: 2000 }).catch(() => undefined);
+          const offered = await page.getByRole("option", { name: nextOptionText, exact: true }).first()
+            .waitFor({ state: "visible", timeout: 1200 }).then(() => true, () => false);
+          await page.keyboard.press("Escape").catch(() => undefined);
+          // Escape does not always close a combobox list: leave every probed opener closed, otherwise the real click
+          // that follows would toggle an open list shut.
+          const stillExpanded = await opener.getAttribute("aria-expanded", { timeout: 500 }).catch(() => null);
+          if (stillExpanded === "true") await opener.click({ timeout: 2000 }).catch(() => undefined);
+          if (!offered) continue;
+          console.log(`[recording-replay] openerOfferingNextOptionResolved=true candidates=${openerCount} index=${index}`);
+          resolution = {
+            status: "resolved",
+            target: actionTarget.target,
+            locator: opener,
+            locatorStrategy: "opener_offering_next_option",
+            confidence: 0.7,
+            matchReason: "only_this_same_name_opener_offers_the_next_recorded_option",
+            candidateText: actionTarget.target,
+            candidates: [],
+          } as typeof resolution;
+          break;
+        }
+      }
+    }
+    // A recorded option click whose list is no longer open: the opener pressed one step ago reports itself collapsed (a
+    // list that closes on its own between two replayed steps). The recording picked the option right after opening it, so
+    // open the same opener again and look once more.
+    if (actionTarget.recordingActionType === "click" && resolution.status === "not_found" && previousClickedLocator
+      && actionTarget.technicalTargetRefs?.some((ref) => /^role:option\|/i.test(ref.trim()))) {
+      const openerExpanded = await previousClickedLocator.getAttribute("aria-expanded", { timeout: 800 }).catch(() => null);
+      if (openerExpanded === "false") {
+        await previousClickedLocator.click({ timeout: 2000 }).catch(() => undefined);
+        await waitForVisualSettle(page, { quietMs: 300, timeoutMs: 3000 }).catch(() => undefined);
+        const reopenedSnapshot = await scanCurrentPage(page).catch(() => currentSnapshot);
+        const reopened = await resolveActionTarget(page, reopenedSnapshot, actionTarget.target, currentTargetOptions);
+        console.log(`[recorded-click-retry] phase=opener_reopened status=${reopened.status}`);
+        if (reopened.status === "resolved") {
+          currentSnapshot = reopenedSnapshot;
+          resolution = reopened;
+        }
+      }
+    }
+    // A recorded click target can be missing only because the app is still producing it (a row's
+    // button appears once its document finishes generating). While a loader is visible, wait for
+    // the page to go quiet (bounded) and resolve once more on a fresh snapshot.
+    if (actionTarget.recordingActionType === "click" && resolution.status === "not_found"
+      && (actionTarget.technicalTargetRefs?.length ?? 0) > 0) {
+      // Server-side work (e.g. a generated document) may take minutes; the wait stays bounded.
+      const pendingWorkDeadline = Date.now() + 600_000;
+      let pendingWorkAttempts = 0;
+      let dialogReopened = false;
+      // Waiting only makes sense while the app is still producing something. A screen that is settled with no loader
+      // visible for several rounds in a row is not going to grow the target: stop instead of spending the whole budget.
+      let quietRounds = 0;
+      while (resolution.status === "not_found" && Date.now() < pendingWorkDeadline) {
+        const settle = await waitForVisualSettle(page, { quietMs: 800, timeoutMs: 15000 }).catch(() => undefined);
+        quietRounds = settle?.settled === true && settle.loaderVisible !== true ? quietRounds + 1 : 0;
+        if (quietRounds > PENDING_WORK_QUIET_ROUNDS) {
+          console.log(`[recorded-click-retry] phase=quiet_exit attempts=${pendingWorkAttempts} quietRounds=${quietRounds}`);
+          break;
+        }
+        await page.waitForTimeout(2000).catch(() => undefined);
+        pendingWorkAttempts += 1;
+        let settledSnapshot = await scanCurrentPage(page).catch(() => currentSnapshot);
+        // The dialog this sequence worked in closed on its own: reopen it once with the click that opened it.
+        if (!dialogReopened && lastDialogOpenerTarget && pendingWorkAttempts >= 2
+          && !(await page.locator('[role="dialog"], [role="alertdialog"], dialog').first().isVisible().catch(() => false))) {
+          const openerResolution = await resolveActionTarget(page, settledSnapshot, lastDialogOpenerTarget, { routeProfile });
+          if (openerResolution.status === "resolved" && openerResolution.locator) {
+            dialogReopened = true;
+            await clickResolvedTarget(openerResolution.locator, false).catch(() => undefined);
+            console.log(`[recorded-click-retry] phase=dialog_reopened opener=${JSON.stringify(lastDialogOpenerTarget)}`);
+            await waitForVisualSettle(page, { quietMs: 800, timeoutMs: 15000 }).catch(() => undefined);
+            settledSnapshot = await scanCurrentPage(page).catch(() => settledSnapshot);
+          }
+        }
+        const settledResolution = await resolveActionTarget(page, settledSnapshot, actionTarget.target, currentTargetOptions);
+        if (settledResolution.status === "resolved") {
+          currentSnapshot = settledSnapshot;
+          resolution = settledResolution;
+        }
+      }
+      console.log(`[recorded-click-retry] phase=pending_work attempts=${pendingWorkAttempts} status=${resolution.status}`);
     }
     console.log(`[critical-path] step=${actionTarget.index} phase=resolver_end durationMs=${Math.round(performance.now() - resolutionStartedAt)} status=${resolution.status}`);
     if (shouldUsePostResumeSnapshot && postResumeCandidates.length > 0) {
@@ -11635,9 +12853,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       continue;
     }
 
-    console.log(`[discovery:case] Clicking target: ${actionTarget.target} (strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
+    console.log(`[discovery:case] Clicking target: ${actionTarget.target} (step=${actionTarget.index}; strategy: ${resolution.locatorStrategy}, confidence: ${resolution.confidence.toFixed(2)})`);
+    previousClickedLocator = finalLocator ?? resolution.locator ?? previousClickedLocator;
 
     const beforeState = await capturePageState(page);
+    const clickOwnerClassTokensBefore = finalLocator
+      ? await readClickOwnerClassTokens(finalLocator)
+      : undefined;
     const stateActionKind = recordingInteractionKind(actionTarget);
     const interactiveStateBefore = stateActionKind
       ? await readInteractiveState(resolution.locator ?? finalLocator)
@@ -12116,6 +13338,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     const structuredActionOwnsSurface = Boolean(options.scenario.recordingExecutionContract?.actions?.length)
       && !options.scenario.authIntent
       && authDetectionBeforeClick.gateType !== "classic_login";
+    // Alerts/toasts already visible when the action starts belong to earlier async work (e.g. a
+    // lookup fired by the previous step that answers late), not to this action. `currentSnapshot`
+    // predates target resolution, which can take seconds, so compare against a fresh scan.
+    const applicationErrorBaseline = await scanCurrentPage(page).catch(() => currentSnapshot);
     const beforeActionObservation = await captureAssertionObservationSnapshot(page as any).catch((error: unknown) => {
       const errorType = error instanceof Error ? error.name : typeof error;
       const errorMessage = error instanceof Error ? error.message.replace(/[\r\n\t]+/g, " ").slice(0, 180) : String(error).slice(0, 180);
@@ -12150,6 +13376,35 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // resolution options are -- reused here read-only, never re-derived.
     const nextActionTarget = (nextExecutableItem as any)?.actionTarget as ActionTargetItem | undefined;
     const nextTargetRequiresRuntimeResolution = nextTargetKnown && crossActionOwnerReadinessRequired(nextActionTarget);
+    const recordingContractActions = scenario.recordingExecutionContract?.actions ?? [];
+    const recordedActionForTarget = (target: ActionTargetItem | undefined) => {
+      const interactionId = target?.sourceInteractionId?.trim();
+      return interactionId
+        ? recordingContractActions.find((candidate) => candidate.interactionId === interactionId)
+        : undefined;
+    };
+    const currentRecordedAction = recordedActionForTarget(actionTarget);
+    const successorRecordedAction = recordedActionForTarget(nextActionTarget);
+    const currentActionIsRecordedOption = (actionTarget.technicalTargetRefs ?? [])
+      .some((ref) => /^role:option\|/i.test(ref.trim()));
+    const sameRecordedPage = Boolean(currentRecordedAction?.pageKey?.trim()
+      && successorRecordedAction?.pageKey?.trim()
+      && currentRecordedAction.pageKey === successorRecordedAction.pageKey);
+    // A recorded same-screen button can load data for a different field that is
+    // selected in the next step. In that shape, the next field being resolvable
+    // is not proof the button ran: the field may already exist while still empty.
+    // Require an observed response/state transition before using next-owner
+    // readiness as the completion signal. Same-field clicks that open a list are
+    // unaffected, as are ordinary non-recorded discovery actions.
+    const crossFieldRecordedOptionFollowsLookup = nextTargetKnown
+      && !currentActionIsRecordedOption
+      && actionTarget.actionType === "action_click"
+      && actionTarget.recordingActionType === "click"
+      && Boolean(actionTarget.associatedField?.trim())
+      && nextActionTarget?.actionType === "action_select"
+      && Boolean(nextActionTarget.associatedField?.trim())
+      && normalizeText(actionTarget.associatedField!) !== normalizeText(nextActionTarget.associatedField!)
+      && (nextActionTarget.technicalTargetRefs ?? []).some((ref) => /^role:option\|/i.test(ref.trim()));
     const sourceRecordedInteraction = actionTarget.sourceInteractionId
       ? scenario.canonicalInteractions?.find((interaction: any) => interaction?.id === actionTarget.sourceInteractionId)
       : undefined;
@@ -12159,11 +13414,15 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     const recordedAfterScreen = typeof sourceRecordedInteraction?.screenAfterRef === "string"
       ? sourceRecordedInteraction.screenAfterRef.trim()
       : "";
-    const recordedSameSurfaceAction = actionTarget.recordedSameSurfaceAction === true || (actionTarget.recordingActionType === "click"
+    // A click followed by the same control again is a retry the user made after waiting: the first click's
+    // work (request/spinner) must finish before the repeat, so the screen is never "settled" early here.
+    const repeatedByNextAction = Boolean(actionTarget.recordedControlIdentity?.trim())
+      && nextActionTarget?.recordedControlIdentity === actionTarget.recordedControlIdentity;
+    const recordedSameSurfaceAction = !repeatedByNextAction && (actionTarget.recordedSameSurfaceAction === true || (actionTarget.recordingActionType === "click"
       && sourceRecordedInteraction?.action === "click"
       && Boolean(recordedBeforeScreen)
       && recordedBeforeScreen === recordedAfterScreen
-      && !String(sourceRecordedInteraction?.routeAfter ?? sourceRecordedInteraction?.expectedRouteAfter ?? "").trim());
+      && !String(sourceRecordedInteraction?.routeAfter ?? sourceRecordedInteraction?.expectedRouteAfter ?? "").trim()));
     if (recordedSameSurfaceAction) {
       console.log(`[recording-replay] sameSurfaceOutcomeCertified=true interactionIdPresent=${Boolean(actionTarget.sourceInteractionId)} reason=identical_recorded_screen_refs`);
     }
@@ -12173,16 +13432,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // completion now requires an actual false->true transition; the other branches that read
     // `nextTargetAvailable` (auth_gate_changed) are unaffected by this baseline.
     const isTargetTextVisible = (elements: any[] | undefined, targetText: string) =>
-      Boolean(targetText && elements?.some((element: any) => {
-        const text = String(element.text ?? element.label ?? element.name ?? element.ariaLabel ?? "").trim();
-        return text.length > 0 && (normalizeText(text) === normalizeText(targetText)
-          || normalizeText(text).includes(normalizeText(targetText)));
-      }));
+      isTargetTextVisibleInSnapshot(elements, targetText, normalizeText);
     const nextTargetVisibleBefore = isTargetTextVisible(currentSnapshot?.elements, nextTargetText);
     let postActionSyncSignal: string | undefined;
     let postActionNextTargetVisible = false;
     let postActionNextTargetReady = false;
+    let recordedPostActionSuccessorStableProbeCount = 0;
+    let recordedSuccessorOwnerResolutionAttempted = false;
+    let recordedSuccessorOwnerLocator: Locator | undefined;
     let nextTargetVisibleLogged = false;
+    let crossFieldRefreshGateLogged = false;
     let domMutationDiagnosticLogged = false;
     let stateDiagnosticLogged = false;
     let scopedMutationDiagnosticLogged = false;
@@ -12195,6 +13454,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // `undefined` (never computed, e.g. observer authority insufficient) must never be treated
     // as "no effect" -- only an explicit `false` from a reliable scoped observation counts.
     let clickCausalEffectDetected: boolean | undefined;
+    // The owner-scoped observer only sees the clicked control. Many controls act elsewhere on the page
+    // (a list, a toast, another section); the page-wide observation diff is the evidence for those.
+    let pageDomChangedSinceClick = false;
     // FIRST_LOSS fix (task-20260927222226-69ef2ab2): the owner-scoped MutationObserver already
     // computed below (`scoped.childList`) recorded a brand-new subtree mounting (e.g. a modal)
     // but was wired only into the diagnostic-only `clickCausalEffectDetected` (property
@@ -12236,6 +13498,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     });
     let routeObservationAuthority: LearnedRouteAuthority | null = null;
     let routeObservationReplayWritten = false;
+    let observedRecordedDestinationUrl: string | undefined;
     if (routeObservationEligible && recordedPostActionExpected) {
       const identity = {
         recordingId: routeObservationRecordingId!,
@@ -12248,14 +13511,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       await seedCaptureObservation(identity, recordedPostActionExpected, preClickUrl);
     }
     const isRecordedPostActionReached = (): boolean =>
-      recordedPostActionSurfaceReached(page.url(), recordedPostActionExpected, routeObservationAuthority ?? undefined);
+      recordedPostActionSurfaceReached(page.url(), recordedPostActionExpected, routeObservationAuthority ?? undefined)
+      || Boolean(observedRecordedDestinationUrl && page.url() === observedRecordedDestinationUrl);
     const recordedSurfaceReconcilesWithNextTarget = (nextTargetReady: boolean): boolean =>
       Boolean(
-        recordedPostActionExpected
-        && recordedPostActionStableProbeCount >= RECORDED_SURFACE_STABLE_PROBES
-        && nextTargetReady
-        && nextActionTarget?.expectedRouteBefore
-        && recordedPostActionSurfaceReached(recordedPostActionExpected, nextActionTarget.expectedRouteBefore),
+        (recordedPostActionExpected
+          && recordedPostActionStableProbeCount >= RECORDED_SURFACE_STABLE_PROBES
+          && nextTargetReady
+          && nextActionTarget?.expectedRouteBefore
+          && recordedPostActionSurfaceReached(recordedPostActionExpected, nextActionTarget.expectedRouteBefore))
+        || (observedRecordedDestinationUrl && page.url() === observedRecordedDestinationUrl),
       );
     const postActionCompletionProbe = async (): Promise<{ completed: boolean; signal?: string }> => {
       const iteration = ++postActionProbeIteration;
@@ -12272,11 +13537,17 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       const observationDiff = beforeActionObservation && afterActionObservation
         ? diffAssertionObservation(beforeActionObservation, afterActionObservation, progress.responseObserved)
         : undefined;
+      const stateCandidateMutations = diffStateCandidates(beforeActionObservation, afterActionObservation);
       // TEMPORARY DIAGNOSTIC (this ticket only): `domMutation` passed to
       // resolvePostActionSynchronization is the flat `changed` boolean, which cannot tell a
       // focus-only mutation apart from a real validation/form change. Log the already-computed,
       // more precise sub-fields once per action so a physical run can show which one fired --
       // no behavior/control-flow change.
+      // Focus-only changes do not count; a content/form/state/navigation change anywhere on the page does.
+      if (observationDiff && (observationDiff.validationMutation || observationDiff.formStateChanged
+        || observationDiff.navigationMutation || observationDiff.stateMutation === true)) {
+        pageDomChangedSinceClick = true;
+      }
       if (observationDiff?.changed && !domMutationDiagnosticLogged) {
         domMutationDiagnosticLogged = true;
         console.log(`[dom-mutation-diagnostic] actionIndex=${actionTarget.index} changedPaths=${observationDiff.changedPaths.join(",")} validationMutation=${observationDiff.validationMutation} accessibilityMutation=${observationDiff.accessibilityMutation} formStateChanged=${observationDiff.formStateChanged} navigationMutation=${observationDiff.navigationMutation}`);
@@ -12286,17 +13557,16 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       // property channel that changed via the redacted state-candidate fingerprints -- never a
       // value, never a completion signal. Purely observational: it changes no control flow.
       if (observationDiff?.stateMutation !== true && !stateDiagnosticLogged) {
-        const stateMutations = diffStateCandidates(beforeActionObservation, afterActionObservation);
         stateDiagnosticLogged = true;
         const beforeCount = beforeActionObservation?.stateCandidates?.length ?? 0;
         const afterCount = afterActionObservation?.stateCandidates?.length ?? 0;
-        const diagnosticReason = stateMutations.length > 0
+        const diagnosticReason = stateCandidateMutations.length > 0
           ? "mutation_detected"
           : beforeCount === 0 && afterCount === 0
             ? "no_state_candidates"
             : "candidates_unchanged";
-        console.log(`[state-diagnostic] actionIndex=${actionTarget.index} beforeSnapshotAvailable=${Boolean(beforeActionObservation)} afterSnapshotAvailable=${Boolean(afterActionObservation)} snapshotChanged=${observationDiff?.changed ?? false} changedPaths=${observationDiff?.changedPaths.join(",") ?? ""} stateCandidatesBefore=${beforeCount} stateCandidatesAfter=${afterCount} stateMutations=${stateMutations.length} diagnosticLogEligible=${stateMutations.length > 0} diagnosticReason=${diagnosticReason}`);
-        for (const mutation of stateMutations.slice(0, 6)) {
+        console.log(`[state-diagnostic] actionIndex=${actionTarget.index} beforeSnapshotAvailable=${Boolean(beforeActionObservation)} afterSnapshotAvailable=${Boolean(afterActionObservation)} snapshotChanged=${observationDiff?.changed ?? false} changedPaths=${observationDiff?.changedPaths.join(",") ?? ""} stateCandidatesBefore=${beforeCount} stateCandidatesAfter=${afterCount} stateMutations=${stateCandidateMutations.length} diagnosticLogEligible=${stateCandidateMutations.length > 0} diagnosticReason=${diagnosticReason}`);
+        for (const mutation of stateCandidateMutations.slice(0, 6)) {
           console.log(`[state-diagnostic] actionIndex=${actionTarget.index} tag=${mutation.tag} role=${mutation.role ?? ""} inputType=${mutation.inputType ?? ""} contentEditable=${mutation.contentEditable} changedProperties=${mutation.changedProperties.join(",")} fingerprintBefore=${mutation.fingerprintBefore} fingerprintAfter=${mutation.fingerprintAfter}`);
         }
       }
@@ -12339,10 +13609,12 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       const scanStart = performance.now();
       const afterSnapshot = await scanCurrentPage(page).catch(() => undefined);
       const scanCurrentPageMs = performance.now() - scanStart;
-      const recordedPostActionReachedNow = isRecordedPostActionReached();
+      const exactRecordedPostActionReachedNow = recordedPostActionSurfaceReached(
+        page.url(), recordedPostActionExpected, routeObservationAuthority ?? undefined,
+      );
       if (!recordedPostActionExpected) {
         recordedPostActionStableProbeCount = RECORDED_SURFACE_STABLE_PROBES;
-      } else if (recordedPostActionReachedNow) {
+      } else if (exactRecordedPostActionReachedNow) {
         recordedPostActionStableProbeCount += 1;
       } else {
         recordedPostActionStableProbeCount = 0;
@@ -12358,13 +13630,48 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         markCriticalPath("next_target_visible");
       }
       postActionNextTargetVisible = postActionNextTargetVisible || nextTargetVisible;
+      const routeChangedNow = safePathname(page.url()) !== preClickPathname;
+      const applicationErrorVisible = hasNewVisibleApplicationError({
+        before: applicationErrorBaseline.elements,
+        after: afterSnapshot?.elements ?? [],
+        sameSurface: preClickUrl === page.url(),
+      }, isCredentialRejectionMessage, nonBlockingApplicationErrorTextFragments);
+      const recordedPostActionRequiredForSuccessor = Boolean(recordedPostActionExpected)
+        && !recordedSurfaceReconcilesWithNextTarget(false);
+      const currentUrlStillOnRecordedPreActionSurface = page.url() === preClickUrl
+        && Boolean(recordedPreActionExpected)
+        && recordedPostActionSurfaceReached(page.url(), recordedPreActionExpected, routeObservationAuthority ?? currentSurfaceRouteAuthority ?? undefined);
+      const successorRouteMatchesNextAction = Boolean(recordedPostActionExpected?.trim()
+        && nextActionTarget?.expectedRouteBefore?.trim()
+        && recordedPostActionSurfaceReached(nextActionTarget.expectedRouteBefore, recordedPostActionExpected));
+      const actionEffectObserved = progress.responseObserved
+        || clickCausalEffectDetected === true
+        || ownerSubtreeMutationDetected === true
+        || pageDomChangedSinceClick
+        || observationDiff?.changed === true;
+      const actionSettled = !progress.active
+        && progress.pendingCount === 0
+        && !progress.terminalClientError;
+      const successorActionIsReadOnlyToResolve = nextActionTarget?.actionType === "action_click"
+        || nextActionTarget?.actionType === "action_fill";
+      const recordedSuccessorProbeEligible = actionTarget.recordingActionType === "click"
+        && Boolean(actionTarget.sourceInteractionId)
+        && recordedPostActionRequiredForSuccessor
+        && currentUrlStillOnRecordedPreActionSurface
+        && sameRecordedPage
+        && successorRouteMatchesNextAction
+        && !nextTargetVisibleBefore
+        && actionEffectObserved
+        && actionSettled
+        && !applicationErrorVisible
+        && successorActionIsReadOnlyToResolve;
       // Reuses the SAME shared resolver every structured action already goes through -- never a
       // new selector pipeline. A label being visible is not the same as the owner being
       // resolvable: only `status === "resolved"` counts as ready (ambiguous/not_found/
       // locator_resolution_failed all correctly stay not-ready and never guess a best candidate).
       const resolverStart = performance.now();
       let resolverStatus = "not_run";
-      const nextTargetResolution = nextTargetRequiresRuntimeResolution && nextActionTarget && afterSnapshot
+      let nextTargetResolution = nextTargetRequiresRuntimeResolution && nextActionTarget && afterSnapshot
         ? await resolveActionTarget(page, afterSnapshot, nextActionTarget.target, {
             semanticRole: nextActionTarget.semanticRole,
             associatedField: nextActionTarget.associatedField,
@@ -12381,23 +13688,82 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           }).catch(() => undefined)
         : undefined;
       resolverStatus = nextTargetResolution?.status ?? resolverStatus;
-      const nextTargetReady = resolverStatus === "resolved";
+      let nextTargetReady = resolverStatus === "resolved";
       postActionNextTargetReady = postActionNextTargetReady || nextTargetReady;
-      const resolveNextTargetMs = performance.now() - resolverStart;
+      let resolveNextTargetMs = performance.now() - resolverStart;
       const nextTargetReadyCheckMs = 0;
       if ((nextTargetVisible || nextTargetReady) && !nextTargetFirstObservableLogged) {
         nextTargetFirstObservableLogged = true;
         console.log(`[next-target-first-observable] actionIndex=${actionTarget.index} iteration=${iteration} elapsedSinceClickMs=${Math.round(performance.now() - criticalPathStartedAt)} url=${safePathname(page.url())} visible=${nextTargetVisible} ready=${nextTargetReady}`);
       }
+      if (recordedSuccessorProbeEligible && nextActionTarget && afterSnapshot && !recordedSuccessorOwnerResolutionAttempted) {
+        // If the SPA kept the prior URL, resolve the exact next recorded click/fill owner once.
+        // Resolving a successor selection here could dispatch it, so this fallback is read-only.
+        recordedSuccessorOwnerResolutionAttempted = true;
+        if (!nextTargetResolution) {
+          nextTargetResolution = await resolveActionTarget(page, afterSnapshot, nextActionTarget.target, {
+            semanticRole: nextActionTarget.semanticRole,
+            associatedField: nextActionTarget.associatedField,
+            actionType: nextActionTarget.actionType as "action_click" | "action_fill",
+            recordingActionType: nextActionTarget.recordingActionType,
+            recordedTechnicalTargets: nextActionTarget.technicalTargetCandidates as any,
+            recordedTechnicalTargetRefs: nextActionTarget.technicalTargetRefs,
+            learnedRouteAuthority: currentSurfaceRouteAuthority ?? undefined,
+            routeProfile,
+          }).catch(() => undefined);
+        }
+        if (nextTargetResolution?.status === "resolved" && nextTargetResolution.locator) {
+          recordedSuccessorOwnerLocator = nextTargetResolution.locator;
+          resolverStatus = "resolved";
+          nextTargetReady = true;
+          postActionNextTargetReady = true;
+        }
+        resolveNextTargetMs = performance.now() - resolverStart;
+      }
+      const recordedSuccessorOwnerReadyNow = Boolean(recordedSuccessorOwnerLocator
+        && await recordedSuccessorOwnerLocator.isVisible().catch(() => false)
+        && await recordedSuccessorOwnerLocator.isEnabled().catch(() => false));
+      if (recordedSuccessorProbeEligible && recordedSuccessorOwnerReadyNow) {
+        recordedPostActionSuccessorStableProbeCount += 1;
+      } else {
+        recordedPostActionSuccessorStableProbeCount = 0;
+      }
+      const recordedPostActionSuccessorConfirmed = hasRecordedSuccessorSurfaceProof({
+        recordedPostActionSurfaceRequired: recordedPostActionRequiredForSuccessor,
+        recordedPostActionSurfaceReached: recordedPostActionStableProbeCount >= RECORDED_SURFACE_STABLE_PROBES
+          || isRecordedPostActionReached(),
+        successorRouteMatchesNextAction,
+        currentUrlStillOnRecordedPreActionSurface,
+        sameRecordedPage,
+        successorOwnerWasTextVisibleBefore: nextTargetVisibleBefore,
+        successorOwnerReadyNow: recordedSuccessorOwnerReadyNow,
+        actionEffectObserved,
+        actionSettled,
+        applicationError: applicationErrorVisible,
+        stableSuccessorProbes: recordedPostActionSuccessorStableProbeCount,
+        requiredStableProbes: RECORDED_SURFACE_STABLE_PROBES,
+      });
+      if (recordedPostActionSuccessorConfirmed) {
+        console.log(`[recorded-postcondition] accepted=stable_recorded_successor_owner actionIndex=${actionTarget.index} sameRecordedPage=true stableOwnerProbes=${recordedPostActionSuccessorStableProbeCount}/${RECORDED_SURFACE_STABLE_PROBES}`);
+      }
+      if (!observedRecordedDestinationUrl && matchesObservedRecordedDestination({
+        sameBrowserPage: true,
+        routeChanged: safePathname(page.url()) !== preClickPathname,
+        applicationError: applicationErrorVisible,
+        nextTargetVisible,
+        previousUrl: preClickUrl,
+        currentUrl: page.url(),
+        expectedRouteAfter: recordedPostActionExpected,
+        nextExpectedRouteBefore: nextActionTarget?.expectedRouteBefore,
+      })) {
+        observedRecordedDestinationUrl = page.url();
+        console.log(
+          `[recorded-postcondition] accepted=observed_route_transition nextTargetVisible=true ` +
+          `expected=${safePathname(recordedPostActionExpected!)} actual=${safePathname(observedRecordedDestinationUrl)}`
+        );
+      }
+      const recordedPostActionReachedNow = isRecordedPostActionReached();
       console.log(`[post-action-probe-timing] actionIndex=${actionTarget.index} iteration=${iteration} url=${safePathname(page.url())} iterationStartMs=${Math.round(iterationStart)} snapshotMs=${Math.round(snapshotMs)} scanCurrentPageMs=${Math.round(scanCurrentPageMs)} resolveNextTargetMs=${Math.round(resolveNextTargetMs)} nextTargetVisibleCheckMs=${Math.round(nextTargetVisibleCheckMs)} nextTargetReadyCheckMs=${nextTargetReadyCheckMs} nextTargetVisible=${nextTargetVisible} nextTargetReady=${nextTargetReady} resolverStatus=${resolverStatus} recordedSurfaceReached=${recordedPostActionReachedNow} recordedSurfaceStableProbes=${recordedPostActionStableProbeCount}/${RECORDED_SURFACE_STABLE_PROBES} iterationTotalMs=${Math.round(performance.now() - iterationStart)}`);
-      const applicationErrorVisible = Boolean(afterSnapshot?.elements.some((element: any) => {
-        if (element.visible === false) return false;
-        const role = String(element.role ?? "").toLowerCase();
-        const text = String(element.text ?? element.label ?? element.name ?? "");
-        return ((role === "alert" || role === "status" || role === "dialog" || role === "alertdialog")
-          && /error|invalid|incorrect|failed|fall[oó]|inv[aá]lid/i.test(text))
-          || isCredentialRejectionMessage(text);
-      }));
       const terminalAuthClientError = isTerminalAuthenticationClientError({
         beforeAuthDetected: authDetectionBeforeClick.detected,
         afterAuthDetected: afterAuth?.detected === true,
@@ -12422,11 +13788,38 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       // already established pre-click for post-hoc diagnostics) -- never a new resolver -- and
       // requires a strict causal transition (`hasCausalSelectionTransition`), never "already
       // selected" alone.
-      const targetSelectionStateChanged = stateActionKind
-        && isActionSurfaceStableForStateProbe(preClickUrl, page.url(), afterSnapshot?.url ?? page.url())
+      const stateProbeSurfaceStable = isActionSurfaceStableForStateProbe(preClickUrl, page.url(), afterSnapshot?.url ?? page.url());
+      const structuredSelectionStateChanged = stateActionKind && stateProbeSurfaceStable
         ? hasCausalSelectionTransition(interactiveStateBefore, await readInteractiveState(resolution.locator ?? finalLocator))
         : false;
-      const routeChangedNow = safePathname(page.url()) !== preClickPathname;
+      const clickOwnerClassTokensAfter = finalLocator && stateProbeSurfaceStable
+        ? await readClickOwnerClassTokens(finalLocator)
+        : undefined;
+      const selectionClassTransition = hasCausalSelectionClassTransition(clickOwnerClassTokensBefore, clickOwnerClassTokensAfter);
+      if (selectionClassTransition) {
+        console.log(`[selection-class-state] actionIndex=${actionTarget.index} target="${actionTarget.target}" stateChanged=true evidence=resolved_owner_class_token`);
+      }
+      const targetSelectionStateChanged = structuredSelectionStateChanged || selectionClassTransition;
+      const crossFieldRefreshEffectObserved = hasCrossFieldLookupRefreshEffect({
+        responseObserved: progress.responseObserved,
+        nextTargetBecameVisible,
+        formStateChanged: observationDiff?.formStateChanged,
+        validationMutation: observationDiff?.validationMutation,
+        navigationMutation: observationDiff?.navigationMutation,
+        structuredStateMutation: observationDiff?.stateMutation,
+        // The helper only counts state candidates that existed before the click; a newly appearing
+        // counter/banner alone must not certify a cross-field lookup refresh.
+        stateCandidateMutations,
+        ownerSubtreeMutation: ownerSubtreeMutationDetected,
+        targetSelectionStateChanged,
+        selectionApplied: resolution.selectionApplied,
+      });
+      const nextTargetReadyForOutcome = nextTargetReady
+        && (!crossFieldRecordedOptionFollowsLookup || crossFieldRefreshEffectObserved);
+      if (crossFieldRecordedOptionFollowsLookup && nextTargetReady && !crossFieldRefreshEffectObserved && !crossFieldRefreshGateLogged) {
+        crossFieldRefreshGateLogged = true;
+        console.log("[post-action-sync] crossFieldOptionReadinessBlocked=true reason=no_lookup_response_or_dependent_state_change");
+      }
       // OBSERVATION TIMING: write only once this action has already produced its own causal
       // route transition (watcher armed before the click, technical target resolved, structured
       // execution authority -- all already established above) and no application error is
@@ -12464,6 +13857,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         clickCausalEffectDetected,
         applicationError: applicationErrorVisible,
         authGateChanged: authChanged,
+        authenticationRequestPending: authDetectionBeforeClick.detected && !structuredActionOwnsSurface && actionNetworkObservation.hasPendingActionRequest(),
         authenticationBoundaryStillActive: authDetectionBeforeClick.detected
           && afterAuth?.detected === true
           && !authChanged
@@ -12475,10 +13869,11 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         nextTargetBecameVisible,
         nextTargetKnown,
         nextTargetRequiresRuntimeResolution,
-        nextTargetReady,
+        nextTargetReady: nextTargetReadyForOutcome,
         causalClickEffect: clickCausalEffectDetected === true,
         targetSelectionStateChanged,
         selectionApplied: resolution.selectionApplied,
+        crossFieldLookupRefreshObserved: crossFieldRecordedOptionFollowsLookup && crossFieldRefreshEffectObserved,
         terminalDownloadObserved: watchTerminalDownload && actionDownloadObserved,
         screenFingerprintChanged: observationDiff?.navigationMutation || observationDiff?.validationMutation,
         structuredStateMutation: observationDiff?.stateMutation === true,
@@ -12489,9 +13884,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         // surface, that shared route expectation is stale evidence, not a second navigation
         // requirement. This is structural and route-generic: no app labels, paths, or sleeps.
         recordedPostActionSurfaceRequired: Boolean(recordedPostActionExpected)
-          && !recordedSurfaceReconcilesWithNextTarget(nextTargetReady),
+          && !recordedSurfaceReconcilesWithNextTarget(nextTargetReadyForOutcome),
         recordedPostActionSurfaceReached: recordedPostActionStableProbeCount >= RECORDED_SURFACE_STABLE_PROBES
-          || recordedSurfaceReconcilesWithNextTarget(nextTargetReady),
+          || recordedSurfaceReconcilesWithNextTarget(nextTargetReadyForOutcome),
+        recordedPostActionSuccessorConfirmed,
         recordedSameSurfaceAction,
         // A terminal recorded click is an executed action once its own observer window has
         // settled and shows a completed response or confirmed causal DOM effect. Its captured
@@ -12595,11 +13991,20 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         };
         await resolveOpenedRecordedDynamicSelect();
         const isRuntimeBackedSelection = actionTarget.actionType === "action_select" && Boolean(selectionValue);
-        const finalTagName = isRuntimeBackedSelection
-          ? await finalLocator.evaluate((element) => element.tagName.toLowerCase()).catch(() => "")
-          : "";
+        const resolverAlreadyAppliedRecordedOption = shouldSkipClickAfterVerifiedSelection({
+          selectionApplied: resolution.selectionApplied,
+          selectionStateVerified: resolution.selectionDiagnostics?.stateVerified,
+          locatorStrategy: resolution.locatorStrategy,
+        });
+        const finalTagName = await readPendingSelectionTag(finalLocator, {
+          runtimeBacked: isRuntimeBackedSelection,
+          selectionApplied: resolution.selectionApplied === true,
+          dynamicSelectionApplied: recordedDynamicSelectApplied,
+        });
         if (recordedDynamicSelectApplied) {
           console.log(`[discovery:case] Dynamic recorded select applied from unique live option actionIndex=${actionTarget.index}`);
+        } else if (resolverAlreadyAppliedRecordedOption) {
+          console.log(`[discovery:case] Verified recorded option already applied; click skipped actionIndex=${actionTarget.index}`);
         } else if (isRuntimeBackedSelection && resolution.selectionApplied) {
           console.log(`[discovery:case] Runtime-backed custom selection already applied and state verified strategy=${resolution.locatorStrategy ?? "unknown"}`);
         } else if (isRuntimeBackedSelection && finalTagName === "select") {
@@ -12659,18 +14064,30 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
             console.log(`[click-owner-identity] actionIndex=${actionTarget.index} promotedToAncestor=${promotedToAncestor} tag=${clickOwnerIdentity?.tag ?? "unknown"} role=${clickOwnerIdentity?.role ?? ""} id=${clickOwnerIdentity?.id ?? ""} testId=${clickOwnerIdentity?.testId ?? ""} hasOwnOnClick=${clickOwnerIdentity?.hasOnClick ?? false} disabled=${clickOwnerIdentity?.disabled ?? false} pointerEvents=${clickOwnerIdentity?.pointerEvents ?? ""} boundingBox=${clickOwnerIdentity?.boundingBox ?? ""} nearestAncestorClickableTag=${clickOwnerIdentity?.ancestorClickableTag ?? "none"}`);
             console.log(`[click-primitive] actionIndex=${actionTarget.index} primitive=locator.click`);
             activityTargetBox = await finalLocator.boundingBox().catch(() => null);
+            dialogVisibleBeforeClick = await page.locator('[role="dialog"], [role="alertdialog"], dialog').first().isVisible().catch(() => false);
             markCriticalPath("click_dispatch_start");
             await clickResolvedTarget(finalLocator, false);
             await resolveOpenedRecordedDynamicSelect?.();
             markCriticalPath("click_dispatch_end");
           }
         }
-      } catch {
+      } catch (firstClickError) {
         try {
-          console.log(`[discovery:case] Retrying with force click...`);
-          await clickResolvedTarget(finalLocator, true);
+          console.log(`[discovery:case] Retrying with force click... firstAttempt=${JSON.stringify((firstClickError instanceof Error ? firstClickError.message : String(firstClickError)).replace(/\s+/g, ' ').slice(0, 300))}`);
+          // The previous step's confirm click left its dialog open (it only recalculated the form):
+          // the dialog still blocks this click, so answer that same confirm once and click normally.
+          const dialogConfirmRetried = await retryPendingDialogConfirm(page, steps[steps.length - 1]?.targetText, actionTarget.target);
+          await clickResolvedTarget(finalLocator, !dialogConfirmRetried);
           await resolveOpenedRecordedDynamicSelect?.();
         } catch (err) {
+        // A dismiss control ("Cerrar") that removed itself before the click (a toast or notice that timed out) has done
+        // what the recorded click was for: the control is gone. Anything else that cannot be clicked still fails.
+        console.log(`[click-failed] actionIndex=${actionTarget.index} target=${JSON.stringify(actionTarget.target)} error=${JSON.stringify((err instanceof Error ? err.message : String(err)).replace(/\s+/g, ' ').slice(0, 400))}`);
+        const dismissAlreadyGone = DISMISS_CONTROL_NAME.test(actionTarget.target.trim())
+          && await finalLocator.count().catch(() => 1) === 0;
+        if (dismissAlreadyGone) {
+          console.log(`[click-skipped] actionIndex=${actionTarget.index} target=${JSON.stringify(actionTarget.target)} reason=dismiss_control_already_gone`);
+        } else {
         const scan = await scanAndCollectObjects(page, actionTarget.index, evidenceDir);
         currentSnapshot = scan.snapshot;
 
@@ -12706,6 +14123,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
           failedAtStep, failedTarget, failedReason, allDiscoveredObjects
           );
         }
+        }
       }
       } finally {
         await releaseAcceptedScopeMarker(page, acceptedScopeRuntimeMarkerForClick);
@@ -12729,10 +14147,18 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     console.log("[discovery:case] Waiting after click...");
     // Check for loading indicators post-click before proceeding
     const { waitForStableInteractiveScreen, startPagePointerActivityHeartbeat } = await import("../runner/execution-plan-executor");
+    // A click that opened the file picker already has its observable outcome (the chooser, answered by
+    // the next attach step). Other rows' spinners (documents still syncing) must not hold it for the
+    // whole safety cap: a manual upload takes seconds, this wait used to cost ~2 min per document.
     let stability = await waitForStableInteractiveScreen(page, {
+            // The picker can open a moment after the click: end the wait as soon as it does.
+            earlyExit: () => hasPendingFileChooser(page),
             progressProbe: () => actionNetworkObservation.getProgressState(),
             waitForPendingTransport: true,
             completionProbe: postActionCompletionProbe,
+            // A declared route is the completion condition. A quiet gap between
+            // backend operations must not trigger a retry while creation can still finish.
+            completionDeadline: recordedPostActionExpected && !isRecordedPostActionReached() ? "absolute" : "idle",
             activityTarget: finalLocator,
             activityTargetBox,
           });
@@ -12740,7 +14166,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     const actionNetworkEvents = await actionNetworkObservation.stop({
       passiveTail: !stability.stable && stability.reason === "loading_timeout"
     });
-    const actionServerError = findActionServerError(actionNetworkEvents);
+    let actionServerError = findActionServerError(actionNetworkEvents);
     const relevantNetworkEvents = actionNetworkEvents.filter((event) =>
       event.resourceType === "fetch" ||
       event.resourceType === "xhr" ||
@@ -12784,7 +14210,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // transport or an unmet recorded surface.
     const noNetworkActivityAtAll = relevantNetworkEvents.length === 0
       && !relevantNetworkEvents.some((event) => event.state === "pending");
-    const inPlaceCausalEffectConfirmed = clickCausalEffectDetected === true && noNetworkActivityAtAll;
+    const inPlaceCausalEffectConfirmed = (clickCausalEffectDetected === true || pageDomChangedSinceClick) && noNetworkActivityAtAll;
     // A click that triggers a hard/full navigation can outrun the network/DOM observers entirely;
     // the final URL still proves a route transition. Compare route identity here (including
     // hash-router paths) without changing the pathname-only route authority used above.
@@ -12826,10 +14252,10 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       `terminationReason=${stability.terminationReason}`
     );
     markCriticalPath("screen_stability_returned");
-    const afterAuthSnapshot = authDetectionBeforeClick.detected
+    let afterAuthSnapshot = authDetectionBeforeClick.detected
       ? await scanCurrentPage(page).catch(() => undefined)
       : undefined;
-    const afterAuthDetection = afterAuthSnapshot ? detectAuthGate(afterAuthSnapshot) : undefined;
+    let afterAuthDetection = afterAuthSnapshot ? detectAuthGate(afterAuthSnapshot) : undefined;
     const authErrorSurfaceObserved = Boolean(afterAuthSnapshot?.elements.some((element: any) => {
       if (element.visible === false) return false;
       const role = String(element.role ?? "").toLowerCase();
@@ -12846,19 +14272,27 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       authErrorSurfaceObserved,
       structuredActionOwnsSurface,
     });
-    const authenticationOutcome = authBoundaryAttempted
-      ? classifyAuthenticationOutcome({
-          beforeAuthDetected: authDetectionBeforeClick.detected,
-          afterAuthDetected: Boolean(afterAuthDetection?.detected),
-          events: relevantNetworkEvents,
-          afterPath: finalPath,
-          loadingObserved: !stability.stable
-            || stability.signals.some((signal) => /spinner|loading|pending/i.test(signal))
-            || pendingAtTimeout.length > 0,
-          errorSurfaceObserved: authErrorSurfaceObserved,
-          businessCandidateObserved: finalPath !== safePathname(actionTarget.expectedRouteBefore ?? "")
-            && (postActionNextTargetVisible || postActionSyncSignal === "next_target_visible"),
-          nextRecordedBusinessTargetVisible: postActionNextTargetVisible,
+    const classifyAuthNow = (): AuthenticationOutcome => classifyAuthenticationOutcome({
+      beforeAuthDetected: authDetectionBeforeClick.detected,
+      afterAuthDetected: Boolean(afterAuthDetection?.detected),
+      events: relevantNetworkEvents,
+      afterPath: finalPath,
+      loadingObserved: !stability.stable
+        || stability.signals.some((signal) => /spinner|loading|pending/i.test(signal))
+        || pendingAtTimeout.length > 0,
+      errorSurfaceObserved: authErrorSurfaceObserved,
+      businessCandidateObserved: finalPath !== safePathname(actionTarget.expectedRouteBefore ?? "")
+        && (postActionNextTargetVisible || postActionSyncSignal === "next_target_visible"),
+      nextRecordedBusinessTargetVisible: postActionNextTargetVisible,
+    });
+    const initialAuthOutcome = authBoundaryAttempted ? classifyAuthNow() : undefined;
+    // A login the server accepted may still be showing the login page while the app loads: re-scan for a bounded time
+    // before calling it a navigation failure.
+    const authenticationOutcome = initialAuthOutcome
+      ? await settleAuthenticationTransition(initialAuthOutcome, async () => {
+          afterAuthSnapshot = await scanCurrentPage(page).catch(() => afterAuthSnapshot);
+          afterAuthDetection = afterAuthSnapshot ? detectAuthGate(afterAuthSnapshot) : afterAuthDetection;
+          return classifyAuthNow();
         })
       : undefined;
     if (authenticationOutcome) {
@@ -12932,6 +14366,31 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         authFailure
       );
     }
+    // A lookup button (e.g. "Depurar") whose backend answered with an error or did not move the screen
+    // is pressed again, as a person does after "intente nuevamente"; buttons with side effects never are.
+    if (!expectedAuthenticationRejection
+      && (actionServerError || recordedPostActionPending || postActionSyncSignal === "application_error")
+      && isRetryableLookupClick(actionTarget)) {
+      const retryBudget = clickRetryBudget();
+      for (let attempt = 1; attempt <= retryBudget && (actionServerError || recordedPostActionPending || postActionSyncSignal === "application_error"); attempt += 1) {
+        console.log(`[click-retry] actionIndex=${actionTarget.index} target="${actionTarget.target}" attempt=${attempt}/${retryBudget} reason=${actionServerError ? `http_${actionServerError.status}` : postActionSyncSignal === "application_error" ? "application_error" : "postcondition_not_reached"}`);
+        await page.waitForTimeout(2000 * attempt);
+        // A press that cannot be dispatched yet (a loading overlay from the first attempt still covers the button)
+        // is not the end of the retries: the next attempt waits longer and tries again, within the same budget.
+        try { await clickResolvedTarget(resolution.locator!, false); } catch (retryClickError) {
+          console.log(`[click-retry] actionIndex=${actionTarget.index} attempt=${attempt} dispatchFailed=true reason=${(retryClickError instanceof Error ? retryClickError.message : "unknown").split("\n")[0].slice(0, 120)}`);
+          continue;
+        }
+        await page.waitForTimeout(1500);
+        postActionSyncSignal = undefined;
+        const retried = await postActionCompletionProbe().catch(() => ({ completed: false } as { completed: boolean; signal?: string }));
+        if (retried.completed && postActionSyncSignal !== "application_error") {
+          recordedPostActionPending = false;
+          actionServerError = undefined; // the repeated press reached the recorded outcome: the first answer was transient
+          console.log(`[click-retry] actionIndex=${actionTarget.index} recovered=true attempt=${attempt}`);
+        }
+      }
+    }
     if (actionServerError) {
       failedAtStep = actionTarget.index;
       failedTarget = actionTarget.target;
@@ -12973,7 +14432,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     // scoped-mutation authority), never a new resolver/observer. `undefined` (observer authority
     // insufficient -- never reliably measured) must never be treated as "no effect": only an
     // explicit `false` counts, so this never fires on an app this diagnostic simply cannot see.
-    if (recordedPostActionPending && clickCausalEffectDetected === false) {
+    if (recordedPostActionPending && clickCausalEffectDetected === false && !pageDomChangedSinceClick) {
       console.log(`[discovery:case] click dispatched but produced no observable causal effect; stopping actionIndex=${actionTarget.index}`);
       failedAtStep = actionTarget.index;
       failedTarget = actionTarget.target;
@@ -13002,7 +14461,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       return (path === "/" || path === "") && preClickPathname !== "/" && preClickPathname !== "";
     };
     if (recordedPostActionPending && rootRegressionDetected()) {
-      console.log(`[discovery:case] app appears reset to root surface after action; skipping click retries actionIndex=${actionTarget.index}`);
+      console.log(`[discovery:case] app appears reset to root surface after action; stopping after dispatched click actionIndex=${actionTarget.index}`);
       failedAtStep = actionTarget.index;
       failedTarget = actionTarget.target;
       failedReason = "APP_SESSION_RESET_TO_ROOT_DETECTED";
@@ -13017,24 +14476,36 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         failedAtStep, failedTarget, failedReason, allDiscoveredObjects
       );
     }
-    // A single re-click was confirmed insufficient (a fresh physical run still failed after
-    // one retry): up to POST_ACTION_CLICK_RETRY_LIMIT bounded re-clicks of the SAME
-    // finalLocator -- never a new resolution, never a weaker completion signal -- give the
-    // real click more chances. `isRecordedPostActionReached()` is the same strict
-    // recorded-surface check used everywhere else, so retries that still do not reach the
-    // recorded surface fall straight through to the unchanged failure below.
-    for (
-      let retryAttempt = 1;
-      recordedPostActionPending && retryAttempt <= POST_ACTION_CLICK_RETRY_LIMIT && !rootRegressionDetected();
-      retryAttempt += 1
-    ) {
-      console.log(`[discovery:case] recorded post-action surface not reached; retrying click attempt=${retryAttempt}/${POST_ACTION_CLICK_RETRY_LIMIT} actionIndex=${actionTarget.index}`);
-      await clickResolvedTarget(finalLocator, false).catch(() => undefined);
-      await waitForPageReady(page, { networkIdleTimeoutMs: 5000, stabilizationMs: 500 }).catch(() => undefined);
-      recordedPostActionPending = Boolean(recordedPostActionExpected) && !isRecordedPostActionReached();
+    // A runtime-created destination can arrive after the bounded action probe. Re-run the
+    // same read-only post-action observer once before failing so it can bind a same-tab route
+    // to the recorded successor using the existing route-lineage + visible-target proof.
+    // The original action is never dispatched again: it may have caused a business side effect
+    // even when its recorded destination was not reached.
+    if (recordedPostActionPending && !rootRegressionDetected()) {
+      await postActionCompletionProbe().catch(() => ({ completed: false }));
+      const lateObservedDestinationConfirmed = Boolean(
+        observedRecordedDestinationUrl
+        && page.url() === observedRecordedDestinationUrl
+        && postActionSyncSignal !== "application_error",
+      );
+      if (lateObservedDestinationConfirmed) {
+        recordedPostActionPending = false;
+        stability = {
+          ...stability,
+          stable: true,
+          signals: [...stability.signals, "recorded_post_action_surface"],
+          waitState: "completed",
+          terminationReason: "stable",
+          reason: undefined,
+        };
+        console.log(
+          `[recorded-postcondition] accepted=late_observed_destination ` +
+          `actionIndex=${actionTarget.index} sameRecordedPage=true nextTargetVisible=true`,
+        );
+      }
     }
     if (recordedPostActionPending && rootRegressionDetected()) {
-      console.log(`[discovery:case] app appears reset to root surface after action; stopping retries actionIndex=${actionTarget.index}`);
+      console.log(`[discovery:case] app appears reset to root surface after action; stopping after dispatched click actionIndex=${actionTarget.index}`);
       failedAtStep = actionTarget.index;
       failedTarget = actionTarget.target;
       failedReason = "APP_SESSION_RESET_TO_ROOT_DETECTED";
@@ -13070,6 +14541,22 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
         pendingObjectsPath, pendingPlansPath, evidenceDir,
         failedAtStep, failedTarget, failedReason, allDiscoveredObjects
       );
+    }
+    // The last action has no next target for the completion probe to wait for. An idle stall with nothing pending and
+    // no active loader after it means the page settled (a closing dialog changes the DOM but not the route or network),
+    // so it is not a loading failure. Earlier actions keep the stall as a failure: they still have a next step to reach.
+    if (
+      !stability.stable
+      && stability.terminationReason === "stalled"
+      && !stability.activeAsyncOperation
+      && pendingAtTimeout.length === 0
+      && orderedItems.indexOf(orderedItem) === orderedItems.length - 1
+    ) {
+      console.log(
+        `[discovery:case] Final action settled without a next target; accepting idle stall actionIndex=${actionTarget.index} ` +
+        `waitedMs=${stability.waitedMs ?? "n/a"}`,
+      );
+      stability = { ...stability, stable: true, waitState: "completed", terminationReason: "stable", reason: undefined };
     }
     if (!stability.stable) {
       failedAtStep = actionTarget.index;
@@ -13263,7 +14750,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
 
     // Capture evidence after click completes and page stabilizes
     // Skip generic screenshot when detail screenshot will capture the same state
-    const willCaptureDetailScreenshot = detailTarget && finalProductClickStepIndex === actionTarget.index && evidenceRec;
+    const willCaptureDetailScreenshot = detailCaptureOwnsAction(detailTarget, finalProductClickStepIndex, actionTarget.index, evidenceRec as any);
     if (willCaptureDetailScreenshot) {
       // Increment evidence index without capturing screenshot - detail capture will use this index
       evidenceStepIndex++;
@@ -13761,9 +15248,13 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       nextTargets: parsed.actionTargets.filter(a => a.index > actionTarget.index).slice(0, 5).map(a => a.target),
       expectedAssertions: parsed.assertionTargets.filter(a => a.index >= actionTarget.index).map(a => a.target)
     });
+    // A click that opened a native file chooser changes nothing in the page, but the chooser is its
+    // outcome: pressing again (force/JS click) would only stack a second chooser and lose the first.
+    const openedFileChooser = await hasPendingFileChooser(page).catch(() => false);
     const initialObservableOutcome = initialPostClickUiResult.success
       || Boolean(postActionSyncSignal)
-      || Boolean(resolution.selectionApplied);
+      || Boolean(resolution.selectionApplied)
+      || openedFileChooser;
     const clickRetryPolicy = resolveClickRetryPolicy({
       recordingActionType: actionTarget.recordingActionType,
       actionType: actionTarget.actionType,
@@ -13774,6 +15265,9 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
     });
 
     markCriticalPath("semantic_verification_end");
+    if (!dialogVisibleBeforeClick && (initialPostClickUiResult.reason === "dialog_opened" || initialPostClickUiResult.reason === "modal_opened")) {
+      lastDialogOpenerTarget = actionTarget.target;
+    }
     console.log(`[discovery:case] Transition detected: ${transitionDetected ? "yes" : "no"}`);
     console.log(
       `[click-outcome] targetType=${actionTarget.recordingActionType ?? actionTarget.actionType ?? "click"} ` +
@@ -13911,6 +15405,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
                 containerLocator: containerLocator || undefined,
                 detectedAt: new Date().toISOString()
               };
+              activeContainerPageUrl = page.url();
               
               console.log(`[discovery:case] Active container set: type="${activeContainer.type}" reason="${activeContainer.reason}"${activeContainer.containerLocator ? ' with locator' : ' (metadata only)'}`);
             }
@@ -14371,6 +15866,15 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       markFunctionalStepAfterAuth(actionTarget.target, authGateState);
     }
 
+    const completedActionUrl = page.url();
+    if (preClickUrl !== completedActionUrl) {
+      lastObservedRouteTransition = {
+        actionIndex: actionTarget.index,
+        page,
+        urlBefore: preClickUrl,
+        urlAfter: completedActionUrl,
+      };
+    }
     executedStepIndices.add(actionTarget.index);
     if (typeof currentActionOrder === "number") {
       executedActionOrders.add(currentActionOrder);
@@ -14393,6 +15897,7 @@ export async function runCaseDiscovery(options: CaseDiscoveryOptions): Promise<C
       controlIdentity: currentSnapshot.elements.find((element) => element.id === resolution.candidateId)?.controlIdentity,
       locatorStrategy: resolution.locatorStrategy,
       assertionDiagnostics: postActionSyncSignal ? { postActionSyncSignal } : undefined,
+      ...(resolution.certifiedTechnicalTarget ? { technicalTargetCandidates: [{ ...resolution.certifiedTechnicalTarget, validatedByInteraction: true }] } : {}),
       // FIRST_LOSS fix (job d84277e1-d0f1-4eb3-885c-e7f9c7b7d6e4): this is the standard-click
       // success persistence path -- it never copied actionTarget.associatedField, so a
       // field-scoped-fallback click that physically PASSED during Discovery (tier=3, recorded)

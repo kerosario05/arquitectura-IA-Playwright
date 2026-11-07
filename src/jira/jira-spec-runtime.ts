@@ -22,6 +22,7 @@ import { chooseJiraMatchingOption, jiraOptionTextMatches, jiraOptionSearchRoot, 
 import { isJiraRangeMetadataAssertion, jiraNumericValueMatches, jiraRangeMetadataAssertionMatches, setJiraRangeControlValue } from "./jira-range-control";
 import { captureJiraEvidenceScreenshot, readJiraScreenIdentity, waitForJiraScreenSettled } from "./jira-evidence-capture";
 import { observeJiraFieldValidation } from "./jira-field-validation";
+import { resolveTestFile } from "../test-files/test-file-store";
 
 export { assertJiraDownloadContent as assertJiraSpecDownloadContent, assertJiraTableBoundDownload as assertJiraSpecTableBoundDownload } from "./jira-download-assertion";
 
@@ -1195,6 +1196,24 @@ export async function resolveJiraSpecValue(key: string, appSlug: string, section
   const manifestValue = manifest?.entries.find(entry => normalizeKey(entry.key) === requestedKey)?.value;
   if (manifestValue?.trim()) return manifestValue;
   throw new Error("JIRA_SPEC_REQUIRED_DATA_MISSING");
+}
+
+/** Resolves a project-scoped fixture reference and attaches bytes only to the exact observed file control. */
+export async function attachJiraSpecFile(page: Page, target: PlanTarget, fileRef: string, appSlug: string): Promise<void> {
+  const label = typeof target === "string" ? target : target.value ?? target.name ?? target.hint;
+  if (!label || !fileRef) throw new Error("JIRA_SPEC_FILE_TARGET_OR_REFERENCE_MISSING");
+  const input = page.getByLabel(label, { exact: true });
+  // count() does not wait: let a field rendered by the previous navigation attach before judging uniqueness.
+  await input.first().waitFor({ state: "attached", timeout: 10000 }).catch(() => undefined);
+  if (await input.count() !== 1 || !await input.evaluate(element => element instanceof HTMLInputElement && element.type === "file")) {
+    throw new Error("JIRA_SPEC_FILE_INPUT_NOT_UNIQUELY_IDENTIFIED");
+  }
+  const asset = await resolveTestFile(appSlug, fileRef);
+  const bytes = await fs.readFile(asset.path);
+  await input.setInputFiles({ name: asset.filename, mimeType: asset.contentType, buffer: bytes });
+  if (!await input.evaluate(element => (element as HTMLInputElement).files?.length === 1)) {
+    throw new Error("JIRA_SPEC_FILE_UPLOAD_NOT_CONFIRMED");
+  }
 }
 
 async function resolveJiraCaseRuntimeValue(input: {

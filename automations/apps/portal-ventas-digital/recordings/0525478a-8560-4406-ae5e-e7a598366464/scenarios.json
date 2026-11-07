@@ -364,7 +364,7 @@
           "event-29"
         ],
         "stepTemplate": "Ingresar [otp_digit_2] en \"OTP digit 2\"",
-        "renderedStep": "Ingresar \"••••••\" en \"OTP digit 2\"",
+        "renderedStep": "Ingresar \"â€¢â€¢â€¢â€¢â€¢â€¢\" en \"OTP digit 2\"",
         "valueKey": "otp_digit_2",
         "interactionId": "interaction-29",
         "sensitive": true,
@@ -382,7 +382,7 @@
           "event-30"
         ],
         "stepTemplate": "Ingresar [otp_digit_3] en \"OTP digit 3\"",
-        "renderedStep": "Ingresar \"••••••\" en \"OTP digit 3\"",
+        "renderedStep": "Ingresar \"â€¢â€¢â€¢â€¢â€¢â€¢\" en \"OTP digit 3\"",
         "valueKey": "otp_digit_3",
         "interactionId": "interaction-30",
         "sensitive": true,
@@ -400,7 +400,7 @@
           "event-31"
         ],
         "stepTemplate": "Ingresar [otp_digit_4] en \"OTP digit 4\"",
-        "renderedStep": "Ingresar \"••••••\" en \"OTP digit 4\"",
+        "renderedStep": "Ingresar \"â€¢â€¢â€¢â€¢â€¢â€¢\" en \"OTP digit 4\"",
         "valueKey": "otp_digit_4",
         "interactionId": "interaction-31",
         "sensitive": true,
@@ -418,7 +418,7 @@
           "event-32"
         ],
         "stepTemplate": "Ingresar [otp_digit_5] en \"OTP digit 5\"",
-        "renderedStep": "Ingresar \"••••••\" en \"OTP digit 5\"",
+        "renderedStep": "Ingresar \"â€¢â€¢â€¢â€¢â€¢â€¢\" en \"OTP digit 5\"",
         "valueKey": "otp_digit_5",
         "interactionId": "interaction-32",
         "sensitive": true,
@@ -436,7 +436,7 @@
           "event-34"
         ],
         "stepTemplate": "Ingresar [otp_digit_6] en \"OTP digit 6\"",
-        "renderedStep": "Ingresar \"••••••\" en \"OTP digit 6\"",
+        "renderedStep": "Ingresar \"â€¢â€¢â€¢â€¢â€¢â€¢\" en \"OTP digit 6\"",
         "valueKey": "otp_digit_6",
         "interactionId": "interaction-34",
         "sensitive": true,
@@ -1531,11 +1531,11 @@
     "readiness": {
       "functionalReadiness": true,
       "dataReadiness": true,
-      "technicalReadiness": false,
+      "technicalReadiness": true,
       "oracleReadiness": true,
       "reviewReadiness": true,
       "publicationContentReadiness": true,
-      "executionReadiness": false,
+      "executionReadiness": true,
       "publicationReadiness": true,
       "missingInputs": [],
       "datasetAuthorityMismatches": [],
@@ -1881,11 +1881,11 @@
         "needsReview": true
       }
     ],
-    "testRailCaseId": 54881,
+    "testRailCaseId": 57169,
     "testRailDestination": {
       "projectId": "56",
       "suiteId": "1731",
-      "sectionId": "4903"
+      "sectionId": "4755"
     }
   }
 ]

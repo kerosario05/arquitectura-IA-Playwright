@@ -29,6 +29,8 @@ export type RoutePolicy = {
   path: string;
   /** All of these are required. Empty means "any authenticated caller". */
   permissions: PermissionKey[];
+  /** At least one of these is required, on top of `permissions`. */
+  anyPermissions?: PermissionKey[];
   project: ProjectScopeMode;
   /** The router enforces its own policy (auth, users, roles). */
   skip?: boolean;
@@ -40,6 +42,14 @@ const R = (
   permissions: PermissionKey[],
   project: ProjectScopeMode = "none",
 ): RoutePolicy => ({ method, path, permissions, project });
+
+/** Like `R`, but any one of `anyPermissions` is enough. */
+const ANY = (
+  method: string,
+  path: string,
+  anyPermissions: PermissionKey[],
+  project: ProjectScopeMode = "none",
+): RoutePolicy => ({ method, path, permissions: [], anyPermissions, project });
 
 const SKIP = (path: string): RoutePolicy => ({
   method: "*",
@@ -67,11 +77,23 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("PUT", "/api/projects/shared-connections/:id", ["projects.edit"]),
   R("POST", "/api/projects/web", ["projects.create"]),
   R("POST", "/api/projects/mobile", ["projects.create"]),
+  R("GET", "/api/projects/:slug/request-cancellation-config", ["projects.view"], "required"),
+  R("PUT", "/api/projects/:slug/request-cancellation-config", ["projects.edit"], "required"),
+  R("GET", "/api/projects/:slug/data-services", ["projects.view"], "required"),
+  R("PUT", "/api/projects/:slug/data-services/data-cedulas", ["projects.edit"], "required"),
+  R("POST", "/api/projects/:slug/data-services/data-cedulas/generate", ["tests.launch"], "required"),
+  R("POST", "/api/projects/:slug/requests/cancellation-preview", ["tests.launch"], "required"),
+  R("POST", "/api/projects/:slug/requests/cancel", ["tests.launch"], "required"),
+  R("POST", "/api/projects/:slug/requests/cancel-all", ["tests.launch"], "required"),
   R("GET", "/api/projects/:slug", ["projects.view"], "required"),
   R("PUT", "/api/projects/:slug", ["projects.edit"], "required"),
   R("POST", "/api/projects/:slug/refresh-status", ["projects.edit"], "required"),
   R("PUT", "/api/projects/:slug/jira", ["projects.edit"], "required"),
   R("PUT", "/api/projects/:slug/testrail", ["projects.edit"], "required"),
+  R("GET", "/api/projects/:slug/repository", ["projects.view"], "required"),
+  R("PUT", "/api/projects/:slug/repository", ["projects.edit"], "required"),
+  R("DELETE", "/api/projects/:slug/repository", ["projects.edit"], "required"),
+  R("POST", "/api/projects/:slug/repository/test", ["projects.edit"], "required"),
   R("POST", "/api/projects/:slug/materialize", ["projects.materialize"], "required"),
   R("DELETE", "/api/projects/:slug", ["projects.delete"], "required"),
   R("GET", "/api/projects/:projectSlug/cases/:caseId/input-requirements", ["projects.view"], "required"),
@@ -86,6 +108,11 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("PUT", "/api/projects/:projectId/generation-config", ["projects.edit"]),
 
   // --- runs --------------------------------------------------------------
+  // Static fixture paths must precede the parameterized `:jobId` policies.
+  R("GET", "/api/runs/test-files", ["tests.launch"], "required"),
+  R("GET", "/api/runs/workflow-applications", ["tests.launch"], "required"),
+  R("PUT", "/api/runs/workflow-applications", ["tests.launch"], "required"),
+  R("POST", "/api/runs/test-files", ["tests.launch"], "required"),
   R("POST", "/api/runs/scenario-preview", ["tests.launch"], "required"),
   R("POST", "/api/runs/discovery-batch", ["tests.launch"], "required"),
   R("POST", "/api/runs/sprint", ["tests.launch"], "optional"),
@@ -113,6 +140,7 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("GET", "/api/recordings/:recordingId/trace", ["recordings.view"], "required"),
   R("GET", "/api/recordings/:recordingId/semantic", ["recordings.view"], "required"),
   R("PUT", "/api/recordings/:recordingId/scenario-value", ["recordings.derive"], "required"),
+  R("POST", "/api/recordings/:recordingId/scenario-step/remove", ["recordings.derive"], "required"),
   R("PUT", "/api/recordings/:recordingId/scenario-title", ["recordings.derive"], "required"),
   R("POST", "/api/recordings/:recordingId/suggestion-drafts", ["recordings.derive"], "required"),
   R("GET", "/api/recordings/:recordingId/goal-coverage", ["recordings.view"], "required"),
@@ -122,20 +150,32 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("DELETE", "/api/recordings/:recordingId/suggestion-drafts/:scenarioId", ["recordings.derive"], "required"),
   R("POST", "/api/recordings/:recordingId/stop", ["recordings.create"], "required"),
   R("POST", "/api/recordings/:recordingId/control", ["recordings.create"], "required"),
+  // Multipart parsing happens inside the route; its handler validates recording project access.
+  R("POST", "/api/recordings/:recordingId/live-files", ["recordings.create"], "optional"),
   R("POST", "/api/recordings/:recordingId/derive", ["recordings.derive"], "required"),
   R("GET", "/api/recordings/:recordingId/derivation", ["recordings.view"], "required"),
   R("POST", "/api/recordings/:recordingId/execute", ["tests.launch"], "required"),
   R("POST", "/api/recordings/:recordingId/testrail", ["recordings.promote"], "required"),
   R("DELETE", "/api/recordings/:recordingId", ["recordings.create"], "required"),
+
+  // --- Data_Cedulas source service --------------------------------------
+  R("GET", "/api/data-cedulas/databases", ["tests.launch"]),
+  R("GET", "/api/data-cedulas/clientes/nuevo", ["tests.launch"]),
+  R("GET", "/api/data-cedulas/ready/status", ["tests.launch"]),
+  R("POST", "/api/data-cedulas/ready/start", ["tests.launch"]),
+  R("POST", "/api/data-cedulas/ready/stop", ["tests.launch"]),
   R("GET", "/api/recordings/:recordingId", ["recordings.view"], "required"),
 
   // --- local agent (Chromium on the user's PC for recordings) ----------
   // The agent itself never calls these: its WebSockets authenticate apart
   // (agent id + optional LOCAL_AGENT_KEY). These are the panel's questions
   // about the agent on the caller's own PC.
-  R("GET", "/api/local-agent/status", ["recordings.view"]),
+  // Lanzar pruebas mobile también usa el emulador del PC del usuario.
+  ANY("GET", "/api/local-agent/status", ["recordings.view", "tests.launch"]),
   R("POST", "/api/local-agent/install", ["recordings.create"]),
-  R("POST", "/api/local-agent/select", ["recordings.create"]),
+  ANY("POST", "/api/local-agent/select", ["recordings.create", "tests.launch"]),
+  ANY("POST", "/api/local-agent/android/emulator", ["recordings.create", "tests.launch"]),
+  ANY("POST", "/api/local-agent/android/emulator/stop", ["recordings.create", "tests.launch"]),
 
   // --- executions --------------------------------------------------------
   R("GET", "/api/executions", ["executions.view"], "optional"),
@@ -159,6 +199,8 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("GET", "/api/test-design/jira/*", ["testdesign.view"]),
   R("GET", "/api/test-design/testrail/*", ["testdesign.view"]),
   R("GET", "/api/test-design/drafts", ["testdesign.view"], "optional"),
+  // Dashboard summary: readable from the dashboard or the module itself, narrowed to the caller's drafts.
+  ANY("GET", "/api/test-design/metrics", ["dashboard.view", "testdesign.view"], "optional"),
   R("POST", "/api/test-design/drafts", ["testdesign.generate"], "optional"),
   R("GET", "/api/test-design/drafts/:draftId", ["testdesign.view"]),
   R("PUT", "/api/test-design/drafts/:draftId", ["testdesign.generate"]),
@@ -169,6 +211,35 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   R("POST", "/api/test-design/drafts/:draftId/publish/testrail", ["testdesign.publish_testrail"]),
   R("POST", "/api/test-design/drafts/:draftId/testrail/reconcile", ["testdesign.publish_testrail"]),
   R("POST", "/api/test-design/drafts/:draftId/publish/jira", ["testdesign.publish_jira"]),
+  R("GET", "/api/test-design/files", ["testdesign.view"], "required"),
+  R("GET", "/api/test-design/workflow-applications", ["testdesign.view"], "required"),
+  R("PUT", "/api/test-design/workflow-applications", ["testdesign.generate"], "required"),
+  R("POST", "/api/test-design/files", ["testdesign.generate"], "required"),
+
+  // --- service catalog (reusable services such as OTP, per-project settings) ---
+  R("GET", "/api/service-catalog", ["services.view"], "optional"),
+  R("GET", "/api/service-catalog/projects/:slug/services", ["services.view"], "required"),
+  R("PUT", "/api/service-catalog/projects/:slug/services/:serviceKey", ["services.edit"], "required"),
+  R("POST", "/api/service-catalog/projects/:slug/services/:serviceKey/test", ["services.edit"], "required"),
+  // Bindings live on recordings, test-design stories and cases: whoever may prepare
+  // a scenario in one of those modules may choose the service that fills its fields.
+  ANY("GET", "/api/service-bindings", ["recordings.view", "testdesign.view", "tests.launch", "services.view"], "required"),
+  ANY("POST", "/api/service-bindings/view", ["recordings.view", "testdesign.view", "tests.launch", "services.view"], "required"),
+  ANY("PUT", "/api/service-bindings", ["recordings.derive", "testdesign.generate", "tests.launch"], "required"),
+  ANY("DELETE", "/api/service-bindings", ["recordings.derive", "testdesign.generate", "tests.launch"], "required"),
+
+  // --- test planning (test-plan-<HU>.md files in the project's git repo) ---
+  R("GET", "/api/test-planning/projects", ["testplanning.view"], "optional"),
+  R("GET", "/api/test-planning/projects/:slug/branches", ["testplanning.view"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/fetch", ["testplanning.sync"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/pull", ["testplanning.sync"], "required"),
+  R("GET", "/api/test-planning/projects/:slug/plans", ["testplanning.view"], "required"),
+  R("GET", "/api/test-planning/projects/:slug/plan", ["testplanning.view"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/plan/preview", ["testplanning.edit"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/plan/commit", ["testplanning.edit", "testplanning.commit"], "required"),
+  R("POST", "/api/test-planning/projects/:slug/plan/accept", ["testplanning.edit"], "required"),
+  // Dashboard summary: readable from the dashboard or the module itself, narrowed to the caller's projects.
+  ANY("GET", "/api/test-planning/metrics", ["dashboard.view", "testplanning.view"], "optional"),
 
   // --- external catalogues (read-only reference data) ---------------------
   R("GET", "/api/jira/*", ["dashboard.view"]),
@@ -346,6 +417,15 @@ export function enforceRoutePolicy(): RequestHandler {
       deny(res, 403, "forbidden", "No tienes permiso para esta acción", {
         requiredPermissions: policy.permissions,
         missingPermissions: missing,
+      });
+      return;
+    }
+
+    const anyOf = policy.anyPermissions ?? [];
+    if (anyOf.length > 0 && !anyOf.some((permission) => hasPermission(principal, permission))) {
+      deny(res, 403, "forbidden", "No tienes permiso para esta acción", {
+        requiredAnyPermissions: anyOf,
+        missingPermissions: anyOf,
       });
       return;
     }

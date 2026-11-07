@@ -1,0 +1,31 @@
+1) automations\apps\portal-comercial\sections\api-tests\cases\preview-001-crear-cliente-v2\.candidate-validation-2280-1793361462219.spec.ts:14:5 › Crear Cliente V2
+Error: PROMOTED_UNEXPECTED_BUSINESS_ERROR
+at ..\..\src\automations\runtime\promoted-spec-runtime.ts:3556
+3554 |         throw new Error("PROMOTED_FINAL_OUTCOME_UNVERIFIED");
+3555 |       }
+> 3556 |       const signals = await readPromotedOutcomeSignals(this.page, true);
+|               ^
+3557 |       const routeOf = (url: string) => { try { const parsed = new URL(url); return parsed.origin + parsed.pathname + (parsed.hash.startsWith("#/") ? parsed.hash.split("?")[0] : ""); } catch { return url; } };
+3558 |       const finalActionNavigated = !check.hasFinalAssertion
+3559 |         && Boolean(check.urlBeforeFinalAction)
+at PromotedSpecRuntime.verifyScenarioOutcome (C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\src\automations\runtime\promoted-spec-runtime.ts:3556:15)
+at Proxy.<anonymous> (C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\src\automations\runtime\promoted-spec-runtime.ts:6460:13)
+at C:\MisProyectos\arquitectura-IA-Playwright-feature-auth-gate\automations\apps\portal-comercial\sections\api-tests\cases\preview-001-crear-cliente-v2\.candidate-validation-2280-1793361462219.spec.ts:508:5
+attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--a3cef-3361462219-Crear-Cliente-V2\test-failed-1.png
+────────────────────────────────────────────────────────────────────────────────────────────────
+attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--a3cef-3361462219-Crear-Cliente-V2\video.webm
+────────────────────────────────────────────────────────────────────────────────────────────────
+Error Context: test-results\apps\portal-comercial-sections--a3cef-3361462219-Crear-Cliente-V2\error-context.md
+attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+test-results\apps\portal-comercial-sections--a3cef-3361462219-Crear-Cliente-V2\trace.zip
+Usage:
+npx playwright show-trace test-results\apps\portal-comercial-sections--a3cef-3361462219-Crear-Cliente-V2\trace.zip
+────────────────────────────────────────────────────────────────────────────────────────────────
+1 failed
+automations\apps\portal-comercial\sections\api-tests\cases\preview-001-crear-cliente-v2\.candidate-validation-2280-1793361462219.spec.ts:14:5 › Crear Cliente V2
+(node:34292) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:34292) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)

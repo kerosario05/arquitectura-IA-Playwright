@@ -1,0 +1,5718 @@
+{
+  "version": "1.0",
+  "source": "discovery_generated",
+  "status": "validated",
+  "scenario": {
+    "source": "testrail",
+    "externalId": "PREVIEW-001",
+    "caseId": 0,
+    "title": "Crear Cliente V2"
+  },
+  "requiredData": [
+    {
+      "key": "usuario",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "contrasena",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "numero_de_identificacion",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "contacto",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "nombre_de_la_empresa_actividad_independi",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "departamento_area",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "puesto_que_ocupa",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "salario",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "fecha_de_ingreso",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "telefono",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "extension",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "calle_avenida_autopista",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "nombre_edificio",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "numero_casa_edificio",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "numero_apartamento",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "referencia",
+      "required": true,
+      "resolved": true
+    },
+    {
+      "key": "monto_solicitado",
+      "required": true,
+      "resolved": true
+    }
+  ],
+  "steps": [
+    {
+      "index": 1,
+      "action": "navigate",
+      "description": "Navigate to https://srvqacgowb01.local.bsc.com:5000/",
+      "target": "APP_BASE_URL"
+    },
+    {
+      "index": 2,
+      "action": "fill",
+      "description": "Ingresar \"radames\" en \"Usuario\"",
+      "target": {
+        "strategy": "text",
+        "value": "Usuario",
+        "exact": false
+      },
+      "valueKey": "usuario",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-6",
+      "recordingActionType": "fill",
+      "technicalTargetRefs": [
+        "role:textbox|Usuario",
+        "css:#username",
+        "id:username"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 3,
+      "action": "fill",
+      "description": "Ingresar \"••••••\" en \"Contraseña\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contraseña",
+        "exact": false
+      },
+      "valueKey": "contrasena",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-7",
+      "recordingActionType": "fill",
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña",
+        "css:#password",
+        "id:password"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 4,
+      "action": "press",
+      "description": "Presionar \"Enter\" en \"Contraseña\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contraseña",
+        "exact": false
+      },
+      "value": "Enter",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-8",
+      "recordingActionType": "press",
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña",
+        "css:#password",
+        "id:password"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 5,
+      "action": "click",
+      "description": "Presionar \"Solicitud multiproducto\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Solicitud multiproducto",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-11",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:link|Solicitud multiproducto"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 6,
+      "action": "fill",
+      "description": "Ingresar \"402-0039009-0\" en \"Número de identificación\"",
+      "target": {
+        "strategy": "text",
+        "value": "Número de identificación",
+        "exact": false
+      },
+      "valueKey": "numero_de_identificacion",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-16",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 7,
+      "action": "click",
+      "description": "Presionar botón asociado a \"Número de identificación\"",
+      "target": {
+        "strategy": "recorded:css",
+        "value": "Número de identificación",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:css",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-17",
+      "recordingActionType": "click",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 8,
+      "action": "click",
+      "description": "Seleccionar \"U5ZQWPJQ 95Z5PPW WZUJP J4ZJXU5\" en \"Oficial\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "U5ZQWPJQ 95Z5PPW WZUJP J4ZJXU5",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Oficial",
+          "resolvedTargetName": "U5ZQWPJQ 95Z5PPW WZUJP J4ZJXU5",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-20",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|U5ZQWPJQ 95Z5PPW WZUJP J4ZJXU5",
+        "css:#pv_id_17_21",
+        "id:pv_id_17_21"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 9,
+      "action": "click",
+      "description": "Seleccionar \"U5ZQWPJQ UJ4JQ 45S5PY5 9WCU5XUW\" en \"Promotor\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "U5ZQWPJQ UJ4JQ 45S5PY5 9WCU5XUW",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Promotor",
+          "resolvedTargetName": "U5ZQWPJQ UJ4JQ 45S5PY5 9WCU5XUW",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": []
+    },
+    {
+      "index": 10,
+      "action": "click",
+      "description": "Presionar \"Depurar\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Depurar",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-29",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:button|Depurar"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 11,
+      "action": "click",
+      "description": "Presionar botón asociado a \"¿No posee correo electrónico?\"",
+      "target": {
+        "strategy": "snapshot:unique_checkable_control_in_caption_scope",
+        "value": "¿No posee correo electrónico?",
+        "exact": false
+      },
+      "locatorStrategy": "snapshot:unique_checkable_control_in_caption_scope",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-32",
+      "recordingActionType": "click",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 12,
+      "action": "click",
+      "description": "Presionar \"Añadir contacto\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Añadir contacto",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-34",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:button|Añadir contacto"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 13,
+      "action": "click",
+      "description": "Seleccionar \"Celular\" en \"Tipo\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "Celular",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Tipo",
+          "resolvedTargetName": "Celular",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-37",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|Celular",
+        "css:#pv_id_54_0",
+        "id:pv_id_54_0"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 14,
+      "action": "fill",
+      "description": "Ingresar \"829-255-1236\" en \"Contacto\"",
+      "target": {
+        "strategy": "text",
+        "value": "Contacto",
+        "exact": false
+      },
+      "valueKey": "contacto",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-41",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 15,
+      "action": "click",
+      "description": "Seleccionar \"Casa\" en \"Ubicación\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "Casa",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Ubicación",
+          "resolvedTargetName": "Casa",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-44",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|Casa",
+        "css:#pv_id_53_0",
+        "id:pv_id_53_0"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 16,
+      "action": "click",
+      "description": "Presionar \"Aceptar\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Aceptar",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-48",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:button|Aceptar"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 17,
+      "action": "click",
+      "description": "Seleccionar \"CULTIVO DE PIMIENTA\" en \"Actividad económica\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "CULTIVO DE PIMIENTA",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Actividad económica",
+          "resolvedTargetName": "CULTIVO DE PIMIENTA",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-51",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|CULTIVO DE PIMIENTA",
+        "css:#pv_id_49_0",
+        "id:pv_id_49_0"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 18,
+      "action": "click",
+      "description": "Seleccionar \"Mediana Empresa Zona Francas\" en \"Tipo de cliente\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "Mediana Empresa Zona Francas",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Tipo de cliente",
+          "resolvedTargetName": "Mediana Empresa Zona Francas",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-56",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|Mediana Empresa Zona Francas",
+        "css:#pv_id_59_0",
+        "id:pv_id_59_0"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 19,
+      "action": "click",
+      "description": "Seleccionar \"Miembros del poder legislativo\" en \"Ocupación\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "Miembros del poder legislativo",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Ocupación",
+          "resolvedTargetName": "Miembros del poder legislativo",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-61",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|Miembros del poder legislativo",
+        "css:#pv_id_50_3",
+        "id:pv_id_50_3"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 20,
+      "action": "click",
+      "description": "Presionar \"Añadir datos laborales\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Añadir datos laborales",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-65",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:button|Añadir datos laborales"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 21,
+      "action": "fill",
+      "description": "Ingresar \"QA\" en \"Nombre de la empresa / Actividad independiente\"",
+      "target": {
+        "strategy": "text",
+        "value": "Nombre de la empresa / Actividad independiente",
+        "exact": false
+      },
+      "valueKey": "nombre_de_la_empresa_actividad_independi",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-68",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 22,
+      "action": "fill",
+      "description": "Ingresar \"QA\" en \"Departamento / Área\"",
+      "target": {
+        "strategy": "text",
+        "value": "Departamento / Área",
+        "exact": false
+      },
+      "valueKey": "departamento_area",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-70",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 23,
+      "action": "fill",
+      "description": "Ingresar \"QA\" en \"Puesto que ocupa\"",
+      "target": {
+        "strategy": "text",
+        "value": "Puesto que ocupa",
+        "exact": false
+      },
+      "valueKey": "puesto_que_ocupa",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-71",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 24,
+      "action": "click",
+      "description": "Seleccionar \"Ingeniero\" en \"Cargo\"",
+      "target": {
+        "strategy": "visible_label_custom_selection_state_verified",
+        "value": "Ingeniero",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Cargo",
+          "resolvedTargetName": "Ingeniero",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "visible_label_custom_selection_state_verified",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-74",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|Ingeniero",
+        "css:#pv_id_73_0",
+        "id:pv_id_73_0"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 25,
+      "action": "click",
+      "description": "Seleccionar \"Salario\" en \"Tipo de ingreso\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "Salario",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Tipo de ingreso",
+          "resolvedTargetName": "Salario",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-79",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|Salario",
+        "css:#pv_id_74_0",
+        "id:pv_id_74_0"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 26,
+      "action": "fill",
+      "description": "Ingresar \"$110,000.00 mensual\" en \"Salario\"",
+      "target": {
+        "strategy": "text",
+        "value": "Salario",
+        "exact": false
+      },
+      "valueKey": "salario",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-84",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 27,
+      "action": "click",
+      "description": "Presionar \"Sí\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Sí",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-85",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:radio|Sí"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 28,
+      "action": "fill",
+      "description": "Ingresar \"01-10-2020\" en \"Fecha de ingreso\"",
+      "target": {
+        "strategy": "text",
+        "value": "Fecha de ingreso",
+        "exact": false
+      },
+      "valueKey": "fecha_de_ingreso",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-90",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 29,
+      "action": "fill",
+      "description": "Ingresar \"829-255-1232\" en \"Teléfono\"",
+      "target": {
+        "strategy": "text",
+        "value": "Teléfono",
+        "exact": false
+      },
+      "valueKey": "telefono",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-92",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 30,
+      "action": "fill",
+      "description": "Ingresar \"3322\" en \"Extensión\"",
+      "target": {
+        "strategy": "text",
+        "value": "Extensión",
+        "exact": false
+      },
+      "valueKey": "extension",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-94",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 31,
+      "action": "fill",
+      "description": "Ingresar \"12\" en \"Calle / Avenida / Autopista\"",
+      "target": {
+        "strategy": "text",
+        "value": "Calle / Avenida / Autopista",
+        "exact": false
+      },
+      "valueKey": "calle_avenida_autopista",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-96",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 32,
+      "action": "fill",
+      "description": "Ingresar \"3\" en \"Nombre edificio\"",
+      "target": {
+        "strategy": "text",
+        "value": "Nombre edificio",
+        "exact": false
+      },
+      "valueKey": "nombre_edificio",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-97",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 33,
+      "action": "fill",
+      "description": "Ingresar \"21\" en \"Número casa / edificio\"",
+      "target": {
+        "strategy": "text",
+        "value": "Número casa / edificio",
+        "exact": false
+      },
+      "valueKey": "numero_casa_edificio",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-101",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 34,
+      "action": "fill",
+      "description": "Ingresar \"23\" en \"Número apartamento\"",
+      "target": {
+        "strategy": "text",
+        "value": "Número apartamento",
+        "exact": false
+      },
+      "valueKey": "numero_apartamento",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-102",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 35,
+      "action": "click",
+      "description": "Seleccionar \"Distrito Nacional\" en \"Región\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "Distrito Nacional",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Región",
+          "resolvedTargetName": "Distrito Nacional",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": []
+    },
+    {
+      "index": 36,
+      "action": "click",
+      "description": "Seleccionar \"Distrito Nacional\" en \"Provincia\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "Distrito Nacional",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Provincia",
+          "resolvedTargetName": "Distrito Nacional",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": []
+    },
+    {
+      "index": 37,
+      "action": "click",
+      "description": "Seleccionar \"Santo Domingo\" en \"Municipio\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "Santo Domingo",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Municipio",
+          "resolvedTargetName": "Santo Domingo",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-115",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|Santo Domingo",
+        "css:#pv_id_77_0",
+        "id:pv_id_77_0"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 38,
+      "action": "click",
+      "description": "Seleccionar \"Santo Domingo De Guzmán\" en \"Localidad\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "Santo Domingo De Guzmán",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Localidad",
+          "resolvedTargetName": "Santo Domingo De Guzmán",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-120",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|Santo Domingo De Guzmán",
+        "css:#pv_id_78_0",
+        "id:pv_id_78_0"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 39,
+      "action": "click",
+      "description": "Seleccionar \"Agua Dulce\" en \"Sector\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "Agua Dulce",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Sector",
+          "resolvedTargetName": "Agua Dulce",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-125",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|Agua Dulce",
+        "css:#pv_id_79_0",
+        "id:pv_id_79_0"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 40,
+      "action": "fill",
+      "description": "Ingresar \"1Q\" en \"Referencia\"",
+      "target": {
+        "strategy": "text",
+        "value": "Referencia",
+        "exact": false
+      },
+      "valueKey": "referencia",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-130",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 41,
+      "action": "click",
+      "description": "Presionar \"Aceptar\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Aceptar",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-131",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:button|Aceptar"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 42,
+      "action": "click",
+      "description": "Presionar \"Continuar\"",
+      "target": {
+        "strategy": "recorded:structural-owner",
+        "value": "Continuar",
+        "exact": false
+      },
+      "locatorStrategy": "recorded:structural-owner",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-133",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:button|Continuar"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 43,
+      "action": "click",
+      "description": "Seleccionar \"Sistema de Prestamos\" en \"Categoría de producto\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "Sistema de Prestamos",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Categoría de producto",
+          "resolvedTargetName": "Sistema de Prestamos",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-136",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|Sistema de Prestamos",
+        "css:#pv_id_88_2",
+        "id:pv_id_88_2"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 44,
+      "action": "click",
+      "description": "Seleccionar \"24 - PRESTAMOS PERSONALES FACILES\" en \"Producto\"",
+      "target": {
+        "strategy": "text",
+        "value": "Producto",
+        "exact": false
+      },
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-141",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|24 - PRESTAMOS PERSONALES FACILES",
+        "css:#pv_id_89_0",
+        "id:pv_id_89_0"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 45,
+      "action": "click",
+      "description": "Presionar \"Seleccione una opción\"",
+      "target": {
+        "strategy": "css",
+        "value": "Seleccione una opción",
+        "exact": false
+      },
+      "locatorStrategy": "css",
+      "controlIdentity": {
+        "fingerprint": "3bec145b413db75364174dd02185fb1ba3263b15b94d0a2e7cad82a11b08c934",
+        "source": "runtime",
+        "signals": {
+          "tagName": "div",
+          "id": "pv_id_93",
+          "candidateLocator": {
+            "strategy": "text",
+            "exact": false
+          }
+        }
+      },
+      "requirementRefs": []
+    },
+    {
+      "index": 46,
+      "action": "click",
+      "description": "Seleccionar \"PRÉSTAMOS PERSONALES NUEVOS\" en \"Seleccione una opción\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "PRÉSTAMOS PERSONALES NUEVOS",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Seleccione una opción",
+          "resolvedTargetName": "PRÉSTAMOS PERSONALES NUEVOS",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-148",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|PRÉSTAMOS PERSONALES NUEVOS",
+        "css:#pv_id_94_0",
+        "id:pv_id_94_0"
+      ],
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 47,
+      "action": "fill",
+      "description": "Ingresar \"RD$60,000.00\" en \"Monto solicitado\"",
+      "target": {
+        "strategy": "text",
+        "value": "Monto solicitado",
+        "exact": false
+      },
+      "valueKey": "monto_solicitado",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-154",
+      "recordingActionType": "fill",
+      "pageKey": "tab-1"
+    },
+    {
+      "index": 48,
+      "action": "click",
+      "description": "Seleccionar \"6 meses\" en \"Plazo\"",
+      "target": {
+        "strategy": "selection_option_causal_surface",
+        "value": "6 meses",
+        "exact": false,
+        "metadata": {
+          "originalTarget": "Plazo",
+          "resolvedTargetName": "6 meses",
+          "aiAssisted": false,
+          "repairType": "target_resolution",
+          "decisionStatus": "resolved",
+          "validationStatus": "passed"
+        }
+      },
+      "locatorStrategy": "selection_option_causal_surface",
+      "requirementRefs": [],
+      "sourceInteractionId": "interaction-158",
+      "recordingActionType": "click",
+      "technicalTargetRefs": [
+        "role:option|6 meses",
+        "css:#pv_id_93_0",
+        "id:pv_id_93_0"
+      ],
+      "pageKey": "tab-1"
+    }
+  ],
+  "notes": [
+    "Discovery completed successfully. All targets and concrete assertions passed."
+  ],
+  "createdAt": "2026-10-30T11:54:54.841Z",
+  "sourceScenario": {
+    "title": "Crear Cliente V2",
+    "steps": [
+      {
+        "index": 1,
+        "action": "Abrir la aplicación configurada del proyecto",
+        "description": "Abrir la aplicación configurada del proyecto"
+      },
+      {
+        "index": 2,
+        "action": "Ingresar \"radames\" en \"Usuario\"",
+        "description": "Ingresar \"radames\" en \"Usuario\"",
+        "valueKey": "usuario",
+        "technicalTargetRef": "role:textbox|Usuario",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#username",
+          "id:username"
+        ],
+        "associatedField": "Usuario",
+        "controlIdentity": "dc6c2cb3e533|Usuario|role|textbox|Usuario",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 3,
+        "action": "Ingresar \"••••••\" en \"Contraseña\"",
+        "description": "Ingresar \"••••••\" en \"Contraseña\"",
+        "valueKey": "contrasena",
+        "technicalTargetRef": "role:textbox|Contraseña",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "associatedField": "Contraseña",
+        "controlIdentity": "dc6c2cb3e533|Contraseña|role|textbox|Contraseña",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 4,
+        "action": "Presionar \"Enter\" en \"Contraseña\"",
+        "description": "Presionar \"Enter\" en \"Contraseña\"",
+        "technicalTargetRef": "role:textbox|Contraseña",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "controlIdentity": "dc6c2cb3e533|Contraseña|role|textbox|Contraseña",
+        "recordingActionType": "press"
+      },
+      {
+        "index": 5,
+        "action": "Presionar \"Solicitud multiproducto\"",
+        "description": "Presionar \"Solicitud multiproducto\"",
+        "technicalTargetRef": "role:link|Solicitud multiproducto",
+        "technicalTargetRefs": [
+          "role:link|Solicitud multiproducto"
+        ],
+        "expectedOutcomeKind": "route_transition",
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Solicitud multiproducto",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "/requests/create/multiproduct"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_5_0_1"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"/requests/create/multiproduct\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "3edab033d35c|Solicitud multiproducto|role|link|Solicitud multiproducto",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 6,
+        "action": "Ingresar \"402-0039009-0\" en \"Número de identificación\"",
+        "description": "Ingresar \"402-0039009-0\" en \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": false,
+            "certifiedFrom": "recording",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "[data-pc-name=\"inputmask\"][data-pc-section=\"root\"]",
+                "confidence": 0.95
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "input",
+                "role": "textbox"
+              },
+              "stableDirectAttributes": {
+                "data-pc-name": "inputmask",
+                "data-pc-section": "root"
+              },
+              "stableDescendants": [],
+              "semanticShape": []
+            },
+            "confidence": 0.95,
+            "certificationTier": 1
+          }
+        ],
+        "associatedField": "Número de identificación",
+        "controlIdentity": "9b3ed654dc84|Número de identificación",
+        "recordingActionType": "fill"
+      },
+      {
+        "index": 7,
+        "action": "Presionar botón asociado a \"Número de identificación\"",
+        "description": "Presionar botón asociado a \"Número de identificación\"",
+        "valueKey": "numero_de_identificacion",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": true,
+            "certifiedFrom": "discovery",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "div:has-text(\"Número de identificación\"):has(button[data-pc-name=\"button\"][data-pc-section=\"root\"]):not(:has(div:has-text(\"Número de identificación\"):has(button[data-pc-name=\"button\"][data-pc-section=\"root\"]))) button[data-pc-name=\"button\"][data-pc-section=\"root\"]",
+                "confidence": 0.55
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "button",
+                  "role": "button",
+                  "stableAttributes": {
+                    "data-pc-name": "button",
+                    "data-pc-section": "root"
+                  }
+                }
+              ]
+            },
+            "confidence": 0.55,
+            "certificationTier": 3,
+            "reconfirmedByDiscovery": true
+          },
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_9_content"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Número de identificación",
+        "controlIdentity": "9b3ed654dc84|Número de identificación",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 8,
+        "action": "Seleccionar \"U5ZQWPJQ 95Z5PPW WZUJP J4ZJXU5\" en \"Oficial\"",
+        "description": "Seleccionar \"U5ZQWPJQ 95Z5PPW WZUJP J4ZJXU5\" en \"Oficial\"",
+        "associatedField": "Oficial"
+      },
+      {
+        "index": 9,
+        "action": "Seleccionar \"U5ZQWPJQ UJ4JQ 45S5PY5 9WCU5XUW\" en \"Promotor\"",
+        "description": "Seleccionar \"U5ZQWPJQ UJ4JQ 45S5PY5 9WCU5XUW\" en \"Promotor\""
+      },
+      {
+        "index": 10,
+        "action": "Presionar \"Depurar\"",
+        "description": "Presionar \"Depurar\"",
+        "technicalTargetRef": "role:button|Depurar",
+        "technicalTargetRefs": [
+          "role:button|Depurar"
+        ],
+        "expectedOutcomeKind": "route_transition",
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Depurar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Depurar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "__nuxt"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "9b3ed654dc84|Depurar|role|button|Depurar",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 11,
+        "action": "Presionar botón asociado a \"¿No posee correo electrónico?\"",
+        "description": "Presionar botón asociado a \"¿No posee correo electrónico?\"",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": true,
+            "certifiedFrom": "discovery",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "div:has-text(\"¿No posee correo electrónico?\"):has(input[data-pc-section=\"input\"]):not(:has(div:has-text(\"¿No posee correo electrónico?\"):has(input[data-pc-section=\"input\"]))) input[data-pc-section=\"input\"]",
+                "confidence": 0.55
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "role": "switch",
+                  "stableAttributes": {
+                    "data-pc-section": "input"
+                  }
+                }
+              ]
+            },
+            "confidence": 0.55,
+            "certificationTier": 3,
+            "reconfirmedByDiscovery": true
+          },
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "input",
+                "role": "switch"
+              },
+              "stableDirectAttributes": {
+                "role": "switch"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_35_content"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"input\",\"role\":\"switch\"},\"stableDirectAttributes\":{\"role\":\"switch\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "39ce8495830f|¿No posee correo electrónico?",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 12,
+        "action": "Presionar \"Añadir contacto\"",
+        "description": "Presionar \"Añadir contacto\"",
+        "technicalTargetRef": "role:button|Añadir contacto",
+        "technicalTargetRefs": [
+          "role:button|Añadir contacto"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Añadir contacto",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Añadir contacto\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Añadir contacto",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Añadir contacto"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_35_content"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "39ce8495830f|Añadir contacto|role|button|Añadir contacto",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 13,
+        "action": "Seleccionar \"Celular\" en \"Tipo\"",
+        "description": "Seleccionar \"Celular\" en \"Tipo\"",
+        "technicalTargetRef": "role:option|Celular",
+        "technicalTargetRefs": [
+          "role:option|Celular",
+          "css:#pv_id_54_0",
+          "id:pv_id_54_0"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Celular",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_54_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_54_0",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Celular",
+                "id": "pv_id_54_0",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_54_list"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_54_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Tipo"
+      },
+      {
+        "index": 14,
+        "action": "Ingresar \"829-255-1236\" en \"Contacto\"",
+        "description": "Ingresar \"829-255-1236\" en \"Contacto\"",
+        "associatedField": "Contacto"
+      },
+      {
+        "index": 15,
+        "action": "Seleccionar \"Casa\" en \"Ubicación\"",
+        "description": "Seleccionar \"Casa\" en \"Ubicación\"",
+        "technicalTargetRef": "role:option|Casa",
+        "technicalTargetRefs": [
+          "role:option|Casa",
+          "css:#pv_id_53_0",
+          "id:pv_id_53_0"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Casa",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_53_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_53_0",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Casa",
+                "id": "pv_id_53_0",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_53_list"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_53_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Ubicación"
+      },
+      {
+        "index": 16,
+        "action": "Presionar \"Aceptar\"",
+        "description": "Presionar \"Aceptar\"",
+        "technicalTargetRef": "role:button|Aceptar",
+        "technicalTargetRefs": [
+          "role:button|Aceptar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Aceptar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Aceptar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "39ce8495830f|Aceptar|role|button|Aceptar",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 17,
+        "action": "Seleccionar \"CULTIVO DE PIMIENTA\" en \"Actividad económica\"",
+        "description": "Seleccionar \"CULTIVO DE PIMIENTA\" en \"Actividad económica\"",
+        "technicalTargetRef": "role:option|CULTIVO DE PIMIENTA",
+        "technicalTargetRefs": [
+          "role:option|CULTIVO DE PIMIENTA",
+          "css:#pv_id_49_0",
+          "id:pv_id_49_0"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "CULTIVO DE PIMIENTA",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_49_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_49_0",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "CULTIVO DE PIMIENTA",
+                "id": "pv_id_49_0",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_49_list"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_49_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Actividad económica"
+      },
+      {
+        "index": 18,
+        "action": "Seleccionar \"Mediana Empresa Zona Francas\" en \"Tipo de cliente\"",
+        "description": "Seleccionar \"Mediana Empresa Zona Francas\" en \"Tipo de cliente\"",
+        "technicalTargetRef": "role:option|Mediana Empresa Zona Francas",
+        "technicalTargetRefs": [
+          "role:option|Mediana Empresa Zona Francas",
+          "css:#pv_id_59_0",
+          "id:pv_id_59_0"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Mediana Empresa Zona Francas",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_59_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_59_0",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Mediana Empresa Zona Francas",
+                "id": "pv_id_59_0",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_59_list"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_59_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Tipo de cliente"
+      },
+      {
+        "index": 19,
+        "action": "Seleccionar \"Miembros del poder legislativo\" en \"Ocupación\"",
+        "description": "Seleccionar \"Miembros del poder legislativo\" en \"Ocupación\"",
+        "technicalTargetRef": "role:option|Miembros del poder legislativo",
+        "technicalTargetRefs": [
+          "role:option|Miembros del poder legislativo",
+          "css:#pv_id_50_3",
+          "id:pv_id_50_3"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Miembros del poder legislativo",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_50_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_50_3",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Miembros del poder legislativo",
+                "id": "pv_id_50_3",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_50_list"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_50_3\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Ocupación"
+      },
+      {
+        "index": 20,
+        "action": "Presionar \"Añadir datos laborales\"",
+        "description": "Presionar \"Añadir datos laborales\"",
+        "technicalTargetRef": "role:button|Añadir datos laborales",
+        "technicalTargetRefs": [
+          "role:button|Añadir datos laborales"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Añadir datos laborales",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Añadir datos laborales\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Añadir datos laborales",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Añadir datos laborales"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_41_content"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "39ce8495830f|Añadir datos laborales|role|button|Añadir datos laborales",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 21,
+        "action": "Ingresar \"QA\" en \"Nombre de la empresa / Actividad independiente\"",
+        "description": "Ingresar \"QA\" en \"Nombre de la empresa / Actividad independiente\"",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": false,
+            "certifiedFrom": "recording",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "div:has-text(\"Nombre de la empresa / Actividad independiente\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]):not(:has(div:has-text(\"Nombre de la empresa / Actividad independiente\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]))) input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+                "confidence": 0.55
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "role": "textbox",
+                  "stableAttributes": {
+                    "data-pc-name": "inputtext",
+                    "data-pc-section": "root"
+                  }
+                }
+              ]
+            },
+            "confidence": 0.55,
+            "certificationTier": 3
+          }
+        ],
+        "associatedField": "Nombre de la empresa / Actividad independiente"
+      },
+      {
+        "index": 22,
+        "action": "Ingresar \"QA\" en \"Departamento / Área\"",
+        "description": "Ingresar \"QA\" en \"Departamento / Área\"",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": false,
+            "certifiedFrom": "recording",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "div:has-text(\"Departamento / Área\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]):not(:has(div:has-text(\"Departamento / Área\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]))) input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+                "confidence": 0.55
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "role": "textbox",
+                  "stableAttributes": {
+                    "data-pc-name": "inputtext",
+                    "data-pc-section": "root"
+                  }
+                }
+              ]
+            },
+            "confidence": 0.55,
+            "certificationTier": 3
+          }
+        ],
+        "associatedField": "Departamento / Área"
+      },
+      {
+        "index": 23,
+        "action": "Ingresar \"QA\" en \"Puesto que ocupa\"",
+        "description": "Ingresar \"QA\" en \"Puesto que ocupa\"",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": false,
+            "certifiedFrom": "recording",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "div:has-text(\"Puesto que ocupa\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]):not(:has(div:has-text(\"Puesto que ocupa\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]))) input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+                "confidence": 0.55
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "role": "textbox",
+                  "stableAttributes": {
+                    "data-pc-name": "inputtext",
+                    "data-pc-section": "root"
+                  }
+                }
+              ]
+            },
+            "confidence": 0.55,
+            "certificationTier": 3
+          }
+        ],
+        "associatedField": "Puesto que ocupa"
+      },
+      {
+        "index": 24,
+        "action": "Seleccionar \"Ingeniero\" en \"Cargo\"",
+        "description": "Seleccionar \"Ingeniero\" en \"Cargo\"",
+        "associatedField": "Cargo"
+      },
+      {
+        "index": 25,
+        "action": "Seleccionar \"Salario\" en \"Tipo de ingreso\"",
+        "description": "Seleccionar \"Salario\" en \"Tipo de ingreso\"",
+        "technicalTargetRef": "role:option|Salario",
+        "technicalTargetRefs": [
+          "role:option|Salario",
+          "css:#pv_id_74_0",
+          "id:pv_id_74_0"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Salario",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_74_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_74_0",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Salario",
+                "id": "pv_id_74_0",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_74_list"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_74_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Tipo de ingreso"
+      },
+      {
+        "index": 26,
+        "action": "Ingresar \"$110,000.00 mensual\" en \"Salario\"",
+        "description": "Ingresar \"$110,000.00 mensual\" en \"Salario\"",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": false,
+            "certifiedFrom": "recording",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "[data-pc-name=\"input\"][data-pc-extend=\"inputtext\"][data-pc-section=\"root\"]",
+                "confidence": 0.95
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "input",
+                "role": "spinbutton"
+              },
+              "stableDirectAttributes": {
+                "data-pc-extend": "inputtext",
+                "data-pc-name": "input",
+                "data-pc-section": "root"
+              },
+              "stableDescendants": [],
+              "semanticShape": []
+            },
+            "confidence": 0.95,
+            "certificationTier": 1
+          }
+        ]
+      },
+      {
+        "index": 27,
+        "action": "Presionar \"Sí\"",
+        "description": "Presionar \"Sí\"",
+        "technicalTargetRef": "role:radio|Sí",
+        "technicalTargetRefs": [
+          "role:radio|Sí"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "radio|Sí",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div",
+                "role": "radio"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Sí",
+                "role": "radio"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_63_content"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"radio\"},\"stableDirectAttributes\":{\"role\":\"radio\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "39ce8495830f|Sí|role|radio|Sí",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 28,
+        "action": "Ingresar \"01-10-2020\" en \"Fecha de ingreso\"",
+        "description": "Ingresar \"01-10-2020\" en \"Fecha de ingreso\"",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": false,
+            "certifiedFrom": "recording",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "div:has-text(\"Fecha de ingreso\"):has(input[data-pc-section=\"input\"]):not(:has(div:has-text(\"Fecha de ingreso\"):has(input[data-pc-section=\"input\"]))) input[data-pc-section=\"input\"]",
+                "confidence": 0.55
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "role": "combobox",
+                  "stableAttributes": {
+                    "data-pc-section": "input"
+                  }
+                }
+              ]
+            },
+            "confidence": 0.55,
+            "certificationTier": 3
+          }
+        ],
+        "associatedField": "Fecha de ingreso"
+      },
+      {
+        "index": 29,
+        "action": "Ingresar \"829-255-1232\" en \"Teléfono\"",
+        "description": "Ingresar \"829-255-1232\" en \"Teléfono\"",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": false,
+            "certifiedFrom": "recording",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "[data-pc-name=\"inputmask\"][data-pc-section=\"root\"]",
+                "confidence": 0.95
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "input",
+                "role": "textbox"
+              },
+              "stableDirectAttributes": {
+                "data-pc-name": "inputmask",
+                "data-pc-section": "root"
+              },
+              "stableDescendants": [],
+              "semanticShape": []
+            },
+            "confidence": 0.95,
+            "certificationTier": 1
+          }
+        ],
+        "associatedField": "Teléfono"
+      },
+      {
+        "index": 30,
+        "action": "Ingresar \"3322\" en \"Extensión\"",
+        "description": "Ingresar \"3322\" en \"Extensión\"",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": false,
+            "certifiedFrom": "recording",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "div:has-text(\"Extensión\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]):not(:has(div:has-text(\"Extensión\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]))) input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+                "confidence": 0.55
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "role": "textbox",
+                  "stableAttributes": {
+                    "data-pc-name": "inputtext",
+                    "data-pc-section": "root"
+                  }
+                }
+              ]
+            },
+            "confidence": 0.55,
+            "certificationTier": 3
+          }
+        ],
+        "associatedField": "Extensión"
+      },
+      {
+        "index": 31,
+        "action": "Ingresar \"12\" en \"Calle / Avenida / Autopista\"",
+        "description": "Ingresar \"12\" en \"Calle / Avenida / Autopista\"",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": false,
+            "certifiedFrom": "recording",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "div:has-text(\"Calle / Avenida / Autopista\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]):not(:has(div:has-text(\"Calle / Avenida / Autopista\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]))) input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+                "confidence": 0.55
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "role": "textbox",
+                  "stableAttributes": {
+                    "data-pc-name": "inputtext",
+                    "data-pc-section": "root"
+                  }
+                }
+              ]
+            },
+            "confidence": 0.55,
+            "certificationTier": 3
+          }
+        ],
+        "associatedField": "Calle / Avenida / Autopista"
+      },
+      {
+        "index": 32,
+        "action": "Ingresar \"3\" en \"Nombre edificio\"",
+        "description": "Ingresar \"3\" en \"Nombre edificio\"",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": false,
+            "certifiedFrom": "recording",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "div:has-text(\"Nombre edificio\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]):not(:has(div:has-text(\"Nombre edificio\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]))) input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+                "confidence": 0.55
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "role": "textbox",
+                  "stableAttributes": {
+                    "data-pc-name": "inputtext",
+                    "data-pc-section": "root"
+                  }
+                }
+              ]
+            },
+            "confidence": 0.55,
+            "certificationTier": 3
+          }
+        ],
+        "associatedField": "Nombre edificio"
+      },
+      {
+        "index": 33,
+        "action": "Ingresar \"21\" en \"Número casa / edificio\"",
+        "description": "Ingresar \"21\" en \"Número casa / edificio\"",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": false,
+            "certifiedFrom": "recording",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "div:has-text(\"Número casa / edificio\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]):not(:has(div:has-text(\"Número casa / edificio\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]))) input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+                "confidence": 0.55
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "role": "textbox",
+                  "stableAttributes": {
+                    "data-pc-name": "inputtext",
+                    "data-pc-section": "root"
+                  }
+                }
+              ]
+            },
+            "confidence": 0.55,
+            "certificationTier": 3
+          }
+        ],
+        "associatedField": "Número casa / edificio"
+      },
+      {
+        "index": 34,
+        "action": "Ingresar \"23\" en \"Número apartamento\"",
+        "description": "Ingresar \"23\" en \"Número apartamento\"",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": false,
+            "certifiedFrom": "recording",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "div:has-text(\"Número apartamento\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]):not(:has(div:has-text(\"Número apartamento\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]))) input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+                "confidence": 0.55
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "role": "textbox",
+                  "stableAttributes": {
+                    "data-pc-name": "inputtext",
+                    "data-pc-section": "root"
+                  }
+                }
+              ]
+            },
+            "confidence": 0.55,
+            "certificationTier": 3
+          }
+        ],
+        "associatedField": "Número apartamento"
+      },
+      {
+        "index": 35,
+        "action": "Seleccionar \"Distrito Nacional\" en \"Región\"",
+        "description": "Seleccionar \"Distrito Nacional\" en \"Región\"",
+        "technicalTargetRef": "role:option|Distrito Nacional",
+        "technicalTargetRefs": [
+          "role:option|Distrito Nacional",
+          "css:#pv_id_72_0",
+          "id:pv_id_72_0"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Distrito Nacional",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_72_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_72_0",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Distrito Nacional",
+                "id": "pv_id_72_0",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_72_list"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_72_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Distrito Nacional"
+      },
+      {
+        "index": 36,
+        "action": "Seleccionar \"Distrito Nacional\" en \"Provincia\"",
+        "description": "Seleccionar \"Distrito Nacional\" en \"Provincia\""
+      },
+      {
+        "index": 37,
+        "action": "Seleccionar \"Santo Domingo\" en \"Municipio\"",
+        "description": "Seleccionar \"Santo Domingo\" en \"Municipio\"",
+        "associatedField": "Municipio"
+      },
+      {
+        "index": 38,
+        "action": "Seleccionar \"Santo Domingo De Guzmán\" en \"Localidad\"",
+        "description": "Seleccionar \"Santo Domingo De Guzmán\" en \"Localidad\"",
+        "associatedField": "Localidad"
+      },
+      {
+        "index": 39,
+        "action": "Seleccionar \"Agua Dulce\" en \"Sector\"",
+        "description": "Seleccionar \"Agua Dulce\" en \"Sector\"",
+        "associatedField": "Sector"
+      },
+      {
+        "index": 40,
+        "action": "Ingresar \"1Q\" en \"Referencia\"",
+        "description": "Ingresar \"1Q\" en \"Referencia\"",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": false,
+            "certifiedFrom": "recording",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "div:has-text(\"Referencia\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]):not(:has(div:has-text(\"Referencia\"):has(input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]))) input[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+                "confidence": 0.55
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "role": "textbox",
+                  "stableAttributes": {
+                    "data-pc-name": "inputtext",
+                    "data-pc-section": "root"
+                  }
+                }
+              ]
+            },
+            "confidence": 0.55,
+            "certificationTier": 3
+          }
+        ],
+        "associatedField": "Referencia"
+      },
+      {
+        "index": 41,
+        "action": "Presionar \"Aceptar\"",
+        "description": "Presionar \"Aceptar\"",
+        "technicalTargetRef": "role:button|Aceptar",
+        "technicalTargetRefs": [
+          "role:button|Aceptar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Aceptar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Aceptar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "39ce8495830f|Aceptar|role|button|Aceptar",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 42,
+        "action": "Presionar \"Continuar\"",
+        "description": "Presionar \"Continuar\"",
+        "technicalTargetRef": "role:button|Continuar",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Continuar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Continuar"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "__nuxt"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "controlIdentity": "39ce8495830f|Continuar|role|button|Continuar",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 43,
+        "action": "Seleccionar \"Sistema de Prestamos\" en \"Categoría de producto\"",
+        "description": "Seleccionar \"Sistema de Prestamos\" en \"Categoría de producto\"",
+        "associatedField": "Categoría de producto"
+      },
+      {
+        "index": 44,
+        "action": "Seleccionar \"24 - PRESTAMOS PERSONALES FACILES\" en \"Producto\"",
+        "description": "Seleccionar \"24 - PRESTAMOS PERSONALES FACILES\" en \"Producto\"",
+        "associatedField": "Producto"
+      },
+      {
+        "index": 45,
+        "action": "Presionar \"Seleccione una opción\"",
+        "description": "Presionar \"Seleccione una opción\"",
+        "valueKey": "seleccione_una_opcion",
+        "technicalTargetRef": "role:combobox|Seleccione una opción",
+        "technicalTargetRefs": [
+          "role:combobox|Seleccione una opción"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "combobox",
+          "normalizedName": "Seleccione una opción",
+          "targetTag": "span",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_94"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "combobox|Seleccione una opción",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "span",
+                "role": "combobox"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "Seleccione una opción",
+                "role": "combobox"
+              },
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": true,
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_94"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"combobox\"},\"stableDirectAttributes\":{\"role\":\"combobox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Seleccione una opción",
+        "controlIdentity": "39ce8495830f|Seleccione una opción|role|combobox|Seleccione una opción",
+        "recordingActionType": "click"
+      },
+      {
+        "index": 46,
+        "action": "Seleccionar \"PRÉSTAMOS PERSONALES NUEVOS\" en \"Seleccione una opción\"",
+        "description": "Seleccionar \"PRÉSTAMOS PERSONALES NUEVOS\" en \"Seleccione una opción\"",
+        "associatedField": "Seleccione una opción"
+      },
+      {
+        "index": 47,
+        "action": "Ingresar \"RD$60,000.00\" en \"Monto solicitado\"",
+        "description": "Ingresar \"RD$60,000.00\" en \"Monto solicitado\"",
+        "technicalTargetCandidates": [
+          {
+            "interactionEvidence": [],
+            "validatedByInteraction": false,
+            "certifiedFrom": "recording",
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "div:has-text(\"Monto solicitado\"):has(input[data-pc-name=\"input\"][data-pc-extend=\"inputtext\"][data-pc-section=\"root\"]):not(:has(div:has-text(\"Monto solicitado\"):has(input[data-pc-name=\"input\"][data-pc-extend=\"inputtext\"][data-pc-section=\"root\"]))) input[data-pc-name=\"input\"][data-pc-extend=\"inputtext\"][data-pc-section=\"root\"]",
+                "confidence": 0.55
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "div"
+              },
+              "stableDescendants": [
+                {
+                  "relation": "descendant",
+                  "tag": "input",
+                  "role": "spinbutton",
+                  "stableAttributes": {
+                    "data-pc-name": "input",
+                    "data-pc-extend": "inputtext",
+                    "data-pc-section": "root"
+                  }
+                }
+              ]
+            },
+            "confidence": 0.55,
+            "certificationTier": 3
+          }
+        ],
+        "associatedField": "Monto solicitado"
+      },
+      {
+        "index": 48,
+        "action": "Seleccionar \"6 meses\" en \"Plazo\"",
+        "description": "Seleccionar \"6 meses\" en \"Plazo\"",
+        "technicalTargetRef": "role:option|6 meses",
+        "technicalTargetRefs": [
+          "role:option|6 meses",
+          "css:#pv_id_93_0",
+          "id:pv_id_93_0"
+        ],
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "6 meses",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_93_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#pv_id_93_0",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "li",
+                "role": "option"
+              },
+              "stableDirectAttributes": {
+                "aria-label": "6 meses",
+                "id": "pv_id_93_0",
+                "role": "option"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_93_list"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_93_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "associatedField": "Plazo"
+      }
+    ],
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "observedAssertions": [],
+    "observableOracles": [],
+    "stepStatuses": [
+      {
+        "index": 2,
+        "status": "found"
+      },
+      {
+        "index": 3,
+        "status": "found"
+      },
+      {
+        "index": 4,
+        "status": "found"
+      },
+      {
+        "index": 5,
+        "status": "found"
+      },
+      {
+        "index": 6,
+        "status": "found"
+      },
+      {
+        "index": 7,
+        "status": "found"
+      },
+      {
+        "index": 8,
+        "status": "found"
+      },
+      {
+        "index": 9,
+        "status": "found"
+      },
+      {
+        "index": 10,
+        "status": "found"
+      },
+      {
+        "index": 11,
+        "status": "found"
+      },
+      {
+        "index": 12,
+        "status": "found"
+      },
+      {
+        "index": 13,
+        "status": "found"
+      },
+      {
+        "index": 14,
+        "status": "found"
+      },
+      {
+        "index": 15,
+        "status": "found"
+      },
+      {
+        "index": 16,
+        "status": "found"
+      },
+      {
+        "index": 17,
+        "status": "found"
+      },
+      {
+        "index": 18,
+        "status": "found"
+      },
+      {
+        "index": 19,
+        "status": "found"
+      },
+      {
+        "index": 20,
+        "status": "found"
+      },
+      {
+        "index": 21,
+        "status": "found"
+      },
+      {
+        "index": 22,
+        "status": "found"
+      },
+      {
+        "index": 23,
+        "status": "found"
+      },
+      {
+        "index": 24,
+        "status": "found"
+      },
+      {
+        "index": 25,
+        "status": "found"
+      },
+      {
+        "index": 26,
+        "status": "found"
+      },
+      {
+        "index": 27,
+        "status": "found"
+      },
+      {
+        "index": 28,
+        "status": "found"
+      },
+      {
+        "index": 29,
+        "status": "found"
+      },
+      {
+        "index": 30,
+        "status": "found"
+      },
+      {
+        "index": 31,
+        "status": "found"
+      },
+      {
+        "index": 32,
+        "status": "found"
+      },
+      {
+        "index": 33,
+        "status": "found"
+      },
+      {
+        "index": 34,
+        "status": "found"
+      },
+      {
+        "index": 35,
+        "status": "found"
+      },
+      {
+        "index": 36,
+        "status": "found"
+      },
+      {
+        "index": 37,
+        "status": "found"
+      },
+      {
+        "index": 38,
+        "status": "found"
+      },
+      {
+        "index": 39,
+        "status": "found"
+      },
+      {
+        "index": 40,
+        "status": "found"
+      },
+      {
+        "index": 41,
+        "status": "found"
+      },
+      {
+        "index": 42,
+        "status": "found"
+      },
+      {
+        "index": 43,
+        "status": "found"
+      },
+      {
+        "index": 44,
+        "status": "found"
+      },
+      {
+        "index": 45,
+        "status": "found"
+      },
+      {
+        "index": 46,
+        "status": "found"
+      },
+      {
+        "index": 47,
+        "status": "found"
+      },
+      {
+        "index": 48,
+        "status": "found"
+      }
+    ],
+    "auth": {}
+  },
+  "executionContract": {
+    "version": "1.0",
+    "scenarioId": "PREVIEW-001",
+    "title": "Crear Cliente V2",
+    "appSlug": "portal-comercial",
+    "sectionSlug": "api-tests",
+    "steps": [
+      {
+        "contractStepIndex": 0,
+        "scenarioStepIndex": 1,
+        "originalText": "Abrir la aplicación configurada del proyecto",
+        "operation": "navigate",
+        "target": {
+          "strategy": "url",
+          "value": "APP_BASE_URL"
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 1,
+        "scenarioStepIndex": 2,
+        "originalText": "Ingresar \"radames\" en \"Usuario\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Usuario"
+        },
+        "valueKey": "usuario",
+        "associatedField": "Usuario",
+        "technicalTargetRef": "role:textbox|Usuario",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#username",
+          "id:username"
+        ],
+        "pageKey": "tab-1",
+        "controlIdentity": "dc6c2cb3e533|Usuario|role|textbox|Usuario",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Usuario",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 2,
+        "scenarioStepIndex": 3,
+        "originalText": "Ingresar \"••••••\" en \"Contraseña\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Contraseña"
+        },
+        "valueKey": "contrasena",
+        "associatedField": "Contraseña",
+        "technicalTargetRef": "role:textbox|Contraseña",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "pageKey": "tab-1",
+        "controlIdentity": "dc6c2cb3e533|Contraseña|role|textbox|Contraseña",
+        "recordingActionType": "fill",
+        "authGateExpected": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 3,
+        "scenarioStepIndex": 4,
+        "originalText": "Presionar \"Enter\" en \"Contraseña\"",
+        "operation": "press",
+        "target": {
+          "strategy": "text",
+          "value": "Contraseña",
+          "exact": false
+        },
+        "value": "Enter",
+        "technicalTargetRef": "role:textbox|Contraseña",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "pageKey": "tab-1",
+        "controlIdentity": "dc6c2cb3e533|Contraseña|role|textbox|Contraseña",
+        "recordingActionType": "press",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contraseña",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "pressPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 4,
+        "scenarioStepIndex": 5,
+        "originalText": "Presionar \"Solicitud multiproducto\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Solicitud multiproducto"
+        },
+        "technicalTargetRef": "role:link|Solicitud multiproducto",
+        "technicalTargetRefs": [
+          "role:link|Solicitud multiproducto"
+        ],
+        "pageKey": "tab-1",
+        "controlIdentity": "3edab033d35c|Solicitud multiproducto|role|link|Solicitud multiproducto",
+        "recordingActionType": "click",
+        "expectedRouteTransition": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[href=\"/requests/create/multiproduct\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "/requests/create/multiproduct"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_5_0_1"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"/requests/create/multiproduct\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 5,
+        "scenarioStepIndex": 6,
+        "originalText": "Ingresar \"402-0039009-0\" en \"Número de identificación\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Número de identificación"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "pageKey": "tab-1",
+        "controlIdentity": "9b3ed654dc84|Número de identificación",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[data-pc-name=\"inputmask\"][data-pc-section=\"root\"]",
+              "confidence": 0.95
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "input",
+              "role": "textbox"
+            },
+            "stableDirectAttributes": {
+              "data-pc-name": "inputmask",
+              "data-pc-section": "root"
+            },
+            "stableDescendants": [],
+            "semanticShape": []
+          },
+          "confidence": 0.95,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 6,
+        "scenarioStepIndex": 7,
+        "originalText": "Presionar botón asociado a \"Número de identificación\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Número de identificación"
+        },
+        "valueKey": "numero_de_identificacion",
+        "associatedField": "Número de identificación",
+        "pageKey": "tab-1",
+        "controlIdentity": "9b3ed654dc84|Número de identificación",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "discovery",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "div:has-text(\"Número de identificación\"):has(button[data-pc-name=\"button\"][data-pc-section=\"root\"]):not(:has(div:has-text(\"Número de identificación\"):has(button[data-pc-name=\"button\"][data-pc-section=\"root\"]))) button[data-pc-name=\"button\"][data-pc-section=\"root\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "button",
+                "role": "button",
+                "stableAttributes": {
+                  "data-pc-name": "button",
+                  "data-pc-section": "root"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3,
+          "reconfirmedByDiscovery": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 7,
+        "scenarioStepIndex": 8,
+        "originalText": "Seleccionar \"U5ZQWPJQ 95Z5PPW WZUJP J4ZJXU5\" en \"Oficial\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "U5ZQWPJQ 95Z5PPW WZUJP J4ZJXU5"
+        },
+        "selectionField": "Oficial",
+        "associatedField": "Oficial",
+        "technicalTargetRefs": [
+          "role:option|U5ZQWPJQ 95Z5PPW WZUJP J4ZJXU5",
+          "css:#pv_id_17_21",
+          "id:pv_id_17_21"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "U5ZQWPJQ 95Z5PPW WZUJP J4ZJXU5",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "U5ZQWPJQ 95Z5PPW WZUJP J4ZJXU5",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 8,
+        "scenarioStepIndex": 9,
+        "originalText": "Seleccionar \"U5ZQWPJQ UJ4JQ 45S5PY5 9WCU5XUW\" en \"Promotor\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "U5ZQWPJQ UJ4JQ 45S5PY5 9WCU5XUW"
+        },
+        "selectionField": "Promotor",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "U5ZQWPJQ UJ4JQ 45S5PY5 9WCU5XUW",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "U5ZQWPJQ UJ4JQ 45S5PY5 9WCU5XUW",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 9,
+        "scenarioStepIndex": 10,
+        "originalText": "Presionar \"Depurar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Depurar"
+        },
+        "technicalTargetRef": "role:button|Depurar",
+        "technicalTargetRefs": [
+          "role:button|Depurar"
+        ],
+        "pageKey": "tab-1",
+        "controlIdentity": "9b3ed654dc84|Depurar|role|button|Depurar",
+        "recordingActionType": "click",
+        "expectedRouteTransition": true,
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Depurar\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Depurar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "__nuxt"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 10,
+        "scenarioStepIndex": 11,
+        "originalText": "Presionar botón asociado a \"¿No posee correo electrónico?\"",
+        "operation": "click",
+        "target": {
+          "strategy": "label",
+          "value": "¿No posee correo electrónico?"
+        },
+        "associatedField": "¿No posee correo electrónico?",
+        "checkableCaptionOwner": true,
+        "pageKey": "tab-1",
+        "controlIdentity": "39ce8495830f|¿No posee correo electrónico?",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "discovery",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "div:has-text(\"¿No posee correo electrónico?\"):has(input[data-pc-section=\"input\"]):not(:has(div:has-text(\"¿No posee correo electrónico?\"):has(input[data-pc-section=\"input\"]))) input[data-pc-section=\"input\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "role": "switch",
+                "stableAttributes": {
+                  "data-pc-section": "input"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3,
+          "reconfirmedByDiscovery": true
+        },
+        "resolutionState": "runtime_resolution_required",
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 11,
+        "scenarioStepIndex": 12,
+        "originalText": "Presionar \"Añadir contacto\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Añadir contacto"
+        },
+        "technicalTargetRef": "role:button|Añadir contacto",
+        "technicalTargetRefs": [
+          "role:button|Añadir contacto"
+        ],
+        "pageKey": "tab-1",
+        "controlIdentity": "39ce8495830f|Añadir contacto|role|button|Añadir contacto",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Añadir contacto\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Añadir contacto"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_35_content"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Añadir contacto",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Añadir contacto\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 12,
+        "scenarioStepIndex": 13,
+        "originalText": "Seleccionar \"Celular\" en \"Tipo\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Celular"
+        },
+        "selectionField": "Tipo",
+        "selectionActivationField": "Contacto",
+        "associatedField": "Tipo",
+        "technicalTargetRef": "role:option|Celular",
+        "technicalTargetRefs": [
+          "role:option|Celular",
+          "css:#pv_id_54_0",
+          "id:pv_id_54_0"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Celular\"][id=\"pv_id_54_0\"][role=\"option\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Celular",
+              "id": "pv_id_54_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_54_list"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_54_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Celular",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_54_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "Celular",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 13,
+        "scenarioStepIndex": 14,
+        "originalText": "Ingresar \"829-255-1236\" en \"Contacto\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Contacto"
+        },
+        "valueKey": "contacto",
+        "associatedField": "Contacto",
+        "pageKey": "tab-1",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Contacto",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 14,
+        "scenarioStepIndex": 15,
+        "originalText": "Seleccionar \"Casa\" en \"Ubicación\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Casa"
+        },
+        "selectionField": "Ubicación",
+        "associatedField": "Ubicación",
+        "technicalTargetRef": "role:option|Casa",
+        "technicalTargetRefs": [
+          "role:option|Casa",
+          "css:#pv_id_53_0",
+          "id:pv_id_53_0"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Casa\"][id=\"pv_id_53_0\"][role=\"option\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Casa",
+              "id": "pv_id_53_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_53_list"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_53_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Casa",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_53_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "Casa",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 15,
+        "scenarioStepIndex": 16,
+        "originalText": "Presionar \"Aceptar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Aceptar"
+        },
+        "technicalTargetRef": "role:button|Aceptar",
+        "technicalTargetRefs": [
+          "role:button|Aceptar"
+        ],
+        "pageKey": "tab-1",
+        "controlIdentity": "39ce8495830f|Aceptar|role|button|Aceptar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Aceptar\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Aceptar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 16,
+        "scenarioStepIndex": 17,
+        "originalText": "Seleccionar \"CULTIVO DE PIMIENTA\" en \"Actividad económica\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "CULTIVO DE PIMIENTA"
+        },
+        "selectionField": "Actividad económica",
+        "associatedField": "Actividad económica",
+        "technicalTargetRef": "role:option|CULTIVO DE PIMIENTA",
+        "technicalTargetRefs": [
+          "role:option|CULTIVO DE PIMIENTA",
+          "css:#pv_id_49_0",
+          "id:pv_id_49_0"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"CULTIVO DE PIMIENTA\"][id=\"pv_id_49_0\"][role=\"option\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "CULTIVO DE PIMIENTA",
+              "id": "pv_id_49_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_49_list"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_49_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "CULTIVO DE PIMIENTA",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_49_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "CULTIVO DE PIMIENTA",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 17,
+        "scenarioStepIndex": 18,
+        "originalText": "Seleccionar \"Mediana Empresa Zona Francas\" en \"Tipo de cliente\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Mediana Empresa Zona Francas"
+        },
+        "selectionField": "Tipo de cliente",
+        "associatedField": "Tipo de cliente",
+        "technicalTargetRef": "role:option|Mediana Empresa Zona Francas",
+        "technicalTargetRefs": [
+          "role:option|Mediana Empresa Zona Francas",
+          "css:#pv_id_59_0",
+          "id:pv_id_59_0"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Mediana Empresa Zona Francas\"][id=\"pv_id_59_0\"][role=\"option\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Mediana Empresa Zona Francas",
+              "id": "pv_id_59_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_59_list"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_59_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Mediana Empresa Zona Francas",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_59_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "Mediana Empresa Zona Francas",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 18,
+        "scenarioStepIndex": 19,
+        "originalText": "Seleccionar \"Miembros del poder legislativo\" en \"Ocupación\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Miembros del poder legislativo"
+        },
+        "selectionField": "Ocupación",
+        "associatedField": "Ocupación",
+        "technicalTargetRef": "role:option|Miembros del poder legislativo",
+        "technicalTargetRefs": [
+          "role:option|Miembros del poder legislativo",
+          "css:#pv_id_50_3",
+          "id:pv_id_50_3"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Miembros del poder legislativo\"][id=\"pv_id_50_3\"][role=\"option\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Miembros del poder legislativo",
+              "id": "pv_id_50_3",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_50_list"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_50_3\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Miembros del poder legislativo",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_50_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "Miembros del poder legislativo",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 19,
+        "scenarioStepIndex": 20,
+        "originalText": "Presionar \"Añadir datos laborales\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Añadir datos laborales"
+        },
+        "technicalTargetRef": "role:button|Añadir datos laborales",
+        "technicalTargetRefs": [
+          "role:button|Añadir datos laborales"
+        ],
+        "pageKey": "tab-1",
+        "controlIdentity": "39ce8495830f|Añadir datos laborales|role|button|Añadir datos laborales",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Añadir datos laborales\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Añadir datos laborales"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_41_content"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Añadir datos laborales",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(button[aria-label=\"Añadir datos laborales\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 20,
+        "scenarioStepIndex": 21,
+        "originalText": "Ingresar \"QA\" en \"Nombre de la empresa / Actividad independiente\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Nombre de la empresa / Actividad independiente"
+        },
+        "valueKey": "nombre_de_la_empresa_actividad_independi",
+        "associatedField": "Nombre de la empresa / Actividad independiente",
+        "pageKey": "tab-1",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "role": "textbox",
+                "stableAttributes": {
+                  "data-pc-name": "inputtext",
+                  "data-pc-section": "root"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 21,
+        "scenarioStepIndex": 22,
+        "originalText": "Ingresar \"QA\" en \"Departamento / Área\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Departamento / Área"
+        },
+        "valueKey": "departamento_area",
+        "associatedField": "Departamento / Área",
+        "pageKey": "tab-1",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "role": "textbox",
+                "stableAttributes": {
+                  "data-pc-name": "inputtext",
+                  "data-pc-section": "root"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 22,
+        "scenarioStepIndex": 23,
+        "originalText": "Ingresar \"QA\" en \"Puesto que ocupa\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Puesto que ocupa"
+        },
+        "valueKey": "puesto_que_ocupa",
+        "associatedField": "Puesto que ocupa",
+        "pageKey": "tab-1",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "role": "textbox",
+                "stableAttributes": {
+                  "data-pc-name": "inputtext",
+                  "data-pc-section": "root"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 23,
+        "scenarioStepIndex": 24,
+        "originalText": "Seleccionar \"Ingeniero\" en \"Cargo\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Ingeniero"
+        },
+        "selectionField": "Cargo",
+        "associatedField": "Cargo",
+        "technicalTargetRefs": [
+          "role:option|Ingeniero",
+          "css:#pv_id_73_0",
+          "id:pv_id_73_0"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Ingeniero",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "Ingeniero",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 24,
+        "scenarioStepIndex": 25,
+        "originalText": "Seleccionar \"Salario\" en \"Tipo de ingreso\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Salario"
+        },
+        "selectionField": "Tipo de ingreso",
+        "selectionActivationField": "Salario",
+        "associatedField": "Tipo de ingreso",
+        "technicalTargetRef": "role:option|Salario",
+        "technicalTargetRefs": [
+          "role:option|Salario",
+          "css:#pv_id_74_0",
+          "id:pv_id_74_0"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Salario\"][id=\"pv_id_74_0\"][role=\"option\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Salario",
+              "id": "pv_id_74_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_74_list"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_74_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Salario",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_74_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "Salario",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 25,
+        "scenarioStepIndex": 26,
+        "originalText": "Ingresar \"$110,000.00 mensual\" en \"Salario\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Salario"
+        },
+        "valueKey": "salario",
+        "pageKey": "tab-1",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[data-pc-extend=\"inputtext\"][data-pc-name=\"input\"][data-pc-section=\"root\"]",
+              "confidence": 0.95
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "input",
+              "role": "spinbutton"
+            },
+            "stableDirectAttributes": {
+              "data-pc-extend": "inputtext",
+              "data-pc-name": "input",
+              "data-pc-section": "root"
+            },
+            "stableDescendants": [],
+            "semanticShape": []
+          },
+          "confidence": 0.95,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 26,
+        "scenarioStepIndex": 27,
+        "originalText": "Presionar \"Sí\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Sí"
+        },
+        "technicalTargetRef": "role:radio|Sí",
+        "technicalTargetRefs": [
+          "role:radio|Sí"
+        ],
+        "pageKey": "tab-1",
+        "controlIdentity": "39ce8495830f|Sí|role|radio|Sí",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Sí\"][role=\"radio\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div",
+              "role": "radio"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Sí",
+              "role": "radio"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_63_content"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"div\",\"role\":\"radio\"},\"stableDirectAttributes\":{\"role\":\"radio\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 27,
+        "scenarioStepIndex": 28,
+        "originalText": "Ingresar \"01-10-2020\" en \"Fecha de ingreso\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Fecha de ingreso"
+        },
+        "valueKey": "fecha_de_ingreso",
+        "associatedField": "Fecha de ingreso",
+        "pageKey": "tab-1",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[data-pc-section=\"input\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "role": "combobox",
+                "stableAttributes": {
+                  "data-pc-section": "input"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 28,
+        "scenarioStepIndex": 29,
+        "originalText": "Ingresar \"829-255-1232\" en \"Teléfono\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Teléfono"
+        },
+        "valueKey": "telefono",
+        "associatedField": "Teléfono",
+        "pageKey": "tab-1",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[data-pc-name=\"inputmask\"][data-pc-section=\"root\"]",
+              "confidence": 0.95
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "input",
+              "role": "textbox"
+            },
+            "stableDirectAttributes": {
+              "data-pc-name": "inputmask",
+              "data-pc-section": "root"
+            },
+            "stableDescendants": [],
+            "semanticShape": []
+          },
+          "confidence": 0.95,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 29,
+        "scenarioStepIndex": 30,
+        "originalText": "Ingresar \"3322\" en \"Extensión\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Extensión"
+        },
+        "valueKey": "extension",
+        "associatedField": "Extensión",
+        "pageKey": "tab-1",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "role": "textbox",
+                "stableAttributes": {
+                  "data-pc-name": "inputtext",
+                  "data-pc-section": "root"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 30,
+        "scenarioStepIndex": 31,
+        "originalText": "Ingresar \"12\" en \"Calle / Avenida / Autopista\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Calle / Avenida / Autopista"
+        },
+        "valueKey": "calle_avenida_autopista",
+        "associatedField": "Calle / Avenida / Autopista",
+        "pageKey": "tab-1",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "role": "textbox",
+                "stableAttributes": {
+                  "data-pc-name": "inputtext",
+                  "data-pc-section": "root"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 31,
+        "scenarioStepIndex": 32,
+        "originalText": "Ingresar \"3\" en \"Nombre edificio\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Nombre edificio"
+        },
+        "valueKey": "nombre_edificio",
+        "associatedField": "Nombre edificio",
+        "pageKey": "tab-1",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "role": "textbox",
+                "stableAttributes": {
+                  "data-pc-name": "inputtext",
+                  "data-pc-section": "root"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 32,
+        "scenarioStepIndex": 33,
+        "originalText": "Ingresar \"21\" en \"Número casa / edificio\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Número casa / edificio"
+        },
+        "valueKey": "numero_casa_edificio",
+        "associatedField": "Número casa / edificio",
+        "pageKey": "tab-1",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "role": "textbox",
+                "stableAttributes": {
+                  "data-pc-name": "inputtext",
+                  "data-pc-section": "root"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 33,
+        "scenarioStepIndex": 34,
+        "originalText": "Ingresar \"23\" en \"Número apartamento\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Número apartamento"
+        },
+        "valueKey": "numero_apartamento",
+        "associatedField": "Número apartamento",
+        "pageKey": "tab-1",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "role": "textbox",
+                "stableAttributes": {
+                  "data-pc-name": "inputtext",
+                  "data-pc-section": "root"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 34,
+        "scenarioStepIndex": 35,
+        "originalText": "Seleccionar \"Distrito Nacional\" en \"Región\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Distrito Nacional"
+        },
+        "selectionField": "Región",
+        "associatedField": "Distrito Nacional",
+        "technicalTargetRef": "role:option|Distrito Nacional",
+        "technicalTargetRefs": [
+          "role:option|Distrito Nacional",
+          "css:#pv_id_72_0",
+          "id:pv_id_72_0"
+        ],
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Distrito Nacional\"][id=\"pv_id_72_0\"][role=\"option\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Distrito Nacional",
+              "id": "pv_id_72_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_72_list"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_72_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "Distrito Nacional",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_72_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "Distrito Nacional",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 35,
+        "scenarioStepIndex": 36,
+        "originalText": "Seleccionar \"Distrito Nacional\" en \"Provincia\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Distrito Nacional"
+        },
+        "selectionField": "Provincia",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Distrito Nacional",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "Distrito Nacional",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 36,
+        "scenarioStepIndex": 37,
+        "originalText": "Seleccionar \"Santo Domingo\" en \"Municipio\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Santo Domingo"
+        },
+        "selectionField": "Municipio",
+        "associatedField": "Municipio",
+        "technicalTargetRefs": [
+          "role:option|Santo Domingo",
+          "css:#pv_id_77_0",
+          "id:pv_id_77_0"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Santo Domingo",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "Santo Domingo",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 37,
+        "scenarioStepIndex": 38,
+        "originalText": "Seleccionar \"Santo Domingo De Guzmán\" en \"Localidad\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Santo Domingo De Guzmán"
+        },
+        "selectionField": "Localidad",
+        "associatedField": "Localidad",
+        "technicalTargetRefs": [
+          "role:option|Santo Domingo De Guzmán",
+          "css:#pv_id_78_0",
+          "id:pv_id_78_0"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Santo Domingo De Guzmán",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "Santo Domingo De Guzmán",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 38,
+        "scenarioStepIndex": 39,
+        "originalText": "Seleccionar \"Agua Dulce\" en \"Sector\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Agua Dulce"
+        },
+        "selectionField": "Sector",
+        "selectionActivationField": "Referencia",
+        "associatedField": "Sector",
+        "technicalTargetRefs": [
+          "role:option|Agua Dulce",
+          "css:#pv_id_79_0",
+          "id:pv_id_79_0"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Agua Dulce",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "Agua Dulce",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 39,
+        "scenarioStepIndex": 40,
+        "originalText": "Ingresar \"1Q\" en \"Referencia\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Referencia"
+        },
+        "valueKey": "referencia",
+        "associatedField": "Referencia",
+        "pageKey": "tab-1",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[data-pc-name=\"inputtext\"][data-pc-section=\"root\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "role": "textbox",
+                "stableAttributes": {
+                  "data-pc-name": "inputtext",
+                  "data-pc-section": "root"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 40,
+        "scenarioStepIndex": 41,
+        "originalText": "Presionar \"Aceptar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Aceptar"
+        },
+        "technicalTargetRef": "role:button|Aceptar",
+        "technicalTargetRefs": [
+          "role:button|Aceptar"
+        ],
+        "pageKey": "tab-1",
+        "controlIdentity": "39ce8495830f|Aceptar|role|button|Aceptar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Aceptar\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Aceptar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 41,
+        "scenarioStepIndex": 42,
+        "originalText": "Presionar \"Continuar\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Continuar"
+        },
+        "technicalTargetRef": "role:button|Continuar",
+        "technicalTargetRefs": [
+          "role:button|Continuar"
+        ],
+        "pageKey": "tab-1",
+        "controlIdentity": "39ce8495830f|Continuar|role|button|Continuar",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Continuar\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "button"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Continuar"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "__nuxt"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 42,
+        "scenarioStepIndex": 43,
+        "originalText": "Seleccionar \"Sistema de Prestamos\" en \"Categoría de producto\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "Sistema de Prestamos"
+        },
+        "selectionField": "Categoría de producto",
+        "associatedField": "Categoría de producto",
+        "technicalTargetRefs": [
+          "role:option|Sistema de Prestamos",
+          "css:#pv_id_88_2",
+          "id:pv_id_88_2"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "Sistema de Prestamos",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "Sistema de Prestamos",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 43,
+        "scenarioStepIndex": 44,
+        "originalText": "Seleccionar \"24 - PRESTAMOS PERSONALES FACILES\" en \"Producto\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "24 - PRESTAMOS PERSONALES FACILES"
+        },
+        "selectionField": "Producto",
+        "associatedField": "Producto",
+        "technicalTargetRefs": [
+          "role:option|24 - PRESTAMOS PERSONALES FACILES",
+          "css:#pv_id_89_0",
+          "id:pv_id_89_0"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "24 - PRESTAMOS PERSONALES FACILES",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "resolvedExecutionTarget": "24 - PRESTAMOS PERSONALES FACILES",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 44,
+        "scenarioStepIndex": 45,
+        "originalText": "Presionar \"Seleccione una opción\"",
+        "operation": "click",
+        "target": {
+          "strategy": "text",
+          "value": "Seleccione una opción"
+        },
+        "valueKey": "seleccione_una_opcion",
+        "associatedField": "Seleccione una opción",
+        "technicalTargetRef": "role:combobox|Seleccione una opción",
+        "technicalTargetRefs": [
+          "role:combobox|Seleccione una opción"
+        ],
+        "controlIdentity": "39ce8495830f|Seleccione una opción|role|combobox|Seleccione una opción",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"Seleccione una opción\"][role=\"combobox\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "span",
+              "role": "combobox"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "Seleccione una opción",
+              "role": "combobox"
+            },
+            "stableDescendants": [],
+            "semanticShape": [],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_94"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"span\",\"role\":\"combobox\"},\"stableDirectAttributes\":{\"role\":\"combobox\"},\"stableDescendants\":[],\"semanticShape\":[],\"topologySignature\":\"\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "combobox",
+          "normalizedName": "Seleccione una opción",
+          "targetTag": "span",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_94"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 45,
+        "scenarioStepIndex": 46,
+        "originalText": "Seleccionar \"PRÉSTAMOS PERSONALES NUEVOS\" en \"Seleccione una opción\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "PRÉSTAMOS PERSONALES NUEVOS"
+        },
+        "selectionField": "Seleccione una opción",
+        "selectionActivationField": "Monto solicitado",
+        "associatedField": "Seleccione una opción",
+        "technicalTargetRefs": [
+          "role:option|PRÉSTAMOS PERSONALES NUEVOS",
+          "css:#pv_id_94_0",
+          "id:pv_id_94_0"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "discovery",
+          "targetType": "display",
+          "locatorCandidates": [
+            {
+              "strategy": "text",
+              "value": "PRÉSTAMOS PERSONALES NUEVOS",
+              "confidence": 0.5
+            }
+          ],
+          "confidence": 0.5,
+          "certificationTier": 5
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "PRÉSTAMOS PERSONALES NUEVOS",
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 46,
+        "scenarioStepIndex": 47,
+        "originalText": "Ingresar \"RD$60,000.00\" en \"Monto solicitado\"",
+        "operation": "fill",
+        "target": {
+          "strategy": "label",
+          "value": "Monto solicitado"
+        },
+        "valueKey": "monto_solicitado",
+        "associatedField": "Monto solicitado",
+        "pageKey": "tab-1",
+        "recordingActionType": "fill",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": false,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "div|[data-pc-name=\"input\"][data-pc-extend=\"inputtext\"][data-pc-section=\"root\"]",
+              "confidence": 0.55
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "div"
+            },
+            "stableDescendants": [
+              {
+                "relation": "descendant",
+                "tag": "input",
+                "role": "spinbutton",
+                "stableAttributes": {
+                  "data-pc-name": "input",
+                  "data-pc-extend": "inputtext",
+                  "data-pc-section": "root"
+                }
+              }
+            ]
+          },
+          "confidence": 0.55,
+          "certificationTier": 3
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "fillPromotedField"
+        },
+        "evidenceRefs": []
+      },
+      {
+        "contractStepIndex": 47,
+        "scenarioStepIndex": 48,
+        "originalText": "Seleccionar \"6 meses\" en \"Plazo\"",
+        "operation": "select",
+        "target": {
+          "strategy": "text",
+          "value": "6 meses"
+        },
+        "selectionField": "Plazo",
+        "associatedField": "Plazo",
+        "technicalTargetRef": "role:option|6 meses",
+        "technicalTargetRefs": [
+          "role:option|6 meses",
+          "css:#pv_id_93_0",
+          "id:pv_id_93_0"
+        ],
+        "pageKey": "tab-1",
+        "recordingActionType": "click",
+        "certifiedTechnicalTarget": {
+          "interactionEvidence": [],
+          "validatedByInteraction": true,
+          "certifiedFrom": "recording",
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "css",
+              "value": "[aria-label=\"6 meses\"][id=\"pv_id_93_0\"][role=\"option\"]",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "li",
+              "role": "option"
+            },
+            "stableDirectAttributes": {
+              "aria-label": "6 meses",
+              "id": "pv_id_93_0",
+              "role": "option"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "deterministicStructuralIdentity": true,
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_93_list"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"li\",\"role\":\"option\"},\"stableDirectAttributes\":{\"id\":\"pv_id_93_0\",\"role\":\"option\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "confidence": 0.85,
+          "certificationTier": 1
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "option",
+          "normalizedName": "6 meses",
+          "targetTag": "li",
+          "scopeIdentity": {
+            "strategy": "id",
+            "value": "pv_id_93_list"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "required": true,
+        "executionStatus": "executed",
+        "implementation": {
+          "kind": "runtime",
+          "runtimeMethod": "clickPromotedTarget"
+        },
+        "resolvedExecutionTarget": "6 meses",
+        "evidenceRefs": []
+      }
+    ],
+    "unresolvedRequiredOracles": [],
+    "diagnostics": {
+      "requiredScenarioSteps": 48,
+      "representedScenarioSteps": 48,
+      "missingScenarioSteps": []
+    }
+  }
+}

@@ -1,21 +1,27 @@
 import os from "node:os";
+import path from "node:path";
 import WebSocket from "ws";
 import type { AgentConfig } from "./agent-config";
 import { BrowserSession } from "./browser-session";
+import { AppiumInstaller, AppiumServer } from "./appium-runtime";
 import { ChromiumInstaller } from "./chromium-installer";
+import { probeAndroid, resolveSdk, runCommand, startEmulator, stopEmulator, type AndroidStatus } from "./android-probe";
+import { openTcpStream, type LocalTarget } from "./tcp-stream";
 import {
   AGENT_CDP_PATH,
   AGENT_CONTROL_PATH,
   AGENT_PROTOCOL_VERSION,
+  AGENT_STREAM_PATH,
   parseServerMessage,
   toWebSocketUrl,
   type AgentToServer,
   type ServerToAgent,
+  type StreamTarget,
 } from "./protocol";
 
 /**
  * Agente local: mantiene un canal de control con el servidor y ejecuta sus
- * órdenes (instalar Chromium, abrir y cerrar navegadores). No decide nada por
+ * órdenes (instalar Chromium y Appium, abrir y cerrar navegadores, arrancar emuladores). No decide nada por
  * su cuenta salvo reconectar: qué revisión hace falta y cuándo grabar lo
  * decide el servidor, así una actualización del servidor no exige tocar los PCs.
  */
@@ -33,6 +39,40 @@ export type LocalAgentOptions = {
   log?: (line: string) => void;
   /** Revisiones que el agente informa aunque aún no estén instaladas. */
   knownRevisions?: string[];
+  /** Android Studio del PC; las pruebas lo sustituyen. */
+  android?: {
+    probe(): Promise<AndroidStatus>;
+    start(avd: string, onProgress: (phase: "launched" | "booting") => void): Promise<{ serial: string; avd: string }>;
+    stop(serial: string): Promise<void>;
+  };
+  /** Dónde escuchan adb y Appium en este PC; las pruebas lo sustituyen. */
+  localTargets?: Partial<Record<StreamTarget, LocalTarget>>;
+  /** node.exe con el que se arranca Appium y su puerto; las pruebas los sustituyen. */
+  appiumNodePath?: string;
+  appiumPort?: number;
+};
+
+/** adb escucha en 5037 (o ANDROID_ADB_SERVER_PORT); Appium, en QALAB_APPIUM_PORT o 4723. */
+function defaultLocalTargets(): Record<StreamTarget, LocalTarget> {
+  const adbPort = Number(process.env.ANDROID_ADB_SERVER_PORT) || 5037;
+  return {
+    adb: {
+      port: adbPort,
+      // Si el servidor de adb no está arrancado, lo arranca y reintenta una vez.
+      start: async () => {
+        const sdk = resolveSdk();
+        if (!sdk) throw new Error("No se encontró el SDK de Android (Android Studio)");
+        await runCommand(sdk.adbPath, ["start-server"], 20_000);
+      },
+    },
+    appium: { port: Number(process.env.QALAB_APPIUM_PORT) || 4723 },
+  };
+}
+
+const defaultAndroid: NonNullable<LocalAgentOptions["android"]> = {
+  probe: () => probeAndroid(),
+  start: (avd, onProgress) => startEmulator(avd, { onProgress }),
+  stop: (serial) => stopEmulator(serial),
 };
 
 export class LocalAgent {
@@ -43,13 +83,26 @@ export class LocalAgent {
   private heartbeat?: NodeJS.Timeout;
   private readonly sessions = new Map<string, BrowserSession>();
   private readonly installer: ChromiumInstaller;
+  private readonly appiumInstaller: AppiumInstaller;
+  private appiumServer?: AppiumServer;
+  /** La versión que reparte el servidor (welcome); sin ella, la más reciente instalada. */
+  private requiredAppium?: string;
   private readonly log: (line: string) => void;
   private connectedOnce?: () => void;
+  private readonly android: NonNullable<LocalAgentOptions["android"]>;
+  private readonly localTargets: Record<StreamTarget, LocalTarget>;
   readonly connected: Promise<void>;
 
   constructor(private readonly options: LocalAgentOptions) {
     this.log = options.log ?? ((line) => console.log(line));
+    this.android = options.android ?? defaultAndroid;
+    const defaults = defaultLocalTargets();
+    // Nada escucha en el puerto de Appium: el agente arranca el suyo y la conexión se reintenta.
+    const appiumPort = options.appiumPort ?? defaults.appium.port;
+    const appium: LocalTarget = { port: appiumPort, start: () => this.startAppium(appiumPort) };
+    this.localTargets = { ...defaults, appium, ...options.localTargets };
     this.installer = new ChromiumInstaller(options.config.browsersDir, options.config.serverUrl, this.authHeaders());
+    this.appiumInstaller = new AppiumInstaller(path.join(options.config.rootDir, "appium"), options.config.serverUrl, this.authHeaders());
     this.connected = new Promise((resolve) => (this.connectedOnce = resolve));
   }
 
@@ -63,7 +116,30 @@ export class LocalAgent {
     clearTimeout(this.reconnectTimer);
     clearInterval(this.heartbeat);
     await Promise.all([...this.sessions.values()].map((s) => s.close("server_closed")));
+    await this.appiumServer?.stop();
     this.socket?.close();
+  }
+
+  /** Arranca el Appium instalado por el agente en `port` (una vez; luego lo reutiliza). */
+  private async startAppium(port: number): Promise<void> {
+    const installed = this.appiumInstaller.installedVersions();
+    const version = this.requiredAppium && installed.includes(this.requiredAppium) ? this.requiredAppium : installed.sort().at(-1);
+    const mainScript = version ? this.appiumInstaller.mainScript(version) : undefined;
+    if (!version || !mainScript) throw new Error("Appium aún no está instalado en tu equipo");
+    const home = this.appiumInstaller.dirFor(version);
+    if (!this.appiumServer || this.appiumServer.home !== home) {
+      await this.appiumServer?.stop();
+      this.appiumServer = new AppiumServer({
+        home,
+        mainScript,
+        port,
+        sdkPath: resolveSdk()?.sdkPath,
+        logFile: path.join(this.options.config.logsDir, "appium.log"),
+        nodePath: this.options.appiumNodePath,
+        log: this.log,
+      });
+    }
+    await this.appiumServer.start();
   }
 
   get openSessions(): number {
@@ -85,7 +161,7 @@ export class LocalAgent {
     socket.on("open", () => {
       this.reconnectDelay = RECONNECT_MIN_MS;
       this.log(`[agente] conectado a ${this.options.config.serverUrl}`);
-      this.send(this.hello());
+      this.sendHello();
       clearInterval(this.heartbeat);
       // ping de WebSocket: mantiene viva la conexión a través de proxies y
       // detecta cortes que el sistema operativo tarda minutos en informar.
@@ -130,7 +206,14 @@ export class LocalAgent {
     if (this.socket?.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify(message));
   }
 
-  private hello(): AgentToServer {
+  private sendHello(): void {
+    void this.hello().then(
+      (msg) => this.send(msg),
+      (err) => this.log(`[agente] no se pudo armar el estado: ${err?.message ?? err}`),
+    );
+  }
+
+  private async hello(): Promise<AgentToServer> {
     const installed = this.installer.installedRevisions();
     const extra = (this.options.knownRevisions ?? [])
       .filter((rev) => !installed.some((s) => s.revision === rev))
@@ -143,6 +226,15 @@ export class LocalAgent {
       machine: os.hostname(),
       windowsUser: os.userInfo().username,
       chromium: [...installed, ...extra],
+      appium: { installed: this.appiumInstaller.installedVersions() },
+      android: await this.android.probe().catch((err) => ({
+        sdkFound: false,
+        emulatorFound: false,
+        avds: [],
+        devices: [],
+        error: `No se pudo revisar Android Studio: ${err instanceof Error ? err.message : String(err)}`,
+        checkedAt: new Date().toISOString(),
+      })),
     };
   }
 
@@ -153,10 +245,43 @@ export class LocalAgent {
           const removed = this.installer.pruneExcept(msg.requiredRevision);
           if (removed.length > 0) this.log(`[agente] revisiones antiguas borradas: ${removed.join(", ")}`);
         }
+        if (msg.requiredAppium) {
+          this.requiredAppium = msg.requiredAppium;
+          if (!this.appiumServer?.running && this.appiumInstaller.mainScript(msg.requiredAppium)) {
+            const removed = this.appiumInstaller.pruneExcept(msg.requiredAppium);
+            if (removed.length > 0) this.log(`[agente] versiones antiguas de Appium borradas: ${removed.join(", ")}`);
+          }
+        }
         return;
 
       case "status_request":
-        this.send(this.hello());
+        this.sendHello();
+        return;
+
+      case "start_emulator": {
+        this.log(`[agente] arrancando el emulador ${msg.avd}`);
+        try {
+          const ready = await this.android.start(msg.avd, (phase) =>
+            this.send({ t: "emulator_progress", requestId: msg.requestId, avd: msg.avd, phase }),
+          );
+          this.log(`[agente] emulador ${msg.avd} listo (${ready.serial})`);
+          this.send({ t: "emulator_ready", requestId: msg.requestId, avd: msg.avd, serial: ready.serial });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          this.log(`[agente] falló el emulador ${msg.avd}: ${message}`);
+          this.send({ t: "emulator_error", requestId: msg.requestId, avd: msg.avd, message });
+        }
+        this.sendHello();
+        return;
+      }
+
+      case "stop_emulator":
+        try {
+          await this.android.stop(msg.serial);
+        } catch (err) {
+          this.log(`[agente] no se pudo apagar ${msg.serial}: ${err instanceof Error ? err.message : String(err)}`);
+        }
+        this.sendHello();
         return;
 
       case "install_chromium": {
@@ -171,6 +296,22 @@ export class LocalAgent {
           const message = err instanceof Error ? err.message : String(err);
           this.log(`[agente] falló la instalación de Chromium ${msg.revision}: ${message}`);
           this.send({ t: "install_error", requestId: msg.requestId, revision: msg.revision, message });
+        }
+        return;
+      }
+
+      case "install_appium": {
+        this.log(`[agente] instalando Appium ${msg.version}`);
+        try {
+          await this.appiumInstaller.install(msg, (p) =>
+            this.send({ t: "appium_install_progress", requestId: msg.requestId, version: msg.version, ...p }),
+          );
+          this.log(`[agente] Appium ${msg.version} instalado`);
+          this.send({ t: "appium_install_done", requestId: msg.requestId, version: msg.version });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          this.log(`[agente] falló la instalación de Appium ${msg.version}: ${message}`);
+          this.send({ t: "appium_install_error", requestId: msg.requestId, version: msg.version, message });
         }
         return;
       }
@@ -206,6 +347,26 @@ export class LocalAgent {
         } catch (err) {
           this.sessions.delete(msg.sessionId);
           this.send({ t: "browser_error", sessionId: msg.sessionId, message: err instanceof Error ? err.message : String(err) });
+        }
+        return;
+      }
+
+      case "open_stream": {
+        const local = this.localTargets[msg.target];
+        if (!local) {
+          this.send({ t: "stream_error", streamId: msg.streamId, message: `servicio desconocido: ${String(msg.target)}` });
+          return;
+        }
+        try {
+          await openTcpStream({
+            local,
+            dataChannelUrl: toWebSocketUrl(this.options.config.serverUrl, AGENT_STREAM_PATH, { stream: msg.streamId, token: msg.dataToken }),
+            headers: this.authHeaders(),
+          });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          this.log(`[agente] no se pudo abrir la conexión a ${msg.target}: ${message}`);
+          this.send({ t: "stream_error", streamId: msg.streamId, message });
         }
         return;
       }

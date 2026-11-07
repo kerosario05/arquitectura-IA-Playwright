@@ -1,0 +1,1301 @@
+[
+  {
+    "scenarioId": "REC-4ABEA656-01",
+    "title": "Prueba",
+    "description": "Recorrido observado para completar \"Prueba\". Se registraron 21 acciones funcionales.",
+    "preconditions": [
+      "Acceso a la aplicación configurada del proyecto",
+      "Datos de prueba válidos disponibles para el proyecto"
+    ],
+    "kind": "happy_path",
+    "provenance": "observed",
+    "scope": "end_to_end",
+    "mobileSteps": [],
+    "webSteps": [
+      {
+        "action": "navigate",
+        "value": "https://next.portalcomercial.dev.bsc.com.do/",
+        "description": "Navegar a https://next.portalcomercial.dev.bsc.com.do/"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Usuario"
+        },
+        "valueKey": "usuario",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#username",
+          "id:username"
+        ],
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "interactionId": "interaction-6",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "fill",
+        "target": {
+          "strategy": "role",
+          "value": "textbox|Contraseña"
+        },
+        "valueKey": "contrasena",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "interactionId": "interaction-7",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Persona jurídica"
+        },
+        "description": "Presionar \"Persona jurídica\"",
+        "interactionId": "interaction-11",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "link|Nueva solicitud"
+        },
+        "description": "Presionar \"Nueva solicitud\"",
+        "interactionId": "interaction-13",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Recuperar"
+        },
+        "description": "Presionar \"Request ID: 2396\"",
+        "interactionId": "interaction-17",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Añadir ó actualizar relacionado"
+        },
+        "description": "Presionar \"Añadir ó actualizar relacionado\"",
+        "interactionId": "interaction-21",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "description": "Presionar el control grabado",
+        "interactionId": "interaction-23",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Confirmar"
+        },
+        "description": "Presionar \"Confirmar\"",
+        "interactionId": "interaction-25",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Actualizar Relacionado"
+        },
+        "description": "Presionar \"Actualizar Relacionado\"",
+        "interactionId": "interaction-27",
+        "pageKey": "tab-1"
+      },
+      {
+        "action": "click",
+        "target": {
+          "strategy": "role",
+          "value": "button|Volver"
+        },
+        "description": "Presionar \"Volver\"",
+        "interactionId": "interaction-29",
+        "pageKey": "tab-1"
+      }
+    ],
+    "testRailSteps": [
+      {
+        "content": "Abrir la aplicación configurada del proyecto",
+        "expected": "La aplicación carga su pantalla inicial",
+        "classification": "FUNCTIONAL_ACTION",
+        "isSetup": true,
+        "stepNumber": 1
+      },
+      {
+        "content": "Ingresar [usuario] en \"Usuario\"",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "stepTemplate": "Ingresar [usuario] en \"Usuario\"",
+        "renderedStep": "Ingresar \"radames\" en \"Usuario\"",
+        "valueKey": "usuario",
+        "interactionId": "interaction-6",
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#username",
+          "id:username"
+        ],
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "45f8e7320f7d",
+        "screenAfterRef": "45f8e7320f7d",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/login",
+        "stateScope": "45f8e7320f7d",
+        "stepNumber": 2
+      },
+      {
+        "content": "Ingresar [contrasena] en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "stepTemplate": "Ingresar [contrasena] en \"Contraseña\"",
+        "renderedStep": "Ingresar \"â€¢â€¢â€¢â€¢â€¢â€¢\" en \"Contraseña\"",
+        "valueKey": "contrasena",
+        "interactionId": "interaction-7",
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "45f8e7320f7d",
+        "screenAfterRef": "45f8e7320f7d",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/login",
+        "stateScope": "45f8e7320f7d",
+        "stepNumber": 3
+      },
+      {
+        "content": "Presionar \"Enter\" en \"Contraseña\"",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "renderedStep": "Presionar \"Enter\" en \"Contraseña\"",
+        "interactionId": "interaction-8",
+        "sensitive": true,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "45f8e7320f7d",
+        "screenAfterRef": "45f8e7320f7d",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/login",
+        "routeAfter": "https://next.portalcomercial.dev.bsc.com.do/",
+        "stateScope": "45f8e7320f7d",
+        "stepNumber": 4
+      },
+      {
+        "content": "Presionar \"Persona jurídica\"",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "renderedStep": "Presionar \"Persona jurídica\"",
+        "interactionId": "interaction-11",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "20a681cf9918",
+        "screenAfterRef": "20a681cf9918",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/",
+        "stateScope": "20a681cf9918",
+        "stepNumber": 5
+      },
+      {
+        "content": "Presionar \"Nueva solicitud\"",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "renderedStep": "Presionar \"Nueva solicitud\"",
+        "interactionId": "interaction-13",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "20a681cf9918",
+        "screenAfterRef": "20a681cf9918",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/",
+        "routeAfter": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica",
+        "stateScope": "20a681cf9918",
+        "stepNumber": 6
+      },
+      {
+        "content": "Presionar \"Request ID: 2396\"",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "renderedStep": "Presionar \"Request ID: 2396\"",
+        "interactionId": "interaction-17",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "4d1ca9072954",
+        "screenAfterRef": "4d1ca9072954",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica",
+        "routeAfter": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+        "stateScope": "4d1ca9072954",
+        "stepNumber": 7
+      },
+      {
+        "content": "Presionar \"Añadir ó actualizar relacionado\"",
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "renderedStep": "Presionar \"Añadir ó actualizar relacionado\"",
+        "interactionId": "interaction-21",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "e076027ef0e2",
+        "screenAfterRef": "e076027ef0e2",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+        "stateScope": "e076027ef0e2",
+        "stepNumber": 8
+      },
+      {
+        "content": "Presionar el control grabado",
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "renderedStep": "Presionar el control grabado",
+        "interactionId": "interaction-23",
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "e076027ef0e2",
+        "screenAfterRef": "e076027ef0e2",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+        "stateScope": "e076027ef0e2",
+        "stepNumber": 9
+      },
+      {
+        "content": "Presionar \"Confirmar\"",
+        "sourceEventRefs": [
+          "event-25"
+        ],
+        "renderedStep": "Presionar \"Confirmar\"",
+        "interactionId": "interaction-25",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "e076027ef0e2",
+        "screenAfterRef": "e076027ef0e2",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+        "stateScope": "e076027ef0e2",
+        "stepNumber": 10
+      },
+      {
+        "content": "Presionar \"Actualizar Relacionado\"",
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "renderedStep": "Presionar \"Actualizar Relacionado\"",
+        "interactionId": "interaction-27",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "e076027ef0e2",
+        "screenAfterRef": "e076027ef0e2",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+        "stateScope": "e076027ef0e2",
+        "stepNumber": 11
+      },
+      {
+        "content": "Presionar \"Volver\"",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "renderedStep": "Presionar \"Volver\"",
+        "interactionId": "interaction-29",
+        "sensitive": false,
+        "expected": "",
+        "classification": "FUNCTIONAL_ACTION",
+        "pageKey": "tab-1",
+        "screenBeforeRef": "e076027ef0e2",
+        "screenAfterRef": "e076027ef0e2",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+        "stateScope": "e076027ef0e2",
+        "stepNumber": 12
+      }
+    ],
+    "requiredData": [
+      {
+        "key": "usuario",
+        "label": "Usuario",
+        "stepIndex": 1,
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#username",
+          "id:username"
+        ],
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "exampleValue": "radames",
+        "sensitive": false,
+        "valueRole": "action_input",
+        "source": "RECORDED_CONFIRMED",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Usuario",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      },
+      {
+        "key": "contrasena",
+        "label": "Contraseña",
+        "stepIndex": 2,
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "sensitive": true,
+        "valueRole": "secure_input",
+        "source": "secure",
+        "validatedByInteraction": false,
+        "confidence": 0.9,
+        "semanticField": "Contraseña",
+        "needsReview": false,
+        "reviewReason": "stable_business_label"
+      }
+    ],
+    "stepTargets": [
+      {
+        "stepIndex": 1,
+        "description": "Ingresar [usuario] en \"Usuario\"",
+        "strategy": "role",
+        "value": "textbox|Usuario"
+      },
+      {
+        "stepIndex": 2,
+        "description": "Ingresar [contrasena] en \"Contraseña\"",
+        "strategy": "role",
+        "value": "textbox|Contraseña"
+      },
+      {
+        "stepIndex": 3,
+        "description": "Presionar \"Persona jurídica\"",
+        "strategy": "role",
+        "value": "button|Persona jurídica"
+      },
+      {
+        "stepIndex": 4,
+        "description": "Presionar \"Nueva solicitud\"",
+        "strategy": "role",
+        "value": "link|Nueva solicitud"
+      },
+      {
+        "stepIndex": 5,
+        "description": "Presionar \"Request ID: 2396\"",
+        "strategy": "role",
+        "value": "button|Recuperar"
+      },
+      {
+        "stepIndex": 6,
+        "description": "Presionar \"Añadir ó actualizar relacionado\"",
+        "strategy": "role",
+        "value": "button|Añadir ó actualizar relacionado"
+      },
+      {
+        "stepIndex": 8,
+        "description": "Presionar \"Confirmar\"",
+        "strategy": "role",
+        "value": "button|Confirmar"
+      },
+      {
+        "stepIndex": 9,
+        "description": "Presionar \"Actualizar Relacionado\"",
+        "strategy": "role",
+        "value": "button|Actualizar Relacionado"
+      },
+      {
+        "stepIndex": 10,
+        "description": "Presionar \"Volver\"",
+        "strategy": "role",
+        "value": "button|Volver"
+      }
+    ],
+    "sourceRecordingId": "4abea656-6137-45e0-a713-4a792ee70535",
+    "hasUncertainSteps": true,
+    "primary": true,
+    "sourceEventRefs": [
+      "event-1",
+      "event-2",
+      "event-3",
+      "event-4",
+      "event-5",
+      "event-6",
+      "event-7",
+      "event-8",
+      "event-9",
+      "event-10",
+      "event-11",
+      "event-12",
+      "event-13",
+      "event-14",
+      "event-15",
+      "event-16",
+      "event-17",
+      "event-18",
+      "event-19",
+      "event-20",
+      "event-21",
+      "event-22",
+      "event-23",
+      "event-24",
+      "event-25",
+      "event-26",
+      "event-27",
+      "event-28",
+      "event-29",
+      "event-30"
+    ],
+    "traceBacked": true,
+    "containsUnexecutedActions": false,
+    "functionalReadiness": true,
+    "technicalReadiness": false,
+    "expectedResultCandidate": "La aplicación carga su pantalla inicial",
+    "oracleAuthority": "observed_only",
+    "confidence": 0.95,
+    "scenarioStepCount": 12,
+    "functionalActionCount": 11,
+    "nonUserSetupSteps": 1,
+    "reasonForDifference": "El contador funcional excluye filas de setup/navegación inicial visibles en el preview.",
+    "scenarioGoal": "Prueba",
+    "stateSequenceValid": true,
+    "stateSequenceIssues": [],
+    "postGoalObservations": [],
+    "goalContract": {
+      "nonGeneric": true,
+      "goalCoherent": true,
+      "mutationIntentExpressed": true
+    },
+    "replayEligible": true,
+    "canonicalInteractions": [
+      {
+        "id": "interaction-1",
+        "controlIdentity": "inicio",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-1"
+        ],
+        "technicalTargetRefs": [],
+        "pageKey": "tab-1",
+        "stateScope": "inicio",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "inicio",
+        "screenAfterRef": "inicio",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/login"
+      },
+      {
+        "id": "interaction-2",
+        "controlIdentity": "15ce316eba2d",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-2"
+        ],
+        "technicalTargetRefs": [],
+        "pageKey": "tab-1",
+        "stateScope": "15ce316eba2d",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "15ce316eba2d",
+        "screenAfterRef": "15ce316eba2d",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/login"
+      },
+      {
+        "id": "interaction-3",
+        "controlIdentity": "15ce316eba2d",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-3"
+        ],
+        "technicalTargetRefs": [],
+        "pageKey": "tab-1",
+        "stateScope": "15ce316eba2d",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "15ce316eba2d",
+        "screenAfterRef": "15ce316eba2d",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/login"
+      },
+      {
+        "id": "interaction-5",
+        "controlIdentity": "45f8e7320f7d",
+        "action": "navigation",
+        "sourceEventRefs": [
+          "event-5"
+        ],
+        "technicalTargetRefs": [],
+        "pageKey": "tab-1",
+        "stateScope": "45f8e7320f7d",
+        "technicalOnly": true,
+        "confidence": 0.9,
+        "screenBeforeRef": "45f8e7320f7d",
+        "screenAfterRef": "45f8e7320f7d",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/login"
+      },
+      {
+        "id": "interaction-6",
+        "controlIdentity": "45f8e7320f7d|Usuario|role|textbox|Usuario",
+        "semanticField": "Usuario",
+        "action": "fill",
+        "pageKey": "tab-1",
+        "valueKey": "usuario",
+        "recordedValue": "radames",
+        "rawTypedValue": "radames",
+        "sourceEventRefs": [
+          "event-6"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Usuario",
+          "css:#username",
+          "id:username"
+        ],
+        "editingSessionRef": "edit-1",
+        "description": "Ingresar en \"Usuario\"",
+        "stateScope": "45f8e7320f7d",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "45f8e7320f7d",
+        "screenAfterRef": "45f8e7320f7d",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/login"
+      },
+      {
+        "id": "interaction-7",
+        "controlIdentity": "45f8e7320f7d|Contraseña|role|textbox|Contraseña",
+        "semanticField": "Contraseña",
+        "action": "fill",
+        "pageKey": "tab-1",
+        "valueKey": "contrasena",
+        "sourceEventRefs": [
+          "event-7"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "editingSessionRef": "edit-2",
+        "description": "Ingresar en \"Contraseña\"",
+        "stateScope": "45f8e7320f7d",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "45f8e7320f7d",
+        "screenAfterRef": "45f8e7320f7d",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/login"
+      },
+      {
+        "id": "interaction-8",
+        "controlIdentity": "45f8e7320f7d|Contraseña|role|textbox|Contraseña",
+        "action": "press",
+        "pageKey": "tab-1",
+        "key": "Enter",
+        "sourceEventRefs": [
+          "event-8"
+        ],
+        "technicalTargetRefs": [
+          "role:textbox|Contraseña",
+          "css:#password",
+          "id:password"
+        ],
+        "stateScope": "45f8e7320f7d",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "45f8e7320f7d",
+        "screenAfterRef": "45f8e7320f7d",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/login",
+        "routeAfter": "https://next.portalcomercial.dev.bsc.com.do/",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-11",
+        "controlIdentity": "20a681cf9918|Persona jurídica|role|button|Persona jurídica",
+        "action": "click",
+        "pageKey": "tab-1",
+        "sourceEventRefs": [
+          "event-11"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Persona jurídica",
+          "css:#reka-accordion-trigger-v-1-5",
+          "id:reka-accordion-trigger-v-1-5"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "css",
+                "value": "#reka-accordion-trigger-v-1-5",
+                "confidence": 0.8
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {
+                "id": "reka-accordion-trigger-v-1-5"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",3]],\"descendantEntries\":[[\"span\",4]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "dashboard-sidebar-layout"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{\"id\":\"reka-accordion-trigger-v-1-5\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",3]],\\\"descendantEntries\\\":[[\\\"span\\\",4]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "stateScope": "20a681cf9918",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "20a681cf9918",
+        "screenAfterRef": "20a681cf9918",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/"
+      },
+      {
+        "id": "interaction-13",
+        "controlIdentity": "20a681cf9918|Nueva solicitud|role|link|Nueva solicitud",
+        "action": "click",
+        "pageKey": "tab-1",
+        "sourceEventRefs": [
+          "event-13"
+        ],
+        "technicalTargetRefs": [
+          "role:link|Nueva solicitud"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Nueva solicitud",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "/solicitud-persona-juridica"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "nav"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "reka-collapsible-content-v-1-6"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"/solicitud-persona-juridica\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "stateScope": "20a681cf9918",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "20a681cf9918",
+        "screenAfterRef": "20a681cf9918",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/",
+        "routeAfter": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-17",
+        "controlIdentity": "4d1ca9072954|Request ID: 2396|role|button|Recuperar",
+        "semanticField": "Request ID: 2396",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "request_id_2396",
+        "sourceEventRefs": [
+          "event-17"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Recuperar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Recuperar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 11,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "dashboard-panel-v-1-22"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 11
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Request ID: 2396",
+          "targetTag": "div",
+          "promotedTitle": true,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Request ID: 2396\"",
+        "stateScope": "4d1ca9072954",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "4d1ca9072954",
+        "screenAfterRef": "4d1ca9072954",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica",
+        "routeAfter": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar",
+        "transitionObserved": true,
+        "causedTransition": true,
+        "terminalForContext": true
+      },
+      {
+        "id": "interaction-21",
+        "controlIdentity": "e076027ef0e2|Añadir ó actualizar relacionado|role|button|Añadir ó actualizar relacionado",
+        "semanticField": "Añadir ó actualizar relacionado",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "anadir_o_actualizar_relacionado",
+        "sourceEventRefs": [
+          "event-21"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Añadir ó actualizar relacionado"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Añadir ó actualizar relacionado",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 4,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "dashboard-panel-v-1-27"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"button\"},\"stableDirectAttributes\":{},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",1]],\\\"descendantEntries\\\":[[\\\"span\\\",1]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 4
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Añadir ó actualizar relacionado",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "section:has(button[aria-labelledby=\"reka-stepper-item-title-v-1-30\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(div[aria-label=\"progreso\"])"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "dashboard-panel-v-1-27"
+              },
+              "captureMatchCount": 1
+            },
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(div[role=\"separator\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Añadir ó actualizar relacionado",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "section:has(button[aria-labelledby=\"reka-stepper-item-title-v-1-30\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Añadir ó actualizar relacionado\"",
+        "stateScope": "e076027ef0e2",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "e076027ef0e2",
+        "screenAfterRef": "e076027ef0e2",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar"
+      },
+      {
+        "id": "interaction-23",
+        "controlIdentity": "e076027ef0e2|M & R HOLISTIC KAIZEN101854236 · Prospecto principalSolicitantePendiente de crea",
+        "action": "click",
+        "pageKey": "tab-1",
+        "dynamicTargetLabel": true,
+        "sourceEventRefs": [
+          "event-23"
+        ],
+        "technicalTargetRefs": [],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "div",
+                "span"
+              ],
+              "deterministicStructuralIdentity": true,
+              "topologyTieBreakUnique": true,
+              "topologySignature": "{\"childEntries\":[[\"div\",2],[\"span\",3]],\"descendantEntries\":[[\"div\",2],[\"p\",2],[\"span\",7]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "stateScope": "e076027ef0e2",
+        "admissionStatus": "accepted",
+        "resolutionState": "runtime_resolution_required",
+        "confidence": 0.7,
+        "screenBeforeRef": "e076027ef0e2",
+        "screenAfterRef": "e076027ef0e2",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar"
+      },
+      {
+        "id": "interaction-25",
+        "controlIdentity": "e076027ef0e2|Confirmar|role|button|Confirmar",
+        "semanticField": "Confirmar",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "confirmar",
+        "sourceEventRefs": [
+          "event-25"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Confirmar"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Confirmar",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 4
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Confirmar",
+          "targetTag": "button",
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Confirmar\"",
+        "stateScope": "e076027ef0e2",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "e076027ef0e2",
+        "screenAfterRef": "e076027ef0e2",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar"
+      },
+      {
+        "id": "interaction-27",
+        "controlIdentity": "e076027ef0e2|Actualizar Relacionado|role|button|Actualizar Relacionado",
+        "semanticField": "Actualizar Relacionado",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "actualizar_relacionado",
+        "sourceEventRefs": [
+          "event-27"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Actualizar Relacionado"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Actualizar Relacionado",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [],
+              "deterministicStructuralIdentity": false,
+              "identityAmbiguous": true,
+              "structuralIdentityMatchCount": 2
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "semanticRuntimeEvidence": {
+          "source": "accessible_name",
+          "normalizedValue": "Actualizar Relacionado",
+          "role": "button",
+          "targetTag": "button",
+          "scopeAlternatives": [
+            {
+              "scopeIdentity": {
+                "strategy": "css",
+                "value": "div:has(h2[id=\"reka-dialog-title-v-1-353\"])"
+              },
+              "captureMatchCount": 1
+            }
+          ],
+          "captureUniqueTarget": true
+        },
+        "playwrightRecorderEvidence": {
+          "kind": "role",
+          "role": "button",
+          "normalizedName": "Actualizar Relacionado",
+          "targetTag": "button",
+          "scopeIdentity": {
+            "strategy": "css",
+            "value": "div:has(h2[id=\"reka-dialog-title-v-1-353\"])"
+          },
+          "captureMatchCount": 1,
+          "runtimeResolutionRequired": true
+        },
+        "description": "Ingresar en \"Actualizar Relacionado\"",
+        "stateScope": "e076027ef0e2",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "e076027ef0e2",
+        "screenAfterRef": "e076027ef0e2",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar"
+      },
+      {
+        "id": "interaction-29",
+        "controlIdentity": "e076027ef0e2|Volver|role|button|Volver",
+        "semanticField": "Volver",
+        "action": "click",
+        "pageKey": "tab-1",
+        "valueKey": "volver",
+        "sourceEventRefs": [
+          "event-29"
+        ],
+        "technicalTargetRefs": [
+          "role:button|Volver"
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "button|Volver",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "button"
+              },
+              "stableDirectAttributes": {},
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "deterministicStructuralIdentity": false,
+              "topologySignature": "{\"childEntries\":[[\"span\",1]],\"descendantEntries\":[[\"span\",1]]}",
+              "structuralIdentityMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ],
+        "validatedByInteraction": true,
+        "description": "Ingresar en \"Volver\"",
+        "stateScope": "e076027ef0e2",
+        "admissionStatus": "accepted",
+        "resolutionState": "certified",
+        "confidence": 0.85,
+        "screenBeforeRef": "e076027ef0e2",
+        "screenAfterRef": "e076027ef0e2",
+        "routeBefore": "https://next.portalcomercial.dev.bsc.com.do/solicitud-persona-juridica/2396/editar"
+      }
+    ],
+    "entityActionBlocks": [],
+    "readiness": {
+      "functionalReadiness": true,
+      "dataReadiness": true,
+      "technicalReadiness": false,
+      "oracleReadiness": true,
+      "reviewReadiness": true,
+      "publicationContentReadiness": true,
+      "executionReadiness": true,
+      "publicationReadiness": true,
+      "missingInputs": [],
+      "datasetAuthorityMismatches": [],
+      "dataReadinessReasons": []
+    },
+    "technicalKnowledgeRefs": [],
+    "runtimeInputRequirements": [
+      {
+        "valueKey": "usuario",
+        "semanticField": "Usuario",
+        "valueRole": "action_input",
+        "required": true,
+        "value": "radames",
+        "source": "RECORDED_CONFIRMED",
+        "resolved": true,
+        "sensitive": false,
+        "stepIndex": 1,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": false,
+        "editable": true,
+        "authority": "canonical_logical",
+        "authorityValue": "radames",
+        "datasetAuthorityMismatch": false
+      },
+      {
+        "valueKey": "contrasena",
+        "semanticField": "Contraseña",
+        "valueRole": "secure_input",
+        "required": true,
+        "value": "Masteryi16.",
+        "source": "CURRENT_QA_EDIT",
+        "resolved": true,
+        "sensitive": true,
+        "stepIndex": 2,
+        "readOnly": false,
+        "computed": false,
+        "systemGenerated": false,
+        "masked": true,
+        "editable": true,
+        "authority": "explicit_qa_edit",
+        "authorityValue": "Masteryi16.",
+        "datasetAuthorityMismatch": false
+      }
+    ],
+    "runtimeDataset": {
+      "scenarioId": "REC-4ABEA656-01",
+      "requirements": [
+        {
+          "valueKey": "usuario",
+          "semanticField": "Usuario",
+          "valueRole": "action_input",
+          "required": true,
+          "value": "radames",
+          "source": "RECORDED_CONFIRMED",
+          "resolved": true,
+          "sensitive": false,
+          "stepIndex": 1,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": false,
+          "editable": true,
+          "authority": "canonical_logical",
+          "authorityValue": "radames",
+          "datasetAuthorityMismatch": false
+        },
+        {
+          "valueKey": "contrasena",
+          "semanticField": "Contraseña",
+          "valueRole": "secure_input",
+          "required": true,
+          "value": "Masteryi16.",
+          "source": "CURRENT_QA_EDIT",
+          "resolved": true,
+          "sensitive": true,
+          "stepIndex": 2,
+          "readOnly": false,
+          "computed": false,
+          "systemGenerated": false,
+          "masked": true,
+          "editable": true,
+          "authority": "explicit_qa_edit",
+          "authorityValue": "Masteryi16.",
+          "datasetAuthorityMismatch": false
+        }
+      ],
+      "resolvedValues": {
+        "usuario": "radames",
+        "contrasena": "Masteryi16."
+      },
+      "missingValues": []
+    },
+    "mutationOpportunities": [],
+    "testRailCaseId": 57280,
+    "testRailDestination": {
+      "projectId": "56",
+      "suiteId": "1731",
+      "sectionId": "4755"
+    }
+  }
+]

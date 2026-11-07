@@ -1,5 +1,6 @@
 import path from "node:path";
 import {
+  isFilePickerActivationDelegatedToNextUpload,
   SpecExecutionContract,
   SpecExecutionContractStep,
   SpecStepOperation,
@@ -75,7 +76,7 @@ function portableImportPath(targetSpecPath: string, absoluteTargetPath: string):
   return buildPortablePathFromSpec(targetSpecPath, absoluteTargetPath).replace(/\.ts$/, "");
 }
 
-export type SpecCompilerSupportedOperation = Extract<SpecStepOperation, "navigate" | "fill" | "press" | "click" | "select">;
+export type SpecCompilerSupportedOperation = Extract<SpecStepOperation, "navigate" | "fill" | "upload" | "press" | "click" | "select">;
 
 /**
  * Deterministic Page Object shell: pure organization/maintainability layer,
@@ -95,6 +96,7 @@ const POM_CLASS_NAME = "DeterministicPromotedPage";
 const POM_METHOD_BY_OPERATION: Record<SpecCompilerSupportedOperation, string> = {
   navigate: "navigate",
   fill: "fill",
+  upload: "upload",
   click: "click",
   press: "press",
   select: "select",
@@ -105,6 +107,7 @@ function buildPomClassSource(): string[] {
     `class ${POM_CLASS_NAME} {`,
     `  constructor(private readonly runtime: ReturnType<typeof createPromotedSpecRuntime>) {}`,
     `  fill(options: Parameters<typeof this.runtime.fillPromotedField>[0]) { return this.runtime.fillPromotedField(options); }`,
+    `  upload(options: Parameters<typeof this.runtime.uploadRecordedFiles>[0]) { return this.runtime.uploadRecordedFiles(options); }`,
     `  click(options: Parameters<typeof this.runtime.clickPromotedTarget>[0]) { return this.runtime.clickPromotedTarget(options); }`,
     `  press(options: Parameters<typeof this.runtime.pressPromotedTarget>[0]) { return this.runtime.pressPromotedTarget(options); }`,
     `  select(options: Parameters<typeof this.runtime.selectPromotedItem>[0]) { return this.runtime.selectPromotedItem(options); }`,
@@ -114,7 +117,9 @@ function buildPomClassSource(): string[] {
 
 const SUPPORTED_OPERATIONS: ReadonlySet<SpecStepOperation> = new Set<SpecStepOperation>([
   "navigate",
+  "select_tab",
   "fill",
+  "upload",
   "press",
   "click",
   "select",
@@ -158,6 +163,7 @@ function compileNavigateStep(
   lines: string[],
   bindings: SpecCompileBinding[],
   unsupportedCapabilities: string[],
+  pageExpression = "page",
 ): void {
   const target = step.target;
   if (target?.strategy !== "url" || !target.value) {
@@ -170,11 +176,11 @@ function compileNavigateStep(
     const urlVariable = `navigationUrl_${step.scenarioStepIndex}`;
     lines.push(`    const ${urlVariable} = process.env.APP_BASE_URL;`);
     lines.push(`    if (!${urlVariable}) throw new Error('APP_BASE_URL is required');`);
-    lines.push(`    await page.goto(${urlVariable});`);
+    lines.push(`    await ${pageExpression}.goto(${urlVariable});`);
   } else {
-    lines.push(`    await page.goto('${escapeString(targetRef)}');`);
+    lines.push(`    await ${pageExpression}.goto('${escapeString(targetRef)}');`);
   }
-  lines.push(`    await page.waitForLoadState('domcontentloaded');`);
+  lines.push(`    await ${pageExpression}.waitForLoadState('domcontentloaded');`);
   bindings.push({
     scenarioStepIndex: step.scenarioStepIndex,
     operation: "navigate",
@@ -194,7 +200,7 @@ function jsonLiteral(value: unknown): string {
  * testid/css) -- never derived from business-facing label text when a
  * technical strategy/value pair already exists.
  */
-function buildLocatorExpression(target: SpecStepTarget): string | undefined {
+function buildLocatorExpression(target: SpecStepTarget, pageExpression = "page"): string | undefined {
   switch (target.strategy) {
     case "role": {
       if (!target.role) return undefined;
@@ -202,24 +208,24 @@ function buildLocatorExpression(target: SpecStepTarget): string | undefined {
       if (target.name !== undefined) opts.push(`name: '${escapeString(target.name)}'`);
       if (target.exact) opts.push("exact: true");
       const optsExpr = opts.length > 0 ? `, { ${opts.join(", ")} }` : "";
-      return `page.getByRole('${escapeString(target.role)}'${optsExpr})`;
+      return `${pageExpression}.getByRole('${escapeString(target.role)}'${optsExpr})`;
     }
     case "text":
       if (!target.value) return undefined;
-      return `page.getByText('${escapeString(target.value)}'${target.exact ? ", { exact: true }" : ""})`;
+      return `${pageExpression}.getByText('${escapeString(target.value)}'${target.exact ? ", { exact: true }" : ""})`;
     case "label":
       if (!target.value) return undefined;
-      return `page.getByLabel('${escapeString(target.value)}')`;
+      return `${pageExpression}.getByLabel('${escapeString(target.value)}')`;
     case "placeholder":
       if (!target.value) return undefined;
-      return `page.getByPlaceholder('${escapeString(target.value)}')`;
+      return `${pageExpression}.getByPlaceholder('${escapeString(target.value)}')`;
     case "data-testid":
     case "testid":
       if (!target.value) return undefined;
-      return `page.getByTestId('${escapeString(target.value)}')`;
+      return `${pageExpression}.getByTestId('${escapeString(target.value)}')`;
     case "css":
       if (!target.value) return undefined;
-      return `page.locator('${escapeString(target.value)}')`;
+      return `${pageExpression}.locator('${escapeString(target.value)}')`;
     default:
       return undefined;
   }
@@ -252,9 +258,9 @@ function displayTargetRef(target: SpecStepTarget): string {
  * into the existing parser, so "role:button|Depurar" can never degrade into
  * business-text locators like getByText('Depurar').
  */
-function buildTechnicalTargetRefLocatorExpression(technicalTargetRef: string): string {
+function buildTechnicalTargetRefLocatorExpression(technicalTargetRef: string, pageExpression = "page"): string {
   const exactText = technicalTargetRef.startsWith("text:") ? ", true" : "";
-  return `recordedLocatorFactory(page, parseSerializedTechnicalTargetString('${escapeString(technicalTargetRef)}')!${exactText})!`;
+  return `recordedLocatorFactory(${pageExpression}, parseSerializedTechnicalTargetString('${escapeString(technicalTargetRef)}')!${exactText})!`;
 }
 
 function hasTechnicalTargetRef(step: SpecExecutionContractStep): step is SpecExecutionContractStep & { technicalTargetRef: string } {
@@ -291,7 +297,11 @@ type ActionTargetAuthority =
 
 function firstStructuredEvidenceRef(step: SpecExecutionContractStep): string | undefined {
   const candidate = step.certifiedTechnicalTarget?.locatorCandidates?.[0];
-  if (candidate?.strategy && candidate.value) {
+  const scopedSelectionWithBareRole = step.operation === "select"
+    && step.resolutionState === "runtime_resolution_required"
+    && Boolean(step.associatedField?.trim())
+    && candidate?.strategy === "role" && !candidate.value.includes("|");
+  if (candidate?.strategy && candidate.value && !scopedSelectionWithBareRole) {
     return `${candidate.strategy}:${candidate.value}`;
   }
   return step.target ? serializeStructuredTarget(step.target) : undefined;
@@ -391,6 +401,17 @@ function resolveActionTargetAuthority(step: SpecExecutionContractStep): ActionTa
   if (step.resolutionState === "unresolved_unrecoverable") {
     return { kind: "insufficient", reason: "unresolved_unrecoverable" };
   }
+  // Discovery's validated checkable-caption strategy proves the caption/control relation, but
+  // an older recorded technical ref can still point at an internal input that is not the visible
+  // switch owner. Keep that provenance on the contract, while compiling this narrow strategy to
+  // the shared runtime field resolver. The runtime must prove the unique visible checkable owner
+  // again on the execution page; this is deliberately not a locator certification.
+  if (step.checkableCaptionOwner === true
+    && step.operation === "click"
+    && step.resolutionState === "runtime_resolution_required"
+    && step.associatedField?.trim()) {
+    return { kind: "runtime_deferred", ref: `label:${step.associatedField.trim()}` };
+  }
   // A recorder scope identifies the container in which the original control was
   // observed; it is never the control's own locator. Some recordings persist that
   // same scope as technicalTargetRef (for example, text "SMS" inside
@@ -435,6 +456,16 @@ function resolveActionTargetAuthority(step: SpecExecutionContractStep): ActionTa
     if (certifiedStructural) {
       return certifiedStructural;
     }
+  }
+  // A ref that is only a framework-generated id (e.g. PrimeVue `pv_id_123_1`) changes on every page
+  // load and is never durable identity; when the step carries its visible text, resolve by that text.
+  const onlyGeneratedIdRef = step.operation === "click"
+    && hasTechnicalTargetRef(step)
+    && /^(?:id:|css:#)(?:pv_id_\d+(?:_\d+)?|mui-\d+|:r[0-9a-z]+:|ember\d+|headlessui-[a-z-]+-\d+)$/i.test(step.technicalTargetRef.trim())
+    && (step.technicalTargetRefs ?? []).every((ref) => /^(?:id:|css:#)(?:pv_id_\d+(?:_\d+)?|mui-\d+|:r[0-9a-z]+:|ember\d+|headlessui-[a-z-]+-\d+)$/i.test(ref.trim()))
+    && Boolean(step.target?.value?.trim());
+  if (onlyGeneratedIdRef) {
+    return { kind: "display_fallback" };
   }
   if (hasTechnicalTargetRef(step)) {
     return { kind: "technical_ref", ref: step.technicalTargetRef };
@@ -513,9 +544,19 @@ function compileFillStep(
   bindings: SpecCompileBinding[],
   unsupportedCapabilities: string[],
   previousStepReplays: PreviousStepReplay[],
+  pageExpression = "page",
 ): void {
   const target = step.target;
-  const authority = resolveActionTargetAuthority(step);
+  const resolvedAuthority = resolveActionTargetAuthority(step);
+  // A recorded certification whose owner is a plain wrapper element (`role:div|<descendant css>`)
+  // identifies the CONTAINER of the editable control, never the control itself: Playwright cannot
+  // fill it, and the serialized role locator carries no unique selector. For a fill, defer to the
+  // step's own field label, which the shared runtime resolver proves against the live control.
+  const wrapperOwnedFill = resolvedAuthority.kind === "certified_structural"
+    && /^role:(div|span|section|p|li|ul|label)\|/i.test(resolvedAuthority.ref)
+    && Boolean(target)
+    && (target!.strategy === "label" || target!.strategy === "text");
+  const authority: ActionTargetAuthority = wrapperOwnedFill ? { kind: "display_fallback" } : resolvedAuthority;
 
   let locatorExpr: string | undefined;
   let refForBinding: string | undefined;
@@ -524,9 +565,9 @@ function compileFillStep(
 
   if (usesRefLocator) {
     refForBinding = (authority as { ref: string }).ref;
-    locatorExpr = buildTechnicalTargetRefLocatorExpression(refForBinding);
+    locatorExpr = buildTechnicalTargetRefLocatorExpression(refForBinding, pageExpression);
   } else if (authority.kind === "display_fallback" || authority.kind === "semantic_runtime_only") {
-    locatorExpr = target ? buildLocatorExpression(target) : undefined;
+    locatorExpr = target ? buildLocatorExpression(target, pageExpression) : undefined;
   } else {
     unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:fill_insufficient_authority:${authority.reason}`);
     return;
@@ -541,7 +582,9 @@ function compileFillStep(
     return;
   }
   const targetRef = usesRefLocator ? refForBinding! : displayTargetRef(target!);
-  const valueExpr = step.valueKey ? dataRefEnvExpression(step.valueKey) : `'${escapeString(step.value ?? "")}'`;
+  const valueExpr = step.runtimeDerivedSourceEventRef
+    ? `promotedRuntime.resolveCapturedApplicationValue('${escapeString(step.runtimeDerivedSourceEventRef)}')`
+    : step.valueKey ? dataRefEnvExpression(step.valueKey) : `'${escapeString(step.value ?? "")}'`;
   const pomMethod = POM_METHOD_BY_OPERATION.fill;
 
   lines.push(`    await pageObject.${pomMethod}({`);
@@ -566,6 +609,9 @@ function compileFillStep(
   }
   if (isRuntimeDeferred && step.playwrightRecorderEvidence) {
     lines.push(`      playwrightRecorderEvidence: ${JSON.stringify(step.playwrightRecorderEvidence)},`);
+  }
+  if (step.selectionQueryOwnerField) {
+    lines.push(`      selectionQueryOwnerField: '${escapeString(step.selectionQueryOwnerField)}',`);
   }
   if (step.authGateExpected) {
     // Structured auth-gate credential authority, transported verbatim from the contract so the
@@ -596,6 +642,32 @@ function compileFillStep(
     targetRef,
     sensitive: Boolean(step.authGateExpected),
     replayExpr: `async () => { await ${locatorExpr}.fill(${valueExpr}); }`,
+  });
+}
+
+function compileUploadStep(
+  step: SpecExecutionContractStep,
+  appSlug: string | undefined,
+  lines: string[],
+  bindings: SpecCompileBinding[],
+  unsupportedCapabilities: string[],
+): void {
+  if (!appSlug || (!step.fileAssets?.length && !step.fileSetValueKey) || !step.technicalTargetRefs?.length) {
+    unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:recorded_upload_missing_project_assets_or_target`);
+    return;
+  }
+  lines.push(`    await promotedRuntime.uploadRecordedFiles({`);
+  lines.push(`      stepIndex: ${step.scenarioStepIndex},`);
+  lines.push(`      projectSlug: '${escapeString(appSlug)}',`);
+  lines.push(`      technicalTargetRefs: ${jsonLiteral(step.technicalTargetRefs)},`);
+  lines.push(`      fileAssets: ${jsonLiteral(step.fileAssets ?? [])},`);
+  if (step.fileSetValueKey) lines.push(`      fileSetValueKey: '${escapeString(step.fileSetValueKey)}',`);
+  lines.push(`    });`);
+  bindings.push({
+    scenarioStepIndex: step.scenarioStepIndex,
+    operation: "upload",
+    runtimeMethod: "uploadRecordedFiles",
+    targetRef: step.technicalTargetRefs[0],
   });
 }
 
@@ -670,6 +742,45 @@ function recordedRole(ref: string | undefined): string | undefined {
   return (separator >= 0 ? value.slice(0, separator) : value).trim().toLowerCase();
 }
 
+function structuralOwnerAriaRole(target: CertifiedTechnicalTarget | undefined): string | undefined {
+  const context = target?.structuralContext;
+  const owner = context?.owner;
+  if (!owner) return undefined;
+  const explicitRole = typeof owner.role === "string" ? owner.role.trim().toLowerCase() : "";
+  if (explicitRole) return explicitRole;
+  const tag = owner.tag?.trim().toLowerCase();
+  if (tag === "a") return "link";
+  if (tag === "button" || tag === "summary") return "button";
+  if (tag === "select") return "combobox";
+  if (tag === "textarea") return "textbox";
+  if (tag === "option") return "option";
+  if (tag === "input") {
+    const inputType = context?.stableDirectAttributes?.type?.trim().toLowerCase();
+    if (inputType === "checkbox" || inputType === "radio" || inputType === "button" || inputType === "submit") {
+      return inputType === "submit" ? "button" : inputType;
+    }
+    return "textbox";
+  }
+  return undefined;
+}
+
+function recordedStructuralSemanticFallbackRefs(
+  step: SpecExecutionContractStep,
+  target: CertifiedTechnicalTarget | undefined,
+): string[] {
+  const ownerRole = structuralOwnerAriaRole(target);
+  if (!ownerRole) return [];
+  return [...new Set([step.technicalTargetRef, ...(step.technicalTargetRefs ?? [])]
+    .filter((ref): ref is string => typeof ref === "string")
+    .map((ref) => ref.trim())
+    .filter((ref) => {
+      const role = recordedRole(ref);
+      const value = ref.startsWith("role:") ? ref.slice("role:".length) : "";
+      const separator = value.indexOf("|");
+      return role === ownerRole && separator >= 0 && Boolean(value.slice(separator + 1).trim());
+    }))];
+}
+
 function isSelectionLikeRecordedRole(step: SpecExecutionContractStep): boolean {
   const role = recordedRole(step.technicalTargetRef) ?? step.technicalTargetRefs?.map(recordedRole).find(Boolean);
   return Boolean(role && SELECTION_LIKE_ROLES.has(role));
@@ -693,7 +804,8 @@ function hasUniqueControlLineage(step: SpecExecutionContractStep, allSteps: read
 }
 
 const TEST_BUDGET_BASE_MS = 60000;
-const TEST_BUDGET_PER_STEP_MS = 8000;
+// An upper bound, not a pace: a slow QA environment can take ~15-20 s per step (waits for the app to settle).
+const TEST_BUDGET_PER_STEP_MS = 30000;
 
 function compileClickStep(
   step: SpecExecutionContractStep,
@@ -702,14 +814,38 @@ function compileClickStep(
   bindings: SpecCompileBinding[],
   unsupportedCapabilities: string[],
   previousStepReplays: PreviousStepReplay[],
+  pageExpression = "page",
 ): void {
+  const stepPosition = allSteps.indexOf(step);
+  const nextStep = stepPosition >= 0 ? allSteps[stepPosition + 1] : undefined;
+  if (isFilePickerActivationDelegatedToNextUpload(step, nextStep)) {
+    const targetRef = step.semanticRuntimeEvidence?.normalizedValue
+      ?? step.playwrightRecorderEvidence?.normalizedName
+      ?? step.associatedField
+      ?? "recorded file input";
+    lines.push(`    await promotedRuntime.completeRecordedFilePickerClick({`);
+    lines.push(`      stepIndex: ${step.scenarioStepIndex},`);
+    lines.push(`      target: ${jsonLiteral(targetRef)},`);
+    lines.push(`      uploadStepIndex: ${nextStep.scenarioStepIndex},`);
+    lines.push(`    });`);
+    bindings.push({
+      scenarioStepIndex: step.scenarioStepIndex,
+      operation: "click",
+      runtimeMethod: "completeRecordedFilePickerClick",
+      targetRef,
+    });
+    return;
+  }
+
   const target = step.target;
   const authority = resolveActionTargetAuthority(step);
   // For a recorded selection option, keep the exact accessible-role identity as the replay ref
   // even when its structural certificate contains ephemeral DOM attributes. The certificate is
   // still transported and tried first; the exact role ref reaches the shared causal resolver if
   // that capture-time scope has changed.
-  const selectionLike = isSelectionLikeRecordedRole(step) && hasUniqueControlLineage(step, allSteps);
+  const selectionLike = !step.checkableCaptionOwner
+    && isSelectionLikeRecordedRole(step)
+    && hasUniqueControlLineage(step, allSteps);
   const recordedSelectionRef = selectionLike
     ? [step.technicalTargetRef, ...(step.technicalTargetRefs ?? [])]
       .find((ref) => {
@@ -725,13 +861,13 @@ function compileClickStep(
 
   if (usesRefLocator) {
     refForBinding = recordedSelectionRef ?? (authority as { ref: string }).ref;
-    locatorExpr = buildTechnicalTargetRefLocatorExpression(refForBinding);
+    locatorExpr = buildTechnicalTargetRefLocatorExpression(refForBinding, pageExpression);
   } else if (authority.kind === "display_fallback" || authority.kind === "semantic_runtime_only") {
     // The generic display/text fallback locator is independent, pre-existing behavior for the
     // final `action:` callback closure -- never derived FROM `semanticRuntimeEvidence`, which is
     // instead emitted as its own structured field below and resolved by the shared runtime
     // resolver BEFORE this callback is ever reached.
-    locatorExpr = target ? buildLocatorExpression(target) : undefined;
+    locatorExpr = target ? buildLocatorExpression(target, pageExpression) : undefined;
   } else {
     unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:click_insufficient_authority:${authority.reason}`);
     return;
@@ -763,7 +899,7 @@ function compileClickStep(
   lines.push(`      stepIndex: ${step.scenarioStepIndex},`);
   lines.push(`      target: '${escapeString(targetRef)}',`);
   lines.push(`      actionIntent: 'click',`);
-  lines.push(`      expectedEffect: '${step.recordedSameSurfaceAction ? "none" : selectionLike ? "selection_state_change" : "ui_change"}',`);
+  lines.push(`      expectedEffect: '${step.expectedRouteTransition ? "navigation" : step.recordedSameSurfaceAction ? "none" : selectionLike ? "selection_state_change" : "ui_change"}',`);
   if (virtualKeyboardEvidence) {
     // Keep the data value outside generated source and logs. The runtime uses the recorded key
     // layout plus this one-based position to replay exactly one character for this step.
@@ -781,12 +917,22 @@ function compileClickStep(
   // callback path unchanged.
   if (authority.kind === "certified_structural" && authority.structuralTarget) {
     lines.push(`      structuralTarget: ${JSON.stringify(authority.structuralTarget)},`);
+    const semanticFallbackRefs = recordedStructuralSemanticFallbackRefs(step, authority.structuralTarget);
+    if (semanticFallbackRefs.length > 0) {
+      lines.push(`      structuralSemanticFallbackRefs: ${JSON.stringify(semanticFallbackRefs)},`);
+    }
   }
   // Transported ONLY for runtime_resolution_required clicks (never upgrades/replaces
   // technicalTargetRefs/firstStructuredEvidenceRef above) -- lets clickPromotedTarget retry via
   // the SAME shared field-scoped resolver Discovery's own live walk already used for this step.
-  if (isRuntimeDeferred && step.associatedField) {
+  if ((isRuntimeDeferred || /^role:(?:radio|checkbox|switch)\|/i.test(refForBinding ?? "")) && step.associatedField) {
     lines.push(`      associatedField: '${escapeString(step.associatedField)}',`);
+  }
+  // The validated caption strategy is execution-only. The runtime uses the associated field to
+  // re-resolve the unique visible checkbox/switch and fails closed instead of clicking the old
+  // recorded input or the caption itself.
+  if (isRuntimeDeferred && step.checkableCaptionOwner) {
+    lines.push(`      checkableCaptionOwner: true,`);
   }
   // A recorded option's owning field can be recovered from its same-control capture lineage.
   // Carry that field only as runtime causal context; it does not replace the option identity.
@@ -805,7 +951,6 @@ function compileClickStep(
   // locator) inherits the state instead of toggling again.
   const checkLocator = (candidate: SpecExecutionContractStep): string | undefined =>
     candidate.certifiedTechnicalTarget?.locatorCandidates?.[0]?.value;
-  const stepPosition = allSteps.indexOf(step);
   const checkOwner = step.recordingActionType === "check" || step.recordingActionType === "uncheck"
     ? step
     : [allSteps[stepPosition - 1], allSteps[stepPosition + 1]].find((neighbor) =>
@@ -862,6 +1007,7 @@ function compileSelectStep(
   lines: string[],
   bindings: SpecCompileBinding[],
   unsupportedCapabilities: string[],
+  pageExpression = "page",
 ): void {
   const target = step.target;
   const authority = resolveActionTargetAuthority(step);
@@ -955,9 +1101,9 @@ function compileSelectStep(
   lines.push(`      actionIntent: 'select',`);
   lines.push(`      expectedEffect: 'selection_state_change',`);
   lines.push(discoveredNativeSelection && selectionValueExpr
-    ? `      action: async () => { await page.locator('${escapeString(target!.value!)}').selectOption({ label: ${selectionValueExpr} }); }`
+    ? `      action: async () => { await ${pageExpression}.locator('${escapeString(target!.value!)}').selectOption({ label: ${selectionValueExpr} }); }`
     : selectionValueExpr && nativeSelection?.selectionMode !== "index"
-    ? `      action: async () => { await page.getByRole('option', { name: ${selectionValueExpr}, exact: true }).click(); }`
+    ? `      action: async () => { await ${pageExpression}.getByRole('option', { name: ${selectionValueExpr}, exact: true }).click(); }`
     : `      action: async () => { throw new Error('Recorded indexed selection requires runtime resolution'); }`);
   lines.push(`    });`);
 
@@ -972,11 +1118,30 @@ function compileSelectStep(
   });
 }
 
+/**
+ * Replace path segments that are generated identifiers (4+ digit numbers, UUIDs) with the `{id}`
+ * marker understood by the promoted runtime; `regexSource` is the equivalent for Playwright's
+ * toHaveURL. Returns the URL unchanged (no regexSource) when nothing generated is present.
+ */
+export function generalizeGeneratedUrlSegments(url: string): { pattern: string; regexSource?: string } {
+  let parsed: URL;
+  try { parsed = new URL(url); } catch { return { pattern: url }; }
+  const generated = /^(?:\d{4,}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
+  const segments = parsed.pathname.split("/");
+  if (!segments.some((segment) => generated.test(segment))) return { pattern: url };
+  const pathPattern = segments.map((segment) => generated.test(segment) ? "{id}" : segment).join("/");
+  const pattern = `${parsed.origin}${pathPattern}${parsed.search}${parsed.hash}`;
+  const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regexSource = `^${pattern.split("{id}").map(escape).join("[^/?#]+")}$`;
+  return { pattern, regexSource };
+}
+
 function compileNavigationTransitionOracle(
   step: SpecExecutionContractStep,
   lines: string[],
   bindings: SpecCompileBinding[],
   unsupportedCapabilities: string[],
+  pageExpression = "page",
 ): void {
   const oracle = step.oracle;
   const urlPattern = oracle?.mechanism?.expected?.urlPattern;
@@ -988,13 +1153,18 @@ function compileNavigationTransitionOracle(
   }
   const targetRef = step.target ? displayTargetRef(step.target) : `scenarioStep${step.scenarioStepIndex}`;
   const polarity = oracle.polarity ?? "positive";
+  // An identifier generated while recording (created entity's numeric id / UUID) is not stable
+  // across runs: match any single segment there instead of the recorded value.
+  const generalizedUrl = generalizeGeneratedUrlSegments(urlPattern);
 
   lines.push(`    await promotedRuntime.expectPromotedVisible({`);
   lines.push(`      stepIndex: ${step.scenarioStepIndex},`);
   lines.push(`      target: '${escapeString(targetRef)}',`);
   lines.push(`      polarity: ${jsonLiteral(polarity)},`);
-  lines.push(`      expectedUrl: '${escapeString(urlPattern)}',`);
-  lines.push(`      assertion: async () => { await expect(page).toHaveURL(${jsonLiteral(urlPattern)}); }`);
+  lines.push(`      expectedUrl: '${escapeString(generalizedUrl.pattern)}',`);
+  lines.push(generalizedUrl.regexSource
+    ? `      assertion: async () => { await expect(${pageExpression}).toHaveURL(new RegExp(${jsonLiteral(generalizedUrl.regexSource)})); }`
+    : `      assertion: async () => { await expect(${pageExpression}).toHaveURL(${jsonLiteral(urlPattern)}); }`);
   lines.push(`    });`);
 
   bindings.push({
@@ -1034,6 +1204,7 @@ function compileVisibleTextOracle(
   lines: string[],
   bindings: SpecCompileBinding[],
   unsupportedCapabilities: string[],
+  pageExpression = "page",
 ): void {
   const oracle = step.oracle;
   const target = oracle?.target?.trim();
@@ -1055,12 +1226,12 @@ function compileVisibleTextOracle(
   if (oracle.requirement) lines.push(`      description: '${escapeString(oracle.requirement)}',`);
   lines.push(`      polarity: 'positive',`);
   if (hasDateTimePattern) {
-    lines.push(`      assertion: async () => { await expect(page.getByText(new RegExp(${jsonLiteral(VISIBLE_DATE_TIME_REGEX_SOURCE)}, 'i')).filter({ visible: true }).first()).toBeVisible(); }`);
+    lines.push(`      assertion: async () => { await expect(${pageExpression}.getByText(new RegExp(${jsonLiteral(VISIBLE_DATE_TIME_REGEX_SOURCE)}, 'i')).filter({ visible: true }).first()).toBeVisible(); }`);
   } else if (visibleTargets.length > 1) {
-    lines.push(`      assertion: async () => { await Promise.all(${jsonLiteral(visibleTargets)}.map((text) => expect(page.getByText(text, { exact: true }).filter({ visible: true }).first()).toBeVisible())); }`);
+    lines.push(`      assertion: async () => { await Promise.all(${jsonLiteral(visibleTargets)}.map((text) => expect(${pageExpression}.getByText(text, { exact: true }).filter({ visible: true }).first()).toBeVisible())); }`);
   } else {
     const exactTarget = visibleTargets[0] ?? target!;
-    lines.push(`      assertion: async () => { await expect(page.getByText('${escapeString(exactTarget)}', { exact: true }).filter({ visible: true }).first()).toBeVisible(); }`);
+    lines.push(`      assertion: async () => { await expect(${pageExpression}.getByText('${escapeString(exactTarget)}', { exact: true }).filter({ visible: true }).first()).toBeVisible(); }`);
   }
   lines.push(`    });`);
 
@@ -1079,6 +1250,20 @@ function compileVisibleTextOracle(
  * `compileContext.targetSpecPath` is required (never defaulted) so import
  * paths are never silently computed relative to the wrong location.
  */
+/**
+ * Interactive steps (fill/press/click) the compiled spec must bind itself. Steps the authentication flow covers as one
+ * aggregate (a login: user, password, sign in) are replaced by a single `ensureAuthenticated` call and carry no binding of
+ * their own, so they are not part of the parity a caller checks against the compiled bindings.
+ */
+export function countRequiredActionSteps(contract: SpecExecutionContract): number {
+  const authCovered = new Set(contract.auth?.aggregate?.coveredScenarioStepIndices ?? []);
+  return contract.steps.filter((step) =>
+    step.required !== false
+    && ["fill", "press", "click"].includes(step.operation)
+    && !authCovered.has(step.scenarioStepIndex),
+  ).length;
+}
+
 export function compileDeterministicSpec(contract: SpecExecutionContract, compileContext: SpecCompileContext): SpecCompileResult {
   const bindings: SpecCompileBinding[] = [];
   const unsupportedCapabilities: string[] = [];
@@ -1214,6 +1399,17 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
     if (step.required === false) continue;
     if (authAggregateCoverage.has(step.scenarioStepIndex)) continue;
 
+    // Recorder-owned tab lineage is the only authority for switching pages. Older and
+    // non-Recording plans have no pageKey and continue to use the original Playwright page.
+    const pageExpression = step.pageKey ? `recordingPage_${step.scenarioStepIndex}` : "page";
+    if (step.pageKey) {
+      lines.push(`    const ${pageExpression} = await promotedRuntime.selectRecordedPage(${jsonLiteral(step.pageKey)}, ${step.opensNewPage === true});`);
+    }
+
+    for (const capture of step.runtimeValueCaptures ?? []) {
+      lines.push(`    await promotedRuntime.captureRecordedApplicationValue(${jsonLiteral(capture)});`);
+    }
+
     // Action and oracle are independent semantics that may coexist on the
     // same contract step (e.g. click + navigation_transition). The action,
     // when present, is always emitted first; the oracle never replaces it.
@@ -1225,19 +1421,30 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
     const hasNegativeVisibilityOracle = step.oracle?.type === "negative_visibility";
     const hasCredentialRejectionOracle = step.oracle?.type === "credential_rejection";
 
-    if (isSupportedAction) {
+    if (step.operation === "select_tab") {
+      if (!step.pageKey) unsupportedCapabilities.push(`scenarioStepIndex=${step.scenarioStepIndex}:recorded_tab_key_missing`);
+      else bindings.push({
+        scenarioStepIndex: step.scenarioStepIndex,
+        operation: "select_tab",
+        runtimeMethod: "selectRecordedPage",
+        targetRef: step.pageKey,
+      });
+    } else if (isSupportedAction) {
       switch (step.operation as SpecCompilerSupportedOperation) {
         case "navigate":
-          compileNavigateStep(step, lines, bindings, unsupportedCapabilities);
+          compileNavigateStep(step, lines, bindings, unsupportedCapabilities, pageExpression);
           break;
         case "fill":
-          compileFillStep(step, lines, bindings, unsupportedCapabilities, previousStepReplays);
+          compileFillStep(step, lines, bindings, unsupportedCapabilities, previousStepReplays, pageExpression);
+          break;
+        case "upload":
+          compileUploadStep(step, contract.appSlug, lines, bindings, unsupportedCapabilities);
           break;
         case "press":
           compilePressStep(step, lines, bindings, unsupportedCapabilities, previousStepReplays);
           break;
         case "click":
-          compileClickStep(step, contract.steps, lines, bindings, unsupportedCapabilities, previousStepReplays);
+          compileClickStep(step, contract.steps, lines, bindings, unsupportedCapabilities, previousStepReplays, pageExpression);
           break;
         case "select":
           compileSelectStep(
@@ -1246,6 +1453,7 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
             lines,
             bindings,
             unsupportedCapabilities,
+            pageExpression,
           );
           break;
       }
@@ -1254,10 +1462,10 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
     }
 
     if (hasNavigationOracle) {
-      compileNavigationTransitionOracle(step, lines, bindings, unsupportedCapabilities);
+      compileNavigationTransitionOracle(step, lines, bindings, unsupportedCapabilities, pageExpression);
     }
     if (hasVisibleTextOracle) {
-      compileVisibleTextOracle(step, lines, bindings, unsupportedCapabilities);
+      compileVisibleTextOracle(step, lines, bindings, unsupportedCapabilities, pageExpression);
     }
     if (hasNegativeVisibilityOracle) {
       compileNegativeVisibilityOracle(step,lines,bindings,unsupportedCapabilities);
@@ -1278,7 +1486,7 @@ export function compileDeterministicSpec(contract: SpecExecutionContract, compil
         const stage = step.oracle.mechanism.expected?.stage;
         const polarity = step.oracle.polarity ?? "positive";
         lines.push(`    await promotedRuntime.expectPromotedVisible({ stepIndex: ${step.scenarioStepIndex}, target: 'authentication gate', polarity: '${polarity}', assertion: async () => {`);
-        lines.push(`      await expect.poll(async () => { const gate = detectAuthGate(await scanCurrentPage(page)); return gate.detected && gate.stage !== 'unknown' && gate.stage !== 'authenticated_landing'${stage ? ` && gate.stage === ${jsonLiteral(stage)}` : ""}; }).toBe(${polarity !== "negative"});`);
+        lines.push(`      await expect.poll(async () => { const gate = detectAuthGate(await scanCurrentPage(${pageExpression})); return gate.detected && gate.stage !== 'unknown' && gate.stage !== 'authenticated_landing'${stage ? ` && gate.stage === ${jsonLiteral(stage)}` : ""}; }).toBe(${polarity !== "negative"});`);
         lines.push(`    } });`);
         bindings.push({ scenarioStepIndex: step.scenarioStepIndex, operation: step.operation, runtimeMethod: "expectPromotedVisible", targetRef: "authentication gate" });
       }

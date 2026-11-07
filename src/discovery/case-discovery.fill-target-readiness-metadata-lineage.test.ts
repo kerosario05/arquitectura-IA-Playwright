@@ -144,3 +144,96 @@ test("6/multiproject. no app/field hardcode governs the lineage -- an arbitrary 
     assert.equal(parsed.actionTargets[0]?.associatedField, field);
   }
 });
+
+test("7/selectionQuery. a fill between a recorded selection owner and its exact option inherits that field", () => {
+  const scenario = {
+    source: "testrail",
+    externalId: "selection-query-fixture",
+    caseId: 2,
+    title: "Search a recorded selection",
+    steps: [
+      'Presionar "Industry"',
+      'Ingresar [industry_query] en "184 results available"',
+      'Seleccionar "Manufacturing" en "Industry"',
+    ],
+    recordingExecutionContract: {
+      actions: [
+        { actionType: "click", semanticField: "Industry", associatedField: "Industry", targetRef: "screen|Industry", stepIndex: 1 },
+        {
+          actionType: "fill",
+          semanticField: "184 results available",
+          associatedField: "184 results available",
+          targetRef: "screen|184 results available",
+          humanStep: 'Ingresar [industry_query] en "184 results available"',
+          valueKey: "industry_query",
+          value: "manufacturing",
+          valueRole: "action_input",
+          runtimeValueSource: "dataset",
+          stepIndex: 2,
+        },
+        {
+          actionType: "click",
+          semanticField: "Industry",
+          associatedField: "Industry",
+          targetRef: "screen|Manufacturing|role|option|Manufacturing",
+          technicalTargetRef: "role:option|Manufacturing",
+          technicalTargetRefs: ["role:option|Manufacturing"],
+          stepIndex: 3,
+        },
+      ],
+      runtimeInputRequirements: [],
+    },
+  } as unknown as TestScenario;
+
+  const parsed = parseScenarioStepsForDiscovery(scenario);
+  const query = parsed.actionTargets[1];
+  assert.equal(query?.target, "Industry");
+  assert.equal(query?.associatedField, "Industry");
+  assert.equal(query?.valueKey, "industry_query");
+  assert.equal(query?.value, "manufacturing");
+});
+
+test("8/selectionQueryFailClosed. unrelated neighboring actions do not rebind a fill to a selection field", () => {
+  const scenario = {
+    source: "testrail",
+    externalId: "selection-query-negative-fixture",
+    caseId: 3,
+    title: "Unrelated fill",
+    steps: [
+      'Presionar "Industry"',
+      'Ingresar [industry_query] en "184 results available"',
+      'Seleccionar "Manager" en "Occupation"',
+    ],
+    recordingExecutionContract: {
+      actions: [
+        { actionType: "click", semanticField: "Industry", associatedField: "Industry", targetRef: "screen|Industry", stepIndex: 1 },
+        {
+          actionType: "fill",
+          semanticField: "184 results available",
+          associatedField: "184 results available",
+          targetRef: "screen|184 results available",
+          humanStep: 'Ingresar [industry_query] en "184 results available"',
+          valueKey: "industry_query",
+          value: "manufacturing",
+          valueRole: "action_input",
+          runtimeValueSource: "dataset",
+          stepIndex: 2,
+        },
+        {
+          actionType: "click",
+          semanticField: "Occupation",
+          associatedField: "Occupation",
+          targetRef: "screen|Manager|role|option|Manager",
+          technicalTargetRef: "role:option|Manager",
+          technicalTargetRefs: ["role:option|Manager"],
+          stepIndex: 3,
+        },
+      ],
+      runtimeInputRequirements: [],
+    },
+  } as unknown as TestScenario;
+
+  const parsed = parseScenarioStepsForDiscovery(scenario);
+  assert.equal(parsed.actionTargets[1]?.target, "184 results available");
+  assert.equal(parsed.actionTargets[1]?.associatedField, "184 results available");
+});

@@ -10,6 +10,8 @@ test("accepts a redacted segmented-field mask as a projection token", () => {
   assert.equal(isCompatibleSegmentValue("••••••", "•••••"), false);
   assert.equal(isCompatibleSegmentValue("•••••", "••••••"), false);
   assert.equal(isProjectableFirstSegment("••••••", "test_data"), true);
+  assert.equal(isProjectableFirstSegment("â€¢â€¢â€¢â€¢â€¢â€¢", "unknown"), true);
+  assert.equal(isCompatibleSegmentValue("â€¢â€¢â€¢â€¢â€¢â€¢", "â€¢â€¢â€¢â€¢â€¢â€¢"), true);
   assert.equal(isProjectableFirstSegment("123456", "test_data"), false);
 });
 
