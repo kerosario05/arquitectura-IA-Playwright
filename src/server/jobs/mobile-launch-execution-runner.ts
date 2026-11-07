@@ -1,6 +1,8 @@
+import type { RuntimeServiceBinding } from "../../service-catalog/runtime-service-values";
 import { jobStore } from "./job-store";
 import {
   ensureMobileInfra,
+  openJobDevice,
   evaluateScenarioPrecheck,
   type MobileInfraReadyState,
   runOneScenario,
@@ -21,6 +23,7 @@ import { applyDataOverrides, type MobileStep, type MobileDataField } from "../..
 import { defectChecklistStore } from "../services/defect-checklist-store";
 import { buildStructuredDefectDescription, buildDefectTitle, inferDefectSeverity } from "../services/defect-content-builder";
 import { createMobileJobLogger } from "./mobile-job-logger";
+import type { AgentDevice } from "../local-agent/agent-device";
 import {
   persistMobileExecutionManifest,
   persistMobileExecutionResults,
@@ -41,6 +44,8 @@ export type MobileLaunchScenario = {
   requiresRouteLearning?: boolean;
   /** Step-level requirement references to propagate into runtime transitions. */
   stepRequirementRefs?: Array<{ stepIndex: number; requirementIds: string[] }>;
+  /** Recording the scenario came from: its service bindings (OTP...) apply to the run. */
+  recordingId?: string;
 };
 
 export type MobileLaunchExecutionParams = {
@@ -58,6 +63,19 @@ export type MobileLaunchExecutionParams = {
   sectionSlug?: string;
   /** User-supplied real values for fill steps, keyed by scenarioId -> { stepIndex: value }. */
   dataOverrides?: Record<string, Record<number, string>>;
+  /**
+   * Run on the emulator or phone the user picked on their own PC (through their local agent)
+   * instead of the server's emulator. Both or neither; set by the route after pairing.
+   */
+  localAgentId?: string;
+  deviceSerial?: string;
+  /**
+   * Jira story (HU) the user chose for this run: defects and the checklist go under it.
+   * Absent = derived from the scenario ids (generated MOBILE-<HU>-n scenarios).
+   */
+  issueKey?: string;
+  /** Planned by the execute route from the recordings' saved bindings. */
+  serviceBindings?: RuntimeServiceBinding[];
 };
 
 /** Derives the source Jira story key from a mobile scenarioId (MOBILE-AA-93-001 → AA-93). */
@@ -222,6 +240,7 @@ function classifyInfrastructureExecutionFailure(message: string): { blocked: boo
     { reason: "mobile_apk_not_found", sharedInfraUnreliable: true },
     { reason: "mobile_apk_not_accessible", sharedInfraUnreliable: true },
     { reason: "mobile_app_configuration_missing", sharedInfraUnreliable: true },
+    { reason: "mobile_agent_device_unavailable", sharedInfraUnreliable: true },
   ];
   for (const entry of knownReasons) {
     if (normalized.startsWith(`${entry.reason}:`) || normalized.includes(entry.reason)) {
@@ -233,6 +252,7 @@ function classifyInfrastructureExecutionFailure(message: string): { blocked: boo
 
 export async function startMobileLaunchExecutionJob(jobId: string): Promise<void> {
   const deps = {
+    openJobDeviceFn: openJobDevice,
     ensureMobileInfraFn: ensureMobileInfra,
     runOneScenarioFn: runOneScenario,
     syncResultFn: syncDiscoveryResultToTestRail,
@@ -244,6 +264,8 @@ export async function startMobileLaunchExecutionJob(jobId: string): Promise<void
 export async function startMobileLaunchExecutionJobWithDeps(
   jobId: string,
   deps: {
+    /** Optional so existing callers keep running on the server's emulator. */
+    openJobDeviceFn?: typeof openJobDevice;
     ensureMobileInfraFn: typeof ensureMobileInfra;
     runOneScenarioFn: typeof runOneScenario;
     syncResultFn: typeof syncDiscoveryResultToTestRail;
@@ -261,6 +283,7 @@ export async function startMobileLaunchExecutionJobWithDeps(
   const onLog = (line: string) => logger.log(line);
 
   jobStore.update(jobId, { status: "running", startedAt: new Date().toISOString() });
+  const runStartedAt = new Date().toISOString();
   onLog(`[mobile:run] started runId=${jobId} scenarios=${params.scenarios?.length ?? 0} appSlug=${params.appSlug}`);
   try {
     persistMobileExecutionManifest(jobId, params, {
@@ -315,6 +338,7 @@ export async function startMobileLaunchExecutionJobWithDeps(
 
   const sectionSlug = params.sectionSlug || target.appPackage?.replace(/[^a-zA-Z0-9_-]/g, "_") || "android";
 
+  let device: AgentDevice | undefined;
   try {
     let infraState: MobileInfraReadyState | undefined;
     const attemptedScenarioIds = new Set<string>();
@@ -436,9 +460,12 @@ export async function startMobileLaunchExecutionJobWithDeps(
       }
 
       if (!infraState) {
+        device = await (deps.openJobDeviceFn ?? openJobDevice)(params, { appium: true, onLog });
         infraState = await deps.ensureMobileInfraFn(target, onLog, {
           runId: jobId,
           traceAppiumChunk: logger.traceAppiumChunk,
+          device,
+          appSlug: params.appSlug,
         });
       }
 
@@ -447,12 +474,14 @@ export async function startMobileLaunchExecutionJobWithDeps(
         execResult = await deps.runOneScenarioFn(
           {
             appiumPort: target.appiumPort,
+            appiumServer: device?.appium,
             systemPort: target.systemPort,
             deviceId: infraState.deviceId,
             emulatorStartedByRunner: infraState.emulatorStartedByRunner,
-            apkPath: target.apkPath,
-            appPackage: target.appPackage,
-            appActivity: target.appActivity,
+            // On the user's PC the APK was already installed through the adb tunnel.
+            apkPath: infraState.installedApp ? undefined : target.apkPath,
+            appPackage: infraState.installedApp?.appPackage ?? target.appPackage,
+            appActivity: infraState.installedApp ? infraState.installedApp.appActivity : target.appActivity,
             steps: stepsToRun,
             evidenceScenarioId: scenario.scenarioId,
             evidenceScenarioTitle: scenario.title,
@@ -468,6 +497,8 @@ export async function startMobileLaunchExecutionJobWithDeps(
             requiredData: scenario.requiredData,
             dataOverrides: params.dataOverrides?.[scenario.scenarioId],
             stepRequirementRefs: scenario.stepRequirementRefs,
+            serviceBindings: params.serviceBindings,
+            serviceRun: { id: runId, startedAt: runStartedAt },
           },
           onLog
         );
@@ -537,8 +568,10 @@ export async function startMobileLaunchExecutionJobWithDeps(
             summary: {
               totalStories: params.scenarios.length,
               synced: syncedCount,
-              passed: totalPassed,
-              failed: totalFailed,
+              passed: scenarioOutcomes.filter((o) => o.status === "passed").length,
+              failed: params.scenarios.length - scenarioOutcomes.filter((o) => o.status === "passed").length,
+              stepsPassed: totalPassed,
+              stepsFailed: totalFailed,
               scenariosSkipped,
               reasonCode,
               testRailRunId: params.testRunId,
@@ -612,7 +645,7 @@ export async function startMobileLaunchExecutionJobWithDeps(
 
       // When a scenario really fails (an interaction step didn't find/act on its element), create/
       // update a defect in the HU checklist, reusing the shared defect content builders.
-      const sourceIssueKey = deriveSourceIssueKey(scenario.scenarioId);
+      const sourceIssueKey = params.issueKey || deriveSourceIssueKey(scenario.scenarioId);
       const shouldSyncAsFunctionalFailure = discoveryStatus === "failed" && failureCategory === "functional_failure";
       if (shouldSyncAsFunctionalFailure && sourceIssueKey) {
         const failedStep = failedSteps[0];
@@ -756,9 +789,14 @@ export async function startMobileLaunchExecutionJobWithDeps(
       summary: {
         totalStories: params.scenarios.length,
         synced: syncedCount,
-        passed: totalPassed,
-        failed: totalFailed,
-        blocked: totalBlocked,
+        // passed/failed/blocked cuentan ESCENARIOS (el panel los rotula "Escenarios ejecutados");
+        // los pasos van aparte en steps*.
+        passed: scenarioOutcomes.filter((o) => o.status === "passed").length,
+        failed: scenarioOutcomes.filter((o) => o.status === "failed").length,
+        blocked: scenarioOutcomes.filter((o) => o.status === "blocked").length,
+        stepsPassed: totalPassed,
+        stepsFailed: totalFailed,
+        stepsBlocked: totalBlocked,
         testRailRunId: params.testRunId
       }
     });
@@ -805,6 +843,7 @@ export async function startMobileLaunchExecutionJobWithDeps(
       onLog("[mobile:run] finished status=failed passed=0 failed=0 blocked=0");
     }
   } finally {
+    await device?.close().catch(() => undefined);
     logger.flush();
   }
 }

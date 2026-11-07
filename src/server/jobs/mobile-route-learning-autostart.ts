@@ -158,7 +158,7 @@ export function planRouteLearningAutostart(input: {
   recentWalk?: Job | null;
   /** True when the app profile already records a flow for this story — survives restarts. */
   flowAlreadyLearned?: boolean;
-  base?: { apkPath?: string; appPackage?: string; appActivity?: string; avdName?: string; headless?: boolean };
+  base?: { apkPath?: string; appPackage?: string; appActivity?: string; avdName?: string; headless?: boolean; localAgentId?: string; deviceSerial?: string };
 }): AutostartDecision {
   if (input.routeLearningScenarios.length === 0) {
     return { start: false, reason: "no_scenarios_require_learning" };
@@ -204,6 +204,7 @@ export function planRouteLearningAutostart(input: {
       ...(input.base?.appActivity ? { appActivity: input.base.appActivity } : {}),
       ...(input.base?.avdName ? { avdName: input.base.avdName } : {}),
       ...(input.base?.headless !== undefined ? { headless: input.base.headless } : {}),
+      ...(input.base?.localAgentId && input.base.deviceSerial ? { localAgentId: input.base.localAgentId, deviceSerial: input.base.deviceSerial } : {}),
       ...(issueKey ? { flowId: issueKey, triggerKeywords: [issueKey.toLowerCase()] } : {}),
       ...(preferLabels.length > 0 ? { preferLabels } : {}),
       // The walk observes; it must never press a control that commits the flow.

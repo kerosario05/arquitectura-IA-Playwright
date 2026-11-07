@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { jobStore } from "./job-store";
-import { resolveMobileTarget, ensureMobileInfra } from "./mobile-test-runner";
+import { resolveMobileTarget, ensureMobileInfra, openJobDevice } from "./mobile-test-runner";
 import { acquireSession, releaseSessionLock, buildLockKey } from "../../mobile/appium-session-coordinator";
-import { createSession, closeSession } from "../../mobile/appium-session";
+import { createSession, closeSession, probeAppiumHealth } from "../../mobile/appium-session";
+import type { AgentDevice } from "../local-agent/agent-device";
 import { getStatus as getEmulatorStatus } from "../../mobile/emulator-manager";
 import { getStatus as getAppiumStatus } from "../../mobile/appium-server-manager";
 import { executeMobileStep } from "../../mobile/mobile-step-executor";
@@ -54,6 +55,9 @@ export type MobileRouteLearningParams = {
   avdName?: string;
   headless?: boolean;
   systemPort?: number;
+  /** Walk the app on the device the user picked on their own PC (local agent). */
+  localAgentId?: string;
+  deviceSerial?: string;
   /** Flow id to record, e.g. "registro". Recorded first in the profile's flows map. */
   flowId?: string;
   flowDescription?: string;
@@ -413,6 +417,7 @@ export async function startMobileRouteLearningJob(jobId: string): Promise<void> 
   // Tracked separately from sessionHandle: when acquireSession() throws, the coordinator
   // leaves the lock entry behind, so the release below must still know what to free.
   let pendingLock: { lockKey: string; lockOwner: string } | null = null;
+  let device: AgentDevice | undefined;
 
   try {
     const target = resolveMobileTarget({
@@ -423,25 +428,36 @@ export async function startMobileRouteLearningJob(jobId: string): Promise<void> 
       appPackage: params.appPackage,
       appActivity: params.appActivity,
       systemPort: params.systemPort,
+      deviceSerial: params.localAgentId ? params.deviceSerial : undefined,
     });
     onLog(`[mobile:learn] target appSlug=${params.appSlug} pkg=${target.appPackage ?? "-"} apk=${target.apkPath ? "si" : "no"} stopBeforeSubmit=${stopBeforeSubmit} maxScreens=${maxScreens}`);
 
-    await ensureMobileInfra(target, onLog, { runId });
+    device = await openJobDevice(params, { appium: true, onLog });
+    const infra = await ensureMobileInfra(target, onLog, { runId, device, appSlug: params.appSlug });
+    if (infra.installedApp) {
+      // Installed through the adb tunnel: the session opens it by package.
+      target.apkPath = undefined;
+      target.appPackage = infra.installedApp.appPackage;
+      target.appActivity = infra.installedApp.appActivity;
+    }
 
-    const appiumHost = process.env.APPIUM_SERVER_HOST?.trim() || "127.0.0.1";
-    const deviceId = getEmulatorStatus().deviceId || `${appiumHost}:${target.appiumPort}`;
+    const remote = device?.appium;
+    const appiumHost = remote?.host ?? (process.env.APPIUM_SERVER_HOST?.trim() || "127.0.0.1");
+    const appiumPort = remote?.port ?? target.appiumPort;
+    const deviceId = device?.serial || getEmulatorStatus().deviceId || `${appiumHost}:${appiumPort}`;
     const lockOwner = `${runId}:route-learning`;
-    pendingLock = { lockKey: buildLockKey(appiumHost, target.appiumPort, deviceId, target.systemPort), lockOwner };
+    pendingLock = { lockKey: buildLockKey(appiumHost, appiumPort, deviceId, target.systemPort), lockOwner };
     const handle = await acquireSession({
       runId,
       lockOwner,
       deviceId,
       systemPort: target.systemPort,
       appiumHost,
-      appiumPort: target.appiumPort,
+      appiumPort,
       factory: () =>
         createSession({
-          appiumPort: target.appiumPort,
+          appiumPort,
+          ...(remote ? { appiumHost } : {}),
           apkPath: target.apkPath,
           appPackage: target.appPackage,
           appActivity: target.appActivity,
@@ -451,6 +467,10 @@ export async function startMobileRouteLearningJob(jobId: string): Promise<void> 
         }),
       emulatorStartedByRunner: false,
       canRetry: async () => {
+        if (remote) {
+          const health = await probeAppiumHealth(appiumPort, 3000, appiumHost);
+          return health.ready ? { allowed: true, reason: "infra_healthy" } : { allowed: false, reason: "infra_unhealthy" };
+        }
         const appiumReady = getAppiumStatus().ready === true;
         const emu = getEmulatorStatus();
         return appiumReady && emu.running && emu.bootCompleted
@@ -770,5 +790,6 @@ export async function startMobileRouteLearningJob(jobId: string): Promise<void> 
     if (lock) {
       releaseSessionLock({ lockKey: lock.lockKey, lockOwner: lock.lockOwner, runId, onLog });
     }
+    await device?.close().catch(() => undefined);
   }
 }

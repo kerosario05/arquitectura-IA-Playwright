@@ -143,9 +143,12 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   // The agent itself never calls these: its WebSockets authenticate apart
   // (agent id + optional LOCAL_AGENT_KEY). These are the panel's questions
   // about the agent on the caller's own PC.
-  R("GET", "/api/local-agent/status", ["recordings.view"]),
+  // Lanzar pruebas mobile también usa el emulador del PC del usuario.
+  ANY("GET", "/api/local-agent/status", ["recordings.view", "tests.launch"]),
   R("POST", "/api/local-agent/install", ["recordings.create"]),
-  R("POST", "/api/local-agent/select", ["recordings.create"]),
+  ANY("POST", "/api/local-agent/select", ["recordings.create", "tests.launch"]),
+  ANY("POST", "/api/local-agent/android/emulator", ["recordings.create", "tests.launch"]),
+  ANY("POST", "/api/local-agent/android/emulator/stop", ["recordings.create", "tests.launch"]),
 
   // --- executions --------------------------------------------------------
   R("GET", "/api/executions", ["executions.view"], "optional"),

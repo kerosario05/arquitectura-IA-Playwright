@@ -1,4 +1,7 @@
-import { Router } from "express";
+import { Router, type Request, type Response } from "express";
+import { clientIpOf } from "../local-agent/agent-endpoint";
+import { LocalAgentError } from "../local-agent/agent-registry";
+import { pairUserDevice, type UserDeviceChoice } from "../local-agent/agent-device";
 import { jobStore } from "../jobs/job-store";
 import { startMobileEmulatorBootJob, ensureAppiumReady } from "../jobs/mobile-emulator-runner";
 import { startMobileTestRunJob, type MobileTestRunParams } from "../jobs/mobile-test-runner";
@@ -12,6 +15,8 @@ import { startMobileLaunchExecutionJob, deriveSourceIssueKey, type MobileLaunchE
 import { getMobileScenarioGenerationJob, startOrReuseMobileScenarioGenerationJob } from "../jobs/mobile-scenario-generation-manager";
 import { startMobileRouteLearningJob, type MobileRouteLearningParams } from "../jobs/mobile-route-learning-runner";
 import { normalizeMobileLaunchExecutionParams, persistMobileExecutionManifest } from "../jobs/mobile-rerun-artifacts";
+import { mergeRunServiceBindings, planExecutionServices, serviceBindingBlockedBody, type ExecutionServiceBlock } from "../../service-catalog/execution-bindings";
+import type { RuntimeServiceBinding } from "../../service-catalog/runtime-service-values";
 import { findActiveRouteLearningJob, findDeviceBusyJob, findRecentRouteLearningJob, isFlowAlreadyLearned, planRouteLearningAutostart } from "../jobs/mobile-route-learning-autostart";
 import { loadMobileRouteProfile } from "../../mobile/mobile-route-profile";
 
@@ -33,6 +38,24 @@ function hasResolvableApp(body: { apkPath?: string; appPackage?: string; appSlug
   if (!slug) return false;
   const profile = loadMobileRouteProfile(slug);
   return Boolean(profile?.packageName?.trim());
+}
+
+/**
+ * `deviceSerial` in the body = run on that emulator/phone of the caller's own PC, through the
+ * agent paired with this request. A client-sent `localAgentId` is always dropped: the job may
+ * only reach the PC of whoever launched it.
+ */
+function withUserDevice<T extends object>(req: Request, body: T): T & Partial<UserDeviceChoice> {
+  const { localAgentId: _clientAgentId, deviceSerial, ...rest } = body as T & { localAgentId?: unknown; deviceSerial?: unknown };
+  if (typeof deviceSerial !== "string" || !deviceSerial.trim()) return rest as T;
+  const user = { userId: req.principal?.userId ?? null, username: req.principal?.username ?? "" };
+  return { ...(rest as T), ...pairUserDevice(user, clientIpOf(req), deviceSerial) };
+}
+
+function sendDeviceError(res: Response, err: unknown): boolean {
+  if (!(err instanceof LocalAgentError)) return false;
+  res.status(err.code === "LOCAL_AGENT_BAD_REQUEST" ? 400 : 409).json({ ok: false, error: err.code, errorCode: err.code, message: err.message });
+  return true;
 }
 
 let activeEmulatorBootJobId: string | null = null;
@@ -193,7 +216,13 @@ mobileRouter.get("/appium/status", async (_req, res, next) => {
 // steps against an installed/launched app, capturing evidence. Watch progress via
 // GET /api/runs/:jobId/logs (SSE).
 mobileRouter.post("/tests/run", (req, res) => {
-  const body = req.body as MobileTestRunParams;
+  let body: MobileTestRunParams;
+  try {
+    body = withUserDevice(req, req.body as MobileTestRunParams);
+  } catch (err) {
+    if (sendDeviceError(res, err)) return;
+    throw err;
+  }
 
   // apkPath/appPackage/appActivity can also come from .env (ANDROID_APK_PATH,
   // ANDROID_APP_PACKAGE, ANDROID_APP_ACTIVITY) — only reject if neither the request
@@ -234,7 +263,13 @@ mobileRouter.post("/tests/run", (req, res) => {
 // Never presses a control that would commit the flow unless stopBeforeSubmit is false.
 // Watch progress via GET /api/runs/:jobId/logs (SSE).
 mobileRouter.post("/route-learning", (req, res) => {
-  const body = req.body as MobileRouteLearningParams;
+  let body: MobileRouteLearningParams;
+  try {
+    body = withUserDevice(req, req.body as MobileRouteLearningParams);
+  } catch (err) {
+    if (sendDeviceError(res, err)) return;
+    throw err;
+  }
 
   if (!body.appSlug?.trim()) {
     res.status(400).json({
@@ -437,6 +472,13 @@ mobileRouter.post("/scenarios/preview", async (req, res, next) => {
 // same as the web endpoint — no device/emulator work happens here.
 mobileRouter.post("/runs/launch-execution", async (req, res, next) => {
   try {
+    let device: Partial<UserDeviceChoice>;
+    try {
+      device = withUserDevice(req, { deviceSerial: (req.body as { deviceSerial?: unknown })?.deviceSerial });
+    } catch (err) {
+      if (sendDeviceError(res, err)) return;
+      throw err;
+    }
     const body = req.body as {
       appSlug?: string;
       projectId?: number;
@@ -508,6 +550,8 @@ mobileRouter.post("/runs/launch-execution", async (req, res, next) => {
         appActivity: body.appActivity,
         avdName: body.avdName,
         headless: body.headless,
+        localAgentId: device.localAgentId,
+        deviceSerial: device.deviceSerial,
       },
     });
     let routeLearningJobId: string | null = null;
@@ -589,8 +633,14 @@ mobileRouter.post("/runs/launch-execution", async (req, res, next) => {
 // against a real emulator/Appium session and syncs pass/fail back to the TestRail Run
 // (reuses syncDiscoveryResultToTestRail() unmodified). Watch progress via
 // GET /api/runs/:jobId/logs (SSE).
-mobileRouter.post("/runs/execute", (req, res) => {
-  const body = normalizeMobileLaunchExecutionParams(req.body as MobileLaunchExecutionParams);
+mobileRouter.post("/runs/execute", async (req, res) => {
+  let body: MobileLaunchExecutionParams;
+  try {
+    body = withUserDevice(req, normalizeMobileLaunchExecutionParams(req.body as MobileLaunchExecutionParams));
+  } catch (err) {
+    if (sendDeviceError(res, err)) return;
+    throw err;
+  }
 
   if (!body.testRunId) {
     res.status(400).json({ ok: false, error: "invalid_request", message: "testRunId is required" });
@@ -632,6 +682,19 @@ mobileRouter.post("/runs/execute", (req, res) => {
     return;
   }
 
+  // Same as the web execute routes: fields a recording bound to a catalog service (the OTP)
+  // are filled by that service at the step, never with the value typed while recording.
+  const servicePlan = await planMobileRunServices(body);
+  if (servicePlan.blocked.length > 0) {
+    console.log(`[runs:execute] rejected reason=service_binding_not_ready codes=${servicePlan.blocked.map((b) => b.code).join(",")}`);
+    res.status(409).json(serviceBindingBlockedBody(servicePlan.blocked));
+    return;
+  }
+  if (servicePlan.bindings.length > 0) {
+    body.serviceBindings = servicePlan.bindings;
+    console.log(`[runs:execute] service bindings=${servicePlan.bindings.map((b) => `${b.valueKey}->${b.serviceKey}`).join(",")}`);
+  }
+
   const job = jobStore.create("mobile-launch-execution", body as unknown as Record<string, unknown>);
   try {
     persistMobileExecutionManifest(job.id, body, {
@@ -651,7 +714,7 @@ mobileRouter.post("/runs/execute", (req, res) => {
   // execution runId (== the execution jobId, the same value logged by `[mobile:run] started runId=`)
   // is appended so the checklist view is isolated to THIS execution's defects only.
   const issueKey =
-    body.scenarios.map((s) => deriveSourceIssueKey(s.scenarioId)).find(Boolean) || undefined;
+    body.issueKey || body.scenarios.map((s) => deriveSourceIssueKey(s.scenarioId)).find(Boolean) || undefined;
   const checklistUrl = issueKey
     ? `/checklist/${issueKey}?runId=${encodeURIComponent(job.id)}`
     : undefined;
@@ -665,3 +728,30 @@ mobileRouter.post("/runs/execute", (req, res) => {
     checklistUrl
   });
 });
+
+/**
+ * The service bindings of every recording the run's scenarios come from, planned exactly as
+ * the web execute route does (per recording, then merged; disagreeing fields block the run).
+ */
+async function planMobileRunServices(body: {
+  appSlug: string;
+  scenarios: Array<{ scenarioId: string; recordingId?: string; requiredData?: Array<{ key: string }> }>;
+}): Promise<{ bindings: RuntimeServiceBinding[]; blocked: ExecutionServiceBlock[] }> {
+  const byRecording = new Map<string, Array<{ scenarioId: string; valueKeys: string[] }>>();
+  for (const scenario of body.scenarios) {
+    const recordingId = scenario.recordingId?.trim();
+    if (!recordingId) continue;
+    const valueKeys = (scenario.requiredData ?? []).map((field) => field.key).filter((key) => typeof key === "string" && key.trim() !== "");
+    byRecording.set(recordingId, [...(byRecording.get(recordingId) ?? []), { scenarioId: scenario.scenarioId, valueKeys }]);
+  }
+  let bindings: RuntimeServiceBinding[] = [];
+  const blocked: ExecutionServiceBlock[] = [];
+  for (const [recordingId, scenarios] of byRecording) {
+    const plan = await planExecutionServices({ projectSlug: body.appSlug, ownerType: "recording", ownerId: recordingId, scenarios });
+    blocked.push(...plan.blocked);
+    const merged = mergeRunServiceBindings(bindings, plan.bindings);
+    bindings = merged.bindings;
+    blocked.push(...merged.conflicts);
+  }
+  return { bindings, blocked };
+}

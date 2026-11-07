@@ -67,6 +67,10 @@ test("one-time code fields are recognized by shape or by name, not ordinary fiel
   assert.equal(looksLikeOneTimeCode({ key: "otp_code" }), true);
   assert.equal(looksLikeOneTimeCode({ key: "f1", label: "Código de verificación" }), true);
   assert.equal(looksLikeOneTimeCode({ key: "f2", label: "Ingresa el token" }), true);
+  assert.equal(looksLikeOneTimeCode({ key: "codigo_de_6_digitos", label: "Código de 6 dígitos" }), true);
+  assert.equal(looksLikeOneTimeCode({ key: "f3", label: "Código SMS" }), true);
+  assert.equal(looksLikeOneTimeCode({ key: "numero_de_documento", label: "Número de documento" }), false);
+  assert.equal(looksLikeOneTimeCode({ key: "codigo_postal", label: "Código postal" }), false);
   assert.equal(looksLikeOneTimeCode({ key: "f3", label: "Código postal" }), false);
   assert.equal(looksLikeOneTimeCode({ key: "telefono", label: "Teléfono" }), false);
 });

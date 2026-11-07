@@ -16,7 +16,7 @@ import {
   type ProjectConfiguration,
 } from "../../db/project-reader";
 import { materializeProjectRuntime } from "../../db/project-materializer";
-import { inspectApk, ApkInspectorError } from "../../utils/apk-inspector";
+import { inspectApkFile, ApkInspectorError } from "../../utils/apk-inspector";
 import { getConnection } from "../../db/sql-connection";
 import {
   getByProjectAndCase,
@@ -348,7 +348,7 @@ projectsRouter.post("/inspect-apk", apkInspectMiddleware, async (req: any, res) 
       return;
     }
 
-    const result = inspectApk(apkPath);
+    const result = await inspectApkFile(apkPath);
     res.json(result);
   } catch (err: any) {
     // cleanup uploaded file on failure to avoid orphan if inspection failed due to invalid apk

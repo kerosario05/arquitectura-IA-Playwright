@@ -19,6 +19,8 @@ export type BoundedNode = {
   package?: string;
   clickable: boolean;
   enabled: boolean;
+  /** The input that has the keyboard: taps below it while it is focused land on the keyboard. */
+  focused?: boolean;
   bounds: RecordedBounds;
   /** Depth in the XML tree — deeper nodes win ties against equally sized ancestors. */
   depth: number;
@@ -91,6 +93,7 @@ export function extractBoundedNodes(pageSourceXml: string): BoundedNode[] {
         package: attr(attrs, "package") || undefined,
         clickable: attr(attrs, "clickable") === "true",
         enabled: attr(attrs, "enabled") !== "false",
+        focused: attr(attrs, "focused") === "true",
         bounds,
         depth,
       });

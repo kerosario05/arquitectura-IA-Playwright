@@ -48,6 +48,7 @@ import { resolveReplayAdmission } from "../services/replay-admission";
 import { resolveScenarioAutomationPlans, partitionScenariosForExecution, computeTestRailPublishCandidates, type ScenarioAutomationPlan, type TestRailCaseLookup, type TestRailDestination } from "../../automations/recording-automation-resolution";
 import { startMixedRerun } from "../jobs/mixed-rerun-orchestrator";
 import { clientIpOf } from "../local-agent/agent-endpoint";
+import { pairUserDevice } from "../local-agent/agent-device";
 import { localAgentRegistry, LocalAgentError } from "../local-agent/agent-registry";
 import type { SessionTrace } from "../../recording/session-trace.types";
 import { mergeRunServiceBindings, planExecutionServices, serviceBindingBlockedBody } from "../../service-catalog/execution-bindings";
@@ -736,7 +737,15 @@ recordingsRouter.post("/start", async (req, res) => {
     // "agent": the Chromium on the caller's own PC. Paired by the IP the panel request came
     // from (the agent connects from the same PC), never by a client-supplied agent id alone.
     let localAgentId: string | undefined;
-    if (browserMode === "agent") {
+    let deviceSerial: string | undefined;
+    if (typeof body.deviceSerial === "string" && body.deviceSerial.trim()) {
+      // ANDROID on the caller's own PC: an emulator or phone of that PC's Android Studio.
+      ({ localAgentId, deviceSerial } = pairUserDevice(
+        { userId: req.principal?.userId ?? null, username: req.principal?.username ?? "" },
+        clientIpOf(req),
+        body.deviceSerial,
+      ));
+    } else if (browserMode === "agent") {
       const pairing = localAgentRegistry.findForUser(
         { userId: req.principal?.userId ?? null, username: req.principal?.username ?? "" },
         clientIpOf(req),
@@ -782,6 +791,7 @@ recordingsRouter.post("/start", async (req, res) => {
       // the existing headless Chromium + live stream; desktop opens that same recorder-owned
       // Page in a visible Chromium window. Omitted mode preserves legacy headless compatibility.
       localAgentId,
+      deviceSerial,
       headless: browserMode === "integrated"
         ? true
         : browserMode === "desktop"

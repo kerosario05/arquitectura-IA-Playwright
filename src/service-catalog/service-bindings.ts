@@ -187,7 +187,8 @@ function words(field: BindingField): string {
     .toLowerCase();
 }
 
-const CODE_FIELD = /\b(otp|one ?time|token|pin)\b|c[oó]digo\s*(de\s*)?(verificaci[oó]n|seguridad|otp|sms|acceso|confirmaci[oó]n)|verification code|clave din[aá]mica/;
+// "Código de 6 dígitos" (mobile apps name the field by its length) and SMS codes count too.
+const CODE_FIELD = /\b(otp|one ?time|token|pin|sms)\b|c[oó]digo\s*(de\s*)?(verificaci[oó]n|seguridad|otp|sms|acceso|confirmaci[oó]n)|c[oó]digo\s*(de\s*)?\d+\s*d[ií]gitos|c[oó]digo\s+(enviado|recibido)|verification code|clave din[aá]mica/;
 const IDENTITY_FIELD = /c[eé]dula|identificaci[oó]n|n[uú]mero de documento|\bdocumento\b|\bidentity\b|\bdni\b/;
 
 /** True when the field looks like a one-time code the user cannot know in advance. */

@@ -1,6 +1,10 @@
+import { materializeServiceBindingsEnv, resolveServiceBoundValue, type RuntimeServiceBinding } from "../service-catalog/runtime-service-values";
 import type { MobileStep, MobileStepResult, MobileStepTarget, MobileDataField } from "./mobile-step-types";
 import { ensureConsentCheckboxChecked, findUncheckedConsentCheckboxes, isSubmitGated, isSubmitLikeClick } from "./mobile-consent-checkbox";
 import { dismissBlockingModal } from "./mobile-modal-dismisser";
+import { findMaskedPhoneLabels, isMaskedPhoneLabel } from "./mobile-masked-phone";
+import { isMaskHint, looksLikeEmail } from "./mobile-mask-hint";
+import { formatBareCedulaForService } from "./mobile-identity-format";
 import { buildTextVariants, normalizeComparableText, repairUtf8Mojibake } from "./mobile-text-normalization";
 import { resolveMobileOtp, MobileOtpResolverError } from "./mobile-otp-resolver";
 import { analyzeSegmentedGroup, joinSegmentValues, parseBounds, type SegmentCandidate } from "./mobile-segmented-input";
@@ -20,6 +24,10 @@ export type MobileStepRuntimeContext = {
    * validation cycle — see `completeRemainingOtpChallenges`.
    */
   steps?: MobileStep[];
+  /** Catalog services bound to this run's fields (OTP...), planned by the execute route. */
+  serviceBindings?: RuntimeServiceBinding[];
+  /** Run id + start: a bound value is fresh for this run and cached only within it. */
+  serviceRun?: { id: string; startedAt: string };
 };
 
 function maskSensitive(v: string): string {
@@ -136,6 +144,67 @@ async function resolveOtpForStep(
     throw new MobileOtpResolverError("otp_value_empty", "OTP resolver returned an empty or whitespace-only value.");
   }
   return otp;
+}
+
+/**
+ * The OTP service is called only OTP_SERVICE_DELAY_MS (default 15 s) after the OTP step starts:
+ * the app has just asked for the code and the generator must not run ahead of it. Once per run
+ * and code (a segmented code fetches once; a re-fill reuses the cached value). 0 disables it.
+ */
+const otpDelayedFor = new Set<string>();
+
+function otpServiceDelayMs(): number {
+  const raw = process.env.MOBILE_OTP_SERVICE_DELAY_MS;
+  if (raw === undefined || raw.trim() === "") return 15000;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? Math.min(n, 120000) : 15000;
+}
+
+async function waitBeforeOtpService(valueKey: string, ctx: MobileStepRuntimeContext): Promise<void> {
+  const binding = ctx.serviceBindings?.find((b) => b.valueKey.trim().toLowerCase() === valueKey.trim().toLowerCase());
+  if (!binding || !binding.serviceKey.toLowerCase().startsWith("otp.")) return;
+  if (binding.segment && binding.segment.position > 1) return;
+  const group = binding.segment ? binding.segment.group.trim().toLowerCase() : binding.valueKey.trim().toLowerCase();
+  const key = `${ctx.serviceRun?.id ?? "run"}:${group}`;
+  if (otpDelayedFor.has(key)) return;
+  otpDelayedFor.add(key);
+  const delay = otpServiceDelayMs();
+  if (delay <= 0) return;
+  console.log(`[mobile:service] valueKey=${valueKey} service=${binding.serviceKey} waiting ${Math.round(delay / 1000)}s before generating the code`);
+  await new Promise<void>((resolve) => setTimeout(resolve, delay));
+}
+
+/**
+ * The value a catalog service gives the field this step fills (an OTP generated now for the
+ * run's identity), or undefined when the field is not bound. Same rules as web: the recorded
+ * value is never typed for a bound field, and a failing service fails the step.
+ */
+async function resolveServiceValueForStep(stepIndex: number, ctx?: MobileStepRuntimeContext): Promise<string | undefined> {
+  if (!ctx?.serviceBindings?.length) return undefined;
+  const field = ctx.requiredData?.find((entry) => entry.stepIndex === stepIndex);
+  if (!field?.key) return undefined;
+  const valueOf = (key: string): string | undefined => {
+    const other = ctx.requiredData?.find((entry) => entry.key.trim().toLowerCase() === key.trim().toLowerCase());
+    if (!other) return undefined;
+    return formatBareCedulaForService(other.key, ctx.dataOverrides?.[other.stepIndex] ?? ctx.steps?.[other.stepIndex]?.value ?? other.exampleValue);
+  };
+  await waitBeforeOtpService(field.key, ctx);
+  const value = await resolveServiceBoundValue(field.key, {
+    env: materializeServiceBindingsEnv(ctx.serviceBindings),
+    readValue: valueOf,
+    ...(ctx.serviceRun ? { generatedAfter: ctx.serviceRun.startedAt, cacheScope: `${ctx.serviceRun.id}:` } : {}),
+  });
+  if (value !== undefined) console.log(`[mobile:service] step=${stepIndex} valueKey=${field.key} resolved=true length=${value.length}`);
+  return value;
+}
+
+/** Same click, same target, right after the previous step: a double tap recorded as two steps. */
+function isRepeatOfPreviousClick(step: MobileStep, index: number, ctx?: MobileStepRuntimeContext): boolean {
+  const previous = ctx?.steps?.[index - 1];
+  return Boolean(
+    step.action === "click" && previous?.action === "click" && step.target && previous.target
+      && step.target.strategy === previous.target.strategy && step.target.value === previous.target.value,
+  );
 }
 
 function slugifyKey(label: string): string {
@@ -321,10 +390,6 @@ async function buildEvidenceFallbackSelectors(
     }
   }
   return Array.from(new Set(selectors));
-}
-
-function hasMaskSeparators(value: string): boolean {
-  return /[^a-zA-Z0-9]/.test(value);
 }
 
 /** Keeps letters/digits, drops only format/separator characters. */
@@ -631,7 +696,7 @@ async function readSegmentedObservation(
   };
 }
 
-async function readFilledValueObservation(el: WdioElement, submittedValue: string, options?: { maskAware?: boolean }): Promise<FillObservation> {
+async function readFilledValueObservation(el: WdioElement, submittedValue: string, options?: { maskAware?: boolean; hint?: string }): Promise<FillObservation> {
   const maskAware = options?.maskAware === true;
   const trimmedValue = submittedValue.trim();
   const canonicalSubmitted = maskAware ? canonicalizeSignificant(trimmedValue) : "";
@@ -651,6 +716,9 @@ async function readFilledValueObservation(el: WdioElement, submittedValue: strin
       observed = "";
     }
     if (!observed) continue;
+    // An empty field reports its placeholder (hint) as text: that is not the typed value, and a
+    // password placeholder ("*********") must not pass for a masked value.
+    if (options?.hint && observed === options.hint.trim()) continue;
     const masked = /[*\u2022]/.test(observed);
     // Masked inputs compare canonical significant content for exact equality (no contains).
     const matched = maskAware
@@ -1047,7 +1115,7 @@ export async function executeMobileStep(
 
   try {
     const normalized = normalizeStepText(step);
-    const effectiveStep = normalized.step;
+    const effectiveStep = { ...normalized.step };
     let resultExtras: Partial<MobileStepResult> = {};
     if (normalized.repaired) {
       console.warn(`[mobile:utf8] repaired_step_text index=${index + 1}`);
@@ -1061,8 +1129,28 @@ export async function executeMobileStep(
       }
       case "click": {
         if (!effectiveStep.target) throw new Error("click step requires a target");
+        // A recorded masked phone ("(829) ***-**00") belongs to the CLIENT: with another cédula the
+        // screen offers another number. Click the phone that is really there (first one if several).
+        if (isMaskedPhoneLabel(effectiveStep.target.value)) {
+          try {
+            const labels = findMaskedPhoneLabels(await browser.getPageSource());
+            if (labels.length > 0 && !labels.includes(effectiveStep.target.value.trim())) {
+              console.log(`[mobile:masked-phone] step=${index} recorded=${effectiveStep.target.value} not on screen; using ${labels[0]} (candidates=${labels.length})`);
+              effectiveStep.target = { strategy: "accessibilityId", value: labels[0] };
+            }
+          } catch (err) {
+            console.log(`[mobile:masked-phone] step=${index} lookup failed: ${err instanceof Error ? err.message : String(err)}`);
+          }
+        }
         const clickSelector = selectorFromTarget(effectiveStep.target);
-        const el = await locateTarget(browser, effectiveStep.target, clickSelector, effectiveStep.timeoutMs ?? 10000, "displayed");
+        const repeatsPrevious = isRepeatOfPreviousClick(effectiveStep, index, otpContext);
+        // A repeated tap (the tester pressed "Continuar" twice while the app was loading) is
+        // looked for briefly: if the first one already moved the app on, it is not an error.
+        const el = await locateTarget(browser, effectiveStep.target, clickSelector, repeatsPrevious ? 3000 : (effectiveStep.timeoutMs ?? 10000), "displayed");
+        if (!el && repeatsPrevious) {
+          console.log(`[mobile:click] step=${index} repeats the previous tap and its target is gone (the app already moved on); treated as done`);
+          return { index, action: effectiveStep.action, description: effectiveStep.description, status: "passed", durationMs: Date.now() - startedAt } as MobileStepResult;
+        }
         if (!el) throw new Error(`click target not found (even after closing any blocking modal): ${JSON.stringify(effectiveStep.target)}`);
         // Primary consent/acceptance strategy: composite acceptance controls (checkbox + terms link)
         // must not be tapped generically at their centre (that hits the terms link and opens the
@@ -1157,7 +1245,10 @@ export async function executeMobileStep(
         const el = await locateTarget(browser, effectiveStep.target, selectorFromTarget(effectiveStep.target), effectiveStep.timeoutMs ?? 10000, "displayed");
         if (!el) throw new Error(`fill target not found (even after closing any blocking modal): ${JSON.stringify(effectiveStep.target)}`);
         let submittedValue = effectiveStep.value ?? "";
-        if (effectiveStep.otp?.required === true) {
+        const serviceValue = await resolveServiceValueForStep(index, otpContext);
+        if (serviceValue !== undefined) {
+          submittedValue = serviceValue;
+        } else if (effectiveStep.otp?.required === true) {
           // Just-in-time OTP: resolve a fresh code and use it as the fill input, in memory only.
           submittedValue = await resolveOtpForStep(effectiveStep, otpContext, index);
         }
@@ -1175,10 +1266,19 @@ export async function executeMobileStep(
         // The submitted value may already be canonicalized (no separators) when it comes from a
         // dataOverride, so we key mask detection on the element hint's visible separators instead
         // of the payload itself.
+        // A password field is never a mask: its symbols must reach the app untouched.
+        let isPasswordField = false;
+        try {
+          isPasswordField = String((await el.getAttribute("password")) ?? "").toLowerCase() === "true";
+        } catch {
+          // attribute missing on some elements
+        }
         const maskAware =
+          !isPasswordField &&
           submittedValue.trim().length > 0 &&
           hintAttr.length > 0 &&
-          hasMaskSeparators(hintAttr) &&
+          isMaskHint(hintAttr) &&
+          !looksLikeEmail(submittedValue) &&
           significantChars.length > 0 &&
           /^[a-zA-Z0-9]+$/.test(significantChars);
         if (maskAware) {
@@ -1204,8 +1304,19 @@ export async function executeMobileStep(
         const postFillEl = await browser.$(fillSelector);
         const fillObservation = segmentGroup
           ? await readSegmentedObservation(browser, fillSelector, segmentGroup, inputPayload)
-          : await readFilledValueObservation(postFillEl, submittedValue, { maskAware });
+          : await readFilledValueObservation(postFillEl, submittedValue, { maskAware, hint: hintAttr });
         getRuntimeState(browser).lastFillByTarget.set(targetKey(effectiveStep.target), fillObservation);
+        // A code field that auto-submits on the last digit leaves the screen: nothing is left to read
+        // back, and the app having moved on IS the acceptance. Only when no value was observed at all
+        // and the field is really gone (a present-but-empty field is still a rejected fill).
+        if (!fillObservation.fieldAccepted && fillObservation.acceptanceSource === "empty_after_fill") {
+          const stillThere = await postFillEl.isExisting().catch(() => true);
+          if (!stillThere) {
+            console.log(`[mobile:fill] step=${index} target gone after fill (the screen moved on); treated as accepted`);
+            fillObservation.fieldAccepted = true;
+            fillObservation.acceptanceSource = "target_gone_after_fill";
+          }
+        }
         if (!fillObservation.fieldAccepted) {
           throw new Error(`data_precondition_failure: fill not accepted target=${JSON.stringify(effectiveStep.target)} acceptanceSource=${fillObservation.acceptanceSource}`);
         }

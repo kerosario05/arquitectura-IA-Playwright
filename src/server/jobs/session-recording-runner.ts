@@ -1,3 +1,4 @@
+import { closeSession, createSession } from "../../mobile/appium-session";
 import { LiveViewSession } from "../../recording/web/live-view-session";
 import { DEFAULT_RECORDING_VIEWPORT } from "../../recording/web/recording-presentation";
 import { randomUUID } from "node:crypto";
@@ -11,6 +12,8 @@ import { getProjectConfigurationBySlug } from "../../db/project-reader";
 import { AndroidSessionRecorder } from "../../recording/mobile/android-session-recorder";
 import { WebSessionRecorder } from "../../recording/web/web-session-recorder";
 import { openAgentBrowser, type AgentBrowser } from "../local-agent/agent-browser";
+import { openAgentDevice, type AgentDevice } from "../local-agent/agent-device";
+import { adbArgs, type AdbTarget } from "../../mobile/apk-installer";
 import { RecordingControlError, type RecordingControlAction } from "../../recording/recording-control";
 import {
   discardFrames,
@@ -99,6 +102,11 @@ export type StartRecordingParams = {
    * no live view in this mode: the user is looking at the real window.
    */
   localAgentId?: string;
+  /**
+   * ANDROID only, with `localAgentId`: the emulator or phone (adb serial) on the user's PC to
+   * record on, reached through the agent's adb tunnel instead of the server's emulator.
+   */
+  deviceSerial?: string;
 };
 
 /**
@@ -129,6 +137,10 @@ type ActiveRecording = {
   liveView?: LiveViewSession;
   startedBy?: string;
   agentBrowser?: AgentBrowser;
+  /** ANDROID on the user's PC: the adb tunnel, closed when the recording ends. */
+  agentDevice?: AgentDevice;
+  /** Appium session used only to read the screen of the user's device. */
+  sourceSession?: WebdriverIO.Browser;
   /** Set by the first stop; a second one (button + closed window at once) waits for it. */
   stopping?: Promise<RecordingSummary>;
 };
@@ -227,23 +239,28 @@ export async function resolveRecordingTarget(projectSlug: string): Promise<Resol
 
 /** Brings the app to the foreground so the walkthrough starts where the user expects. */
 async function launchAndroidApp(
-  deviceId: string,
+  adbTarget: AdbTarget,
   appPackage: string,
   appActivity: string | undefined,
   onLog: (line: string) => void,
 ): Promise<void> {
-  const adb = resolveAndroidSdk().adbPath;
   const component = appActivity
     ? appActivity.startsWith(".") || !appActivity.includes("/")
       ? `${appPackage}/${appActivity}`
       : appActivity
     : undefined;
+  const shell = (...args: string[]) => execFileAsync(adbTarget.adbPath, adbArgs(adbTarget, ["shell", ...args]));
   try {
-    await execFileAsync(adb, ["-s", deviceId, "shell", "am", "force-stop", appPackage]);
-    if (component) {
-      await execFileAsync(adb, ["-s", deviceId, "shell", "am", "start", "-n", component]);
+    await shell("am", "force-stop", appPackage);
+    // Start a clean task (NEW_TASK | CLEAR_TASK), the way an execution's Appium session opens
+    // the app. A plain `am start` / monkey brings back the task Android kept, so the app
+    // reopened mid-flow (the registration step it was left on) and the recording then lacked
+    // the steps an execution needs to get there from the app's first screen.
+    const launcher = component ?? (await resolveLauncherActivity(shell, appPackage));
+    if (launcher) {
+      await shell("am", "start", "-W", "-f", "0x10008000", "-n", launcher);
     } else {
-      await execFileAsync(adb, ["-s", deviceId, "shell", "monkey", "-p", appPackage, "-c", "android.intent.category.LAUNCHER", "1"]);
+      await shell("monkey", "-p", appPackage, "-c", "android.intent.category.LAUNCHER", "1");
     }
     onLog(`[recording] app ${appPackage} en primer plano`);
     await new Promise((r) => setTimeout(r, 2500));
@@ -252,7 +269,40 @@ async function launchAndroidApp(
   }
 }
 
+/**
+ * Projects and devices whose recording is still starting. A start takes tens of seconds on the
+ * user's PC (adb + Appium tunnels, Appium session), long enough for a second click to start a
+ * second recording on the same phone; the two then fight over its only Appium session.
+ */
+const startingRecordings = new Set<string>();
+
 export async function startRecording(params: StartRecordingParams): Promise<{
+  recordingId: string;
+  jobId: string;
+  summary: RecordingSummary;
+}> {
+  const serial = params.deviceSerial?.trim();
+  const keys = [`project:${params.projectSlug.toLowerCase()}`, ...(serial ? [`device:${serial}`] : [])];
+  const deviceBusy = serial
+    ? [...active.values()].some((entry) => entry.agentDevice?.serial === serial)
+    : false;
+  if (deviceBusy || keys.some((key) => startingRecordings.has(key))) {
+    throw new RecordingError(
+      "RECORDING_ALREADY_ACTIVE",
+      serial && (deviceBusy || startingRecordings.has(`device:${serial}`))
+        ? `Ya hay una grabación iniciándose o activa en ${serial}. Espera a que arranque o detenla antes de empezar otra.`
+        : `Ya hay una grabación iniciándose para ${params.projectSlug}. Espera a que arranque.`,
+    );
+  }
+  for (const key of keys) startingRecordings.add(key);
+  try {
+    return await startRecordingUnguarded(params);
+  } finally {
+    for (const key of keys) startingRecordings.delete(key);
+  }
+}
+
+async function startRecordingUnguarded(params: StartRecordingParams): Promise<{
   recordingId: string;
   jobId: string;
   summary: RecordingSummary;
@@ -265,6 +315,10 @@ export async function startRecording(params: StartRecordingParams): Promise<{
   }
   const target = await resolveRecordingTarget(params.projectSlug);
   const platform = params.platform ?? target.platform;
+
+  if (params.deviceSerial && platform !== "android") {
+    throw new RecordingError("DEVICE_NOT_APPLICABLE", "Elegir un dispositivo Android solo aplica a proyectos móviles");
+  }
 
   const existing = activeRecordingFor(params.projectSlug);
   if (existing) {
@@ -312,6 +366,8 @@ export async function startRecording(params: StartRecordingParams): Promise<{
 
   const framesDir = ensureFramesDir(recordingId);
   let agentBrowser: AgentBrowser | undefined;
+  let agentDevice: AgentDevice | undefined;
+  let sourceSession: WebdriverIO.Browser | undefined;
 
   try {
     let recorder: AndroidSessionRecorder | WebSessionRecorder;
@@ -324,17 +380,34 @@ export async function startRecording(params: StartRecordingParams): Promise<{
         appActivity: target.appActivity,
         avdName: params.avdName,
         headless: params.headless,
+        deviceSerial: params.localAgentId ? params.deviceSerial : undefined,
       });
-      await ensureMobileInfra(mobileTarget, onLog, { runId: recordingId });
-      const deviceId = getEmulatorStatus().deviceId;
+      // adb carries the touches and screenshots; Appium (started by the agent) reads the screen,
+      // because `uiautomator dump` waits for the UI to go idle and a screen with an animated
+      // cursor (the OTP code) takes ~10 s per read or is never read at all.
+      agentDevice = params.localAgentId && params.deviceSerial
+        ? await openRecordingAgentDevice(params.localAgentId, params.deviceSerial, onLog)
+        : undefined;
+      const infra = await ensureMobileInfra(mobileTarget, onLog, { runId: recordingId, device: agentDevice });
+      const deviceId = agentDevice ? agentDevice.serial : getEmulatorStatus().deviceId;
       if (!deviceId) {
         throw new RecordingError("DEVICE_NOT_AVAILABLE", "No hay dispositivo Android disponible para grabar");
       }
-      await launchAndroidApp(deviceId, target.appPackage!, target.appActivity, onLog);
+      const adbTarget: AdbTarget = agentDevice?.adb ?? { adbPath: resolveAndroidSdk().adbPath, serial: deviceId };
+      const appPackage = infra.installedApp?.appPackage ?? target.appPackage!;
+      const appActivity = infra.installedApp ? infra.installedApp.appActivity : target.appActivity;
 
+      sourceSession = agentDevice?.appium
+        ? await attachSourceSession(agentDevice, appPackage, onLog)
+        : undefined;
+      const sessionForSource = sourceSession;
       recorder = new AndroidSessionRecorder({
         deviceId,
-        appPackage: target.appPackage,
+        ...(agentDevice ? { adb: agentDevice.adb } : {}),
+        ...(sessionForSource ? { readSource: () => withTimeout(sessionForSource.getPageSource(), 15_000) } : {}),
+        appPackage,
+        // The app opens last, once Appium, the touch stream and the device settings are ready.
+        launchApp: () => launchAndroidApp(adbTarget, appPackage, appActivity, onLog),
         framesDir,
         persistQaCredentials: true,
         sensitiveLabels: params.sensitiveLabels,
@@ -404,7 +477,7 @@ export async function startRecording(params: StartRecordingParams): Promise<{
       ready: false,
       log: onLog,
     }) : undefined;
-    active.set(recordingId, { recordingId, jobId: job.id, trace, recorder, liveView, startedBy: params.startedBy, agentBrowser });
+    active.set(recordingId, { recordingId, jobId: job.id, trace, recorder, liveView, startedBy: params.startedBy, agentBrowser, agentDevice, sourceSession });
     agentBrowser?.onLost((reason) => {
       void stopAfterAgentBrowserLost(recordingId, reason);
     });
@@ -442,6 +515,8 @@ export async function startRecording(params: StartRecordingParams): Promise<{
     jobStore.update(job.id, { status: "failed", errorMessage: message, completedAt: new Date().toISOString() });
     onLog(`[recording] fallo al iniciar: ${message}`);
     await agentBrowser?.close().catch(() => undefined);
+    if (sourceSession) await closeSession(sourceSession);
+    await agentDevice?.close().catch(() => undefined);
     throw err;
   }
 }
@@ -537,6 +612,8 @@ async function stopActiveRecording(recordingId: string, entry: ActiveRecording):
   await entry.liveView?.close();
   const { events, screens } = await entry.recorder.stop();
   await entry.agentBrowser?.close().catch(() => undefined);
+  if (entry.sourceSession) await closeSession(entry.sourceSession);
+  await entry.agentDevice?.close().catch(() => undefined);
   const endedAt = new Date();
 
   entry.trace.events = events;
@@ -872,4 +949,72 @@ export async function deriveScenarios(
 
 export function getRecordingScenarios(appSlug: string, recordingId: string): RecordedScenario[] {
   return loadScenarios(appSlug, recordingId);
+}
+
+/**
+ * The user's device for a recording: the adb tunnel always, the Appium tunnel when the agent
+ * can provide it (agent 0.3.0+ starts Appium on demand). Without Appium the recording still
+ * works, reading the screen with `uiautomator dump`.
+ */
+async function openRecordingAgentDevice(agentId: string, serial: string, onLog: (line: string) => void): Promise<AgentDevice> {
+  try {
+    return await openAgentDevice({ agentId, serial, appium: true, log: onLog });
+  } catch (err) {
+    onLog(`[recording] Appium no disponible en el equipo (${err instanceof Error ? err.message : String(err)}); se lee la pantalla con uiautomator`);
+    return openAgentDevice({ agentId, serial, log: onLog });
+  }
+}
+
+/**
+ * An Appium session attached to the already running app (no relaunch, no reset) whose only
+ * job is reading the screen without waiting for it to go idle.
+ */
+async function attachSourceSession(device: AgentDevice, appPackage: string, onLog: (line: string) => void): Promise<WebdriverIO.Browser | undefined> {
+  if (!device.appium) return undefined;
+  const started = Date.now();
+  try {
+    const session = await createSession({
+      appiumHost: device.appium.host,
+      appiumPort: device.appium.port,
+      appPackage,
+      deviceId: device.serial,
+      extraCapabilities: {
+        "appium:autoLaunch": false,
+        "appium:dontStopAppOnReset": true,
+        "appium:waitForIdleTimeout": 0,
+        // The recorder reads every ~1 s; if the server dies, Appium frees the phone after 10 min.
+        "appium:newCommandTimeout": 600,
+      },
+    });
+    await session.updateSettings({ waitForIdleTimeout: 0 }).catch(() => undefined);
+    onLog(`[recording] pantalla leída con Appium (sin esperar a que deje de animarse), sesión lista en ${Math.round((Date.now() - started) / 1000)} s`);
+    return session;
+  } catch (err) {
+    onLog(`[recording] no se pudo abrir Appium para leer la pantalla (${err instanceof Error ? err.message : String(err)}); se usa uiautomator`);
+    return undefined;
+  }
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`timeout after ${ms} ms`)), ms);
+    promise.then(
+      (value) => { clearTimeout(timer); resolve(value); },
+      (err) => { clearTimeout(timer); reject(err); },
+    );
+  });
+}
+
+/** "pkg/.MainActivity" of the app's launcher entry, or undefined when the device cannot tell. */
+async function resolveLauncherActivity(
+  shell: (...args: string[]) => Promise<{ stdout: string }>,
+  appPackage: string,
+): Promise<string | undefined> {
+  try {
+    const { stdout } = await shell("cmd", "package", "resolve-activity", "--brief", "-c", "android.intent.category.LAUNCHER", appPackage);
+    const line = stdout.trim().split(/\r?\n/).pop()?.trim();
+    return line && line.includes("/") ? line : undefined;
+  } catch {
+    return undefined;
+  }
 }

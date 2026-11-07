@@ -1,3 +1,4 @@
+import type { RuntimeServiceBinding } from "../../service-catalog/runtime-service-values";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { jobStore } from "./job-store";
@@ -18,6 +19,7 @@ import {
 import {
   closeSession,
   createSession,
+  probeAppiumHealth,
 } from "../../mobile/appium-session";
 import {
   acquireSession,
@@ -44,6 +46,9 @@ export { evaluateScenarioPrecheck, type ScenarioPrecheckResult } from "../../mob
 import { dismissAndroidCompatibilityDialog } from "../../mobile/mobile-modal-dismisser";
 import { buildTextVariants } from "../../mobile/mobile-text-normalization";
 import { createMobileJobLogger } from "./mobile-job-logger";
+import { openAgentDevice, type AgentDevice } from "../local-agent/agent-device";
+import { adbArgs, ensureApkInstalled, runAdb, type AdbExec } from "../../mobile/apk-installer";
+import { readApkManifest } from "../../utils/apk-manifest";
 
 let createSessionFn: typeof createSession = createSession;
 let closeSessionFn: typeof closeSession = closeSession;
@@ -88,6 +93,9 @@ export type MobileTestRunParams = {
   appSlug?: string;
   /** Step-level requirement refs from the scenario, to propagate into runtime transitions. */
   stepRequirementRefs?: Array<{ stepIndex: number; requirementIds: string[] }>;
+  /** Device on the user's own PC (local agent); absent = the server's emulator. */
+  localAgentId?: string;
+  deviceSerial?: string;
 };
 
 export type ResolvedMobileTarget = {
@@ -109,6 +117,11 @@ export type MobileInfraReadyState = {
   emulatorStartedByRunner: boolean;
   ownership: EmulatorOwnership;
   ownershipReason: "already_running_reused" | "start_result_reused" | "started_by_runner";
+  /**
+   * Device on the user's PC: the APK was installed through the adb tunnel, so the Appium
+   * session must open the app by package (the server's APK path means nothing over there).
+   */
+  installedApp?: { appPackage: string; appActivity?: string };
 };
 
 export function determineEmulatorOwnership(input: "already_running" | { reused: boolean; external: boolean }): MobileInfraReadyState {
@@ -264,12 +277,14 @@ export function resolveMobileTarget(params: {
   systemPort?: number;
   /** Resolved from SQL MobileProjectConfiguration.packageName by the async caller. */
   sqlPackageName?: string;
+  /** The device is on the user's PC (local agent): no server AVD is needed. */
+  deviceSerial?: string;
 }): ResolvedMobileTarget {
   const appProfileDefaults = resolveAppProfileDefaults(params.appSlug);
-  const avdName = params.avdName?.trim() || config.integrations.android?.avdName;
+  const avdName = params.avdName?.trim() || config.integrations.android?.avdName || (params.deviceSerial?.trim() ? "" : undefined);
   const requestApkPath = params.apkPath?.trim() || undefined;
   const envApkPath = config.integrations.android?.apkPath;
-  if (!avdName) {
+  if (avdName === undefined) {
     throw new Error(
       "Missing Android AVD name. Provide avdName in request payload or configure ANDROID_AVD_NAME."
     );
@@ -296,10 +311,12 @@ export function resolveMobileTarget(params: {
  * is already up instead of re-booting per scenario.
  */
 export async function ensureMobileInfra(
-  target: Pick<ResolvedMobileTarget, "avdName" | "headless" | "bootTimeoutMs" | "appiumPort" | "systemPort">,
+  target: Pick<ResolvedMobileTarget, "avdName" | "headless" | "bootTimeoutMs" | "appiumPort" | "systemPort">
+    & Partial<Pick<ResolvedMobileTarget, "apkPath" | "appPackage" | "appActivity">>,
   onLog: (line: string) => void,
-  context?: { runId?: string; traceAppiumChunk?: AppiumTraceChunkHandler },
+  context?: { runId?: string; traceAppiumChunk?: AppiumTraceChunkHandler; device?: AgentDevice; appSlug?: string },
 ): Promise<MobileInfraReadyState> {
+  if (context?.device) return prepareAgentDevice(context.device, target, onLog, context.appSlug);
   const runId = context?.runId ?? "n/a";
   const emulatorStatus = getEmulatorStatus();
   let ownership = determineEmulatorOwnership("already_running");
@@ -357,6 +374,127 @@ export async function ensureMobileInfra(
     `[mobile:infra] emulator status=ready runId=${runId} deviceId=${resolvedDeviceId ?? "unknown"} emulatorStartedByRunner=${readyState.emulatorStartedByRunner} ownership=${readyState.ownership} reason=${readyState.ownershipReason} trackedExternal=${emulatorOwnership.external}`,
   );
   return readyState;
+}
+
+/**
+ * The user's own emulator or phone, reached through the local agent: nothing to boot or
+ * start here (the user opened it). Checks the device answers and installs the project APK
+ * when the device lacks this exact build.
+ */
+async function prepareAgentDevice(
+  device: AgentDevice,
+  target: Partial<Pick<ResolvedMobileTarget, "apkPath" | "appPackage" | "appActivity">>,
+  onLog: (line: string) => void,
+  appSlug?: string,
+): Promise<MobileInfraReadyState> {
+  const probe = await runAdbFn(device.adb.adbPath, adbArgs(device.adb, ["shell", "echo", "adb_ok"]), 15_000);
+  if (probe.exitCode !== 0 || !probe.stdout.includes("adb_ok")) {
+    throw new Error(`mobile_adb_unhealthy: stage=shell deviceId=${device.serial} reason=${(probe.stderr || probe.stdout).trim().slice(0, 200) || "sin respuesta"}`);
+  }
+
+  // The user's device may not have the app yet: without an APK in the request, the project's
+  // own APK (stored on the server) is what gets installed.
+  if (!target.apkPath && appSlug) {
+    const projectApk = await projectApkPathFn(appSlug);
+    if (projectApk) {
+      onLog(`[mobile:infra] apk source=project appSlug=${appSlug}`);
+      target = { ...target, apkPath: projectApk };
+    }
+  }
+
+  let installedApp: MobileInfraReadyState["installedApp"];
+  if (target.apkPath) {
+    try {
+      const manifest = await readApkManifest(target.apkPath);
+      if (target.appPackage && target.appPackage !== manifest.packageName) {
+        onLog(`[mobile:infra] el APK es ${manifest.packageName}, no ${target.appPackage}: se usa el del APK`);
+      }
+      const outcome = await ensureApkInstalledFn(
+        device.adb,
+        { apkPath: target.apkPath, packageName: manifest.packageName, versionCode: manifest.versionCode },
+        { log: onLog, exec: runAdbFn },
+      );
+      onLog(`[mobile:infra] apk action=${outcome.action} package=${manifest.packageName} deviceId=${device.serial}`);
+      installedApp = {
+        appPackage: manifest.packageName,
+        appActivity: target.appPackage === manifest.packageName ? target.appActivity ?? manifest.mainActivity : manifest.mainActivity,
+      };
+    } catch (err) {
+      throw new Error(`mobile_app_installation_not_completed: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  } else if (target.appPackage) {
+    // Without an APK the app must already be on the device.
+    installedApp = { appPackage: target.appPackage, appActivity: target.appActivity };
+  }
+
+  onLog(`[mobile:infra] device status=ready where=agent agentId=${device.agentId} deviceId=${device.serial} appium=${device.appium ? "tunnel" : "none"}`);
+  return {
+    deviceId: device.serial,
+    emulatorStartedByRunner: false,
+    ownership: "external_reused",
+    ownershipReason: "already_running_reused",
+    ...(installedApp ? { installedApp } : {}),
+  };
+}
+
+async function projectApkPath(appSlug: string): Promise<string | undefined> {
+  try {
+    const apkPath = (await getProjectConfigurationBySlug(appSlug))?.mobile?.apkPath?.trim();
+    return apkPath && fs.existsSync(apkPath) ? apkPath : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+let projectApkPathFn: (appSlug: string) => Promise<string | undefined> = projectApkPath;
+
+export function __setProjectApkPathForTesting(fn: (appSlug: string) => Promise<string | undefined>): void {
+  projectApkPathFn = fn;
+}
+
+export function __resetProjectApkPathForTesting(): void {
+  projectApkPathFn = projectApkPath;
+}
+
+let runAdbFn: AdbExec = runAdb;
+let ensureApkInstalledFn: typeof ensureApkInstalled = ensureApkInstalled;
+export function __setAgentDeviceAdbForTesting(exec: AdbExec, install: typeof ensureApkInstalled = ensureApkInstalled): void {
+  runAdbFn = exec;
+  ensureApkInstalledFn = install;
+}
+export function __resetAgentDeviceAdbForTesting(): void {
+  runAdbFn = runAdb;
+  ensureApkInstalledFn = ensureApkInstalled;
+}
+
+/**
+ * Opens the device the user picked on their own PC for one job, or nothing when the job
+ * runs on the server's emulator. `appium` = the job drives the app (execution, route learning).
+ */
+export async function openJobDevice(
+  params: { localAgentId?: string; deviceSerial?: string },
+  options: { appium: boolean; onLog: (line: string) => void },
+): Promise<AgentDevice | undefined> {
+  const agentId = params.localAgentId?.trim();
+  const serial = params.deviceSerial?.trim();
+  if (!agentId && !serial) return undefined;
+  if (!agentId || !serial) {
+    throw new Error("mobile_app_configuration_missing: el dispositivo del equipo del usuario necesita agente y serial");
+  }
+  try {
+    return await openAgentDeviceFn({ agentId, serial, appium: options.appium, log: options.onLog });
+  } catch (err) {
+    // A reason code the runners already treat as an infrastructure block (nothing functional ran).
+    throw new Error(`mobile_agent_device_unavailable: ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
+
+let openAgentDeviceFn: typeof openAgentDevice = openAgentDevice;
+export function __setOpenAgentDeviceForTesting(fn: typeof openAgentDevice): void {
+  openAgentDeviceFn = fn;
+}
+export function __resetOpenAgentDeviceForTesting(): void {
+  openAgentDeviceFn = openAgentDevice;
 }
 
 function delay(ms: number): Promise<void> {
@@ -652,11 +790,13 @@ async function captureNavigationFailureDiagnostics(
   }
 
   async function createSessionWithControlledRetry(
-    opts: Pick<RunOneScenarioOptions, "runId" | "evidenceScenarioId" | "appiumPort" | "apkPath" | "appPackage" | "appActivity" | "deviceId" | "systemPort" | "emulatorStartedByRunner">,
+    opts: Pick<RunOneScenarioOptions, "runId" | "evidenceScenarioId" | "appiumPort" | "apkPath" | "appPackage" | "appActivity" | "deviceId" | "systemPort" | "emulatorStartedByRunner" | "appiumServer">,
     onLog: (line: string) => void,
   ): Promise<{ browser: WebdriverIO.Browser; lockKey: string; lockOwner: string }> {
-    const appiumHost = process.env.APPIUM_SERVER_HOST?.trim() || "127.0.0.1";
-    const emulatorDeviceId = opts.deviceId || getEmulatorStatus().deviceId || `${appiumHost}:${opts.appiumPort}`;
+    const remote = opts.appiumServer;
+    const appiumHost = remote?.host ?? (process.env.APPIUM_SERVER_HOST?.trim() || "127.0.0.1");
+    const appiumPort = remote?.port ?? opts.appiumPort;
+    const emulatorDeviceId = opts.deviceId || (remote ? undefined : getEmulatorStatus().deviceId) || `${appiumHost}:${appiumPort}`;
     const owner = `${opts.runId}:${opts.evidenceScenarioId}`;
 
     onLog(`[mobile:session] acquiring exclusive session lock deviceId=${emulatorDeviceId} owner=${owner}`);
@@ -667,10 +807,11 @@ async function captureNavigationFailureDiagnostics(
       deviceId: emulatorDeviceId,
       systemPort: opts.systemPort,
       appiumHost,
-      appiumPort: opts.appiumPort,
+      appiumPort,
       factory: () =>
         createSessionFn({
-          appiumPort: opts.appiumPort,
+          appiumPort,
+          ...(remote ? { appiumHost } : {}),
           apkPath: opts.apkPath,
           appPackage: opts.appPackage,
           appActivity: opts.appActivity,
@@ -680,6 +821,13 @@ async function captureNavigationFailureDiagnostics(
         }),
       emulatorStartedByRunner: opts.emulatorStartedByRunner,
       canRetry: async () => {
+        if (remote) {
+          // The user's PC: the server's emulator/Appium singletons say nothing about it.
+          const health = await probeAppiumHealth(appiumPort, 3000, appiumHost);
+          return health.ready
+            ? { allowed: true, reason: "infra_healthy" }
+            : { allowed: false, reason: `infra_unhealthy agentAppium=${health.error ?? "not_ready"}` };
+        }
         const appiumStatus = getAppiumStatus();
         const emulatorStatus = getEmulatorStatus();
         const appiumReady = appiumStatus.ready === true;
@@ -729,6 +877,8 @@ function normalizeSignalToken(value: string): string {
 
 export type RunOneScenarioOptions = {
   appiumPort: number;
+  /** Appium on the user's PC (agent tunnel); absent = the server's Appium. */
+  appiumServer?: { host: string; port: number };
   systemPort: number;
   deviceId?: string;
   emulatorStartedByRunner?: boolean;
@@ -748,6 +898,8 @@ export type RunOneScenarioOptions = {
   dataOverrides?: Record<number, string>;
   /** Step-level requirement refs from the scenario, to propagate into runtime transitions. */
   stepRequirementRefs?: Array<{ stepIndex: number; requirementIds: string[] }>;
+  serviceBindings?: RuntimeServiceBinding[];
+  serviceRun?: { id: string; startedAt: string };
 };
 
 export type RunOneScenarioResult = {
@@ -819,6 +971,7 @@ export async function runOneScenario(
     {
       runId: opts.runId,
       appiumPort: opts.appiumPort,
+      appiumServer: opts.appiumServer,
       systemPort: opts.systemPort,
       deviceId: opts.deviceId,
       emulatorStartedByRunner: opts.emulatorStartedByRunner,
@@ -958,6 +1111,8 @@ export async function runOneScenario(
         // Lets an OTP step find the control that sent the code and see whether a later step
         // already drives the next validation cycle.
         steps: opts.steps,
+        serviceBindings: opts.serviceBindings,
+        serviceRun: opts.serviceRun,
       });
       if (result.status === "failed") {
         result.reasonCode = mapMobileStepFailureReasonCode(result.errorMessage ?? "");
@@ -1332,6 +1487,7 @@ export async function startMobileTestRunJob(jobId: string): Promise<void> {
   jobStore.update(jobId, { status: "running", startedAt: new Date().toISOString() });
   onLog(`[mobile:run] started runId=${jobId} scenarios=1 appSlug=${params.appSlug ?? "mobile"}`);
 
+  let device: AgentDevice | undefined;
   try {
     let target: ResolvedMobileTarget;
     try {
@@ -1378,9 +1534,11 @@ export async function startMobileTestRunJob(jobId: string): Promise<void> {
       return;
     }
 
+    device = await openJobDevice(params, { appium: true, onLog });
     const infraState = await ensureMobileInfra(target, onLog, {
       runId: jobId,
       traceAppiumChunk: logger.traceAppiumChunk,
+      device,
     });
 
     // Use the jobId as the evidence runId so the consolidated docx lands under
@@ -1396,12 +1554,13 @@ export async function startMobileTestRunJob(jobId: string): Promise<void> {
     const { passed, failed, artifactsDir } = await runOneScenario(
       {
         appiumPort: target.appiumPort,
+        appiumServer: device?.appium,
         systemPort: target.systemPort,
         deviceId: infraState.deviceId,
         emulatorStartedByRunner: infraState.emulatorStartedByRunner,
-        apkPath: target.apkPath,
-        appPackage: target.appPackage,
-        appActivity: target.appActivity,
+        apkPath: infraState.installedApp ? undefined : target.apkPath,
+        appPackage: infraState.installedApp?.appPackage ?? target.appPackage,
+        appActivity: infraState.installedApp ? infraState.installedApp.appActivity : target.appActivity,
         steps: stepsToRun,
         evidenceScenarioId: "mobile-test",
         evidenceScenarioTitle: "Mobile test run",
@@ -1439,6 +1598,7 @@ export async function startMobileTestRunJob(jobId: string): Promise<void> {
       errorMessage: message
     });
   } finally {
+    await device?.close().catch(() => undefined);
     logger.flush();
   }
 }

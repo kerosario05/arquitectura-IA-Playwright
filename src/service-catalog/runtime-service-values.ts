@@ -38,6 +38,13 @@ export type ResolveServiceValueOptions = {
    * env is the fallback (the promoted spec's only source).
    */
   readValue?: (valueKey: string) => string | undefined;
+  /**
+   * Runs inside the long-lived server (mobile) are not their own process: they pass when the
+   * run started, so "fresh" means fresh for THIS run, and a scope so two runs never share a
+   * cached code.
+   */
+  generatedAfter?: string;
+  cacheScope?: string;
 };
 
 /** Only tokens generated after this run started count as fresh (latest mode). */
@@ -114,14 +121,14 @@ export async function resolveServiceBoundValue(
   // A segment field (digit N of a code recorded as separate fields) shares its group's value
   // and takes only its own character; the group's first field fetches a fresh value.
   if (binding.segment) {
-    const full = await resolveCached(binding, `segment:${binding.segment.group.trim().toLowerCase()}`, binding.segment.position > 1, env, options.readValue);
+    const full = await resolveCached(binding, `${options.cacheScope ?? ""}segment:${binding.segment.group.trim().toLowerCase()}`, binding.segment.position > 1, env, options.readValue, options.generatedAfter);
     const character = Array.from(full)[binding.segment.position - 1];
     if (character === undefined) {
       throw new Error(`service_value_unresolved: valueKey=${binding.valueKey} service=${binding.serviceKey} reason=segment_out_of_range: the value has ${Array.from(full).length} characters`);
     }
     return character;
   }
-  return resolveCached(binding, binding.valueKey.trim().toLowerCase(), (options.segmentPosition ?? 0) > 1, env, options.readValue);
+  return resolveCached(binding, `${options.cacheScope ?? ""}${binding.valueKey.trim().toLowerCase()}`, (options.segmentPosition ?? 0) > 1, env, options.readValue, options.generatedAfter);
 }
 
 function resolveCached(
@@ -130,6 +137,7 @@ function resolveCached(
   reuse: boolean,
   env: NodeJS.ProcessEnv,
   readValue?: (valueKey: string) => string | undefined,
+  generatedAfter: string = RUN_STARTED_AT,
 ): Promise<string> {
   const cached = reuse ? cache.get(cacheKey) : undefined;
   if (cached) return cached;
@@ -139,7 +147,7 @@ function resolveCached(
     try {
       const params = resolveBindingParams(binding.params, runValue(env, readValue));
       const result = await getServiceProvider(binding.serviceKey).resolve(
-        { projectSlug: binding.projectSlug, settings: binding.settings, generatedAfter: RUN_STARTED_AT },
+        { projectSlug: binding.projectSlug, settings: binding.settings, generatedAfter },
         params,
       );
       const facts = Object.entries(result.meta).map(([key, value]) => `${key}=${value}`).join(" ");
