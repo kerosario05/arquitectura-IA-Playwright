@@ -1,0 +1,73 @@
+{
+  "recordingId": "16221988-df91-4e91-b892-bc53b7cde5db",
+  "projectSlug": "portal-comercial-dev",
+  "appSlug": "portal-comercial-dev",
+  "platform": "web",
+  "baseUrl": "https://next.portalcomercial.dev.bsc.com.do/",
+  "label": "Regresion",
+  "recordingGoal": {
+    "declaredGoal": "Regresion",
+    "normalizedGoal": "Regresion",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-11-07T23:41:38.414Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 3051,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "fingerprint": "",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/login",
+      "pageKey": "tab-1",
+      "seq": 0
+    },
+    {
+      "t": 4467,
+      "kind": "navigate",
+      "screenKey": "15ce316eba2d",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/login",
+      "pageKey": "tab-1",
+      "seq": 1
+    },
+    {
+      "t": 4500,
+      "kind": "navigate",
+      "screenKey": "15ce316eba2d",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/login",
+      "pageKey": "tab-1",
+      "seq": 2
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "15ce316eba2d",
+      "title": "15ce316eba2d",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://next.portalcomercial.dev.bsc.com.do/login",
+      "firstSeenAt": 4099,
+      "controls": [],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-11-07T23:41:43.665Z",
+  "durationMs": 5251
+}
