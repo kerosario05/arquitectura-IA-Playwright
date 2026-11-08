@@ -1,3 +1,6 @@
+import os from "node:os";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { parseJiraWorkflowStep, type JiraWorkflowOperation } from "./jira-workflow";
 import type { Locator, Page } from "@playwright/test";
 import { settleJiraAction } from "./jira-action-settlement";
@@ -807,7 +810,8 @@ export async function selectJiraObservedOption(page: Page, field: Locator, value
     buttonType: element.tagName.toLowerCase() === "button" ? (element as HTMLButtonElement).type : "none",
     selectionPrompt: /select|seleccion|seleccione|choose|pick/.test(`${element.getAttribute("aria-label") ?? ""} ${(element as HTMLElement).innerText.trim()}`.toLocaleLowerCase()) }));
   console.log(`[jira-selection] opening observed field tag=${fieldKind.tag} role=${fieldKind.role} hasPopup=${fieldKind.hasPopup} expanded=${fieldKind.expanded} buttonType=${fieldKind.buttonType} selectionPrompt=${fieldKind.selectionPrompt} idPresent=${fieldKind.hasId} testIdPresent=${fieldKind.hasTestId}`);
-  const explicitPopup = Boolean(`${await field.getAttribute("aria-controls") ?? ""} ${await field.getAttribute("aria-owns") ?? ""}`.trim());
+  const knownPopupRefs = `${await field.getAttribute("aria-controls", { timeout: 1500 }).catch(() => null) ?? ""} ${await field.getAttribute("aria-owns", { timeout: 1500 }).catch(() => null) ?? ""}`.trim();
+  const explicitPopup = Boolean(knownPopupRefs);
   const visibleBeforeOpen = await page.evaluateHandle(() => new Set(Array.from(document.querySelectorAll("body *")).filter(element => {
     const style = window.getComputedStyle(element);
     const rect = element.getBoundingClientRect();
@@ -815,11 +819,13 @@ export async function selectJiraObservedOption(page: Page, field: Locator, value
   })));
   try {
   try { await field.click(); } catch { throw new Error("JIRA_SELECTION_FIELD_OPEN_FAILED"); }
-  const optionRoot = await jiraOptionSearchRoot(page, field);
+  const optionRoot = await jiraOptionSearchRoot(page, field, knownPopupRefs);
   const popupCounts = { listboxes: await page.getByRole("listbox").count(), options: await page.getByRole("option").count(), menus: await page.getByRole("menu").count() };
   console.log(`[jira-selection] opened controls=listboxes:${popupCounts.listboxes},options:${popupCounts.options},menus:${popupCounts.menus}`);
   const deadline = Date.now() + 30000;
   let aiOptionAttempted = false;
+  let searchTypeAttempts = 0;
+  let searchTypedAt = 0;
   while (Date.now() < deadline) {
     const candidates = await optionRoot.locator("*").evaluateAll((elements, { expected, visibleBeforeOpen, explicitPopup }) => {
       const found: Array<{ id?: string; testId?: string; role?: string; label?: string; tag: string; text: string; key: string }> = [];
@@ -899,6 +905,22 @@ export async function selectJiraObservedOption(page: Page, field: Locator, value
       if (!jiraSelectionDisplayConfirms(await readJiraSelectionDisplay(field), value)) throw new Error("JIRA_SELECTION_STATE_UNCONFIRMED");
       return;
     }
+    // Search-as-you-type selectors ("Escribe para buscar…") list nothing until text is entered. When the
+    // opened control left focus in an editable (non-password) input and no option is listed, type the
+    // requested value there; if that finds nothing, retry once with its leading words.
+    if (candidates.length === 0 && searchTypeAttempts < 2 && (searchTypeAttempts === 0 || Date.now() - searchTypedAt > 3000)) {
+      const editableFocused = await page.evaluate(`(() => { const a = document.activeElement; return !!a && a.type !== "password" && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.isContentEditable === true); })()`).catch(() => false);
+      if (editableFocused) {
+        const searchText = searchTypeAttempts === 0 ? value : value.replace(/\s*\([^)]*\)\s*$/, "").split(/\s+/).slice(0, 3).join(" ");
+        await page.keyboard.press("Control+A").catch(() => undefined);
+        await page.keyboard.type(searchText, { delay: 25 });
+        searchTypeAttempts += 1;
+        searchTypedAt = Date.now();
+        console.log(`[jira-selection] search_typed attempt=${searchTypeAttempts}`);
+        await page.waitForTimeout(800);
+        continue;
+      }
+    }
     if (candidates.length === 0 && !aiOptionAttempted) {
       aiOptionAttempted = true;
       const snapshot = await scanCurrentPage(page);
@@ -951,6 +973,12 @@ export function jiraTargetFailure(result: TargetResolutionResult): JiraTargetFai
 }
 
 /** Result-field spread for the runner: only JiraTargetFailureError contributes; any other error yields {}. */
+/** Background 5xx responses that did not fail a completed step; the runner reports them with the case result. */
+const toleratedApplicationErrors: Array<{ stepIndex: number; status: number; method: string; path: string }> = [];
+export function takeToleratedApplicationErrors(): Array<{ stepIndex: number; status: number; method: string; path: string }> {
+  return toleratedApplicationErrors.splice(0);
+}
+
 export function jiraTargetDiagnosticField(error: unknown): { targetDiagnostic?: JiraTargetFailureDiagnostic } {
   return error instanceof JiraTargetFailureError ? { targetDiagnostic: error.diagnostic } : {};
 }
@@ -1333,6 +1361,16 @@ export async function resolveJiraStepTarget(page: Page, step: ExecutionPlanStep,
       return { status: "resolved", target, locator: native, locatorStrategy: "role", confidence: 1,
         matchReason: "unique_native_select", candidateText: target, candidates: [] };
     }
+    // A required field's label often renders a "*" marker (CSS), so its accessible name is "Label *":
+    // accept exactly that one trailing marker, still a unique visible combobox.
+    const requiredMarked = page.getByRole("combobox", { name: new RegExp(`^\\s*${target.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\*?\\s*$`, "i") });
+    if (await requiredMarked.count() === 1 && await requiredMarked.isVisible() && await requiredMarked.isEnabled() && await inRequestedRow(requiredMarked)) {
+      // Pin by id when there is one: a name-based locator can stop resolving once the field shows its value.
+      const markedId = await requiredMarked.getAttribute("id", { timeout: 1500 }).catch(() => null);
+      const pinned = markedId ? page.locator(`[id=${JSON.stringify(markedId)}]`) : requiredMarked;
+      return { status: "resolved", target, locator: pinned, locatorStrategy: markedId ? "css" : "role", confidence: 1,
+        matchReason: "unique_combobox_with_required_marker", candidateText: target, candidates: [] };
+    }
     const range = page.getByRole("slider", { name: new RegExp(target.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") });
     if (await range.count() === 1 && await range.isVisible() && await range.isEnabled() && await inRequestedRow(range)) {
       return { status: "resolved", target, locator: range, locatorStrategy: "role", confidence: 1,
@@ -1370,7 +1408,14 @@ export async function resolveJiraStepTarget(page: Page, step: ExecutionPlanStep,
           matchReason: "jira_ai_selected_unique_observed_selection_dom_candidate", candidateText: selected.label, candidateId: selected.id, candidates: [] };
       }
     }
-    return { status: "not_found", target, confidence: 0, matchReason: "jira_observed_selection_field_not_found", candidateText: target, candidates: [] };
+    // Counts only (no labels/values): tells "absent" from "duplicated" or "not visible" in the diagnostic.
+    const probe = async (locator: Locator) => Math.min(99, await locator.count().catch(() => 0));
+    const loose = new RegExp(target.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+    const exactCount = await probe(page.getByRole("combobox", { name: target, exact: true }));
+    const looseCount = await probe(page.getByRole("combobox", { name: loose }));
+    const visibleCount = await probe(page.getByRole("combobox", { name: loose }).and(page.locator(":visible")));
+    const labelCount = await probe(page.getByLabel(loose));
+    return { status: "not_found", target, confidence: 0, matchReason: `sel_nf_e${exactCount}_l${looseCount}_v${visibleCount}_b${labelCount}`, candidateText: target, candidates: [] };
   }
   return resolveJiraActionTargetWithAi(page, snapshot, target, semanticContext);
 }
@@ -1936,7 +1981,36 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
       if (step.action === "select" && value !== undefined && result.status === "resolved"
         && result.matchReason === JIRA_TEXT_INPUT_FOR_SELECT_REASON) step.action = "fill";
       previousActionWasClick = false;
-      if (result.status !== "resolved" || !result.locator) throw jiraTargetFailure(result);
+      if (result.status !== "resolved" || !result.locator) {
+        await fs.mkdir(os.tmpdir(), { recursive: true }).catch(() => undefined);
+        await fs.writeFile(path.join(os.tmpdir(), "jira-target-debug-reached.txt"), `${new Date().toISOString()} action=${step.action} status=${result.status} reason=${result.matchReason}`).catch(() => undefined);
+        // Local-only debug dump (never sent to the job log): which controls the page exposed when the target was missing.
+        // Evaluated from a string: tsx would inject a `__name` helper into a serialized function.
+        try {
+          const dump = await page.evaluate(`(() => {
+            const rect = el => { const r = el.getBoundingClientRect(); return Math.round(r.left) + "," + Math.round(r.top) + "," + Math.round(r.width) + "x" + Math.round(r.height); };
+            const controls = Array.from(document.querySelectorAll("select,[role=combobox],[role=listbox]")).slice(0, 60).map(el => ({
+              tag: el.tagName.toLowerCase(), role: el.getAttribute("role") || "", id: el.id, name: el.getAttribute("aria-label") || "",
+              labelledBy: el.getAttribute("aria-labelledby") || "", rect: rect(el), visible: el.offsetParent !== null,
+              near: ((el.closest("div") && el.closest("div").parentElement ? el.closest("div").parentElement.innerText : "") || "").trim().replace(/\\s+/g, " ").slice(0, 60) }));
+            const wanted = ${JSON.stringify(target.toLowerCase().replace(/\s+/g, " "))};
+            const labels = Array.from(document.querySelectorAll("body *")).filter(el => el.children.length === 0 && (el.textContent || "").trim().toLowerCase().replace(/\\s+/g, " ").includes(wanted))
+              .slice(0, 10).map(el => ({ tag: el.tagName.toLowerCase(), text: (el.textContent || "").trim().slice(0, 40), rect: rect(el) }));
+            const holder = (() => { const l = Array.from(document.querySelectorAll("label")).find(x => (x.textContent || "").trim().toLowerCase().replace(/\\s+/g, " ") === wanted); let n = l; for (let i = 0; n && i < 3; i += 1) n = n.parentElement; return n ? n.outerHTML.replace(/\\s+/g, " ").slice(0, 3000) : ""; })();
+            return { controls, labels, holder };
+          })()`);
+          const dir = os.tmpdir();
+          await fs.mkdir(dir, { recursive: true });
+          await fs.writeFile(path.join(dir, "jira-target-debug.json"), JSON.stringify({ at: new Date().toISOString(), action: step.action, target,
+            status: result.status, matchReason: result.matchReason, ...(dump as object) }, null, 2));
+        } catch (debugError) {
+          console.log(`[jira-target-debug] failed ${debugError instanceof Error ? debugError.message.split("\n")[0] : "unknown"}`);
+          await fs.mkdir(os.tmpdir(), { recursive: true }).catch(() => undefined);
+          await fs.writeFile(path.join(os.tmpdir(), "jira-target-debug-error.txt"),
+            `${new Date().toISOString()} ${debugError instanceof Error ? debugError.stack ?? debugError.message : String(debugError)}`).catch(() => undefined);
+        }
+        throw jiraTargetFailure(result);
+      }
       const locator = result.locator;
       let durable: PlanTarget;
       try {
@@ -2058,6 +2132,14 @@ export function createJiraPlaywrightPort(page: Page, baseUrl: string, authFlow?:
         lastClickLoadingObservations = [...new Set([...lastClickLoadingObservations, ...currentlyVisibleLoading])];
       }
       return durable;
+      }, undefined, {
+        // A completed step is not failed by a background 5xx; it is reported instead (the next step still has to find
+        // its own target). JIRA_STRICT_APPLICATION_5XX=true restores the strict behaviour.
+        tolerateServerError: process.env.JIRA_STRICT_APPLICATION_5XX !== "true",
+        onToleratedServerError: response => {
+          console.log(`[jira-application-5xx-tolerated] step=${step.index} status=${response.status} method=${response.method} path=${response.path}`);
+          toleratedApplicationErrors.push({ stepIndex: step.index ?? 0, status: response.status ?? 0, method: response.method, path: response.path });
+        },
       });
     },
     async assertAbsent(target) { await assertJiraSpecAbsentText(page,target); return {absent:true}; },

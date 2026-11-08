@@ -2,8 +2,13 @@ import { createHash } from "node:crypto";
 import type { Locator, Page } from "@playwright/test";
 
 /** Honor the popup relation observed on the field when the app supplies one. */
-export async function jiraOptionSearchRoot(page: Page, field: Locator): Promise<Locator> {
-  const ids = `${await field.getAttribute("aria-controls") ?? ""} ${await field.getAttribute("aria-owns") ?? ""}`.trim().split(/\s+/).filter(Boolean);
+export async function jiraOptionSearchRoot(page: Page, field: Locator, knownRefs = ""): Promise<Locator> {
+  // The field can be re-rendered (and its locator stop resolving) once the popup opens; a plain
+  // getAttribute would then wait the full 30 s. Read with a short bound and fall back to what was
+  // observed before the click.
+  const read = (name: string) => field.getAttribute(name, { timeout: 1500 }).catch(() => null);
+  const fresh = `${await read("aria-controls") ?? ""} ${await read("aria-owns") ?? ""}`.trim();
+  const ids = (fresh || knownRefs).trim().split(/\s+/).filter(Boolean);
   return ids.length ? page.locator([...new Set(ids)].map(id => `[id=${JSON.stringify(id)}]`).join(",")) : page.locator("body");
 }
 

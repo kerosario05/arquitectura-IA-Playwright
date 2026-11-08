@@ -10,7 +10,13 @@ export class JiraActionServerError extends Error {
 }
 
 /** Wait for application requests started by this action, never global networkidle. */
-export async function settleJiraAction<T>(page: Page, action: () => Promise<T>, applicationUrl = page.url()): Promise<T> {
+export type JiraSettleOptions = {
+  /** Discovery only: an action that completed is not failed by a background 5xx; report it instead. Never set for generated specs. */
+  tolerateServerError?: boolean;
+  onToleratedServerError?: (response: ActionHttpObservation) => void;
+};
+
+export async function settleJiraAction<T>(page: Page, action: () => Promise<T>, applicationUrl = page.url(), options: JiraSettleOptions = {}): Promise<T> {
   // The owning Playwright scenario supplies the overall deadline. Teardown
   // closes the page; abort here on that real signal without another timer.
   ensureJiraDownloadObserver(page);
@@ -53,7 +59,10 @@ export async function settleJiraAction<T>(page: Page, action: () => Promise<T>, 
       ]);
     }
     const failed = findActionServerError(observations);
-    if (failed) throw new JiraActionServerError(failed);
+    if (failed) {
+      if (!options.tolerateServerError) throw new JiraActionServerError(failed);
+      options.onToleratedServerError?.(failed);
+    }
     return value;
   } finally {
     page.off("request", started);

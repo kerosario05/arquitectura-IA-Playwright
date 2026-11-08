@@ -4,7 +4,7 @@ import { EventEmitter } from "node:events";
 import { chromium, type Page, type Route } from "@playwright/test";
 import { settleJiraAction } from "./jira-action-settlement";
 import { assertJiraSpecVisibleText, clickJiraSpecTarget } from "./jira-spec-runtime";
-import { createJiraPlaywrightPort } from "./jira-semantic-executor";
+import { createJiraPlaywrightPort, takeToleratedApplicationErrors } from "./jira-semantic-executor";
 
 test("Jira waits for the action response before its assertion across two profiles, without another click", async () => {
   const browser = await chromium.launch({ headless: true });
@@ -81,7 +81,9 @@ test("HTTP policy preserves 4xx assertions, ignores foreign/static failures and 
   }
 });
 
-test("Jira Discovery and promoted click reject the same application 500 without another dispatch", async () => {
+test("Jira Discovery (strict mode) and promoted click reject the same application 500 without another dispatch", async () => {
+  const previousStrict = process.env.JIRA_STRICT_APPLICATION_5XX;
+  process.env.JIRA_STRICT_APPLICATION_5XX = "true";
   const browser = await chromium.launch({ headless: true });
   try {
     for (const origin of ["https://fixture-fenix.test", "https://fixture-inventory.test"]) {
@@ -99,5 +101,29 @@ test("Jira Discovery and promoted click reject the same application 500 without 
         await page.close();
       }
     }
-  } finally { await browser.close(); }
+  } finally {
+    if (previousStrict === undefined) delete process.env.JIRA_STRICT_APPLICATION_5XX; else process.env.JIRA_STRICT_APPLICATION_5XX = previousStrict;
+    await browser.close();
+  }
+});
+
+test("Jira Discovery by default completes a step when only a background request returned 5xx, and reports it", async () => {
+  const previousStrict = process.env.JIRA_STRICT_APPLICATION_5XX;
+  delete process.env.JIRA_STRICT_APPLICATION_5XX;
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const origin = "https://fixture-tolerant.test";
+    const page = await browser.newPage();
+    await page.route(`${origin}/**`, route => route.fulfill(route.request().url().endsWith("/next")
+      ? { status: 500, body: "Server failure" }
+      : { contentType: "text/html", body: `<button onclick="window.clicks=(window.clicks||0)+1;fetch('/next')">Continue</button>` }));
+    await page.goto(origin);
+    takeToleratedApplicationErrors();
+    await createJiraPlaywrightPort(page, origin).act({ index: 1, action: "click", description: 'Presionar "Continue"' }, "Continue");
+    assert.equal(await page.evaluate(() => Reflect.get(window, "clicks")), 1);
+    assert.deepEqual(takeToleratedApplicationErrors().map(item => `${item.status} ${item.path}`), ["500 /next"]);
+  } finally {
+    if (previousStrict === undefined) delete process.env.JIRA_STRICT_APPLICATION_5XX; else process.env.JIRA_STRICT_APPLICATION_5XX = previousStrict;
+    await browser.close();
+  }
 });

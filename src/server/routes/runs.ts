@@ -1404,7 +1404,17 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
         for (const requirement of requirements) {
           if (entries.some(entry => entry.key === requirement.key)) continue;
           const label = norm(requirement.label);
-          const source = entries.find(entry => entry.fieldLabel && norm(entry.fieldLabel) === label)
+          // Two fields can fold to the same label (only accents differ: company vs related-person identification).
+          // Among same-label entries take the one keyed nearest to this requirement's step, not simply the first.
+          const positionOf = (key: string) => Number(/^(?:jira_step_|jira_edit_[a-f0-9]+_)(\d+)$/i.exec(key)?.[1] ?? Number.NaN);
+          const sameLabel = entries.filter(entry => entry.fieldLabel && norm(entry.fieldLabel) === label);
+          const labelMatch = sameLabel.length > 1 && Number.isFinite(Number(requirement.stepIndex))
+            ? [...sameLabel].sort((a, b) => {
+              const distance = (entry: DataContextEntry) => { const position = positionOf(entry.key); return Number.isNaN(position) ? Number.MAX_SAFE_INTEGER : Math.abs(position - Number(requirement.stepIndex)); };
+              return distance(a) - distance(b);
+            })[0]
+            : sameLabel[0];
+          const source = labelMatch
             ?? entries.find(entry => !entry.fieldLabel && entry.key === `jira_step_${requirement.stepIndex}`)
             ?? entries.find(entry => !entry.fieldLabel && new RegExp(`^jira_edit_[a-f0-9]+_${requirement.stepIndex}$`).test(entry.key))
             ?? entries.find(entry => label && (norm(entry.key) === label || norm(entry.key).startsWith(`${label}_`)))

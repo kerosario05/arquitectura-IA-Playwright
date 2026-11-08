@@ -9,7 +9,7 @@ import { chromium, firefox, webkit } from "@playwright/test";
 import { jobStore } from "./job-store";
 import { config, requireTestRailConfig } from "../../config/env";
 import { loadAppConfig } from "../../automations/app-auto-resolver";
-import { discoverJiraScenario, createJiraPlaywrightPort, normalizeJiraScenarioForExecution, observeAuthStageSettled, JiraRequiredDataError, jiraScenarioHasAuthoredCredentialEntry, jiraTargetDiagnosticField, type JiraScenarioInput } from "../../jira/jira-semantic-executor";
+import { discoverJiraScenario, createJiraPlaywrightPort, normalizeJiraScenarioForExecution, observeAuthStageSettled, JiraRequiredDataError, jiraScenarioHasAuthoredCredentialEntry, jiraTargetDiagnosticField, takeToleratedApplicationErrors, type JiraScenarioInput } from "../../jira/jira-semantic-executor";
 import { completeObservedOtpStage } from "../../jira/jira-observed-otp";
 import { scanCurrentPage } from "../../explorer/page-scanner";
 import { hasJiraAuthGateData, mapJiraAuthTestData, resolveJiraAuthFlow } from "./jira-auth-flow-wiring";
@@ -309,6 +309,7 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
         }
         passed++;
         result = { caseId, scenarioId: caseId, status: "passed", automationReady: Boolean(specPath), promotionAllowed: Boolean(specPath), specPath,
+          ...(() => { const warnings = takeToleratedApplicationErrors(); return warnings.length ? { applicationHttpWarnings: warnings } : {}; })(),
           specGenerationStatus: specGenerationEnabledForRun ? "passed" : "skipped",
           specGenerationInvoked: specGenerationEnabledForRun,
           ...(specGenerationSkipReason ? { specGenerationReason: specGenerationSkipReason } : {}),
@@ -322,9 +323,15 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
         // proves its navigation may be stale. A generated assertion or missing
         // business step must not erase a route that Discovery previously proved.
         const code = error instanceof Error ? error.message.match(/^([A-Z][A-Z_]+)(?::[a-z_]+)?/)?.[1] ?? "JIRA_EXECUTION_FAILED" : "JIRA_EXECUTION_FAILED";
+        let failureDetail: string | undefined;
         if (code === "JIRA_EXECUTION_FAILED" && error instanceof Error) {
           // Unclassified failures lose their cause; keep the error class and the first message line (no fill values).
-          console.log(`[jira-semantic-unclassified] caseId=${caseId} step=${failedAtStep ?? "unknown"} error=${error.name} message=${error.message.split("\n")[0].replace(/fill\([^)]*\)/g, "fill(...)").slice(0, 200)}`);
+          const detail = error.message.split("\n")[0].replace(/fill\([^)]*\)/g, "fill(...)").slice(0, 200);
+          console.log(`[jira-semantic-unclassified] caseId=${caseId} step=${failedAtStep ?? "unknown"} error=${error.name} message=${detail}`);
+          // The child's console is not relayed to the job log; keep the cause in the local results.json only.
+          const frames = (error.stack ?? "").split("\n").filter(line => /^\s+at /.test(line)).slice(0, 6)
+            .map(line => line.trim().replace(/\(?[A-Za-z]:[\\/][^)]*[\\/](src[\\/][^)]+)\)?/, "($1)")).join(" <- ");
+          failureDetail = `${error.name}: ${detail} | ${frames}`;
         }
         const applicationHttpError = jiraApplicationHttpErrorDiagnostic(error);
         if (applicationHttpError) emit({ type: "application_http_error", caseId, failedAtStep,
@@ -345,7 +352,9 @@ export async function startJiraSemanticRun(jobId: string): Promise<void> {
         }
         evidenceScreenshotPath = fsSync.existsSync(screenshotPath) ? screenshotPath : undefined;
         result = { caseId, scenarioId: caseId, status: "failed", failedAtStep, failedReason: code, automationReady: false, promotionAllowed: false,
+          ...(() => { const warnings = takeToleratedApplicationErrors(); return warnings.length ? { applicationHttpWarnings: warnings } : {}; })(),
           ...(applicationHttpError ? { applicationHttpError } : {}),
+          ...(failureDetail ? { failureDetail } : {}),
           ...(error instanceof JiraSpecVerificationError ? { specVerificationCategory: error.category,
             specVerificationDiagnosticPath: error.diagnosticPath, specVerificationArtifactsDir: error.artifactsDir } : {}),
           ...(error instanceof JiraPromotionIndexError ? { promotionIndexDiagnostic: {
