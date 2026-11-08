@@ -1247,7 +1247,7 @@
           "event-16"
         ],
         "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
-        "renderedStep": "Ingresar \"00101123768\" en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"00101183077\" en \"Número de identificación\"",
         "valueKey": "numero_de_identificacion",
         "interactionId": "interaction-16",
         "technicalTargetRefs": [],
@@ -19952,7 +19952,7 @@
       "oracleReadiness": true,
       "reviewReadiness": true,
       "publicationContentReadiness": true,
-      "executionReadiness": false,
+      "executionReadiness": true,
       "publicationReadiness": true,
       "missingInputs": [],
       "datasetAuthorityMismatches": [],
@@ -20003,7 +20003,7 @@
         "semanticField": "Número de identificación",
         "valueRole": "action_input",
         "required": true,
-        "value": "00101123768",
+        "value": "00101183077",
         "source": "CURRENT_QA_EDIT",
         "resolved": true,
         "sensitive": false,
@@ -20014,7 +20014,7 @@
         "masked": false,
         "editable": true,
         "authority": "explicit_qa_edit",
-        "authorityValue": "00101123768",
+        "authorityValue": "00101183077",
         "datasetAuthorityMismatch": false
       },
       {
@@ -21194,7 +21194,7 @@
           "semanticField": "Número de identificación",
           "valueRole": "action_input",
           "required": true,
-          "value": "00101123768",
+          "value": "00101183077",
           "source": "CURRENT_QA_EDIT",
           "resolved": true,
           "sensitive": false,
@@ -21205,7 +21205,7 @@
           "masked": false,
           "editable": true,
           "authority": "explicit_qa_edit",
-          "authorityValue": "00101123768",
+          "authorityValue": "00101183077",
           "datasetAuthorityMismatch": false
         },
         {
@@ -22342,7 +22342,7 @@
       "resolvedValues": {
         "usuario": "radames",
         "contrasena": "Masteryi16.",
-        "numero_de_identificacion": "00101123768",
+        "numero_de_identificacion": "00101183077",
         "oficial_seleccion": "9J4WX JXU5Z5 WZW C5XXJP",
         "promotor_seleccion": "YP54JX NJ4WX WZUJPW WPUWU4W25W",
         "tipo_seleccion": "Celular",
