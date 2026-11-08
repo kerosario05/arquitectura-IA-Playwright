@@ -37469,34 +37469,64 @@
         "description": "Paso fallido:\nPaso 11: Depurar\n\nQué pasó:\nLa ejecución falló con código: click_no_causal_effect_detected\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
         "severity": "medium",
         "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
-        "jobId": "49137c94-bf9b-4e3e-a3d7-68f50e135dbe",
+        "jobId": "691cf425-245d-4647-9101-7829d930eb9d",
         "status": "pending_review",
         "scenarioId": "PREVIEW-002",
         "scenarioTitle": "Prestamos Personales Faciles",
         "title": "[Media] No se encontró \"Depurar\" (paso 11) — Prestamos Personales Faciles",
         "technicalContext": {
-          "reasonCode": "CLICK_NO_CAUSAL_EFFECT_DETECTED",
+          "reasonCode": "target_not_found",
           "discoveryStatus": "exploration_failed",
-          "failedAtStep": 11,
-          "failedTarget": "Depurar",
+          "failedAtStep": 104,
+          "failedTarget": "Firma manual",
           "expectedResult": "La aplicación carga su pantalla inicial",
-          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-11-04T23-36-28-755Z\\evidence",
-          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-11-04T23-36-28-755Z\\evidence\\step-10-snapshot.json",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-11-08T00-50-31-937Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-11-08T00-50-31-937Z\\evidence\\step-103-snapshot.json",
           "lastSuccessfulStep": {
-            "stepIndex": 10,
-            "action": "Ingresar \"28-04-2030\" en \"Fecha de expiración\"",
-            "target": "Fecha de expiración",
-            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-11-04T23-36-28-755Z\\evidence\\step-10-snapshot.json"
+            "stepIndex": 103,
+            "action": "Presionar \"Gestión Documental 9\"",
+            "target": "Gestión Documental 9",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-002\\2026-11-08T00-50-31-937Z\\evidence\\step-103-snapshot.json"
           },
           "testRailCaseId": 56967,
-          "testRailRunId": 5287
+          "testRailRunId": 5432
         },
         "createdAt": "2026-11-04T23:38:45.407Z",
-        "updatedAt": "2026-11-04T23:38:45.407Z"
+        "updatedAt": "2026-11-08T01:02:18.119Z"
+      },
+      {
+        "id": "1794099738120-yoxynlp",
+        "description": "Paso fallido:\nPaso 10: Depurar\n\nQué pasó:\nLa ejecución falló con código: click_no_causal_effect_detected\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "691cf425-245d-4647-9101-7829d930eb9d",
+        "status": "pending_review",
+        "scenarioId": "PREVIEW-003",
+        "scenarioTitle": "Crear Certificado",
+        "title": "[Media] No se encontró \"Depurar\" (paso 10) — Crear Certificado",
+        "technicalContext": {
+          "reasonCode": "CLICK_NO_CAUSAL_EFFECT_DETECTED",
+          "discoveryStatus": "exploration_failed",
+          "failedAtStep": 10,
+          "failedTarget": "Depurar",
+          "expectedResult": "La aplicación carga su pantalla inicial",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-11-08T00-59-17-109Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-11-08T00-59-17-109Z\\evidence\\step-9-snapshot.json",
+          "lastSuccessfulStep": {
+            "stepIndex": 9,
+            "action": "Seleccionar \"YP54JX NJ4WX WZUJPW WPUWU4W25W\" en \"Promotor\"",
+            "target": "Promotor",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-003\\2026-11-08T00-59-17-109Z\\evidence\\step-9-snapshot.json"
+          },
+          "testRailCaseId": 57178,
+          "testRailRunId": 5432
+        },
+        "createdAt": "2026-11-08T01:02:18.120Z",
+        "updatedAt": "2026-11-08T01:02:18.120Z"
       }
     ],
     "createdAt": "2026-11-04T23:38:45.320Z",
-    "updatedAt": "2026-11-04T23:38:45.407Z"
+    "updatedAt": "2026-11-08T01:02:18.120Z"
   },
   {
     "id": "1793881926585-1hzije8",
