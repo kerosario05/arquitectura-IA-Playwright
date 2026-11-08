@@ -288,6 +288,8 @@ class JobStore {
     const job = this.jobs.get(id);
     if (!job) return;
     job.logs.push(line);
+    // Opt-in mirror for diagnosing a live job from the server console.
+    if (process.env.JOB_LOGS_TO_STDOUT === "true") console.log(`[job ${id.slice(0, 8)}] ${line}`);
     job.emitter.emit("log", line);
   }
 

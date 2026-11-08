@@ -21,7 +21,7 @@ import { normalizeSemanticText } from "../semantic-text-normalization";
 import { resolveSelectionOption } from "../../discovery/selection-option-policy";
 import { evaluatePromotedScenarioOutcome, type ScenarioOutcomeCheck } from "./promoted-scenario-outcome";
 import { findSemanticTargetMatch, type SemanticMatchOptions } from "./semantic-target-matcher";
-import { attemptVirtualKeyboardPress, resolveActionTarget, resolveSequencedSiblingForRoleRef, resolveFillTarget, resolveSelectionSearchInput, recordedLocatorFactory, resolveRecordedStructuralOwner, verificationDigitPosition } from "../../discovery/target-resolver";
+import { attemptVirtualKeyboardPress, resolveActionTarget, resolveSequencedSiblingForRoleRef, resolveFillTarget, resolveSelectionSearchInput, isPlainStableIdLocator, recordedLocatorFactory, resolveRecordedStructuralOwner, verificationDigitPosition } from "../../discovery/target-resolver";
 import { hasCausalSelectionTransition, type InteractiveState } from "../../discovery/selection-state-verification";
 import { coerceToEditableFillTarget } from "../../discovery/editable-fill-target";
 import { settleDependentRequestsAfterFill } from "../../discovery/post-fill-settle";
@@ -219,7 +219,10 @@ async function capturePromotedSelectionStateProbe(
   // the same recorded control; counting refs as separate candidates falsely makes state opaque.
   if (resolvedActionLocator) {
     const before = await readPromotedInteractiveState(resolvedActionLocator);
-    const recordedOption = Boolean(optionRef && selectionActivationField?.trim());
+    // A certified role=option keeps its exact dispatched locator even when the recording
+    // named no owning field (react-select "el control grabado", job f44d48bf): the listbox
+    // closing on the same route is the only observable proof that the option was chosen.
+    const recordedOption = Boolean(optionRef);
     console.log(
       `[selection-runtime] phase=before_dispatch probeAvailable=${Boolean(before)} ` +
       `strategy=${recordedOption ? "recorded-selection-option" : "resolved-action-target"} ` +
@@ -3698,11 +3701,21 @@ export class PromotedSpecRuntime {
   private clickFeedbackProbe: (() => Promise<boolean>) | undefined;
 
   private async waitForPromotedUiStableBody(stepIndex: number, target: string): Promise<void> {
-    const stability = await waitForStablePageState(this.page, {
-      timeoutMs: this.config.stabilityTimeoutMs,
-      pollMs: 500,
-      stableForMs: 700
-    });
+    const options = { timeoutMs: this.config.stabilityTimeoutMs, pollMs: 500, stableForMs: 700 };
+    let stability = await waitForStablePageState(this.page, options);
+    // A loader that is still visible when the window ends is the app still working, not an
+    // unstable UI (job cb758288: "Cargando..." for ~10 s while the identity was validated).
+    // Keep waiting for a bounded grace while the screen keeps reading as loading.
+    let lastDetection = stability.transientDetections.at(-1);
+    if (!stability.finalStable && lastDetection?.transient) {
+      const graceMs = numberFromEnv("PROMOTED_RUNTIME_LOADING_GRACE_MS", 20000);
+      console.log(`[promoted-ui-stable] stepIndex=${stepIndex} phase=loading_grace reason=${lastDetection.reason ?? "unknown"} graceMs=${graceMs}`);
+      stability = await waitForStablePageState(this.page, { ...options, timeoutMs: graceMs });
+      lastDetection = stability.transientDetections.at(-1) ?? lastDetection;
+    }
+    if (!stability.finalStable && lastDetection?.transient) {
+      throw new Error(`UI not stable after step ${stepIndex} target="${target}" reason=${lastDetection.reason ?? "loading"}`);
+    }
     if (!stability.finalStable) {
       // The action's own outcome is verified elsewhere; background work (uploads, syncing rows)
       // can keep the page busy beyond the bound. Failing here would also make the callback re-click
@@ -3970,7 +3983,27 @@ export class PromotedSpecRuntime {
       console.log(`[promoted-click-structural] stepIndex=${options.stepIndex} rowCheckboxByState candidates=${total} stateChanging=${stateChanging.length}`);
       if (stateChanging.length === 1) rowCheckboxLocator = stateChanging[0];
     }
-    const semanticFallback = !resolution?.locator && !causalOptionResolution?.locator && !rowCheckboxLocator
+    // Duplicated stable id (job 035abfcc, step 19 #btn-continue): the app renders the certified
+    // id twice and hides one copy. Same rule Discovery applies to recorded refs: a plain id with
+    // exactly ONE visible, enabled copy names one control; 0 or >1 visible copies stay fatal.
+    let visibleIdLocator: ReturnType<Page["locator"]> | undefined;
+    if (!resolution?.locator
+      && !causalOptionResolution?.locator
+      && !rowCheckboxLocator
+      && /ambiguous|not_unique/i.test(structuralFailureReason ?? "")) {
+      const idCandidate = (options.structuralTarget?.locatorCandidates ?? [])
+        .find((candidate) => isPlainStableIdLocator(candidate as RecordedLocator));
+      const idLocator = idCandidate ? recordedLocatorFactory(this.page, idCandidate as RecordedLocator, true) : undefined;
+      const visibleCopies = idLocator?.filter({ visible: true });
+      if (visibleCopies
+        && await idLocator!.count().catch(() => 0) > 1
+        && await visibleCopies.count().catch(() => 0) === 1
+        && await visibleCopies.isEnabled().catch(() => false)) {
+        visibleIdLocator = visibleCopies;
+        console.log(`[recorded-target-visible-id] stepIndex=${options.stepIndex} strategy=promoted-structural originalMatchCount>1 visibleMatchCount=1`);
+      }
+    }
+    const semanticFallback = !resolution?.locator && !causalOptionResolution?.locator && !rowCheckboxLocator && !visibleIdLocator
       ? await resolveRecordedStructuralSemanticFallback(
         this.page,
         options.structuralTarget,
@@ -3981,17 +4014,19 @@ export class PromotedSpecRuntime {
       : undefined;
     // The recording saw ONE such control when this press was captured, but earlier presses of the same
     // named control already happened in this run and several are still live: take the next unused one.
-    const repeatedPressLocator = !resolution?.locator && !causalOptionResolution?.locator && !rowCheckboxLocator && !semanticFallback?.locator
+    const repeatedPressLocator = !resolution?.locator && !causalOptionResolution?.locator && !rowCheckboxLocator && !visibleIdLocator && !semanticFallback?.locator
       ? await this.nextUnusedRepeatedPress(options.technicalTargetRefs?.[0])
       : undefined;
     const resolvedLocator = (causalOptionResolution?.status === "resolved" ? causalOptionResolution.locator : undefined)
       ?? resolution?.locator
       ?? rowCheckboxLocator
+      ?? visibleIdLocator
       ?? semanticFallback?.locator
       ?? repeatedPressLocator;
     const resolvedStrategy = (causalOptionResolution?.status === "resolved" ? causalOptionResolution.locatorStrategy : undefined)
       ?? resolution?.strategy
       ?? (rowCheckboxLocator ? "row_checkbox_by_state" : undefined)
+      ?? (visibleIdLocator ? "recorded:visible-id" : undefined)
       ?? semanticFallback?.strategy;
     if (!resolvedLocator) {
       throw new Error(

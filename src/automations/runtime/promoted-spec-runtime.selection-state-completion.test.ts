@@ -61,7 +61,8 @@ test("2/exactActionTargetProbe. when a promoted click has an already-resolved lo
 test("2/exactOptionCloseIsObservable. if the associated-field resolver cannot resolve the owner, a certified option still retains its exact dispatched locator so closing the listbox proves selection", () => {
   const probeFn = source.slice(source.indexOf("async function capturePromotedSelectionStateProbe"), source.indexOf("type PromotedActionSurfaceSnapshot"));
   const directProbe = probeFn.slice(probeFn.indexOf("if (resolvedActionLocator)"), probeFn.indexOf("const technicalProbeCandidates"));
-  assert.match(directProbe, /const recordedOption = Boolean\(optionRef && selectionActivationField\?\.trim\(\)\)/);
+  // Without a recorded owning field too (job f44d48bf: react-select option, no associated field).
+  assert.match(directProbe, /const recordedOption = Boolean\(optionRef\)/);
   assert.match(directProbe, /expectedValue: semanticNameFromRef\(optionRef!\)/);
   assert.match(directProbe, /exactTargetLocator: resolvedActionLocator/);
   assert.match(source, /exactOptionNoLongerVisible = expectedSelectionValue[\s\S]*?selectionProbe\?\.exactTargetLocator[\s\S]*?this\.page\.url\(\) === previousUrl[\s\S]*?await selectionProbe\.exactTargetLocator\.isVisible\(\)\.catch\(\(\) => undefined\) === false/);

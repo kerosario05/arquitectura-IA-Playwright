@@ -780,6 +780,7 @@ export function listCaseExecutionResults(): CaseExecutionResult[] {
   return items;
 }
 
+
 function nonNegativeCount(value: unknown): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
