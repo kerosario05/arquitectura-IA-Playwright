@@ -2,7 +2,7 @@
   "version": 1,
   "appSlug": "portal-comercial-dev",
   "createdAt": "2026-11-06T19:31:49.356Z",
-  "updatedAt": "2026-11-07T22:32:43.670Z",
+  "updatedAt": "2026-11-08T18:23:05.818Z",
   "items": [],
   "jiraRoutes": [
     {
@@ -302,6 +302,465 @@
           "target": "Cliente"
         }
       ]
+    },
+    {
+      "schemaVersion": 1,
+      "engine": "jira_semantic",
+      "appSlug": "portal-comercial-dev",
+      "id": "ce1e2966b883cf677ed6a215021befc7da47d3a4fe8f4e07047d3f7bf8beb752",
+      "profileRevision": "2a50b1ee66989ea11fb0fa11684dc426732ef052c7ff79afff1022903ac3a395",
+      "sourceIssueKey": "AA-116",
+      "scenarioId": "cb20fe11-9dd1-4467-a976-674a4b2e91b4",
+      "jobId": "8ead7c5c-b1be-4170-a8d1-b5ab2a5321ab",
+      "validatedAt": "2026-11-08T18:23:05.805Z",
+      "startsFrom": "project_entry",
+      "actions": [
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "navigate"
+        },
+        {
+          "action": "fill",
+          "field": "Usuario",
+          "dataRef": "usuario_negocios"
+        },
+        {
+          "action": "fill",
+          "field": "Contraseña",
+          "dataRef": "contrasena_negocios"
+        },
+        {
+          "action": "click",
+          "field": "Iniciar Sesion",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Persona jurídica",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nueva solicitud",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nuevo caso",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Nuevo caso",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de identificacion",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_9"
+        },
+        {
+          "action": "fill",
+          "field": "Numero de identificacion",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_10"
+        },
+        {
+          "action": "click",
+          "field": "Consultar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Nombre de empresa",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_12"
+        },
+        {
+          "action": "fill",
+          "field": "Nombre Comercial",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_13"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de sociedad",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_14"
+        },
+        {
+          "action": "select",
+          "field": "Nicho",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_15"
+        },
+        {
+          "action": "click",
+          "field": "Continuar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "No. Registro Mercantil *",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_17"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de Emision *",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_18"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de Vencimiento *",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_19"
+        },
+        {
+          "action": "click",
+          "field": "Capital y Operaciones",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Moneda",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_21"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha de Constitucion",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_22"
+        },
+        {
+          "action": "fill",
+          "field": "Capital Social Autorizado",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_23"
+        },
+        {
+          "action": "click",
+          "field": "Domicilio y Contacto",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de Direccion",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_25"
+        },
+        {
+          "action": "select",
+          "field": "Region",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_26"
+        },
+        {
+          "action": "select",
+          "field": "Provincia",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_27"
+        },
+        {
+          "action": "select",
+          "field": "Municipio",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_28"
+        },
+        {
+          "action": "select",
+          "field": "Localidad",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_29"
+        },
+        {
+          "action": "select",
+          "field": "Sector",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_30"
+        },
+        {
+          "action": "fill",
+          "field": "Calle / Avenida",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_31"
+        },
+        {
+          "action": "fill",
+          "field": "Numero casa / edificio",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_32"
+        },
+        {
+          "action": "fill",
+          "field": "Nombre edificio",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_33"
+        },
+        {
+          "action": "fill",
+          "field": "Numero apartamento",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_34"
+        },
+        {
+          "action": "fill",
+          "field": "Referencia",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_35"
+        },
+        {
+          "action": "fill",
+          "field": "Telefono (1)",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_36"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de Telefono",
+          "dataRef": "jira_edit_49ce2663e58fd01f_75"
+        },
+        {
+          "action": "select",
+          "field": "Ubicacion de Telefono",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_38"
+        },
+        {
+          "action": "fill",
+          "field": "Correo Electronico",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_39"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de Correo",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_40"
+        },
+        {
+          "action": "click",
+          "field": "Actividad y Gestion",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Estado Actual de la Sociedad",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_42"
+        },
+        {
+          "action": "select",
+          "field": "Actividad de la Sociedad",
+          "dataRef": "jira_edit_ea4af396769874a0_43"
+        },
+        {
+          "action": "fill",
+          "field": "Objeto Social",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_45"
+        },
+        {
+          "action": "click",
+          "field": "Si",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Ente Regulado",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_47"
+        },
+        {
+          "action": "click",
+          "field": "Comercial y Referencias",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Informacion",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Añadir ó actualizar relacionado",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Libre / desde cero",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Persona Fisica",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de documento",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_53"
+        },
+        {
+          "action": "fill",
+          "field": "Número de identificación",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_54"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Oficial",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_56"
+        },
+        {
+          "action": "select",
+          "field": "Promotor",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_57"
+        },
+        {
+          "action": "click",
+          "field": "Buscar en JCE",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha Vencimiento",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_59"
+        },
+        {
+          "action": "fill",
+          "field": "Fecha Nacimiento",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_60"
+        },
+        {
+          "action": "click",
+          "field": "Si",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de Relacion",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_62"
+        },
+        {
+          "action": "select",
+          "field": "Cargo",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_63"
+        },
+        {
+          "action": "click",
+          "field": "Actualizar Relacionado",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Volver",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Añadir ó actualizar relacionado",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "ROQUE SRL",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Confirmar",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de Cliente",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_68"
+        },
+        {
+          "action": "select",
+          "field": "Tipo de Depositante",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_69"
+        },
+        {
+          "action": "select",
+          "field": "Sector Economico",
+          "dataRef": "jira_edit_3507e9d2b89ea57a_70"
+        },
+        {
+          "action": "select",
+          "field": "Sector Contable",
+          "dataRef": "jira_edit_7ad53c9e77b3339e_71"
+        },
+        {
+          "action": "click",
+          "field": "Actualizar Relacionado",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Volver",
+          "targetKind": "observed_control"
+        },
+        {
+          "action": "click",
+          "field": "Continuar",
+          "targetKind": "observed_control"
+        }
+      ],
+      "evidenceRefs": [
+        "scenario-1-step-1.png",
+        "scenario-1-step-2.png",
+        "scenario-1-step-3.png",
+        "scenario-1-step-4.png",
+        "scenario-1-step-5.png",
+        "scenario-1-step-6.png",
+        "scenario-1-step-7.png",
+        "scenario-1-step-8.png",
+        "scenario-1-step-9.png",
+        "scenario-1-step-10.png",
+        "scenario-1-step-11.png",
+        "scenario-1-step-12.png",
+        "scenario-1-step-13.png",
+        "scenario-1-step-14.png",
+        "scenario-1-step-15.png",
+        "scenario-1-step-16.png",
+        "scenario-1-step-17.png",
+        "scenario-1-step-18.png",
+        "scenario-1-step-19.png",
+        "scenario-1-step-20.png",
+        "scenario-1-step-21.png",
+        "scenario-1-step-22.png",
+        "scenario-1-step-23.png",
+        "scenario-1-step-24.png",
+        "scenario-1-step-25.png",
+        "scenario-1-step-26.png",
+        "scenario-1-step-27.png",
+        "scenario-1-step-28.png",
+        "scenario-1-step-29.png",
+        "scenario-1-step-30.png",
+        "scenario-1-step-31.png",
+        "scenario-1-step-32.png",
+        "scenario-1-step-33.png",
+        "scenario-1-step-34.png",
+        "scenario-1-step-35.png",
+        "scenario-1-step-36.png",
+        "scenario-1-step-37.png",
+        "scenario-1-step-38.png",
+        "scenario-1-step-39.png",
+        "scenario-1-step-40.png",
+        "scenario-1-step-41.png",
+        "scenario-1-step-42.png",
+        "scenario-1-step-43.png",
+        "scenario-1-step-44.png",
+        "scenario-1-step-45.png",
+        "scenario-1-step-46.png",
+        "scenario-1-step-47.png",
+        "scenario-1-step-48.png",
+        "scenario-1-step-49.png",
+        "scenario-1-step-50.png",
+        "scenario-1-step-51.png",
+        "scenario-1-step-52.png",
+        "scenario-1-step-53.png",
+        "scenario-1-step-54.png",
+        "scenario-1-step-55.png",
+        "scenario-1-step-56.png",
+        "scenario-1-step-57.png",
+        "scenario-1-step-58.png",
+        "scenario-1-step-59.png",
+        "scenario-1-step-60.png",
+        "scenario-1-step-61.png",
+        "scenario-1-step-62.png",
+        "scenario-1-step-63.png",
+        "scenario-1-step-64.png",
+        "scenario-1-step-65.png",
+        "scenario-1-step-66.png",
+        "scenario-1-step-70.png",
+        "scenario-1-step-71.png",
+        "scenario-1-step-72.png",
+        "scenario-1-step-73.png",
+        "scenario-1-step-75.png"
+      ],
+      "observables": []
     }
   ]
 }
