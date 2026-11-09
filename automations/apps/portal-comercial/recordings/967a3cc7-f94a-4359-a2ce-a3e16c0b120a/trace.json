@@ -1,0 +1,1470 @@
+{
+  "recordingId": "967a3cc7-f94a-4359-a2ce-a3e16c0b120a",
+  "projectSlug": "portal-comercial",
+  "appSlug": "portal-comercial",
+  "platform": "web",
+  "baseUrl": "https://srvqacgowb01.local.bsc.com:5000/",
+  "label": "QA",
+  "recordingGoal": {
+    "declaredGoal": "QA",
+    "normalizedGoal": "QA",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "captureAuthority": "v2",
+  "startedAt": "2026-11-09T15:32:37.756Z",
+  "status": "stopped",
+  "events": [
+    {
+      "t": 1331,
+      "kind": "navigate",
+      "screenKey": "inicio",
+      "fingerprint": "",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "pageKey": "tab-1",
+      "seq": 0
+    },
+    {
+      "t": 2565,
+      "kind": "navigate",
+      "screenKey": "d216a82efeba",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "pageKey": "tab-1",
+      "seq": 1
+    },
+    {
+      "t": 2579,
+      "kind": "navigate",
+      "screenKey": "d216a82efeba",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "pageKey": "tab-1",
+      "seq": 2
+    },
+    {
+      "t": 0,
+      "kind": "launch",
+      "screenKey": "dc6c2cb3e533",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "pageKey": "tab-1",
+      "seq": 3
+    },
+    {
+      "t": 2653,
+      "kind": "navigate",
+      "screenKey": "dc6c2cb3e533",
+      "fingerprint": "90cf40b16ddadeeeec43d594200d0afff527792b4bb59e1ce68bd189c51e2b8e",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "pageKey": "tab-1",
+      "seq": 4
+    },
+    {
+      "t": 7481,
+      "kind": "fill",
+      "screenKey": "dc6c2cb3e533",
+      "fingerprint": "90cf40b16ddadeeeec43d594200d0afff527792b4bb59e1ce68bd189c51e2b8e",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Usuario",
+        "role": "input",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Usuario",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#username",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "username",
+            "confidence": 0.8
+          }
+        ],
+        "rawTypedValue": "radames",
+        "sensitive": false
+      },
+      "value": "radames",
+      "valueSource": "user",
+      "seq": 5
+    },
+    {
+      "t": 12016,
+      "kind": "fill",
+      "screenKey": "dc6c2cb3e533",
+      "fingerprint": "90cf40b16ddadeeeec43d594200d0afff527792b4bb59e1ce68bd189c51e2b8e",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Contraseña",
+        "role": "input",
+        "tag": "input",
+        "inputType": "password",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "password",
+            "confidence": 0.8
+          }
+        ],
+        "sensitive": true
+      },
+      "redactedKey": "contrasena",
+      "valueSource": "user",
+      "seq": 6
+    },
+    {
+      "t": 12020,
+      "kind": "press",
+      "screenKey": "dc6c2cb3e533",
+      "fingerprint": "90cf40b16ddadeeeec43d594200d0afff527792b4bb59e1ce68bd189c51e2b8e",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Contraseña",
+        "role": "textbox",
+        "tag": "input",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "textbox|Contraseña",
+            "confidence": 0.85
+          },
+          {
+            "strategy": "css",
+            "value": "#password",
+            "confidence": 0.8
+          },
+          {
+            "strategy": "id",
+            "value": "password",
+            "confidence": 0.8
+          }
+        ]
+      },
+      "note": "Enter",
+      "seq": 7
+    },
+    {
+      "t": 12542,
+      "kind": "navigate",
+      "screenKey": "dc6c2cb3e533",
+      "fingerprint": "90cf40b16ddadeeeec43d594200d0afff527792b4bb59e1ce68bd189c51e2b8e",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "pageKey": "tab-1",
+      "seq": 8
+    },
+    {
+      "t": 20820,
+      "interactionId": "pointer-2",
+      "kind": "note",
+      "screenKey": "c52e3defc610",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Solicitud multiproducto",
+        "role": "link",
+        "tag": "a",
+        "locators": []
+      },
+      "note": "Observación técnica (pointer) sobre \"Solicitud multiproducto\"",
+      "observationType": "pointer",
+      "seq": 9
+    },
+    {
+      "t": 21384,
+      "interactionId": "pointer-2",
+      "kind": "tap",
+      "screenKey": "c52e3defc610",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "pageKey": "tab-1",
+      "target": {
+        "label": "Solicitud multiproducto",
+        "role": "link",
+        "tag": "a",
+        "locators": [
+          {
+            "strategy": "role",
+            "value": "link|Solicitud multiproducto",
+            "confidence": 0.85
+          }
+        ],
+        "technicalTargetCandidates": [
+          {
+            "targetType": "structural",
+            "locatorCandidates": [
+              {
+                "strategy": "role",
+                "value": "link|Solicitud multiproducto",
+                "confidence": 0.85
+              }
+            ],
+            "structuralContext": {
+              "owner": {
+                "tag": "a"
+              },
+              "stableDirectAttributes": {
+                "href": "/requests/create/multiproduct"
+              },
+              "stableDescendants": [],
+              "semanticShape": [
+                "span"
+              ],
+              "landmarkAncestor": {
+                "tag": "main"
+              },
+              "deterministicStructuralIdentity": true,
+              "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+              "structuralIdentityMatchCount": 1,
+              "scopeIdentity": {
+                "strategy": "id",
+                "value": "pv_id_5_2_1"
+              },
+              "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"/requests/create/multiproduct\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+              "captureScopeUnique": true,
+              "captureTargetMatchCount": 1
+            },
+            "interactionEvidence": [
+              "v2_click_owner"
+            ],
+            "confidence": 0.85,
+            "validatedByInteraction": true
+          }
+        ]
+      },
+      "seq": 10
+    },
+    {
+      "t": 22103,
+      "kind": "navigate",
+      "screenKey": "c52e3defc610",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "pageKey": "tab-1",
+      "seq": 11
+    },
+    {
+      "t": 22127,
+      "kind": "navigate",
+      "screenKey": "c52e3defc610",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "pageKey": "tab-1",
+      "seq": 12
+    },
+    {
+      "t": 165319,
+      "kind": "navigate",
+      "screenKey": "5107cb8f3c3d",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "pageKey": "tab-1",
+      "seq": 13
+    },
+    {
+      "t": 165333,
+      "kind": "navigate",
+      "screenKey": "5107cb8f3c3d",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "pageKey": "tab-1",
+      "seq": 14
+    },
+    {
+      "t": 166099,
+      "kind": "navigate",
+      "screenKey": "8a9b90229760",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "pageKey": "tab-1",
+      "seq": 15
+    },
+    {
+      "t": 166345,
+      "kind": "navigate",
+      "screenKey": "6517dca925ff",
+      "fingerprint": "3c962bd67443563acea5c026f7281e65dffa01d2550d503a8d848b9a33d18014",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "pageKey": "tab-1",
+      "seq": 16
+    },
+    {
+      "t": 324698,
+      "kind": "navigate",
+      "screenKey": "9102375739c9",
+      "fingerprint": "cf32a74bd473adc9e72afb884dc240e6fdc72d3e5e4950681db7e4e7531081b2",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "pageKey": "tab-1",
+      "seq": 17
+    },
+    {
+      "t": 324711,
+      "kind": "navigate",
+      "screenKey": "9102375739c9",
+      "fingerprint": "cf32a74bd473adc9e72afb884dc240e6fdc72d3e5e4950681db7e4e7531081b2",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "pageKey": "tab-1",
+      "seq": 18
+    }
+  ],
+  "screens": [
+    {
+      "screenKey": "d216a82efeba",
+      "title": "d216a82efeba",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "firstSeenAt": 1396,
+      "controls": [],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "dc6c2cb3e533",
+      "title": "Banco Santa Cruz - Portal Comercial",
+      "fingerprint": "90cf40b16ddadeeeec43d594200d0afff527792b4bb59e1ce68bd189c51e2b8e",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "firstSeenAt": 2614,
+      "controls": [
+        {
+          "label": "Usuario",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingresa tu usuario",
+          "attributes": {
+            "id": "username",
+            "name": "username",
+            "placeholder": "Ingresa tu usuario"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "username",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Contraseña",
+          "role": "input",
+          "tag": "input",
+          "placeholder": "Ingresa tu contraseña",
+          "attributes": {
+            "id": "password",
+            "name": "password",
+            "type": "password",
+            "placeholder": "Ingresa tu contraseña"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "password",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Mantener la sesión iniciada",
+          "role": "input",
+          "tag": "input",
+          "attributes": {
+            "id": "remember-me",
+            "type": "checkbox"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "remember-me",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Iniciar sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {
+            "type": "submit",
+            "aria-label": "Iniciar sesión"
+          },
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Iniciar sesión",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [
+        "Banco Santa Cruz - Portal Comercial"
+      ],
+      "gridMetadata": {
+        "detected": true,
+        "grids": 1,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "c52e3defc610",
+      "title": "c52e3defc610",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "firstSeenAt": 12714,
+      "controls": [
+        {
+          "label": "Portal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Portal Comercial ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Sesión",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_0_0",
+            "aria-label": "Inicio",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_0_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_0_1",
+            "aria-label": "Información",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_0_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Información",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_1_0",
+            "aria-label": "Documentos en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_1_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Documentos en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuracion",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_1_1",
+            "aria-label": "Configuracion",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_1_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Configuracion",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuracion",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva jornada",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_0",
+            "aria-label": "Nueva jornada",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nueva jornada",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva jornada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Jornadas en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_1",
+            "aria-label": "Jornadas en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Jornadas en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Jornadas en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Reasignación",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_2",
+            "aria-label": "Reasignación",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Reasignación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Reasignación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Auditoria de reasignación",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_3",
+            "aria-label": "Auditoria de reasignación",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_3",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Auditoria de reasignación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Auditoria de reasignación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_4",
+            "aria-label": "Configuración",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_4",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "5107cb8f3c3d",
+      "title": "5107cb8f3c3d",
+      "fingerprint": "15e385c05e40dd3f4aa112523c14ac786bab87fbe467cfb6bfba2cdb617b8f74",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "firstSeenAt": 22297,
+      "controls": [
+        {
+          "label": "Portal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Portal Comercial ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Sesión",
+          "role": "button",
+          "tag": "button",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Sesión",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_0_0",
+            "aria-label": "Inicio",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_0_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_0_1",
+            "aria-label": "Información",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_0_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Información",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_1_0",
+            "aria-label": "Documentos en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_1_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Documentos en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuracion",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_1_1",
+            "aria-label": "Configuracion",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_1_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Configuracion",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuracion",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva jornada",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_0",
+            "aria-label": "Nueva jornada",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nueva jornada",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva jornada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Jornadas en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_1",
+            "aria-label": "Jornadas en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Jornadas en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Jornadas en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Reasignación",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_2",
+            "aria-label": "Reasignación",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Reasignación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Reasignación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Auditoria de reasignación",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_3",
+            "aria-label": "Auditoria de reasignación",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_3",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Auditoria de reasignación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Auditoria de reasignación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_4_2_4",
+            "aria-label": "Configuración",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_4_2_4",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "8a9b90229760",
+      "title": "8a9b90229760",
+      "fingerprint": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "firstSeenAt": 165375,
+      "controls": [],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "6517dca925ff",
+      "title": "6517dca925ff",
+      "fingerprint": "3c962bd67443563acea5c026f7281e65dffa01d2550d503a8d848b9a33d18014",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "firstSeenAt": 166168,
+      "controls": [
+        {
+          "label": "Portal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Portal Comercial ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva solicitud",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva solicitud",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    },
+    {
+      "screenKey": "9102375739c9",
+      "title": "9102375739c9",
+      "fingerprint": "cf32a74bd473adc9e72afb884dc240e6fdc72d3e5e4950681db7e4e7531081b2",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "firstSeenAt": 166536,
+      "controls": [
+        {
+          "label": "Portal Comercial",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": " Portal Comercial ",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_1_0_0",
+            "aria-label": "Inicio",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_1_0_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Inicio",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Inicio",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_1_0_1",
+            "aria-label": "Información",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_1_0_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Información",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Información",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_1_1_0",
+            "aria-label": "Documentos en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_1_1_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Documentos en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Documentos en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuracion",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_1_1_1",
+            "aria-label": "Configuracion",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_1_1_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Configuracion",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuracion",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Nueva jornada",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_1_2_0",
+            "aria-label": "Nueva jornada",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_1_2_0",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Nueva jornada",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Nueva jornada",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Jornadas en curso",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_1_2_1",
+            "aria-label": "Jornadas en curso",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_1_2_1",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Jornadas en curso",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Jornadas en curso",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Reasignación",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_1_2_2",
+            "aria-label": "Reasignación",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_1_2_2",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Reasignación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Reasignación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Auditoria de reasignación",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_1_2_3",
+            "aria-label": "Auditoria de reasignación",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_1_2_3",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Auditoria de reasignación",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Auditoria de reasignación",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_1_2_4",
+            "aria-label": "Configuración",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_1_2_4",
+              "confidence": 0.9
+            }
+          ]
+        },
+        {
+          "label": "Configuración",
+          "role": "a",
+          "tag": "a",
+          "attributes": {},
+          "locators": [
+            {
+              "strategy": "text",
+              "value": "Configuración",
+              "confidence": 0.7
+            }
+          ]
+        },
+        {
+          "label": "Campañas",
+          "role": "menuitem",
+          "tag": "li",
+          "attributes": {
+            "id": "pv_id_1_3_0",
+            "aria-label": "Campañas",
+            "role": "menuitem"
+          },
+          "locators": [
+            {
+              "strategy": "aria-label",
+              "value": "pv_id_1_3_0",
+              "confidence": 0.9
+            }
+          ]
+        }
+      ],
+      "texts": [],
+      "gridMetadata": {
+        "detected": false,
+        "grids": 0,
+        "rows": 0,
+        "cells": 0,
+        "headers": [],
+        "headerRelationships": []
+      },
+      "headerRelationships": []
+    }
+  ],
+  "endedAt": "2026-11-09T15:38:02.855Z",
+  "durationMs": 325099
+}

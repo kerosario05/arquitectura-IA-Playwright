@@ -1,0 +1,2483 @@
+{
+  "version": "1.0",
+  "recordingId": "967a3cc7-f94a-4359-a2ce-a3e16c0b120a",
+  "projectSlug": "portal-comercial",
+  "appSlug": "portal-comercial",
+  "platform": "web",
+  "recordingGoal": {
+    "declaredGoal": "QA",
+    "normalizedGoal": "QA",
+    "provenance": "USER_DECLARED",
+    "needsReview": false
+  },
+  "recordingDataPolicy": {
+    "persistRecordedValues": true,
+    "persistQaCredentials": true,
+    "includeQaCredentialsInTestRail": true
+  },
+  "selectorOptionInventories": [],
+  "semanticScreens": [
+    {
+      "screenIdentity": "d216a82efeba",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "d216a82efeba"
+    },
+    {
+      "screenIdentity": "dc6c2cb3e533",
+      "title": "Banco Santa Cruz - Portal Comercial",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "classification": "ROUTE_NAVIGATION",
+      "sourceScreenKey": "dc6c2cb3e533"
+    },
+    {
+      "screenIdentity": "c52e3defc610",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/",
+      "classification": "ROUTE_NAVIGATION",
+      "sourceScreenKey": "c52e3defc610"
+    },
+    {
+      "screenIdentity": "5107cb8f3c3d",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "5107cb8f3c3d"
+    },
+    {
+      "screenIdentity": "8a9b90229760",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "8a9b90229760"
+    },
+    {
+      "screenIdentity": "6517dca925ff",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "6517dca925ff"
+    },
+    {
+      "screenIdentity": "9102375739c9",
+      "url": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "classification": "SAME_SCREEN_MUTATION",
+      "sourceScreenKey": "9102375739c9"
+    }
+  ],
+  "semanticComponents": [
+    {
+      "componentId": "dc6c2cb3e533:control:dc6c2cb3e533|Usuario|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "dc6c2cb3e533",
+      "label": "Usuario",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-6"
+      ]
+    },
+    {
+      "componentId": "dc6c2cb3e533:control:dc6c2cb3e533|Contraseña|amount_or_text",
+      "componentType": "textbox",
+      "screenIdentity": "dc6c2cb3e533",
+      "label": "Contraseña",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "observationRefs": [
+        "obs-7",
+        "obs-8"
+      ]
+    },
+    {
+      "componentId": "c52e3defc610:control:c52e3defc610|Solicitud multiproducto|link",
+      "componentType": "link",
+      "screenIdentity": "c52e3defc610",
+      "label": "Solicitud multiproducto",
+      "needsReview": false,
+      "observationRefs": [
+        "obs-11"
+      ]
+    }
+  ],
+  "semanticEvents": [
+    {
+      "eventRef": "event-1",
+      "action": "navigate",
+      "screenIdentity": "inicio",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-2",
+      "action": "navigate",
+      "screenIdentity": "d216a82efeba",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-3",
+      "action": "navigate",
+      "screenIdentity": "d216a82efeba",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-4",
+      "action": "observe",
+      "screenIdentity": "dc6c2cb3e533",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-5",
+      "action": "navigate",
+      "screenIdentity": "dc6c2cb3e533",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-6",
+      "action": "fill",
+      "screenIdentity": "dc6c2cb3e533",
+      "componentType": "textbox",
+      "field": "Usuario",
+      "controlAffordance": "editable",
+      "valueKey": "usuario",
+      "valueRole": "action_input",
+      "technicalTargetRef": "dc6c2cb3e533:control:role:textbox|Usuario",
+      "afterState": "radames",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-7",
+      "action": "fill",
+      "screenIdentity": "dc6c2cb3e533",
+      "componentType": "textbox",
+      "field": "Contraseña",
+      "controlAffordance": "editable",
+      "valueKey": "contrasena",
+      "valueRole": "secure_input",
+      "technicalTargetRef": "dc6c2cb3e533:control:role:textbox|Contraseña",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-8",
+      "action": "observe",
+      "screenIdentity": "dc6c2cb3e533",
+      "componentType": "textbox",
+      "controlAffordance": "editable",
+      "technicalTargetRef": "dc6c2cb3e533:control:role:textbox|Contraseña",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-9",
+      "action": "navigate",
+      "screenIdentity": "dc6c2cb3e533",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-10",
+      "action": "observe",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "link",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "c52e3defc610:control:c52e3defc610|Solicitud multiproducto|link",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "TECHNICAL_NOISE"
+    },
+    {
+      "eventRef": "event-11",
+      "action": "activate",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "link",
+      "controlAffordance": "observable_control",
+      "technicalTargetRef": "c52e3defc610:control:role:link|Solicitud multiproducto",
+      "provenance": "OBSERVED",
+      "confidence": 0.9,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-12",
+      "action": "navigate",
+      "screenIdentity": "c52e3defc610",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-13",
+      "action": "navigate",
+      "screenIdentity": "c52e3defc610",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-14",
+      "action": "navigate",
+      "screenIdentity": "5107cb8f3c3d",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-15",
+      "action": "navigate",
+      "screenIdentity": "5107cb8f3c3d",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-16",
+      "action": "navigate",
+      "screenIdentity": "8a9b90229760",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-17",
+      "action": "navigate",
+      "screenIdentity": "6517dca925ff",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-18",
+      "action": "navigate",
+      "screenIdentity": "9102375739c9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    },
+    {
+      "eventRef": "event-19",
+      "action": "navigate",
+      "screenIdentity": "9102375739c9",
+      "provenance": "OBSERVED",
+      "confidence": 0.4,
+      "classification": "FUNCTIONAL_ACTION"
+    }
+  ],
+  "datasets": [
+    {
+      "valueKey": "usuario",
+      "semanticField": "Usuario",
+      "valueRole": "action_input",
+      "value": "radames",
+      "rawTypedValue": "radames",
+      "committedValue": "radames",
+      "source": "RECORDED_CONFIRMED",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": false,
+      "generated": false,
+      "instanceIdentity": "dc6c2cb3e533:control:role:textbox|Usuario",
+      "recordingId": "967a3cc7-f94a-4359-a2ce-a3e16c0b120a",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    },
+    {
+      "valueKey": "contrasena",
+      "semanticField": "Contraseña",
+      "valueRole": "secure_input",
+      "source": "secure",
+      "verified": true,
+      "confidence": 0.9,
+      "sensitive": true,
+      "generated": false,
+      "instanceIdentity": "dc6c2cb3e533:control:role:textbox|Contraseña",
+      "recordingId": "967a3cc7-f94a-4359-a2ce-a3e16c0b120a",
+      "needsReview": false,
+      "reviewReason": "stable_business_label"
+    }
+  ],
+  "technicalObservations": [
+    {
+      "observationId": "obs-6",
+      "status": "VALIDATED",
+      "screenIdentity": "dc6c2cb3e533",
+      "componentType": "textbox",
+      "label": "Usuario",
+      "tag": "input",
+      "role": "input",
+      "afterValue": "radames",
+      "semanticField": "Usuario",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Usuario",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#username",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "username",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "dc6c2cb3e533:control:role:textbox|Usuario",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-1",
+      "inputValue": "radames",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-7",
+      "status": "VALIDATED",
+      "screenIdentity": "dc6c2cb3e533",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "input",
+      "semanticField": "Contraseña",
+      "needsReview": false,
+      "reviewReason": "stable_business_label",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Contraseña",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#password",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "password",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "dc6c2cb3e533:control:role:textbox|Contraseña",
+      "validatedByInteraction": true,
+      "editingSessionRef": "edit-2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-8",
+      "status": "OBSERVED",
+      "screenIdentity": "dc6c2cb3e533",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "textbox",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "textbox|Contraseña",
+          "confidence": 0.85
+        },
+        {
+          "strategy": "css",
+          "value": "#password",
+          "confidence": 0.8
+        },
+        {
+          "strategy": "id",
+          "value": "password",
+          "confidence": 0.8
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "dc6c2cb3e533:control:role:textbox|Contraseña",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "obs-10",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "link",
+      "label": "Solicitud multiproducto",
+      "tag": "a",
+      "role": "link",
+      "locatorCandidates": [],
+      "confidence": 0.4,
+      "technicalTargetRef": "c52e3defc610:control:c52e3defc610|Solicitud multiproducto|link",
+      "validatedByInteraction": false,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "obs-11",
+      "status": "VALIDATED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "link",
+      "label": "Solicitud multiproducto",
+      "tag": "a",
+      "role": "link",
+      "locatorCandidates": [
+        {
+          "strategy": "role",
+          "value": "link|Solicitud multiproducto",
+          "confidence": 0.85
+        }
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "link|Solicitud multiproducto",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "/requests/create/multiproduct"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_5_2_1"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"/requests/create/multiproduct\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "confidence": 0.85,
+      "technicalTargetRef": "c52e3defc610:control:role:link|Solicitud multiproducto",
+      "validatedByInteraction": true,
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-dc6c2cb3e533-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "dc6c2cb3e533",
+      "componentType": "textbox",
+      "label": "Usuario",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "username",
+        "name": "username",
+        "placeholder": "Ingresa tu usuario"
+      },
+      "placeholder": "Ingresa tu usuario",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "username",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "dc6c2cb3e533:control:1",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-dc6c2cb3e533-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "dc6c2cb3e533",
+      "componentType": "textbox",
+      "label": "Contraseña",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "password",
+        "name": "password",
+        "type": "password",
+        "placeholder": "Ingresa tu contraseña"
+      },
+      "placeholder": "Ingresa tu contraseña",
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "password",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "dc6c2cb3e533:control:2",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-dc6c2cb3e533-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "dc6c2cb3e533",
+      "componentType": "textbox",
+      "label": "Mantener la sesión iniciada",
+      "tag": "input",
+      "role": "input",
+      "attributes": {
+        "id": "remember-me",
+        "type": "checkbox"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "remember-me",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "dc6c2cb3e533:control:3",
+      "selectable": false,
+      "editable": true
+    },
+    {
+      "observationId": "screen-dc6c2cb3e533-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "dc6c2cb3e533",
+      "componentType": "button",
+      "label": "Iniciar sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {
+        "type": "submit",
+        "aria-label": "Iniciar sesión"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Iniciar sesión",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "dc6c2cb3e533:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "a",
+      "label": "Portal Comercial",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": " Portal Comercial ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "c52e3defc610:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "button",
+      "label": "Configuración",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Configuración",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "c52e3defc610:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "button",
+      "label": "Sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Sesión",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "c52e3defc610:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "menuitem",
+      "label": "Inicio",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_0_0",
+        "aria-label": "Inicio",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_0_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "c52e3defc610:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "a",
+      "label": "Inicio",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "c52e3defc610:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "menuitem",
+      "label": "Información",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_0_1",
+        "aria-label": "Información",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_0_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "c52e3defc610:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "a",
+      "label": "Información",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Información",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "c52e3defc610:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "menuitem",
+      "label": "Documentos en curso",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_1_0",
+        "aria-label": "Documentos en curso",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_1_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "c52e3defc610:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "a",
+      "label": "Documentos en curso",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Documentos en curso",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "c52e3defc610:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "menuitem",
+      "label": "Configuracion",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_1_1",
+        "aria-label": "Configuracion",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_1_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "c52e3defc610:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "a",
+      "label": "Configuracion",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Configuracion",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "c52e3defc610:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "menuitem",
+      "label": "Nueva jornada",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_2_0",
+        "aria-label": "Nueva jornada",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_2_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "c52e3defc610:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "a",
+      "label": "Nueva jornada",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Nueva jornada",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "c52e3defc610:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "menuitem",
+      "label": "Jornadas en curso",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_2_1",
+        "aria-label": "Jornadas en curso",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_2_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "c52e3defc610:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "a",
+      "label": "Jornadas en curso",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Jornadas en curso",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "c52e3defc610:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "menuitem",
+      "label": "Reasignación",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_2_2",
+        "aria-label": "Reasignación",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_2_2",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "c52e3defc610:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "a",
+      "label": "Reasignación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Reasignación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "c52e3defc610:control:17",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "menuitem",
+      "label": "Auditoria de reasignación",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_2_3",
+        "aria-label": "Auditoria de reasignación",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_2_3",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "c52e3defc610:control:18",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-19",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "a",
+      "label": "Auditoria de reasignación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Auditoria de reasignación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "c52e3defc610:control:19",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-c52e3defc610-control-20",
+      "status": "OBSERVED",
+      "screenIdentity": "c52e3defc610",
+      "componentType": "menuitem",
+      "label": "Configuración",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_2_4",
+        "aria-label": "Configuración",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_2_4",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "c52e3defc610:control:20",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "a",
+      "label": "Portal Comercial",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": " Portal Comercial ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "5107cb8f3c3d:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "button",
+      "label": "Configuración",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Configuración",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "5107cb8f3c3d:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "button",
+      "label": "Sesión",
+      "tag": "button",
+      "role": "button",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Sesión",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "5107cb8f3c3d:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "menuitem",
+      "label": "Inicio",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_0_0",
+        "aria-label": "Inicio",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_0_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "5107cb8f3c3d:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "a",
+      "label": "Inicio",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "5107cb8f3c3d:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "menuitem",
+      "label": "Información",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_0_1",
+        "aria-label": "Información",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_0_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "5107cb8f3c3d:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "a",
+      "label": "Información",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Información",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "5107cb8f3c3d:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "menuitem",
+      "label": "Documentos en curso",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_1_0",
+        "aria-label": "Documentos en curso",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_1_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "5107cb8f3c3d:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "a",
+      "label": "Documentos en curso",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Documentos en curso",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "5107cb8f3c3d:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "menuitem",
+      "label": "Configuracion",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_1_1",
+        "aria-label": "Configuracion",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_1_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "5107cb8f3c3d:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "a",
+      "label": "Configuracion",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Configuracion",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "5107cb8f3c3d:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "menuitem",
+      "label": "Nueva jornada",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_2_0",
+        "aria-label": "Nueva jornada",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_2_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "5107cb8f3c3d:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "a",
+      "label": "Nueva jornada",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Nueva jornada",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "5107cb8f3c3d:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "menuitem",
+      "label": "Jornadas en curso",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_2_1",
+        "aria-label": "Jornadas en curso",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_2_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "5107cb8f3c3d:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "a",
+      "label": "Jornadas en curso",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Jornadas en curso",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "5107cb8f3c3d:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "menuitem",
+      "label": "Reasignación",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_2_2",
+        "aria-label": "Reasignación",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_2_2",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "5107cb8f3c3d:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "a",
+      "label": "Reasignación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Reasignación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "5107cb8f3c3d:control:17",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "menuitem",
+      "label": "Auditoria de reasignación",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_2_3",
+        "aria-label": "Auditoria de reasignación",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_2_3",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "5107cb8f3c3d:control:18",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-19",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "a",
+      "label": "Auditoria de reasignación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Auditoria de reasignación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "5107cb8f3c3d:control:19",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-5107cb8f3c3d-control-20",
+      "status": "OBSERVED",
+      "screenIdentity": "5107cb8f3c3d",
+      "componentType": "menuitem",
+      "label": "Configuración",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_4_2_4",
+        "aria-label": "Configuración",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_4_2_4",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "5107cb8f3c3d:control:20",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-6517dca925ff-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "6517dca925ff",
+      "componentType": "a",
+      "label": "Portal Comercial",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": " Portal Comercial ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "6517dca925ff:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-6517dca925ff-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "6517dca925ff",
+      "componentType": "a",
+      "label": "Inicio",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "6517dca925ff:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-6517dca925ff-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "6517dca925ff",
+      "componentType": "a",
+      "label": "Nueva solicitud",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Nueva solicitud",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "6517dca925ff:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-1",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "a",
+      "label": "Portal Comercial",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": " Portal Comercial ",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9102375739c9:control:1",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-2",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "menuitem",
+      "label": "Inicio",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_1_0_0",
+        "aria-label": "Inicio",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_1_0_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9102375739c9:control:2",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-3",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "a",
+      "label": "Inicio",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Inicio",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9102375739c9:control:3",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-4",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "menuitem",
+      "label": "Información",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_1_0_1",
+        "aria-label": "Información",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_1_0_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9102375739c9:control:4",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-5",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "a",
+      "label": "Información",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Información",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9102375739c9:control:5",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-6",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "menuitem",
+      "label": "Documentos en curso",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_1_1_0",
+        "aria-label": "Documentos en curso",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_1_1_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9102375739c9:control:6",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-7",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "a",
+      "label": "Documentos en curso",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Documentos en curso",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9102375739c9:control:7",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-8",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "menuitem",
+      "label": "Configuracion",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_1_1_1",
+        "aria-label": "Configuracion",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_1_1_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9102375739c9:control:8",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-9",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "a",
+      "label": "Configuracion",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Configuracion",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9102375739c9:control:9",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-10",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "menuitem",
+      "label": "Nueva jornada",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_1_2_0",
+        "aria-label": "Nueva jornada",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_1_2_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9102375739c9:control:10",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-11",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "a",
+      "label": "Nueva jornada",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Nueva jornada",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9102375739c9:control:11",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-12",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "menuitem",
+      "label": "Jornadas en curso",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_1_2_1",
+        "aria-label": "Jornadas en curso",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_1_2_1",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9102375739c9:control:12",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-13",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "a",
+      "label": "Jornadas en curso",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Jornadas en curso",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9102375739c9:control:13",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-14",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "menuitem",
+      "label": "Reasignación",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_1_2_2",
+        "aria-label": "Reasignación",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_1_2_2",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9102375739c9:control:14",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-15",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "a",
+      "label": "Reasignación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Reasignación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9102375739c9:control:15",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-16",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "menuitem",
+      "label": "Auditoria de reasignación",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_1_2_3",
+        "aria-label": "Auditoria de reasignación",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_1_2_3",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9102375739c9:control:16",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-17",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "a",
+      "label": "Auditoria de reasignación",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Auditoria de reasignación",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9102375739c9:control:17",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-18",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "menuitem",
+      "label": "Configuración",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_1_2_4",
+        "aria-label": "Configuración",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_1_2_4",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9102375739c9:control:18",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-19",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "a",
+      "label": "Configuración",
+      "tag": "a",
+      "role": "a",
+      "attributes": {},
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "text",
+          "value": "Configuración",
+          "confidence": 0.7
+        }
+      ],
+      "confidence": 0.7,
+      "technicalTargetRef": "9102375739c9:control:19",
+      "selectable": false,
+      "editable": false
+    },
+    {
+      "observationId": "screen-9102375739c9-control-20",
+      "status": "OBSERVED",
+      "screenIdentity": "9102375739c9",
+      "componentType": "menuitem",
+      "label": "Campañas",
+      "tag": "li",
+      "role": "menuitem",
+      "attributes": {
+        "id": "pv_id_1_3_0",
+        "aria-label": "Campañas",
+        "role": "menuitem"
+      },
+      "semanticField": null,
+      "needsReview": true,
+      "reviewReason": "no_durable_semantic_field_evidence",
+      "locatorCandidates": [
+        {
+          "strategy": "aria-label",
+          "value": "pv_id_1_3_0",
+          "confidence": 0.9
+        }
+      ],
+      "confidence": 0.9,
+      "technicalTargetRef": "9102375739c9:control:20",
+      "selectable": false,
+      "editable": false
+    }
+  ],
+  "editingSessions": [
+    {
+      "editingSessionId": "edit-1",
+      "controlIdentity": "dc6c2cb3e533|Usuario|amount_or_text",
+      "screenIdentity": "dc6c2cb3e533",
+      "startedAt": 7481,
+      "endedAt": 7481,
+      "rawEventRefs": [
+        "event-6"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "dc6c2cb3e533:role:textbox|Usuario"
+      ],
+      "inputValue": "radames",
+      "rawTypedValue": "radames",
+      "finalValue": "radames"
+    },
+    {
+      "editingSessionId": "edit-2",
+      "controlIdentity": "dc6c2cb3e533|Contraseña|amount_or_text",
+      "screenIdentity": "dc6c2cb3e533",
+      "startedAt": 12016,
+      "endedAt": 12016,
+      "rawEventRefs": [
+        "event-7"
+      ],
+      "intermediateValues": [],
+      "commitReason": "stabilization_timeout",
+      "technicalTargetRefs": [
+        "dc6c2cb3e533:role:textbox|Contraseña"
+      ]
+    }
+  ],
+  "scenarioSuggestions": [],
+  "canonicalInteractions": [
+    {
+      "id": "interaction-1",
+      "controlIdentity": "inicio",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-1"
+      ],
+      "technicalTargetRefs": [],
+      "pageKey": "tab-1",
+      "screenBeforeRef": "inicio",
+      "screenAfterRef": "inicio",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "inicio",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-2",
+      "controlIdentity": "d216a82efeba",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-2"
+      ],
+      "technicalTargetRefs": [],
+      "pageKey": "tab-1",
+      "screenBeforeRef": "d216a82efeba",
+      "screenAfterRef": "d216a82efeba",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "d216a82efeba",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-3",
+      "controlIdentity": "d216a82efeba",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-3"
+      ],
+      "technicalTargetRefs": [],
+      "pageKey": "tab-1",
+      "screenBeforeRef": "d216a82efeba",
+      "screenAfterRef": "d216a82efeba",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "d216a82efeba",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-5",
+      "controlIdentity": "dc6c2cb3e533",
+      "action": "navigation",
+      "sourceEventRefs": [
+        "event-5"
+      ],
+      "technicalTargetRefs": [],
+      "pageKey": "tab-1",
+      "screenBeforeRef": "dc6c2cb3e533",
+      "screenAfterRef": "dc6c2cb3e533",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "dc6c2cb3e533",
+      "technicalOnly": true,
+      "confidence": 0.9
+    },
+    {
+      "id": "interaction-6",
+      "controlIdentity": "dc6c2cb3e533|Usuario|role|textbox|Usuario",
+      "semanticField": "Usuario",
+      "action": "fill",
+      "pageKey": "tab-1",
+      "valueKey": "usuario",
+      "recordedValue": "radames",
+      "rawTypedValue": "radames",
+      "sourceEventRefs": [
+        "event-6"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Usuario",
+        "css:#username",
+        "id:username"
+      ],
+      "editingSessionRef": "edit-1",
+      "description": "Ingresar en \"Usuario\"",
+      "screenBeforeRef": "dc6c2cb3e533",
+      "screenAfterRef": "dc6c2cb3e533",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "dc6c2cb3e533",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-7",
+      "controlIdentity": "dc6c2cb3e533|Contraseña|role|textbox|Contraseña",
+      "semanticField": "Contraseña",
+      "action": "fill",
+      "pageKey": "tab-1",
+      "valueKey": "contrasena",
+      "sourceEventRefs": [
+        "event-7"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña",
+        "css:#password",
+        "id:password"
+      ],
+      "editingSessionRef": "edit-2",
+      "description": "Ingresar en \"Contraseña\"",
+      "screenBeforeRef": "dc6c2cb3e533",
+      "screenAfterRef": "dc6c2cb3e533",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "stateScope": "dc6c2cb3e533",
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-8",
+      "controlIdentity": "dc6c2cb3e533|Contraseña|role|textbox|Contraseña",
+      "action": "press",
+      "pageKey": "tab-1",
+      "key": "Enter",
+      "sourceEventRefs": [
+        "event-8"
+      ],
+      "technicalTargetRefs": [
+        "role:textbox|Contraseña",
+        "css:#password",
+        "id:password"
+      ],
+      "screenBeforeRef": "dc6c2cb3e533",
+      "screenAfterRef": "dc6c2cb3e533",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/login",
+      "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/",
+      "stateScope": "dc6c2cb3e533",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    },
+    {
+      "id": "interaction-11",
+      "controlIdentity": "c52e3defc610|Solicitud multiproducto|role|link|Solicitud multiproducto",
+      "action": "click",
+      "pageKey": "tab-1",
+      "sourceEventRefs": [
+        "event-11"
+      ],
+      "technicalTargetRefs": [
+        "role:link|Solicitud multiproducto"
+      ],
+      "technicalTargetCandidates": [
+        {
+          "targetType": "structural",
+          "locatorCandidates": [
+            {
+              "strategy": "role",
+              "value": "link|Solicitud multiproducto",
+              "confidence": 0.85
+            }
+          ],
+          "structuralContext": {
+            "owner": {
+              "tag": "a"
+            },
+            "stableDirectAttributes": {
+              "href": "/requests/create/multiproduct"
+            },
+            "stableDescendants": [],
+            "semanticShape": [
+              "span"
+            ],
+            "landmarkAncestor": {
+              "tag": "main"
+            },
+            "deterministicStructuralIdentity": true,
+            "topologySignature": "{\"childEntries\":[[\"span\",2]],\"descendantEntries\":[[\"span\",2]]}",
+            "structuralIdentityMatchCount": 1,
+            "scopeIdentity": {
+              "strategy": "id",
+              "value": "pv_id_5_2_1"
+            },
+            "targetFingerprint": "{\"owner\":{\"tag\":\"a\"},\"stableDirectAttributes\":{\"href\":\"/requests/create/multiproduct\"},\"stableDescendants\":[],\"semanticShape\":[\"span\"],\"topologySignature\":\"{\\\"childEntries\\\":[[\\\"span\\\",2]],\\\"descendantEntries\\\":[[\\\"span\\\",2]]}\"}",
+            "captureScopeUnique": true,
+            "captureTargetMatchCount": 1
+          },
+          "interactionEvidence": [
+            "v2_click_owner"
+          ],
+          "confidence": 0.85,
+          "validatedByInteraction": true
+        }
+      ],
+      "validatedByInteraction": true,
+      "screenBeforeRef": "c52e3defc610",
+      "screenAfterRef": "9102375739c9",
+      "routeBefore": "https://srvqacgowb01.local.bsc.com:5000/",
+      "routeAfter": "https://srvqacgowb01.local.bsc.com:5000/requests/create/multiproduct",
+      "stateScope": "c52e3defc610",
+      "transitionObserved": true,
+      "causedTransition": true,
+      "terminalForContext": true,
+      "admissionStatus": "accepted",
+      "resolutionState": "certified",
+      "confidence": 0.85
+    }
+  ],
+  "gridMetadata": {
+    "detected": true,
+    "grids": 1,
+    "rows": 0,
+    "cells": 0,
+    "headers": [],
+    "headerRelationships": []
+  },
+  "source": "SessionTrace"
+}

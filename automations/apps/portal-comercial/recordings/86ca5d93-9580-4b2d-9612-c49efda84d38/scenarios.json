@@ -1852,7 +1852,7 @@
           "event-16"
         ],
         "stepTemplate": "Ingresar [numero_de_identificacion] en \"Número de identificación\"",
-        "renderedStep": "Ingresar \"00107933038\" en \"Número de identificación\"",
+        "renderedStep": "Ingresar \"03105530459\" en \"Número de identificación\"",
         "valueKey": "numero_de_identificacion",
         "interactionId": "interaction-16",
         "technicalTargetRefs": [],
@@ -28631,7 +28631,7 @@
       "oracleReadiness": true,
       "reviewReadiness": true,
       "publicationContentReadiness": true,
-      "executionReadiness": true,
+      "executionReadiness": false,
       "publicationReadiness": true,
       "missingInputs": [],
       "datasetAuthorityMismatches": [],
@@ -28682,7 +28682,7 @@
         "semanticField": "Número de identificación",
         "valueRole": "action_input",
         "required": true,
-        "value": "00107933038",
+        "value": "03105530459",
         "source": "CURRENT_QA_EDIT",
         "resolved": true,
         "sensitive": false,
@@ -28693,7 +28693,7 @@
         "masked": false,
         "editable": true,
         "authority": "explicit_qa_edit",
-        "authorityValue": "00107933038",
+        "authorityValue": "03105530459",
         "datasetAuthorityMismatch": false
       },
       {
@@ -30157,7 +30157,7 @@
           "semanticField": "Número de identificación",
           "valueRole": "action_input",
           "required": true,
-          "value": "00107933038",
+          "value": "03105530459",
           "source": "CURRENT_QA_EDIT",
           "resolved": true,
           "sensitive": false,
@@ -30168,7 +30168,7 @@
           "masked": false,
           "editable": true,
           "authority": "explicit_qa_edit",
-          "authorityValue": "00107933038",
+          "authorityValue": "03105530459",
           "datasetAuthorityMismatch": false
         },
         {
@@ -31589,7 +31589,7 @@
       "resolvedValues": {
         "usuario": "radames",
         "contrasena": "Masteryi16.",
-        "numero_de_identificacion": "00107933038",
+        "numero_de_identificacion": "03105530459",
         "oficial_seleccion": "9J4WX JXU5Z5 WZW C5XXJP",
         "promotor_seleccion": "UJ4JQ C UJ4JQ 45PWZS5",
         "fecha_de_expiracion": "28-06-2040",

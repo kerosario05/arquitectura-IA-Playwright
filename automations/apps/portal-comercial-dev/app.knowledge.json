@@ -2,7 +2,7 @@
   "version": 1,
   "appSlug": "portal-comercial-dev",
   "createdAt": "2026-11-06T19:31:49.356Z",
-  "updatedAt": "2026-11-08T18:23:05.818Z",
+  "updatedAt": "2026-11-08T19:45:42.475Z",
   "items": [],
   "jiraRoutes": [
     {
@@ -311,8 +311,8 @@
       "profileRevision": "2a50b1ee66989ea11fb0fa11684dc426732ef052c7ff79afff1022903ac3a395",
       "sourceIssueKey": "AA-116",
       "scenarioId": "cb20fe11-9dd1-4467-a976-674a4b2e91b4",
-      "jobId": "8ead7c5c-b1be-4170-a8d1-b5ab2a5321ab",
-      "validatedAt": "2026-11-08T18:23:05.805Z",
+      "jobId": "ec21e6e2-c433-4714-9d35-5a40948e90c0",
+      "validatedAt": "2026-11-08T19:45:42.467Z",
       "startsFrom": "project_entry",
       "actions": [
         {

@@ -37439,30 +37439,30 @@
         "description": "Paso fallido:\nPaso 10: Depurar\n\nQué pasó:\nLa ejecución falló con código: click_no_causal_effect_detected\n\nResultado esperado:\nLa aplicación carga su pantalla inicial\n\nEvidencia:\nEvidencia técnica disponible.",
         "severity": "medium",
         "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
-        "jobId": "305afb3a-a395-4778-a029-85016bf5d8bd",
+        "jobId": "5215b192-c4a9-459a-8356-456ab94fc2e9",
         "status": "pending_review",
         "scenarioId": "PREVIEW-001",
         "scenarioTitle": "Crear Certificado",
         "title": "[Media] No se encontró \"Depurar\" (paso 10) — Crear Certificado",
         "technicalContext": {
-          "reasonCode": "target_not_found",
+          "reasonCode": "RECORDED_POSTCONDITION_NOT_REACHED",
           "discoveryStatus": "exploration_failed",
-          "failedAtStep": 67,
-          "failedTarget": "recorded control",
+          "failedAtStep": 12,
+          "failedTarget": "Depurar",
           "expectedResult": "La aplicación carga su pantalla inicial",
-          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-06T22-15-07-157Z\\evidence",
-          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-06T22-15-07-157Z\\evidence\\step-66-snapshot.json",
+          "evidenceDir": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-08T18-48-12-018Z\\evidence",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-08T18-48-12-018Z\\evidence\\step-11-snapshot.json",
           "lastSuccessfulStep": {
-            "stepIndex": 66,
-            "action": "Presionar \"Añadir ó actualizar relacionado\"",
-            "target": "Añadir ó actualizar relacionado",
-            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-06T22-15-07-157Z\\evidence\\step-66-snapshot.json"
+            "stepIndex": 11,
+            "action": "Ingresar \"12-03-2040\" en \"Fecha de expiración\"",
+            "target": "Fecha de expiración",
+            "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\preview\\PREVIEW-001\\2026-11-08T18-48-12-018Z\\evidence\\step-11-snapshot.json"
           },
-          "testRailCaseId": 57447,
-          "testRailRunId": 5377
+          "testRailCaseId": 57548,
+          "testRailRunId": 5461
         },
         "createdAt": "2026-11-04T23:38:45.368Z",
-        "updatedAt": "2026-11-06T22:29:48.377Z"
+        "updatedAt": "2026-11-08T18:51:17.370Z"
       },
       {
         "id": "1793835525407-qm9bpye",
@@ -41666,8 +41666,58 @@
     "id": "1794161248900-cte7sak",
     "issueKey": "launch:18b4edfd-bf80-40d4-ac0a-fd49b522e161",
     "urlSlug": "launch:18b4edfd-bf80-40d4-ac0a-fd49b522e161",
-    "defects": [],
+    "defects": [
+      {
+        "id": "1794161660285-4pd8ugi",
+        "description": "Paso fallido:\nPaso 75\n\nQué pasó:\nLa ejecución falló con código: jira_assertion_not_satisfied\n\nEvidencia:\nEvidencia técnica disponible.",
+        "severity": "medium",
+        "severityReason": "Validación esperada no encontrada. Requiere revisión funcional.",
+        "jobId": "695a3de3-cb67-4d89-92ef-4d5c73db77cf",
+        "status": "pending_review",
+        "scenarioId": "cb20fe11-9dd1-4467-a976-674a4b2e91b4",
+        "scenarioTitle": "Crear cliente persona jurídica con relacionado persona física",
+        "title": "[Media] La ejecución falló con código: jira_assertion_not_satisfied (paso 75) — Crear cliente persona jurídica con relacionado persona física",
+        "technicalContext": {
+          "dedupeKey": "695a3de3-cb67-4d89-92ef-4d5c73db77cf::57550::cb20fe11-9dd1-4467-a976-674a4b2e91b4",
+          "reasonCode": "JIRA_ASSERTION_NOT_SATISFIED",
+          "discoveryStatus": "failed",
+          "rawError": "Jira semantic Discovery failed at step 75: JIRA_ASSERTION_NOT_SATISFIED.",
+          "testRailCaseId": 57550,
+          "testRailRunId": 5458,
+          "caseId": 57550,
+          "scenarioId": "cb20fe11-9dd1-4467-a976-674a4b2e91b4",
+          "sourceType": "jira_preview",
+          "appSlug": "portal-comercial-dev",
+          "sectionSlug": "automatizacion-persona-juridica",
+          "status": "failed",
+          "failureReason": "JIRA_ASSERTION_NOT_SATISFIED",
+          "errorMessage": "Jira semantic Discovery failed at step 75: JIRA_ASSERTION_NOT_SATISFIED.",
+          "launchId": "18b4edfd-bf80-40d4-ac0a-fd49b522e161",
+          "failedAtStep": 75,
+          "screenshotPath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\scenario-preview-runs\\f557227c-b9d0-490d-9038-5a29d0babe7e\\failed-1.png",
+          "evidencePath": "C:\\MisProyectos\\arquitectura-IA-Playwright-feature-auth-gate\\.artifacts\\scenario-preview-runs\\f557227c-b9d0-490d-9038-5a29d0babe7e\\failed-1.png"
+        },
+        "createdAt": "2026-11-08T18:14:20.285Z",
+        "updatedAt": "2026-11-08T18:14:20.285Z"
+      }
+    ],
     "createdAt": "2026-11-08T18:07:28.900Z",
-    "updatedAt": "2026-11-08T18:07:28.900Z"
+    "updatedAt": "2026-11-08T18:14:20.285Z"
+  },
+  {
+    "id": "1794161893049-utxiqs5",
+    "issueKey": "launch:1fc52edb-691c-4292-bdca-3fce5d3b5177",
+    "urlSlug": "launch:1fc52edb-691c-4292-bdca-3fce5d3b5177",
+    "defects": [],
+    "createdAt": "2026-11-08T18:18:13.049Z",
+    "updatedAt": "2026-11-08T18:18:13.049Z"
+  },
+  {
+    "id": "1794166836923-otfv0x0",
+    "issueKey": "launch:3a49f38c-0cca-493b-9ca3-e279accf8622",
+    "urlSlug": "launch:3a49f38c-0cca-493b-9ca3-e279accf8622",
+    "defects": [],
+    "createdAt": "2026-11-08T19:40:36.923Z",
+    "updatedAt": "2026-11-08T19:40:36.923Z"
   }
 ]
