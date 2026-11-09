@@ -115,6 +115,8 @@ export function createPortalSessionFetcher(
 }
 
 const DEFAULT_REQUEST_TYPE = "MultiProdNatural";
+/** Request type token meaning "every type": the list is not filtered by Type. */
+export const ANY_REQUEST_TYPE = "*";
 const ACTIVE_STATUSES = new Set(["draft", "inprogress"]);
 const APPROVED_TRANSITIONS: Record<string, { to: string; reason: string }> = {
   compliance: { to: "cancelled", reason: "CANCEL" },
@@ -165,7 +167,7 @@ function requestId(request: PortalRequestRecord): string {
 
 function isEligibleRequest(request: PortalRequestRecord, expectedIdentity: string, requestType: string): boolean {
   if (identifyRequest(request) !== expectedIdentity) return false;
-  if (String(request.type ?? "") !== requestType) return false;
+  if (requestType !== ANY_REQUEST_TYPE && String(request.type ?? "") !== requestType) return false;
   if (!ACTIVE_STATUSES.has(String(request.status ?? "").toLowerCase())) return false;
   if (String(request.subStatus ?? "").toLowerCase() === "cancelled") return false;
 
@@ -184,7 +186,7 @@ function isEligibleRequest(request: PortalRequestRecord, expectedIdentity: strin
  */
 function isPartiallyCancelled(request: PortalRequestRecord, expectedIdentity: string, requestType: string): boolean {
   return identifyRequest(request) === expectedIdentity
-    && String(request.type ?? "") === requestType
+    && (requestType === ANY_REQUEST_TYPE || String(request.type ?? "") === requestType)
     && ACTIVE_STATUSES.has(String(request.status ?? "").toLowerCase())
     && String(request.subStatus ?? "").toLowerCase() === "cancelled"
     && String(request.dataByType?.model?.status ?? "").toLowerCase() === "cancelled"
@@ -202,6 +204,31 @@ function isLocallyCancelledDraft(request: PortalRequestRecord): boolean {
   return String(request.subStatus ?? "").toLowerCase() === "cancelled"
     && String(request.dataByType?.model?.status ?? "").toLowerCase() === "cancelled"
     && !(typeof code === "string" && code.trim() !== "");
+}
+
+/**
+ * The Portal stores the creator as an e-mail ("radames@bsc.com.do"). A user name matches its own e-mail exactly
+ * (the part before "@"), never a longer name such as "radames2".
+ */
+function creatorMatches(creator: string, wanted: string): boolean {
+  const target = wanted.trim().toLowerCase();
+  if (!creator || !target) return false;
+  return creator === target || (!target.includes("@") && creator.split("@")[0] === target);
+}
+
+/** Creator of a request as the Portal list reports it (the field name varies by Portal build). */
+function creatorOf(request: PortalRequestRecord): string {
+  for (const key of ["createdBy", "createdByName", "creator", "createdByUser"]) {
+    const value = request[key];
+    if (typeof value === "string" && value.trim()) return value.trim().toLowerCase();
+    if (value && typeof value === "object") {
+      const named = (value as Record<string, unknown>);
+      for (const inner of ["userName", "username", "name", "email", "id"]) {
+        if (typeof named[inner] === "string" && String(named[inner]).trim()) return String(named[inner]).trim().toLowerCase();
+      }
+    }
+  }
+  return "";
 }
 
 function toCandidate(request: PortalRequestRecord): CancellationCandidate {
@@ -270,14 +297,15 @@ export function createPortalRequestCancellationService(
     return result;
   }
 
-  async function getPage(page: number, includeData: boolean): Promise<{ items: PortalRequestRecord[]; totalPages: number }> {
+  async function getPage(page: number, includeData: boolean, createdByContains = ""): Promise<{ items: PortalRequestRecord[]; totalPages: number }> {
     const base = assertReady();
     const url = new URL("/api/proxy/api/Requests", base);
-    url.searchParams.set("Type", config.requestType || DEFAULT_REQUEST_TYPE);
+    const listType = config.requestType || DEFAULT_REQUEST_TYPE;
+    url.searchParams.set("Type", listType === ANY_REQUEST_TYPE ? "" : listType);
     url.searchParams.set("CustomIdentifierContains", "");
     url.searchParams.set("SubType", "");
     url.searchParams.set("SubStatus", "");
-    url.searchParams.set("CreatedByContains", "");
+    url.searchParams.set("CreatedByContains", createdByContains);
     url.searchParams.set("UpdatedByContains", "");
     url.searchParams.set("Page", String(page));
     url.searchParams.set("Items", String(config.pageSize ?? 100));
@@ -310,12 +338,12 @@ export function createPortalRequestCancellationService(
     return { items: body.items, totalPages };
   }
 
-  async function listAllRequests(includeData: boolean): Promise<PortalRequestRecord[]> {
-    const first = await getPage(1, includeData);
+  async function listAllRequests(includeData: boolean, createdByContains = ""): Promise<PortalRequestRecord[]> {
+    const first = await getPage(1, includeData, createdByContains);
     const items = [...first.items];
     for (let page = 2; page <= first.totalPages; page += 4) {
       const pages = Array.from({ length: Math.min(4, first.totalPages - page + 1) }, (_, offset) => page + offset);
-      const results = await Promise.all(pages.map((number) => getPage(number, includeData)));
+      const results = await Promise.all(pages.map((number) => getPage(number, includeData, createdByContains)));
       for (const result of results) {
         if (result.totalPages !== first.totalPages) {
           throw new PortalCancellationError("qa_pagination_changed", 409, "La lista QA cambió durante la lectura; vuelve a revisar la vista previa.");
@@ -630,5 +658,142 @@ export function createPortalRequestCancellationService(
     }
   }
 
-  return { preview, cancel, cancelAll, awaitNoActiveBizagiCases, listBizagiCaseCodes };
+  /**
+   * Requests created by one Portal user. The list is filtered by creator on the server (CreatedByContains) and then
+   * by exact creator here, because "contains" would also match another user whose name includes this one. Each
+   * identity's eligible requests are cancelled with the same checks as the per-identity flow (`cancel`).
+   */
+  async function reviewByCreator(createdByInput: unknown) {
+    assertReady();
+    const createdBy = String(createdByInput ?? "").trim();
+    if (!/^[A-Za-z0-9._@-]{3,64}$/.test(createdBy)) {
+      throw new PortalCancellationError("creator_invalid", 400, "Indica el usuario creador (3 a 64 caracteres, sin espacios).");
+    }
+    const requestType = config.requestType || DEFAULT_REQUEST_TYPE;
+    const records = await listAllRequests(true, createdBy);
+    const creatorsSeen = [...new Set(records.map(creatorOf).filter(Boolean))].slice(0, 10);
+    const own = records.filter((item) => creatorMatches(creatorOf(item), createdBy));
+    const byIdentity = new Map<string, PortalRequestRecord[]>();
+    for (const item of own) {
+      const identity = identifyRequest(item);
+      byIdentity.set(identity, [...(byIdentity.get(identity) ?? []), item]);
+    }
+    const groups = [...byIdentity.entries()].map(([identity, rows]) => {
+      const eligible = rows.filter((item) => identity.length >= 6 && identity.length <= 20
+        && (isEligibleRequest(item, identity, requestType) || isPartiallyCancelled(item, identity, requestType)));
+      return { identity, eligible, omitted: rows.filter((item) => !eligible.includes(item)) };
+    });
+    return { createdBy, requestType, own, groups, creatorsSeen };
+  }
+
+  async function previewByCreatorOneType(createdByInput: unknown) {
+    const review = await reviewByCreator(createdByInput);
+    const hint = (identity: string) => identity.length > 4 ? `${"•".repeat(Math.max(0, identity.length - 4))}${identity.slice(-4)}` : "(sin identidad)";
+    return {
+      createdBy: review.createdBy,
+      requestType: review.requestType,
+      found: review.own.length,
+      // When nothing matches, the creator names the Portal actually returned help to spot a different spelling.
+      ...(review.own.length === 0 && review.creatorsSeen.length ? { creatorsSeen: review.creatorsSeen } : {}),
+      candidates: review.groups.flatMap((group) => group.eligible.map((item) => ({ ...toCandidate(item), type: String(item.type ?? ""), identityHint: hint(group.identity) }))),
+      omitted: review.groups.flatMap((group) => group.omitted.map((item) => ({
+        id: requestId(item), status: String(item.status ?? ""), subStatus: String(item.subStatus ?? ""),
+        modelStatus: String(item.dataByType?.model?.status ?? ""), type: String(item.type ?? ""), identityHint: hint(group.identity),
+      }))),
+    };
+  }
+
+  async function cancelByCreatorOneType(createdByInput: unknown, confirmed: unknown, onProgress?: (cancelledIds: string[], total?: number) => void) {
+    assertReady();
+    if (confirmed !== true) {
+      throw new PortalCancellationError("confirmation_required", 400, "Confirma explícitamente la vista previa antes de cancelar.");
+    }
+    const review = await reviewByCreator(createdByInput);
+    const total = review.groups.reduce((sum, group) => sum + group.eligible.length, 0);
+    onProgress?.([], total);
+    const cancelledIds: string[] = [];
+    let failed: { id: string; reason: string } | null = null;
+    outer: for (const group of review.groups) {
+      const ids = group.eligible.map(requestId);
+      // One request at a time so a long run can report progress after each one.
+      for (const id of ids) {
+        const result = await cancel(group.identity, [id], true);
+        cancelledIds.push(...result.cancelledIds);
+        onProgress?.([...cancelledIds], total);
+        if (result.failed) { failed = result.failed; break outer; }
+      }
+    }
+    return { createdBy: review.createdBy, cancelledIds, failed };
+  }
+
+  /** Request types to work on: the configured one by default, or an explicit list (up to 5). */
+  function typesFor(input: unknown): string[] {
+    const fallback = config.requestType || DEFAULT_REQUEST_TYPE;
+    const list = Array.isArray(input) && input.length ? input : [fallback];
+    const types = [...new Set(list.map((value) => String(value ?? "").trim()))];
+    if (types.length > 5 || types.some((type) => type !== ANY_REQUEST_TYPE && !/^[A-Za-z0-9]{3,64}$/.test(type))) {
+      throw new PortalCancellationError("request_type_invalid", 400, "Indica hasta 5 tipos de solicitud válidos (letras y números).");
+    }
+    return types;
+  }
+  type OnePreview = Awaited<ReturnType<typeof previewByCreatorOneType>>;
+  type OneCancel = Awaited<ReturnType<typeof cancelByCreatorOneType>>;
+  // The same service for another request type. Each one runs its single-type path, so there is no recursion.
+  const forType = (requestType: string) => createPortalRequestCancellationService({ ...config, requestType }, fetcher) as unknown as {
+    previewByCreator(createdBy: unknown): Promise<OnePreview>;
+    cancelByCreator(createdBy: unknown, confirmed: unknown, requestTypes?: unknown, onProgress?: (cancelledIds: string[], total?: number) => void): Promise<OneCancel>;
+  };
+
+  async function previewByCreator(createdByInput: unknown, requestTypesInput?: unknown): Promise<Omit<OnePreview, "candidates" | "omitted"> & {
+    requestTypes: string[];
+    candidates: Array<OnePreview["candidates"][number] & { requestType?: string }>;
+    omitted: Array<OnePreview["omitted"][number] & { requestType?: string }>;
+  }> {
+    const types = typesFor(requestTypesInput);
+    if (types.length === 1 && types[0] === (config.requestType || DEFAULT_REQUEST_TYPE)) {
+      const single = await previewByCreatorOneType(createdByInput);
+      return { ...single, requestTypes: types };
+    }
+    const parts = [];
+    for (const type of types) parts.push(await forType(type).previewByCreator(createdByInput));
+    return {
+      createdBy: parts[0].createdBy,
+      requestType: types.join(","),
+      requestTypes: types,
+      found: parts.reduce((sum, part) => sum + part.found, 0),
+      candidates: parts.flatMap((part) => part.candidates.map((item) => ({ ...item, requestType: part.requestType }))),
+      omitted: parts.flatMap((part) => part.omitted.map((item) => ({ ...item, requestType: part.requestType }))),
+      ...(parts.every((part) => part.found === 0) ? { creatorsSeen: [...new Set(parts.flatMap((part) => part.creatorsSeen ?? []))].slice(0, 10) } : {}),
+    };
+  }
+
+  async function cancelByCreator(createdByInput: unknown, confirmed: unknown, requestTypesInput?: unknown, onProgress?: (cancelledIds: string[], total?: number) => void): Promise<OneCancel & { requestTypes?: string[] }> {
+    const types = typesFor(requestTypesInput);
+    if (types.length === 1 && types[0] === (config.requestType || DEFAULT_REQUEST_TYPE)) {
+      return cancelByCreatorOneType(createdByInput, confirmed, onProgress);
+    }
+    if (confirmed !== true) {
+      throw new PortalCancellationError("confirmation_required", 400, "Confirma explícitamente la vista previa antes de cancelar.");
+    }
+    const cancelledIds: string[] = [];
+    let failed: { id: string; reason: string } | null = null;
+    let createdBy = String(createdByInput ?? "").trim();
+    let totalSoFar = 0;
+    for (const type of types) {
+      const doneBefore = [...cancelledIds];
+      const totalBefore = totalSoFar;
+      let typeTotal = 0;
+      const result = await forType(type).cancelByCreator(createdByInput, true, undefined, (ids, total) => {
+        if (total !== undefined) typeTotal = total;
+        onProgress?.([...doneBefore, ...ids], totalBefore + typeTotal);
+      });
+      totalSoFar = totalBefore + typeTotal;
+      createdBy = result.createdBy;
+      cancelledIds.push(...result.cancelledIds);
+      if (result.failed) { failed = result.failed; break; }
+    }
+    return { createdBy, requestTypes: types, cancelledIds, failed };
+  }
+
+  return { preview, cancel, cancelAll, previewByCreator, cancelByCreator, awaitNoActiveBizagiCases, listBizagiCaseCodes };
 }

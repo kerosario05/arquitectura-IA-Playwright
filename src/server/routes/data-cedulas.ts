@@ -1,3 +1,4 @@
+import { resolvePortalLogin } from "../services/portal-login-resolver";
 import { spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -63,14 +64,17 @@ router.get("/api/data-cedulas/ready/status", (_req: Request, res: Response) => {
   });
 });
 
-router.post("/api/data-cedulas/ready/start", (req: Request, res: Response) => {
+router.post("/api/data-cedulas/ready/start", async (req: Request, res: Response) => {
   try {
     if (readyJobRunning()) return res.status(409).json({ ok: false, error: "already_running" });
     const target = Number(req.body?.target);
     if (!Number.isInteger(target) || target < 1 || target > 5000) return res.status(400).json({ ok: false, error: "target debe ser un entero entre 1 y 5000" });
     const database = validateDataCedulasDatabase(req.body?.database ?? "QA1");
-    const recordingId = String(req.body?.recordingId ?? process.env.DATA_CEDULAS_READY_RECORDING_ID ?? "").trim();
-    if (!/^[0-9a-f-]{36}$/i.test(recordingId)) return res.status(400).json({ ok: false, error: "recordingId (grabación de Portal con usuario y contraseña) es obligatorio" });
+    // Optional: without a recording the script signs in with the project's saved login (see portal-login-resolver).
+    const requestedRecording = String(req.body?.recordingId ?? process.env.DATA_CEDULAS_READY_RECORDING_ID ?? "").trim();
+    if (requestedRecording && !/^[0-9a-f-]{36}$/i.test(requestedRecording)) return res.status(400).json({ ok: false, error: "recordingId no es válido" });
+    if (!requestedRecording && !(await resolvePortalLogin("portal-comercial"))) return res.status(400).json({ ok: false, error: "credentials_required", message: "Faltan las credenciales del Portal: guárdalas en el Catálogo de servicios (tarjeta Generación de cédulas listas) y vuelve a intentar." });
+    const recordingId = requestedRecording || "-";
     // Renewing starts from zero: every cédula is prepared and checked again with a current master date.
     if (req.body?.renew === true) fs.rmSync(READY_STATE, { force: true });
     fs.mkdirSync(path.dirname(READY_LOG), { recursive: true });

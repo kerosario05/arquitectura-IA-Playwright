@@ -45,6 +45,25 @@ import {
   getPortalCancellationEnvironment,
   PortalCancellationError,
 } from "../services/portal-comercial-request-cancellation";
+import { withCancellationService } from "../services/portal-cancellation-runner";
+import {
+  CancellationAlreadyRunningError,
+  getCancellationOperation,
+  getLatestCancellationOperation,
+  startCancellationOperation,
+} from "../services/portal-cancellation-operations";
+import {
+  deleteServiceCredential,
+  getServiceCredentialStatus,
+  saveServiceCredential,
+  ServiceCredentialError,
+} from "../../db/project-service-credential-service";
+import { SecretBoxError } from "../../db/secret-box";
+import { cancelRequestsByIds, createDbCedulaReleaser, listCancellableRequests, PortalDbError, portalDbLocation } from "../services/portal-requests-db";
+import { describePortalDbAccess, PORTAL_DB_CREDENTIAL, resolvePortalDbTarget } from "../services/portal-db-target";
+import { PortalDbImportError, readPortalDbSettingsFile } from "../services/portal-db-import";
+import { resolvePortalLogin } from "../services/portal-login-resolver";
+import { createSessionCedulaReleaser } from "../services/data-cedulas-reuse";
 import {
   findNextDataCedulasCustomers,
   listDataCedulasTnsAliases,
@@ -178,7 +197,12 @@ projectsRouter.post("/:slug/data-services/data-cedulas/generate", async (req, re
     const excludeCedulas = Array.isArray(req.body?.excludeCedulas)
       ? req.body.excludeCedulas.filter((value: unknown): value is string => typeof value === "string").slice(0,100)
       : [];
-    const result = await findNextDataCedulasCustomers(database, count, excludeCedulas);
+    // Before a cédula is handed out, its open Portal requests are cancelled straight in the Portal database;
+    // without a configured database, with the project's saved Portal login instead.
+    const dbTarget = await resolvePortalDbTarget(req.params.slug).catch(() => undefined);
+    const portal = dbTarget ? undefined : await resolvePortalLogin(req.params.slug);
+    const release = dbTarget ? createDbCedulaReleaser(dbTarget) : portal ? createSessionCedulaReleaser(portal.login) : undefined;
+    const result = await findNextDataCedulasCustomers(database, count, excludeCedulas, release ? { release } : {});
     if (!result) {
       sendError(res, 404, "data_cedulas_not_found", "No se encontró una cédula nueva dentro del límite de búsqueda.");
       return;
@@ -197,51 +221,119 @@ projectsRouter.post("/:slug/data-services/data-cedulas/generate", async (req, re
   }
 });
 
-projectsRouter.post("/:slug/requests/cancellation-preview", async (req, res) => {
+type CancellationHandler = (service: ReturnType<typeof createPortalRequestCancellationService>, body: any) => Promise<unknown>;
+
+/** `manual`: an explicit run from the service panel works without assigning the service to the project. */
+function portalCancellationRoute(handler: CancellationHandler, options: { manual?: boolean } = {}) {
+  return async (req: any, res: any) => {
+    const appConfig = getPortalCancellationAppConfig(req.params.slug);
+    if (!appConfig) {
+      sendError(res, 404, "request_cancellation_unavailable", "La cancelación QA no está disponible para este proyecto.");
+      return;
+    }
+    try {
+      res.json(await withCancellationService(req.params.slug, options.manual === true || appConfig.requestCancellation?.enabled === true, (service) => handler(service, req.body)));
+    } catch (error) { sendPortalCancellationError(res, error); }
+  };
+}
+
+projectsRouter.post("/:slug/requests/cancellation-preview", portalCancellationRoute((service, body) => service.preview(body?.identification)));
+projectsRouter.post("/:slug/requests/cancel-all", portalCancellationRoute((service, body) => service.cancelAll(body?.identification, body?.confirmed)));
+projectsRouter.post("/:slug/requests/cancel", portalCancellationRoute((service, body) => service.cancel(body?.identification, body?.requestIds, body?.confirmed)));
+// By creator: every cancellable request opened by one Portal user (e.g. the QA user), reviewed first.
+projectsRouter.post("/:slug/requests/cancellation-preview-by-creator", portalCancellationRoute((service, body) => service.previewByCreator(body?.createdBy, body?.requestTypes), { manual: true }));
+// Long run: starts in the background and answers 202; the panel polls GET .../cancel-by-creator/:operationId.
+projectsRouter.post("/:slug/requests/cancel-by-creator", async (req: any, res: any) => {
   const appConfig = getPortalCancellationAppConfig(req.params.slug);
-  if (!appConfig) {
-    sendError(res, 404, "request_cancellation_unavailable", "La cancelación QA no está disponible para este proyecto.");
-    return;
-  }
+  if (!appConfig) { sendError(res, 404, "request_cancellation_unavailable", "La cancelación QA no está disponible para este proyecto."); return; }
+  if (req.body?.confirmed !== true) { sendError(res, 400, "confirmation_required", "Confirma explícitamente la vista previa antes de cancelar."); return; }
+  const slug = req.params.slug as string;
+  const createdBy = String(req.body?.createdBy ?? "").trim();
   try {
-    const service = createPortalRequestCancellationService({
-      ...getPortalCancellationEnvironment(),
-      enabled: appConfig.requestCancellation?.enabled === true,
-    });
-    res.json(await service.preview(req.body?.identification));
-  } catch (error) { sendPortalCancellationError(res, error); }
+    const operation = startCancellationOperation(slug, createdBy, (onProgress) =>
+      withCancellationService(slug, true, (service) => service.cancelByCreator(createdBy, true, req.body?.requestTypes, onProgress)));
+    res.status(202).json({ operationId: operation.id, status: operation.status });
+  } catch (error) {
+    if (error instanceof CancellationAlreadyRunningError) { res.status(409).json({ ok: false, error: "cancellation_already_running", message: "Ya hay una cancelación en curso para este proyecto.", operationId: error.operationId }); return; }
+    sendPortalCancellationError(res, error);
+  }
+});
+const operationView = (operation: NonNullable<ReturnType<typeof getCancellationOperation>>) => ({
+  operationId: operation.id, status: operation.status, createdBy: operation.createdBy, total: operation.total,
+  cancelledCount: operation.cancelledIds.length, cancelledIds: operation.cancelledIds, failed: operation.failed,
+  ...(operation.error ? { error: operation.error } : {}), startedAt: operation.startedAt,
+  ...(operation.finishedAt ? { finishedAt: operation.finishedAt } : {}),
+});
+// The run in progress (or the latest one): lets a reopened panel follow it without starting anything.
+projectsRouter.get("/:slug/requests/cancel-by-creator", (req: any, res: any) => {
+  const operation = getLatestCancellationOperation(req.params.slug);
+  res.json(operation ? operationView(operation) : { status: "none" });
+});
+projectsRouter.get("/:slug/requests/cancel-by-creator/:operationId", (req: any, res: any) => {
+  const operation = getCancellationOperation(req.params.slug, req.params.operationId);
+  if (!operation) { sendError(res, 404, "operation_not_found", "No existe esa operación (el servidor pudo reiniciarse)."); return; }
+  res.json(operationView(operation));
 });
 
-projectsRouter.post("/:slug/requests/cancel-all", async (req, res) => {
-  const appConfig = getPortalCancellationAppConfig(req.params.slug);
-  if (!appConfig) {
-    sendError(res, 404, "request_cancellation_unavailable", "La cancelación QA no está disponible para este proyecto.");
-    return;
-  }
+// Cancel Portal requests straight in the Portal API database, for a reviewed selection of one creator's requests.
+function sendPortalDbError(res: any, error: unknown) {
+  if (error instanceof PortalDbError) { sendError(res, error.status, error.code, error.message); return; }
+  if (error instanceof ServiceCredentialError) { sendError(res, error.status, error.code, error.message); return; }
+  sendError(res, 500, "portal_db_internal_error", "No se pudo completar la operación en la base del Portal.");
+}
+projectsRouter.get("/:slug/requests/db-cancellation/config", async (req: any, res: any) => {
+  if (!getPortalCancellationAppConfig(req.params.slug)) { sendError(res, 404, "request_cancellation_unavailable", "La cancelación QA no está disponible para este proyecto."); return; }
   try {
-    const service = createPortalRequestCancellationService({
-      ...getPortalCancellationEnvironment(),
-      enabled: appConfig.requestCancellation?.enabled === true,
-    });
-    res.json(await service.cancelAll(req.body?.identification, req.body?.confirmed));
-  } catch (error) { sendPortalCancellationError(res, error); }
+    const access = await describePortalDbAccess(req.params.slug);
+    res.json({ ...access, settingsPathHint: process.env.PORTAL_API_APPSETTINGS?.trim() || undefined,
+      credentials: await getServiceCredentialStatus(req.params.slug, PORTAL_DB_CREDENTIAL) });
+  } catch (error) { sendPortalDbError(res, error); }
 });
-
-projectsRouter.post("/:slug/requests/cancel", async (req, res) => {
-  const appConfig = getPortalCancellationAppConfig(req.params.slug);
-  if (!appConfig) {
-    sendError(res, 404, "request_cancellation_unavailable", "La cancelación QA no está disponible para este proyecto.");
-    return;
-  }
+// Import the database sign-in from the Portal API's appsettings.json (read on the machine where QA Lab runs).
+// Only user/server/database are returned; the password is stored encrypted and never leaves the server.
+projectsRouter.post("/:slug/requests/db-cancellation/import-settings", async (req: any, res: any) => {
+  if (!getPortalCancellationAppConfig(req.params.slug)) { sendError(res, 404, "request_cancellation_unavailable", "La cancelación QA no está disponible para este proyecto."); return; }
   try {
-    const service = createPortalRequestCancellationService({
-      ...getPortalCancellationEnvironment(),
-      enabled: appConfig.requestCancellation?.enabled === true,
-    });
-    res.json(await service.cancel(req.body?.identification, req.body?.requestIds, req.body?.confirmed));
-  } catch (error) { sendPortalCancellationError(res, error); }
+    const imported = readPortalDbSettingsFile(req.body?.path);
+    const status = await saveServiceCredential(req.params.slug, PORTAL_DB_CREDENTIAL, { username: imported.user, password: imported.password }, req.principal?.username);
+    const location = portalDbLocation();
+    res.json({ credentials: status, username: imported.user, server: imported.server, database: imported.database,
+      matchesConfiguredLocation: location.server === imported.server && location.database === imported.database });
+  } catch (error) {
+    if (error instanceof PortalDbImportError) { sendError(res, error.status, error.code, error.message); return; }
+    sendPortalDbError(res, error);
+  }
+});projectsRouter.post("/:slug/requests/db-cancellation/preview", async (req: any, res: any) => {
+  if (!getPortalCancellationAppConfig(req.params.slug)) { sendError(res, 404, "request_cancellation_unavailable", "La cancelación QA no está disponible para este proyecto."); return; }
+  try { res.json(await listCancellableRequests(await resolvePortalDbTarget(req.params.slug), req.body?.createdBy)); }
+  catch (error) { sendPortalDbError(res, error); }
 });
-
+projectsRouter.post("/:slug/requests/db-cancellation/cancel", async (req: any, res: any) => {
+  if (!getPortalCancellationAppConfig(req.params.slug)) { sendError(res, 404, "request_cancellation_unavailable", "La cancelación QA no está disponible para este proyecto."); return; }
+  try {
+    res.json(await cancelRequestsByIds(await resolvePortalDbTarget(req.params.slug), {
+      createdBy: req.body?.createdBy, ids: req.body?.ids, confirmed: req.body?.confirmed, dryRun: req.body?.dryRun === true, actor: req.principal?.username,
+    }));
+  } catch (error) { sendPortalDbError(res, error); }
+});
+// Credentials a catalog service asks for from its own panel. The password is write-only: reads return status.
+function sendServiceCredentialError(res: any, error: unknown) {
+  if (error instanceof ServiceCredentialError) { sendError(res, error.status, error.code, error.message); return; }
+  if (error instanceof SecretBoxError) { sendError(res, 500, error.code, error.message); return; }
+  sendError(res, 500, "service_credential_internal_error", "No se pudo completar la operación de credenciales.");
+}
+projectsRouter.get("/:slug/service-credentials/:credentialKey", async (req: any, res: any) => {
+  try { res.json(await getServiceCredentialStatus(req.params.slug, req.params.credentialKey)); }
+  catch (error) { sendServiceCredentialError(res, error); }
+});
+projectsRouter.put("/:slug/service-credentials/:credentialKey", async (req: any, res: any) => {
+  try { res.json(await saveServiceCredential(req.params.slug, req.params.credentialKey, req.body ?? {}, req.principal?.username)); }
+  catch (error) { sendServiceCredentialError(res, error); }
+});
+projectsRouter.delete("/:slug/service-credentials/:credentialKey", async (req: any, res: any) => {
+  try { await deleteServiceCredential(req.params.slug, req.params.credentialKey); res.json({ configured: false }); }
+  catch (error) { sendServiceCredentialError(res, error); }
+});
 projectsRouter.get("/:projectSlug/data-catalogs", async (req, res, next) => {
   try { res.json({ catalogs: await listProjectDataCatalogs(req.params.projectSlug, req.query.includeInactive === "true") }); }
   catch (error) { next(error); }

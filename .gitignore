@@ -132,3 +132,5 @@ data/descargas/
 
 # Clones git del módulo Planificación de pruebas (GIT_REPOS_DIR)
 data/repos/
+# Encryption key for secrets stored in the database (src/db/secret-box.ts)
+data/secret.key

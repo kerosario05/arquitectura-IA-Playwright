@@ -9,8 +9,11 @@ import { portalLoginFromRequirements, withPortalSession } from "../src/server/se
 import { ficoApprovesLoan } from "../src/server/services/fico-engine-probe";
 import { findNextDataCedulasCustomers } from "../src/server/services/data-cedulas-new-customer";
 import { prepareCedulaRecord, type SqlRunner } from "../src/server/services/data-cedulas-prepare";
+import { resolvePortalLogin } from "../src/server/services/portal-login-resolver";
 
-// Usage: npx tsx scripts/prepare-ready-cedulas.ts <recordingId> <target> [db=QA1]
+// Usage: npx tsx scripts/prepare-ready-cedulas.ts <recordingId|-> <target> [db=QA1]
+// "-" (or a recording without login values) signs in with the project's saved login: DATA_CEDULAS_LEXIS_PORTAL_USERNAME/_PASSWORD
+// when set, otherwise the usuario/contrasena last confirmed when a portal-comercial case was launched.
 // Leaves <target> cédulas with a current master date (FechaProceso = now, rows backed up first) and an
 // engine "approved" verdict. Resumable: progress lives in .artifacts/data-cedulas-ready.json.
 // Every engine verdict is a real consultation, so the loop is sequential.
@@ -21,7 +24,7 @@ type State = { approved: string[]; approvedAt?: Record<string, string>; rejected
 (async () => {
   const [recordingId, targetRaw, database = "QA1"] = process.argv.slice(2);
   const target = Number(targetRaw);
-  if (!recordingId || !Number.isInteger(target) || target <= 0) throw new Error("Uso: prepare-ready-cedulas <recordingId> <target> [db]");
+  if (!recordingId || !Number.isInteger(target) || target <= 0) throw new Error("Uso: prepare-ready-cedulas <recordingId|-> <target> [db]");
   // This run's own filters: the engine, not the utilization proxy, decides.
   Object.assign(process.env, {
     DATA_CEDULAS_SCORE_MAX_AGE_DAYS: "0", DATA_CEDULAS_MAX_UTILIZATION: "0", DATA_CEDULAS_PREPARE: "false",
@@ -46,11 +49,19 @@ type State = { approved: string[]; approvedAt?: Record<string, string>; rejected
     return { rows: result.recordset ?? [], rowsAffected: result.rowsAffected[0] ?? 0 };
   };
 
-  const [scenario] = loadScenarios("portal-comercial", recordingId) as any[];
-  const requirements = scenario.runtimeInputRequirements?.length ? scenario.runtimeInputRequirements : materializeRuntimeInputRequirements(scenario);
-  const login = portalLoginFromRequirements(requirements, (loadPromotedAppConfigSync({ appSlug: "portal-comercial" }) as any)?.baseUrl);
-  if (!login) throw new Error("No hay usuario y contraseña en la grabación");
-
+  const portalBaseUrl = (loadPromotedAppConfigSync({ appSlug: "portal-comercial" }) as any)?.baseUrl;
+  let login: ReturnType<typeof portalLoginFromRequirements>;
+  if (recordingId !== "-") {
+    const [scenario] = loadScenarios("portal-comercial", recordingId) as any[];
+    const requirements = scenario?.runtimeInputRequirements?.length ? scenario.runtimeInputRequirements : scenario ? materializeRuntimeInputRequirements(scenario) : [];
+    login = portalLoginFromRequirements(requirements, portalBaseUrl);
+  }
+  if (!login) {
+    const resolved = await resolvePortalLogin("portal-comercial");
+    login = resolved?.login;
+    if (login) log(`login del Portal: ${resolved!.source}`);
+  }
+  if (!login) throw new Error("No hay usuario y contraseña: ni en la grabación, ni en DATA_CEDULAS_LEXIS_PORTAL_*, ni guardados al lanzar un caso de portal-comercial");
   const quiet = console.log;
   let outages = 0;
   while (state.approved.length < target) {
@@ -101,4 +112,9 @@ type State = { approved: string[]; approvedAt?: Record<string, string>; rejected
   save();
   log(`FINaprobadas=${state.approved.length} rechazadas=${Object.keys(state.rejected).length} lista=${STATE}`);
   await pool.close();
-})().catch((error) => { process.stdout.write(`PREPARE_READY_ERR ${error?.message}\n`); process.exit(1); }).then(() => process.exit(0));
+})().catch((error) => {
+  process.stdout.write(error?.name === "PortalLoginRejectedError"
+    ? "PREPARE_READY_ERR credentials_rejected: el Portal rechazó las credenciales guardadas; vuelve a escribirlas en el Catálogo de servicios\n"
+    : `PREPARE_READY_ERR ${error?.message}\n`);
+  process.exit(1);
+}).then(() => process.exit(0));

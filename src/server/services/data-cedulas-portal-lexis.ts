@@ -1,5 +1,6 @@
 import { request } from 'playwright';
-import { withPortalSession } from './data-cedulas-reuse';
+import { PortalLoginRejectedError, withPortalSession } from './data-cedulas-reuse';
+import { resolvePortalLogin } from './portal-login-resolver';
 
 export type LexisResult = 'clear' | 'match' | 'unavailable';
 
@@ -47,13 +48,12 @@ export async function screenPortalLexis(customer: Record<string, unknown>, datab
   const cookie = process.env.DATA_CEDULAS_LEXIS_PORTAL_COOKIE || process.env.PORTAL_COMERCIAL_QA_API_COOKIE;
   if (authorization) headers.Authorization = authorization;
   if (cookie) headers.Cookie = cookie;
-  // No static token: sign in with the configured Lexis Portal user (the session is cached), so the
-  // screening does not stop when a pasted token expires.
-  const username = process.env.DATA_CEDULAS_LEXIS_PORTAL_USERNAME?.trim();
-  const password = process.env.DATA_CEDULAS_LEXIS_PORTAL_PASSWORD;
-  if (!authorization && !cookie && username && password) {
-    try {
-      const response = await withPortalSession({ baseUrl: url.origin, username, password }, (http) => http('POST', url.pathname + url.search, { body: payload }));
+  // No static token: sign in so the screening does not stop when a pasted token expires. The login is
+  // DATA_CEDULAS_LEXIS_PORTAL_USERNAME/_PASSWORD when set, otherwise the usuario/contrasena saved from the
+  // last portal-comercial launch (see portal-login-resolver), so no dedicated user has to be configured.
+  const resolved = !authorization && !cookie && url.protocol === 'https:' ? await resolvePortalLogin('portal-comercial', { baseUrl: url.origin }) : undefined;
+  if (resolved) {    try {
+      const response = await withPortalSession(resolved.login, (http) => http('POST', url.pathname + url.search, { body: payload }));
       if (response.status !== 200) {
         console.warn(`[data-cedulas][lexis-portal] status=${response.status}`);
         return 'unavailable';
@@ -61,8 +61,10 @@ export async function screenPortalLexis(customer: Record<string, unknown>, datab
       const verdict = classifyPortalLexisResponse(response.body, payload.clientReference);
       if (verdict === 'unavailable') console.warn(`[data-cedulas][lexis-portal] unexpected_response retCode=${String(response.body?.retCode)} hasRecords=${Array.isArray(response.body?.searchResults?.records)}`);
       return verdict;
-    } catch {
-      console.warn('[data-cedulas][lexis-portal] session_request_failed');
+    } catch (error) {
+      console.warn(error instanceof PortalLoginRejectedError
+        ? '[data-cedulas][lexis-portal] credentials_rejected (guarda de nuevo las credenciales del Portal en el Catálogo de servicios)'
+        : '[data-cedulas][lexis-portal] session_request_failed');
       return 'unavailable';
     }
   }

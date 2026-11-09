@@ -395,3 +395,151 @@ test("cancelAll fails closed if another active request appears before final veri
   assert.deepEqual(result.cancelledIds, ["one"]);
   assert.equal(result.failed?.reason, "active_requests_remaining");
 });
+
+function ownedBy(creator: string, request: PortalRequestRecord, ownerIdentity = identity): PortalRequestRecord {
+  const copy = structuredClone(request);
+  copy.createdBy = creator;
+  copy.dataByType!.model!.customer!.personalInfo!.identification = ownerIdentity;
+  return copy;
+}
+
+test("by creator: preview lists only requests created by that exact user, masks identities and sends the server filter", async () => {
+  const { fetcher, calls } = mockFetch([
+    ownedBy("radames", activeRequest("mine-1")),
+    ownedBy("Radames", activeRequest("mine-2"), "11111111111"),
+    ownedBy("radames2", activeRequest("other-1")),
+    ownedBy("someone", activeRequest("other-2")),
+    ownedBy("radames", activeRequest("mine-unsupported", "unknown-stage")),
+  ]);
+  const service = createPortalRequestCancellationService(config, fetcher);
+
+  const result = await service.previewByCreator("radames");
+
+  assert.deepEqual(result.candidates.map((item) => item.id).sort(), ["mine-1", "mine-2"]);
+  assert.deepEqual(result.omitted.map((item) => item.id), ["mine-unsupported"]);
+  assert.equal(result.found, 3);
+  assert.ok(result.candidates.every((item) => /^•+\d{4}$/.test(item.identityHint)));
+  assert.equal(JSON.stringify(result).includes(identity), false, "the full identity is never echoed");
+  assert.equal(calls[0].url.searchParams.get("CreatedByContains"), "radames");
+  assert.ok(calls.every((call) => call.init.method !== "PUT"), "preview never writes");
+});
+
+test("by creator: nothing matches -> the creators the Portal returned are shown to spot another spelling", async () => {
+  const { fetcher } = mockFetch([ownedBy("radames-qa", activeRequest("a"))]);
+  const result = await createPortalRequestCancellationService(config, fetcher).previewByCreator("radames");
+  assert.equal(result.found, 0);
+  assert.deepEqual(result.creatorsSeen, ["radames-qa"]);
+});
+
+test("by creator: cancelling requires confirmation and cancels only that creator's eligible requests", async () => {
+  const { fetcher, state } = mockFetch([
+    ownedBy("radames", activeRequest("mine-1")),
+    ownedBy("radames", activeRequest("mine-2"), "11111111111"),
+    ownedBy("radames2", activeRequest("other-1")),
+  ]);
+  const service = createPortalRequestCancellationService(config, fetcher);
+
+  await assert.rejects(service.cancelByCreator("radames", undefined), (error: unknown) =>
+    error instanceof PortalCancellationError && error.code === "confirmation_required");
+  assert.ok(state.every((item) => item.status === "Draft"), "nothing is cancelled without confirmation");
+
+  const result = await service.cancelByCreator("radames", true);
+
+  assert.deepEqual(result.cancelledIds.sort(), ["mine-1", "mine-2"]);
+  assert.equal(result.failed, null);
+  assert.equal(state.find((item) => item.id === "other-1")!.status, "Draft", "another user's request is untouched");
+});
+
+test("by creator: an invalid creator is rejected before any request is made", async () => {
+  const { fetcher, calls } = mockFetch([]);
+  const service = createPortalRequestCancellationService(config, fetcher);
+  for (const bad of ["", "ab", "a b", "x".repeat(65), "radames;drop"]) {
+    await assert.rejects(service.previewByCreator(bad), (error: unknown) => error instanceof PortalCancellationError && error.code === "creator_invalid");
+  }
+  assert.equal(calls.length, 0);
+});
+
+/** Like mockFetch, but the list honours the Type query parameter (the Portal does). */
+function typedMock(initial: PortalRequestRecord[]) {
+  const base = mockFetch(initial);
+  const fetcher: typeof fetch = async (input, init = {}) => {
+    const url = new URL(String(input));
+    if ((init.method ?? "GET") === "GET") {
+      base.calls.push({ url, init });
+      const type = url.searchParams.get("Type");
+      return jsonResponse({ items: structuredClone(base.state.filter((item) => !type || item.type === type)), page: 1, totalPages: 1 });
+    }
+    return base.fetcher(input, init);
+  };
+  return { ...base, fetcher };
+}
+
+test("by creator with several request types: previews and cancels each type, tagging every request with its type", async () => {
+  const natural = ownedBy("radames", activeRequest("nat-1"));
+  const legal = ownedBy("radames", activeRequest("jur-1"), "22222222222");
+  legal.type = "MultiProdJuridica";
+  const foreign = ownedBy("someone", activeRequest("jur-2"));
+  foreign.type = "MultiProdJuridica";
+  const { fetcher, state } = typedMock([natural, legal, foreign]);
+  const service = createPortalRequestCancellationService(config, fetcher);
+
+  const only = await service.previewByCreator("radames");
+  assert.deepEqual(only.candidates.map((item) => item.id), ["nat-1"], "the default is the configured type only");
+
+  const both = await service.previewByCreator("radames", ["MultiProdNatural", "MultiProdJuridica"]);
+  assert.deepEqual(both.candidates.map((item) => `${item.requestType}:${item.id}`).sort(), ["MultiProdJuridica:jur-1", "MultiProdNatural:nat-1"]);
+  assert.deepEqual(both.requestTypes, ["MultiProdNatural", "MultiProdJuridica"]);
+
+  await assert.rejects(service.cancelByCreator("radames", undefined, ["MultiProdNatural", "MultiProdJuridica"]), (error: unknown) =>
+    error instanceof PortalCancellationError && error.code === "confirmation_required");
+  assert.ok(state.every((item) => item.status === "Draft"));
+
+  const result = await service.cancelByCreator("radames", true, ["MultiProdNatural", "MultiProdJuridica"]);
+  assert.deepEqual(result.cancelledIds.sort(), ["jur-1", "nat-1"]);
+  assert.equal(result.failed, null);
+  assert.equal(state.find((item) => item.id === "jur-2")!.status, "Draft", "another creator's request is untouched");
+});
+
+test("by creator: invalid request types are rejected before any request is made", async () => {
+  const { fetcher, calls } = mockFetch([]);
+  const service = createPortalRequestCancellationService(config, fetcher);
+  for (const bad of [["a"], ["Tipo con espacio"], ["x".repeat(65)], ["A1", "B2", "C3", "D4", "E5", "F6"]]) {
+    await assert.rejects(service.previewByCreator("radames", bad), (error: unknown) => error instanceof PortalCancellationError && error.code === "request_type_invalid");
+  }
+  assert.equal(calls.length, 0);
+});
+
+test("by creator: the Portal stores the creator as an e-mail; the user name matches its own e-mail only", async () => {
+  const { fetcher } = mockFetch([
+    ownedBy("radames@bsc.com.do", activeRequest("mine")),
+    ownedBy("radames2@bsc.com.do", activeRequest("other-1")),
+    ownedBy("xradames@bsc.com.do", activeRequest("other-2")),
+    ownedBy("radames@otro.com", activeRequest("mine-too")),
+  ]);
+  const service = createPortalRequestCancellationService(config, fetcher);
+  const byName = await service.previewByCreator("radames");
+  assert.deepEqual(byName.candidates.map((item) => item.id).sort(), ["mine", "mine-too"], "same user name, any domain");
+  const byEmail = await service.previewByCreator("radames@bsc.com.do");
+  assert.deepEqual(byEmail.candidates.map((item) => item.id), ["mine"], "a full e-mail must match exactly");
+});
+
+test("by creator: '*' covers every request type without sending a Type filter", async () => {
+  const natural = ownedBy("radames@bsc.com.do", activeRequest("nat-1"));
+  const legal = ownedBy("radames@bsc.com.do", activeRequest("jur-1"), "22222222222");
+  legal.type = "MultiProdJuridica";
+  const other = ownedBy("radames@bsc.com.do", activeRequest("svc-1"), "33333333333");
+  other.type = "OtroTipoNuevo";
+  const foreign = ownedBy("someone@bsc.com.do", activeRequest("jur-2"));
+  foreign.type = "MultiProdJuridica";
+  const { fetcher, state, calls } = typedMock([natural, legal, other, foreign]);
+  const service = createPortalRequestCancellationService(config, fetcher);
+
+  const preview = await service.previewByCreator("radames", ["*"]);
+  assert.deepEqual(preview.candidates.map((item) => item.id).sort(), ["jur-1", "nat-1", "svc-1"]);
+  assert.equal(calls[0].url.searchParams.get("Type"), "", "no Type filter is sent");
+
+  const result = await service.cancelByCreator("radames", true, ["*"]);
+  assert.deepEqual(result.cancelledIds.sort(), ["jur-1", "nat-1", "svc-1"]);
+  assert.equal(result.failed, null);
+  assert.equal(state.find((item) => item.id === "jur-2")!.status, "Draft", "another creator's request is untouched");
+});

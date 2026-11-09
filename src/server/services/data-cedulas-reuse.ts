@@ -304,6 +304,11 @@ export function invalidatePortalSession(login: PortalLogin): void {
   sessionCache.delete(sessionKey(login));
 }
 
+/** The Portal login form kept the user on /login: the stored user or password is wrong or expired. */
+export class PortalLoginRejectedError extends Error {
+  constructor() { super("portal_login_rejected"); this.name = "PortalLoginRejectedError"; }
+}
+
 /** Signs in to the Portal with the job's login and gives `run` an HTTP client that carries the session. */
 export async function withPortalSession<T>(login: PortalLogin, run: (http: PortalHttp) => Promise<T>, env: NodeJS.ProcessEnv = process.env, options: { fresh?: boolean } = {}): Promise<T> {
   if (!isAllowedPortalHost(login.baseUrl, env)) throw new Error("host_not_allowed");
@@ -321,7 +326,13 @@ export async function withPortalSession<T>(login: PortalLogin, run: (http: Porta
     await page.locator("#username").fill(login.username);
     await page.locator("#password").fill(login.password);
     await page.locator("#password").press("Enter");
-    await page.waitForURL((current) => !/\/login/i.test(current.pathname), { timeout: 60_000 });
+    try {
+      await page.waitForURL((current) => !/\/login/i.test(current.pathname), { timeout: 60_000 });
+    } catch (error) {
+      // Still on the login screen after submitting = credentials refused (not a slow network).
+      if (/\/login/i.test(new URL(page.url()).pathname)) throw new PortalLoginRejectedError();
+      throw error;
+    }
     sessionCache.set(sessionKey(login), { state: await context.storageState(), expiresAt: Date.now() + SESSION_TTL_MS });
     return await run(portalHttpFromRequest(context.request, login.baseUrl));
   } finally {

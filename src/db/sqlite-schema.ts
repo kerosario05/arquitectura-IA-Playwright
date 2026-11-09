@@ -192,6 +192,20 @@ CREATE TABLE IF NOT EXISTS ProjectServiceConfiguration (
   PRIMARY KEY (projectId, serviceKey)
 );
 
+-- Credentials a catalog service asks for from its own panel (Portal login for cédulas, LexisNexis and
+-- request cancellation). The password is encrypted (src/db/secret-box.ts); the key is not in the database.
+CREATE TABLE IF NOT EXISTS ProjectServiceCredential (
+  projectId       TEXT    NOT NULL COLLATE NOCASE
+                          REFERENCES Projects(id) ON DELETE CASCADE,
+  credentialKey   TEXT    NOT NULL COLLATE NOCASE,
+  username        TEXT    NOT NULL,
+  passwordCipher  TEXT    NOT NULL,
+  updatedBy       TEXT,
+  createdAt       TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  updatedAt       TEXT    NOT NULL DEFAULT (${UTC_NOW_EXPR}),
+  PRIMARY KEY (projectId, credentialKey)
+);
+
 -- Which catalog service fills which scenario field (valueKey). scenarioId '' = the general
 -- form of the owner (recording, test-design story or case); a scenario row overrides it.
 -- serviceKey NULL on a scenario row = "this scenario types the value by hand".
