@@ -17,6 +17,29 @@ export interface DiscoveryEvidenceOptions {
 }
 
 /**
+ * A `discovered_partial` run whose every step ran without error and that reports no failed step is a pass
+ * (only the observable assertion still needs discovery). The job result already counts it as passed, so the
+ * evidence document must not mark it as failed.
+ */
+export function isValidPartialDiscovery(
+  result: {
+    status?: string;
+    steps?: ReadonlyArray<{ status?: string; error?: string }>;
+    failedAtStep?: number;
+    failedTarget?: string;
+    failedReason?: string;
+  } | undefined,
+): boolean {
+  const steps = result?.steps ?? [];
+  return result?.status === "discovered_partial"
+    && steps.length > 0
+    && result.failedAtStep == null
+    && !result.failedTarget
+    && !result.failedReason
+    && steps.every((step) => !step.error && !/failed|not_found|error/i.test(step.status ?? ""));
+}
+
+/**
  * Initialize an EvidenceRecorder for a discovery case.
  * Call before runCaseDiscovery, then call finalizeDiscoveryEvidence() after.
  */
@@ -139,7 +162,7 @@ export async function finalizeDiscoveryEvidence(
         discoveryStatus,
         functionalStatus: discoveryStatus === "exploration_failed"
           ? "not_run"
-          : discoveryStatus === "discovered_passed" || discoveryStatus === "repaired_passed"
+          : discoveryStatus === "discovered_passed" || discoveryStatus === "repaired_passed" || isValidPartialDiscovery(discoveryResult)
             ? "passed"
             : "failed",
       });

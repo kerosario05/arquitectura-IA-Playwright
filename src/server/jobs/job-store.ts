@@ -124,6 +124,8 @@ function persistedSnapshot(job: JobInternal): Job {
     const value = job.params[key];
     if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") params[key] = value;
   }
+  // Selected TestRail case ids: a rerun after an engine restart needs the full selection, not just the last case's batch result.
+  if (Array.isArray(job.params.caseIds) && job.params.caseIds.every((id) => typeof id === "number" || typeof id === "string")) params.caseIds = job.params.caseIds;
 
   const summary: Record<string, unknown> = {};
   if (job.params.executionEngine === "jira_semantic") {

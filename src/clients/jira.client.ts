@@ -28,6 +28,16 @@ const DEFAULT_FIELDS = ["summary", "description", "status", "issuetype", "priori
 
 export type JiraIssueTypeRef = { id: string; name: string; subtask?: boolean };
 
+/** The issue type a defect is created as: Bug if the project has it, else Task, Story, or the first plain type. Defaults to Bug when nothing is known. */
+export function pickDefectIssueType(offered: ReadonlyArray<{ name: string; subtask?: boolean }>): string {
+  const usable = offered.filter((type) => !type.subtask && !/^epic$/i.test(type.name));
+  for (const wanted of ["bug", "defecto", "defect", "task", "tarea", "story", "historia"]) {
+    const found = usable.find((type) => type.name.trim().toLowerCase() === wanted);
+    if (found) return found.name;
+  }
+  return usable[0]?.name ?? "Bug";
+}
+
 export class JiraClient {
   private readonly baseApiUrl: string;
   private readonly agileApiUrl: string;
@@ -153,20 +163,24 @@ export class JiraClient {
     assigneeAccountId?: string;
   }): Promise<{ ok: boolean; issueKey?: string; issueUrl?: string; error?: string }> {
     try {
+      // Not every project has a "Bug" type (GDD only has Epic and Story): use what the project offers.
+      let issueTypeName = params.issueType;
+      if (!issueTypeName) {
+        const offered = await this.getProjectIssueTypes(params.projectKey).catch(() => []);
+        issueTypeName = pickDefectIssueType(offered);
+      }
+      // One paragraph per line, so the structured description keeps its sections in Jira.
+      const lines = String(params.description ?? "").split(/\r?\n/);
+      const paragraphs = lines.map((line) => line.trim() ? { type: "paragraph", content: [{ type: "text", text: line }] } : { type: "paragraph", content: [] });
       const fields: Record<string, unknown> = {
         project: { key: params.projectKey },
         summary: params.summary,
         description: {
           type: "doc",
           version: 1,
-          content: [
-            {
-              type: "paragraph",
-              content: [{ type: "text", text: params.description }],
-            },
-          ],
+          content: paragraphs.length ? paragraphs : [{ type: "paragraph", content: [] }],
         },
-        issuetype: { name: params.issueType || "Bug" },
+        issuetype: { name: issueTypeName },
       };
       if (params.assigneeAccountId) {
         fields.assignee = { accountId: params.assigneeAccountId };
@@ -184,6 +198,14 @@ export class JiraClient {
       const message = err instanceof Error ? err.message : String(err);
       return { ok: false, error: message };
     }
+  }
+
+  /** Every issue type the project's create screen offers. */
+  async getProjectIssueTypes(projectKey: string): Promise<JiraIssueTypeRef[]> {
+    const payload = await this.requestJson<{ issueTypes?: JiraIssueTypeRef[]; values?: JiraIssueTypeRef[] }>(
+      `issue/createmeta/${encodeURIComponent(projectKey)}/issuetypes?maxResults=200`,
+    );
+    return (payload.issueTypes ?? payload.values ?? []).map((t) => ({ id: String(t.id), name: t.name, subtask: t.subtask === true }));
   }
 
   /** Issue types of the project that are sub-tasks, as Jira's create screen offers them. */
@@ -240,7 +262,11 @@ export class JiraClient {
         return { ok: false, error: `Invalid file: ${resolved}` };
       }
       const ext = path.extname(resolved).toLowerCase();
-      if (ext !== ".docx") {
+      // The evidence report is a PDF; Word files stay supported.
+      const mime = ext === ".pdf" ? "application/pdf"
+        : ext === ".docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        : undefined;
+      if (!mime) {
         return { ok: false, error: `Unsupported file type: ${ext}` };
       }
 
@@ -248,7 +274,7 @@ export class JiraClient {
       const buffer = fs.readFileSync(resolved);
 
       const formData = new FormData();
-      formData.append("file", new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }), name);
+      formData.append("file", new Blob([buffer], { type: mime }), name);
 
       const url = `${this.baseApiUrl}/issue/${encodeURIComponent(issueKey)}/attachments`;
       const response = await globalThis.fetch(url, {

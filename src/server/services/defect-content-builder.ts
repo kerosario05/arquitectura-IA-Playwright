@@ -55,11 +55,21 @@ export function sanitizeRawError(raw?: string): string {
   return s;
 }
 
+/** `Ingresar "Numero de Identificacion"` -> `Ingresar Numero de Identificacion` (undefined when there is no step text). */
+export function readableStep(stepText: unknown): string | undefined {
+  if (typeof stepText !== "string") return undefined;
+  const text = stepText.replace(/["“”«»]/g, "").replace(/\s+/g, " ").trim();
+  return text || undefined;
+}
+
 export function mapReasonCodeToHuman(reasonCode?: string, rawError?: string): string {
   if (!reasonCode && !rawError) return "";
   const code = (reasonCode ?? "").toLowerCase();
   if (code.includes("assertion_not_found") || code.includes("assertion") && !code.includes("assertion")) {
     return "La validación esperada no fue encontrada en la pantalla.";
+  }
+  if (code.includes("child_status_not_promoted")) {
+    return "La exploración del caso terminó con error antes de completar todos sus pasos, por lo que no se pudo validar el resultado esperado.";
   }
   if (code.includes("target_disabled")) {
     return "El botón/elemento estaba deshabilitado y no se pudo accionar (no se cumplió una condición previa).";
@@ -141,11 +151,13 @@ export function buildStructuredDefectDescription(params: {
   // Failed step — the exact point of failure.
   const failedAtStep = typeof tc.failedAtStep === "number" ? tc.failedAtStep : undefined;
   const failedTarget = typeof tc.failedTarget === "string" ? tc.failedTarget : undefined;
-  if (failedAtStep != null || failedTarget) {
+  const failedAction = readableStep(tc.failedStepText);
+  if (failedAtStep != null || failedTarget || failedAction) {
     lines.push("Paso fallido:");
     const stepParts: string[] = [];
     if (failedAtStep != null) stepParts.push(`Paso ${failedAtStep}`);
-    if (failedTarget) stepParts.push(failedTarget);
+    // The action the step asked for ("Ingresar Numero de Identificacion"), not just the field it names.
+    if (failedAction || failedTarget) stepParts.push((failedAction ?? failedTarget)!);
     lines.push(stepParts.join(": "));
     lines.push("");
   }
@@ -169,9 +181,17 @@ export function buildStructuredDefectDescription(params: {
 
   // Evidencia.
   const ls = tc.lastSuccessfulStep as Record<string, unknown> | undefined;
-  const hasEvidence = Boolean(tc.evidenceDir) || Boolean(tc.evidencePath) || Boolean(ls?.evidencePath);
+  const hasEvidence = Boolean(tc.evidenceDir) || Boolean(tc.evidencePath) || Boolean(tc.screenshotPath) || Boolean(tc.evidenceJsonPath) || Boolean(ls?.evidencePath);
   lines.push("Evidencia:");
-  lines.push(hasEvidence ? "Evidencia técnica disponible." : "No se registró evidencia visual.");
+  if (!hasEvidence) {
+    lines.push("No se registró evidencia visual.");
+  } else {
+    lines.push("Evidencia técnica disponible.");
+    const lastOk = ls && typeof ls.stepIndex === "number"
+      ? `Último paso correcto: paso ${ls.stepIndex}${typeof ls.target === "string" && ls.target ? ` (${ls.target})` : ""}.`
+      : "";
+    if (lastOk) lines.push(lastOk);
+  }
 
   console.log(`[defect-description] scenarioId=${params.scenarioId} source=technical_context_focused hasFailedStep=${failedAtStep != null || Boolean(failedTarget)} hasExpectedResult=${Boolean(tc.expectedResult)} hasActualResult=${Boolean(actualSummary)} hasEvidence=${hasEvidence}`);
 
@@ -231,7 +251,10 @@ export function buildDefectTitle(params: {
 
   // (A) Lead with the most defect-specific signal available.
   let core: string;
-  if (failedTarget) {
+  const failedAction = readableStep(tc.failedStepText);
+  if (failedAction) {
+    core = `Falló el paso: ${clip(failedAction, 80)}`;
+  } else if (failedTarget) {
     core = `No se encontró "${clip(failedTarget, 60)}"`;
   } else if (expected) {
     core = `No se cumplió: ${clip(expected, 90)}`;

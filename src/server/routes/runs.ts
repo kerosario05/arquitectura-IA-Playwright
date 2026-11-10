@@ -897,7 +897,10 @@ runsRouter.post("/:jobId/rerun", async (req, res, next) => {
   // Jira reruns retain their explicit provenance and never enter Recording hydration/reuse.
   if (previous?.params.executionEngine === "jira_semantic") {
     const manifest = path.resolve(".artifacts/scenario-preview-runs", jobId, "jira-scenarios.json");
-    const all = fs.existsSync(manifest) ? JSON.parse(fs.readFileSync(manifest, "utf8")) as McpScenario[] : previous.params.scenarios as McpScenario[] | undefined;
+    // A rerun job (itself rerunnable) only has preview-scenarios.json, not jira-scenarios.json.
+    const previewManifest = path.resolve(".artifacts/scenario-preview-runs", jobId, "preview-scenarios.json");
+    const manifestFile = [manifest, previewManifest].find((file) => fs.existsSync(file));
+    const all = manifestFile ? JSON.parse(fs.readFileSync(manifestFile, "utf8")) as McpScenario[] : previous.params.scenarios as McpScenario[] | undefined;
     if (!all?.length) { res.status(409).json({ ok: false, error: "JIRA_RERUN_SOURCE_MISSING" }); return; }
     const resultsPath = path.resolve(".artifacts/scenario-preview-runs", jobId, "results.json");
     const outcomes = fs.existsSync(resultsPath) ? JSON.parse(fs.readFileSync(resultsPath, "utf8")).results as Array<{ scenarioId: string; status: string }> : [];

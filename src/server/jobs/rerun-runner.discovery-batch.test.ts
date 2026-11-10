@@ -55,7 +55,7 @@ test("discovery-batch rerun rebuilds the exact selected cases and launches fresh
       assert.equal(result.discoveryParams.overwrite, true);
       assert.equal(result.discoveryParams.autoPromote, true);
       assert.equal(result.discoveryParams.rerunActive, true);
-      assert.equal(result.discoveryParams.executePromotedSpecs, false);
+      assert.equal(result.discoveryParams.executePromotedSpecs, true);
       assert.equal(result.discoveryParams.testRunId, 4829);
       assert.equal(result.discoveryParams.launchId, undefined, "reruns must not replace the original launch manifest");
       assert.deepEqual(result.discoveryParams.publishedCases, [

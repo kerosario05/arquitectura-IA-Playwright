@@ -64,7 +64,9 @@ type State = { approved: string[]; approvedAt?: Record<string, string>; rejected
   if (!login) throw new Error("No hay usuario y contraseña: ni en la grabación, ni en DATA_CEDULAS_LEXIS_PORTAL_*, ni guardados al lanzar un caso de portal-comercial");
   const quiet = console.log;
   let outages = 0;
-  while (state.approved.length < target) {
+  // `target` is how many to ADD to the stock; what is already approved stays and is never counted against it.
+  let added = 0;
+  while (added < target) {
     const seen = [...state.approved, ...Object.keys(state.rejected)];
     let batch: string[] = [];
     let screeningDown = false;
@@ -96,17 +98,17 @@ type State = { approved: string[]; approvedAt?: Record<string, string>; rejected
     if (batch.length === 0) { log("sin mas candidatas elegibles"); break; }
     await withPortalSession(login, async (http) => {
       for (const id of batch) {
-        if (state.approved.length >= target) return;
+        if (added >= target) return;
         try {
           const prepared = await prepareCedulaRecord(run, id, { freshDays: 30, backupDir: BACKUPS });
           if (prepared.status === "missing") { state.rejected[id] = "missing"; continue; }
           const verdict = await ficoApprovesLoan(http as any, id);
-          if (verdict.approved) { state.approved.push(id); (state.approvedAt ??= {})[id] = new Date().toISOString(); } else state.rejected[id] = verdict.detail.slice(0, 120);
+          if (verdict.approved) { if (!state.approved.includes(id)) { state.approved.push(id); added += 1; } (state.approvedAt ??= {})[id] = new Date().toISOString(); } else state.rejected[id] = verdict.detail.slice(0, 120);
         } catch (error: any) { state.rejected[id] = `error:${String(error?.message ?? error).slice(0, 100)}`; }
         save();
       }
     });
-    log(`aprobadas ${state.approved.length}/${target} | rechazadas ${Object.keys(state.rejected).length}`);
+    log(`agregadas ${added}/${target} (stock ${state.approved.length}) | rechazadas ${Object.keys(state.rejected).length}`);
   }
   state.finishedAt = new Date().toISOString();
   save();

@@ -1,4 +1,5 @@
 import { resolvePortalLogin } from "../services/portal-login-resolver";
+import { readyStockCount } from "../services/data-cedulas-ready";
 import { spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -35,7 +36,7 @@ router.get("/api/data-cedulas/databases", (_req: Request, res: Response) => {
 // --- "Generar cédulas": prepares a stock of cédulas the engine approves (scripts/prepare-ready-cedulas.ts) ---
 const READY_STATE = path.join(process.cwd(), ".artifacts", "data-cedulas-ready.json");
 const READY_LOG = path.join(process.cwd(), ".artifacts", "data-cedulas-ready.log");
-let readyJob: { child: ChildProcess; target: number; database: string; startedAt: string } | null = null;
+let readyJob: { child: ChildProcess; target: number; database: string; startedAt: string; baseline: number } | null = null;
 
 function readReadyState(): { approved: string[]; rejected: Record<string, string>; finishedAt?: string } {
   try { return JSON.parse(fs.readFileSync(READY_STATE, "utf8")); } catch { return { approved: [], rejected: {} }; }
@@ -57,7 +58,9 @@ router.get("/api/data-cedulas/ready/status", (_req: Request, res: Response) => {
     target: readyJob?.target ?? null,
     database: readyJob?.database ?? null,
     startedAt: readyJob?.startedAt ?? null,
-    approved: state.approved.length,
+    approved: readyStockCount(),
+    /** Added by the current run (the target counts additions, not the whole stock). */
+    added: Math.max(0, readyStockCount() - (readyJob?.baseline ?? 0)),
     rejected: Object.keys(state.rejected).length,
     finishedAt: state.finishedAt ?? null,
     lastLog,
@@ -76,13 +79,16 @@ router.post("/api/data-cedulas/ready/start", async (req: Request, res: Response)
     if (!requestedRecording && !(await resolvePortalLogin("portal-comercial"))) return res.status(400).json({ ok: false, error: "credentials_required", message: "Faltan las credenciales del Portal: guárdalas en el Catálogo de servicios (tarjeta Generación de cédulas listas) y vuelve a intentar." });
     const recordingId = requestedRecording || "-";
     // Renewing starts from zero: every cédula is prepared and checked again with a current master date.
-    if (req.body?.renew === true) fs.rmSync(READY_STATE, { force: true });
+    // The old list is set aside, never deleted: a renewal that cannot finish (e.g. Lexis down) must not cost the stock.
+    const stockBefore = readyStockCount();
+    const renewedAway = req.body?.renew === true;
+    if (req.body?.renew === true && fs.existsSync(READY_STATE)) fs.renameSync(READY_STATE, READY_STATE.replace(/\.json$/, `.${new Date().toISOString().replace(/[:.]/g, "-")}.bak.json`));
     fs.mkdirSync(path.dirname(READY_LOG), { recursive: true });
     const log = fs.openSync(READY_LOG, "w");
     const child = spawn(process.execPath, ["--import", "tsx", "scripts/prepare-ready-cedulas.ts", recordingId, String(target), database], {
       cwd: process.cwd(), detached: false, windowsHide: true, stdio: ["ignore", log, log],
     });
-    readyJob = { child, target, database, startedAt: new Date().toISOString() };
+    readyJob = { child, target, database, startedAt: new Date().toISOString(), baseline: renewedAway ? 0 : stockBefore };
     return res.status(202).json({ ok: true, target, database });
   } catch (error) {
     return res.status(400).json({ ok: false, error: error instanceof Error ? error.message : String(error) });

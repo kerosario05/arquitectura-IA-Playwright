@@ -35,6 +35,27 @@ test("the retained Word template governs Jira and Recording, without invented ap
   } finally { await browser.close(); }
 });
 
+test("internal ids are hidden and preconditions are grouped per scenario without internal markers", async () => {
+  const uuid = "cb20fe11-9dd1-4467-a976-674a4b2e91b4";
+  const marker = "Precondiciones:\n- Aplicación disponible.\n- Usuario o datos de prueba configurados.\n[automationScenarioId: 68156e4c-001]";
+  const first = { ...recording(), scenarioId: "C57449", scenarioTitle: "Cliente existente", preconditions: [marker, marker, "Sesión iniciada"] };
+  const second = { ...recording(), scenarioId: uuid, scenarioTitle: "Crear cliente jurídico", preconditions: [marker, "Usuario · requerido · paso 2"] };
+  const inputs = [first, second];
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.setContent(await buildCertificationHtml(page, buildEvidenceDocumentModel(inputs), inputs, QA_CERTIFICATION_TEMPLATE));
+    const text = await page.locator("body").innerText();
+    assert.ok(!text.includes(uuid), "the generated id never reaches the report");
+    assert.ok(!text.includes("automationScenarioId"), "internal markers are removed");
+    assert.ok(text.includes("ESC-02 – Crear cliente jurídico"), "a hidden id is replaced by a short label");
+    const section = text.slice(text.indexOf("Precondiciones"), text.indexOf("Criterios de aceptación"));
+    assert.ok(section.indexOf("C57449 – Cliente existente") < section.indexOf("Sesión iniciada"), "each block starts with its scenario");
+    assert.ok(section.indexOf("Sesión iniciada") < section.indexOf("ESC-02 – Crear cliente jurídico"), "blocks are kept apart, in order");
+    assert.equal(section.split("Aplicación disponible.").length - 1, 2, "duplicates collapse inside a scenario, one copy per scenario");
+  } finally { await browser.close(); }
+});
+
 test("PDF is the only generated delivery format, including obsolete DOCX configuration", async () => {
   for (const format of ["auto", "docx", "both", "pdf"]) assert.deepEqual(resolveEvidenceFormats({ EVIDENCE_FORMAT: format }), ["pdf"]);
   assert.equal(resolveCertificationTemplate("templates/evidence/execution-evidence-template.docx"), QA_CERTIFICATION_TEMPLATE);

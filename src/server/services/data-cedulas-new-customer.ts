@@ -7,7 +7,7 @@ import { screenMdwLexis } from './data-cedulas-mdw-lexis';
 import { createCedulaReleaser, createSessionCedulaReleaser, withPortalSession, type CedulaReleaser, type PortalLogin } from './data-cedulas-reuse';
 import { dataCedulasPrepareEnabled, dataCedulasPrepareFreshDays, prepareCedulaRecord, type SqlRunner } from './data-cedulas-prepare';
 import { ficoApprovesLoan } from './fico-engine-probe';
-import { dataCedulasReadyEnabled, holdReadyCedulas, listReadyCedulas } from './data-cedulas-ready';
+import { dataCedulasReadyEnabled, holdReadyCedulas, listReadyCedulas, markReadyCedulasUsed } from './data-cedulas-ready';
 
 const BATCH_SIZE = 10;
 // Fetch/check several logical batches in one round trip. Oracle receives at
@@ -593,6 +593,7 @@ async function takeReadyCustomers(database: string, count: number, excludeIds: s
     connectString: database,
   });
   const picked: DataCedulasCustomer[] = [];
+  const usedNow: string[] = [];
   try {
     for (let start = 0; start < ids.length && picked.length < count; start += 50) {
       const customers = await fetchCustomersByIds(ids.slice(start, start + 50));
@@ -604,11 +605,13 @@ async function takeReadyCustomers(database: string, count: number, excludeIds: s
         if (picked.length >= count) break;
         const id = normalizeId(customer.Cedula);
         // Became a customer or entered a list since it was prepared: leave it out.
+        if (id && existing.has(id)) usedNow.push(id); // a customer now: out of the stock for good
         if (!id || existing.has(id) || plaft.has(id)) continue;
         if (release && await release(String(customer.Cedula).trim()) === "blocked") continue;
         picked.push(customer);
       }
     }
+    markReadyCedulasUsed(usedNow);
     if (picked.length > 0) holdReadyCedulas(picked.map((customer) => customer.Cedula));
     console.log(`[data-cedulas][ready] requested=${count} fromStock=${picked.length} stockAvailable=${ids.length}`);
     return picked;

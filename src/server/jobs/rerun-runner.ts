@@ -590,8 +590,16 @@ async function prepareRerunFromDiscoveryBatchJob(
   const jobCaseIds = Array.isArray(record?.params?.caseIds)
     ? (record!.params!.caseIds as unknown[]).map(positiveCaseId).filter((id): id is number => id !== undefined)
     : [];
+  // Persisted jobs (after an engine restart) keep no caseIds: the launch manifest still lists every published case.
+  const launchCaseIds = jobCaseIds.length > 0 || typeof record?.params?.launchId !== "string"
+    ? []
+    : (readLaunchPublishedCases(record.params.launchId) ?? [])
+      .map((entry) => positiveCaseId(entry.caseId ?? entry.testRailCaseId ?? entry.testrailCaseId))
+      .filter((id): id is number => id !== undefined);
   const requestedIds = jobCaseIds.length > 0
     ? jobCaseIds
+    : launchCaseIds.length > 0
+    ? launchCaseIds
     : Array.isArray(result.args?.caseIds)
       ? result.args.caseIds.map(positiveCaseId).filter((id): id is number => id !== undefined)
       : [];
@@ -667,7 +675,9 @@ async function prepareRerunFromDiscoveryBatchJob(
     autoPom: sourceParams.autoPom === false || result.args?.autoPom === false ? false : true,
     rerunActive: true,
     forceRediscovery: true,
-    executePromotedSpecs: false,
+    // Same functional flow as the original launch: per-case progress, pass rate, defects and checklist (the legacy CLI path reports none).
+    executePromotedSpecs: true,
+    ...(typeof sourceParams.analystName === "string" ? { analystName: sourceParams.analystName } : {}),
     headed: sourceParams.headed === true || result.args?.headed === true,
     sourceJobId,
     rerunMode: mode,

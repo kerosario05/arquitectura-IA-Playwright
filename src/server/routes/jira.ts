@@ -1,4 +1,4 @@
-import { Router } from "express";
+﻿import { Router } from "express";
 import { config, requireJiraConfig } from "../../config/env";
 import { JiraClient } from "../../clients/jira.client";
 import { defectChecklistStore } from "../services/defect-checklist-store";
@@ -114,7 +114,7 @@ jiraRouter.get("/issues", async (req, res, next) => {
   }
 });
 
-// POST /issues/upload-defects — create Jira issues and attach per-defect evidence
+// POST /issues/upload-defects â€” create Jira issues and attach per-defect evidence
 jiraRouter.post("/issues/upload-defects", async (req, res, next) => {
   try {
     const {
@@ -217,7 +217,7 @@ jiraRouter.post("/issues/upload-defects", async (req, res, next) => {
   }
 });
 
-// POST /issues/:issueKey/retry-evidence — re-attach evidence to an existing Jira issue
+// POST /issues/:issueKey/retry-evidence â€” re-attach evidence to an existing Jira issue
 jiraRouter.post("/issues/:issueKey/retry-evidence", async (req, res, next) => {
   try {
     const { issueKey } = req.params;
@@ -321,8 +321,19 @@ async function resolveAndAttachEvidence(params: {
   // 2. Fallback: legacy evidenceDir from technicalContext
   if (!docxPath && legacyEvidenceDir) {
     legacyDirPresent = true;
+    const legacyDir = path.resolve(legacyEvidenceDir);
+    // The folder of a discovery run is reused by later runs: build the PDF again from its current evidence.json
+    // (only this scenario's evidence), and fall back to an existing PDF only if that fails.
+    if (fs.existsSync(legacyDir)) {
+      const built = await buildScenarioPdf(legacyDir, { scenarioId, evidenceRoot, templatePath, defectId, defectFinalStatus: stored?.status, reuseExisting: false });
+      if (built?.docxPath) {
+        docxPath = built.docxPath;
+        screenshotCount = built.screenshots;
+        sourceLog = "legacy_evidence_dir_generated";
+      }
+    }
     const candidate = path.resolve(legacyEvidenceDir, "evidencia.pdf");
-    if (fs.existsSync(candidate) && fs.statSync(candidate).isFile() && fs.statSync(candidate).size > 0) {
+    if (!docxPath && fs.existsSync(candidate) && fs.statSync(candidate).isFile() && fs.statSync(candidate).size > 0) {
       docxPath = candidate;
       sourceLog = "legacy_evidence_dir";
     }
@@ -362,7 +373,7 @@ function resolveScreenshotPath(
   const sp = screenshotPath.replace(/[\\/]+/g, path.sep).trim();
   if (!sp) return undefined;
 
-  // 1. Absolute path — normalize and check existence
+  // 1. Absolute path â€” normalize and check existence
   if (path.isAbsolute(sp)) {
     if (fs.existsSync(sp) && isImageFile(sp)) return sp;
     return undefined;
@@ -419,6 +430,127 @@ function isImageFile(filepath: string): boolean {
   return ext === ".png" || ext === ".jpg" || ext === ".jpeg";
 }
 
+/** Builds the PDF of ONE scenario from its evidence folder (its evidence.json and screenshots). */
+export async function buildScenarioPdf(
+  scenarioDir: string,
+  opts: { jobId?: string; scenarioId: string; evidenceRoot: string; templatePath: string; defectId: string; defectFinalStatus?: string; reuseExisting: boolean },
+): Promise<{ docxPath?: string; screenshots: number; source: string } | undefined> {
+  const { scenarioId, evidenceRoot, templatePath, defectId } = opts;
+  {
+  // Check for existing DOCX first
+  const existingDocx = path.join(scenarioDir, "evidencia.pdf");
+  if (opts.reuseExisting && fs.existsSync(existingDocx) && fs.statSync(existingDocx).isFile() && fs.statSync(existingDocx).size > 0) {
+    console.log(`[jira-evidence-resolve] defectId=${defectId} scenarioId=${scenarioId} documentExists=true screenshots=n/a source=existing_docx`);
+    return { docxPath: existingDocx, screenshots: -1, source: "existing_docx" };
+  }
+
+  // Try evidence.json for on-demand generation
+  const evidenceJson = path.join(scenarioDir, "evidence.json");
+  if (!fs.existsSync(evidenceJson)) return undefined;
+
+  try {
+    const record = JSON.parse(fs.readFileSync(evidenceJson, "utf-8"));
+    const rawSteps: any[] = record.steps || [];
+
+    // Override status from defect final outcome (evidence.json may have provisional "Exitoso")
+    const evidenceJsonStatus = record.status;
+    if (opts.defectFinalStatus) {
+      const docxStatus = resolveFinalEvidenceStatus(opts.defectFinalStatus, evidenceJsonStatus);
+      record.status = docxStatus;
+      console.log(`[jira-evidence-status] scenarioId=${scenarioId} evidenceJsonStatus=${evidenceJsonStatus} finalExecutionStatus=${opts.defectFinalStatus} docxStatus=${docxStatus} source=defect_final_outcome`);
+    } else {
+      console.log(`[jira-evidence-status] scenarioId=${scenarioId} evidenceJsonStatus=${evidenceJsonStatus} docxStatus=${evidenceJsonStatus} source=evidence_json_fallback`);
+    }
+
+    const screenshotsDir = path.join(scenarioDir, "screenshots");
+
+    // Resolve screenshot paths with multi-base fallback
+    const normalizedSteps = rawSteps.map((s: any, idx: number) => {
+      const sp = s.screenshotPath;
+      if (!sp) return s;
+
+      const resolved = resolveScreenshotPath(sp, scenarioDir, evidenceRoot, process.cwd(), screenshotsDir, idx);
+
+      const pathKind = path.isAbsolute(sp) ? "absolute"
+        : sp.startsWith(".artifacts") ? "project_relative"
+        : sp.includes("screenshots") ? "scenario_relative"
+        : "filename_only";
+
+      const base = path.basename(resolved || sp);
+      console.log(`[jira-evidence-image-resolution] scenarioId=${scenarioId} stepIndex=${s.index ?? idx} pathKind=${pathKind} absoluteExists=${resolved ? fs.existsSync(resolved) : false} basenameExists=${base ? fs.existsSync(path.join(screenshotsDir, base)) : false}`);
+
+      return { ...s, screenshotPath: resolved || sp };
+    });
+    const normalizedRecord = { ...record, steps: normalizedSteps };
+
+    const imagesDeclared = normalizedSteps.filter((s: any) => s.screenshotPath).length;
+    const imagesExisting = normalizedSteps.filter((s: any) => s.screenshotPath && isImageFile(s.screenshotPath) && fs.existsSync(s.screenshotPath)).length;
+
+    console.log(`[jira-evidence-record] scenarioId=${scenarioId} steps=${normalizedSteps.length} imagesDeclared=${imagesDeclared} imagesResolved=${imagesExisting}`);
+
+    if (imagesExisting === 0) {
+      return { screenshots: 0, source: "none" };
+    }
+
+    // Template resolution: try multiple locations
+    let resolvedTemplate = QA_CERTIFICATION_TEMPLATE;
+    if (templatePath) {
+      const candidates = [
+        path.resolve(templatePath),                                              // absolute or relative to cwd
+        path.resolve(process.cwd(), templatePath),                               // explicit cwd
+        path.resolve(path.dirname(__filename), "..", "..", "..", templatePath),  // relative to this source file
+        path.resolve(evidenceRoot, "..", templatePath),                          // near evidence root
+      ];
+      // Also try the evidence config default location
+      try {
+        const { loadEvidenceConfig } = await import("../../evidence/evidence-types");
+        const cfg = loadEvidenceConfig();
+        if (cfg.templatePath && cfg.templatePath !== templatePath) {
+          candidates.push(path.resolve(cfg.templatePath));
+          candidates.push(path.resolve(process.cwd(), cfg.templatePath));
+        }
+      } catch { /* non-fatal */ }
+      for (const c of candidates) {
+        if (fs.existsSync(c)) { resolvedTemplate = c; break; }
+      }
+      if (!resolvedTemplate && candidates.length > 0) {
+        // Try __dirname relative to the jira route file
+        resolvedTemplate = candidates[0]; // use first candidate; will be checked below
+      }
+    }
+    const templateExists = resolvedTemplate ? fs.existsSync(resolvedTemplate) : false;
+    console.log(`[jira-evidence-template] source=multi_candidate resolved=${templateExists} extension=${resolvedTemplate ? path.extname(resolvedTemplate) || "none" : "none"}`);
+
+    if (!templateExists) {
+      console.log(`[jira-evidence-resolve] defectId=${defectId} scenarioId=${scenarioId} templatePath=missing_or_invalid`);
+      return { screenshots: imagesExisting, source: "none" };
+    }
+
+    // Generate DOCX
+    const docxOut = path.join(scenarioDir, "evidencia.pdf");
+    try {
+      const result = await generateEvidencePdf(normalizedRecord, resolvedTemplate, docxOut);
+      const outputExists = fs.existsSync(docxOut);
+      const outputSize = outputExists ? fs.statSync(docxOut).size : 0;
+
+      if (result.success && outputExists && outputSize > 0) {
+        console.log(`[jira-evidence-generation] scenarioId=${scenarioId} source=canonical_evidence_json screenshots=${imagesExisting} generated=true validated=true outputSize=${outputSize}`);
+        return { docxPath: docxOut, screenshots: imagesExisting, source: "generated_docx" };
+      }
+
+      console.log(`[jira-evidence-generation-error] scenarioId=${scenarioId} errorName=GeneratorFailed errorMessage="${result.error || "unknown"}" templateResolved=${templateExists} recordLoaded=true imagesDeclared=${imagesDeclared} imagesExisting=${imagesExisting} outputCreated=${outputExists} outputSize=${outputSize}`);
+    } catch (genErr: any) {
+      console.log(`[jira-evidence-generation-error] scenarioId=${scenarioId} errorName=${genErr.name || "Error"} errorMessage="${(genErr.message || String(genErr)).slice(0, 200)}" templateResolved=${templateExists} recordLoaded=true imagesDeclared=${imagesDeclared} imagesExisting=${imagesExisting} outputCreated=false outputSize=0`);
+    }
+
+    return { screenshots: imagesExisting, source: "none" };
+  } catch (parseErr: any) {
+    console.log(`[jira-evidence-generation-error] scenarioId=${scenarioId} errorName=${parseErr.name || "Error"} errorMessage="${(parseErr.message || String(parseErr)).slice(0, 200)}" templateResolved=false recordLoaded=false imagesDeclared=0 imagesExisting=0 outputCreated=false outputSize=0`);
+    return undefined;
+  }
+  }
+}
+
 async function tryGenerateScenarioDocx(
   jobId: string,
   scenarioId: string,
@@ -444,117 +576,9 @@ async function tryGenerateScenarioDocx(
         const scenarioDir = path.join(jobDir, "scenarios", scenarioId);
         if (!fs.existsSync(scenarioDir)) continue;
 
-        // Check for existing DOCX first
-        const existingDocx = path.join(scenarioDir, "evidencia.pdf");
-        if (fs.existsSync(existingDocx) && fs.statSync(existingDocx).isFile() && fs.statSync(existingDocx).size > 0) {
-          console.log(`[jira-evidence-resolve] defectId=${defectId} scenarioId=${scenarioId} documentExists=true screenshots=n/a source=existing_docx`);
-          return { docxPath: existingDocx, screenshots: -1, source: "existing_docx" };
-        }
-
-        // Try evidence.json for on-demand generation
-        const evidenceJson = path.join(scenarioDir, "evidence.json");
-        if (!fs.existsSync(evidenceJson)) continue;
-
-        try {
-          const record = JSON.parse(fs.readFileSync(evidenceJson, "utf-8"));
-          const rawSteps: any[] = record.steps || [];
-
-          // Override status from defect final outcome (evidence.json may have provisional "Exitoso")
-          const evidenceJsonStatus = record.status;
-          if (defectFinalStatus) {
-            const docxStatus = resolveFinalEvidenceStatus(defectFinalStatus, evidenceJsonStatus);
-            record.status = docxStatus;
-            console.log(`[jira-evidence-status] scenarioId=${scenarioId} evidenceJsonStatus=${evidenceJsonStatus} finalExecutionStatus=${defectFinalStatus} docxStatus=${docxStatus} source=defect_final_outcome`);
-          } else {
-            console.log(`[jira-evidence-status] scenarioId=${scenarioId} evidenceJsonStatus=${evidenceJsonStatus} docxStatus=${evidenceJsonStatus} source=evidence_json_fallback`);
-          }
-
-          const screenshotsDir = path.join(scenarioDir, "screenshots");
-
-          // Resolve screenshot paths with multi-base fallback
-          const normalizedSteps = rawSteps.map((s: any, idx: number) => {
-            const sp = s.screenshotPath;
-            if (!sp) return s;
-
-            const resolved = resolveScreenshotPath(sp, scenarioDir, evidenceRoot, process.cwd(), screenshotsDir, idx);
-
-            const pathKind = path.isAbsolute(sp) ? "absolute"
-              : sp.startsWith(".artifacts") ? "project_relative"
-              : sp.includes("screenshots") ? "scenario_relative"
-              : "filename_only";
-
-            const base = path.basename(resolved || sp);
-            console.log(`[jira-evidence-image-resolution] scenarioId=${scenarioId} stepIndex=${s.index ?? idx} pathKind=${pathKind} absoluteExists=${resolved ? fs.existsSync(resolved) : false} basenameExists=${base ? fs.existsSync(path.join(screenshotsDir, base)) : false}`);
-
-            return { ...s, screenshotPath: resolved || sp };
-          });
-          const normalizedRecord = { ...record, steps: normalizedSteps };
-
-          const imagesDeclared = normalizedSteps.filter((s: any) => s.screenshotPath).length;
-          const imagesExisting = normalizedSteps.filter((s: any) => s.screenshotPath && isImageFile(s.screenshotPath) && fs.existsSync(s.screenshotPath)).length;
-
-          console.log(`[jira-evidence-record] scenarioId=${scenarioId} steps=${normalizedSteps.length} imagesDeclared=${imagesDeclared} imagesResolved=${imagesExisting}`);
-
-          if (imagesExisting === 0) {
-            return { screenshots: 0, source: "none" };
-          }
-
-          // Template resolution: try multiple locations
-          let resolvedTemplate = QA_CERTIFICATION_TEMPLATE;
-          if (templatePath) {
-            const candidates = [
-              path.resolve(templatePath),                                              // absolute or relative to cwd
-              path.resolve(process.cwd(), templatePath),                               // explicit cwd
-              path.resolve(path.dirname(__filename), "..", "..", "..", templatePath),  // relative to this source file
-              path.resolve(evidenceRoot, "..", templatePath),                          // near evidence root
-            ];
-            // Also try the evidence config default location
-            try {
-              const { loadEvidenceConfig } = await import("../../evidence/evidence-types");
-              const cfg = loadEvidenceConfig();
-              if (cfg.templatePath && cfg.templatePath !== templatePath) {
-                candidates.push(path.resolve(cfg.templatePath));
-                candidates.push(path.resolve(process.cwd(), cfg.templatePath));
-              }
-            } catch { /* non-fatal */ }
-            for (const c of candidates) {
-              if (fs.existsSync(c)) { resolvedTemplate = c; break; }
-            }
-            if (!resolvedTemplate && candidates.length > 0) {
-              // Try __dirname relative to the jira route file
-              resolvedTemplate = candidates[0]; // use first candidate; will be checked below
-            }
-          }
-          const templateExists = resolvedTemplate ? fs.existsSync(resolvedTemplate) : false;
-          console.log(`[jira-evidence-template] source=multi_candidate resolved=${templateExists} extension=${resolvedTemplate ? path.extname(resolvedTemplate) || "none" : "none"}`);
-
-          if (!templateExists) {
-            console.log(`[jira-evidence-resolve] defectId=${defectId} scenarioId=${scenarioId} templatePath=missing_or_invalid`);
-            return { screenshots: imagesExisting, source: "none" };
-          }
-
-          // Generate DOCX
-          const docxOut = path.join(scenarioDir, "evidencia.pdf");
-          try {
-            const result = await generateEvidencePdf(normalizedRecord, resolvedTemplate, docxOut);
-            const outputExists = fs.existsSync(docxOut);
-            const outputSize = outputExists ? fs.statSync(docxOut).size : 0;
-
-            if (result.success && outputExists && outputSize > 0) {
-              console.log(`[jira-evidence-generation] scenarioId=${scenarioId} source=canonical_evidence_json screenshots=${imagesExisting} generated=true validated=true outputSize=${outputSize}`);
-              return { docxPath: docxOut, screenshots: imagesExisting, source: "generated_docx" };
-            }
-
-            console.log(`[jira-evidence-generation-error] scenarioId=${scenarioId} errorName=GeneratorFailed errorMessage="${result.error || "unknown"}" templateResolved=${templateExists} recordLoaded=true imagesDeclared=${imagesDeclared} imagesExisting=${imagesExisting} outputCreated=${outputExists} outputSize=${outputSize}`);
-          } catch (genErr: any) {
-            console.log(`[jira-evidence-generation-error] scenarioId=${scenarioId} errorName=${genErr.name || "Error"} errorMessage="${(genErr.message || String(genErr)).slice(0, 200)}" templateResolved=${templateExists} recordLoaded=true imagesDeclared=${imagesDeclared} imagesExisting=${imagesExisting} outputCreated=false outputSize=0`);
-          }
-
-          return { screenshots: imagesExisting, source: "none" };
-        } catch (parseErr: any) {
-          console.log(`[jira-evidence-generation-error] scenarioId=${scenarioId} errorName=${parseErr.name || "Error"} errorMessage="${(parseErr.message || String(parseErr)).slice(0, 200)}" templateResolved=false recordLoaded=false imagesDeclared=0 imagesExisting=0 outputCreated=false outputSize=0`);
-          return undefined;
-        }
+        const built = await buildScenarioPdf(scenarioDir, { jobId, scenarioId, evidenceRoot, templatePath, defectId, defectFinalStatus, reuseExisting: true });
+        if (built) return built;
+        continue;
       }
     }
     return undefined;

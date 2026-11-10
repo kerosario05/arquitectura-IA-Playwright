@@ -39,15 +39,41 @@ export function classifyMdwLexisResponse(xml: string, identification: string): L
   } catch { return 'unavailable'; }
 }
 
+/** Why a reply is not usable, without personal data: only protocol-level facts (RetCode, shape). */
+export function diagnoseMdwLexisResponse(xml: string, identification: string): string {
+  try {
+    const soap = read(xml);
+    const reply = read(soap.Envelope.Body.ExecuteResponse.ExecuteResult).ExtremeMsgReply;
+    const rawFields = reply.Data.DField;
+    const fields = (Array.isArray(rawFields) ? rawFields : [rawFields]).filter(Boolean);
+    const ret = fields.filter((f:any)=>f?.name==='RetCode');
+    if (ret.length!==1) return 'retcode_missing';
+    if (ret[0].Value!=='0') return `retcode=${String(ret[0].Value).slice(0,20)}`;
+    const answers = fields.filter((f:any)=>f?.name==='Respuesta');
+    if (answers.length!==1) return 'respuesta_missing';
+    const result = read(answers[0].Value).Respuesta?.SearchResults;
+    if (!result) return 'searchresults_missing';
+    if (result.ClientReference!==identification) return 'client_reference_mismatch';
+    return 'unrecognized_shape';
+  } catch (error: any) { return `unparseable:${String(error?.message ?? error).slice(0,40)}`; }
+}
+
 export async function screenMdwLexis(customer: Record<string, unknown>, database: string): Promise<LexisResult> {
-  if (process.env.DATA_CEDULAS_LEXIS_MDW_DATABASE?.toUpperCase()!==database.toUpperCase()) return 'unavailable';
+  // console.error on purpose: the cédula preparation script mutes console.log/info/warn while it screens.
+  const why = (reason: string): LexisResult => { console.error(`[data-cedulas][lexis-diag] unavailable reason=${reason}`); return 'unavailable'; };
+  if (process.env.DATA_CEDULAS_LEXIS_MDW_DATABASE?.toUpperCase()!==database.toUpperCase()) return why('database_mismatch');
   const endpoint = process.env.DATA_CEDULAS_LEXIS_MDW_URL;
   const envelope = buildMdwLexisEnvelope(customer,process.env.DATA_CEDULAS_LEXIS_MDW_CLIENT_ID||'');
-  if (!endpoint || !envelope) return 'unavailable';
+  if (!endpoint) return why('no_endpoint');
+  if (!envelope) return why('no_envelope(clientId_or_customer_data_missing)');
   const configured = Number(process.env.DATA_CEDULAS_LEXIS_TIMEOUT_MS || 10000);
   const client = await request.newContext({timeout:Number.isFinite(configured)&&configured>0?configured:10000});
   try {
     const r = await client.post(endpoint,{data:envelope,headers:{'Content-Type':'text/xml; charset=utf-8',SOAPAction:'http://tempuri.org/MDS/Execute'},maxRedirects:0});
-    return r.status()===200 ? classifyMdwLexisResponse(await r.text(),String(customer.Cedula).replace(/\D/g,'')) : 'unavailable';
-  } catch {return 'unavailable';} finally {await client.dispose();}
+    if (r.status()!==200) return why(`http_${r.status()}`);
+    const body = await r.text();
+    const identification = String(customer.Cedula).replace(/\D/g,'');
+    const result = classifyMdwLexisResponse(body,identification);
+    return result==='unavailable' ? why(diagnoseMdwLexisResponse(body,identification)) : result;
+  } catch (error: any) {return why(`request_error:${String(error?.message ?? error).split('\n')[0].slice(0,60)}`);} finally {await client.dispose();}
 }

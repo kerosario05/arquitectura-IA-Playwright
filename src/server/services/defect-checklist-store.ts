@@ -29,6 +29,8 @@ export type Defect = {
     discoveryStatus?: string;
     failedAtStep?: number;
     failedTarget?: string;
+    /** The step as written in the case (action + target), e.g. `Ingresar "Numero de Identificacion"`. */
+    failedStepText?: string;
     expectedResult?: string;
     rawError?: string;
     evidenceDir?: string;

@@ -6,7 +6,8 @@ import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
 import { evidenceActorEnvironment } from "../../auth/report-attribution";
 import { RunEvidenceRecorder } from "../../evidence/run-evidence-recorder";
-import { buildEvidencePaths, buildEvidenceRunPaths } from "../../evidence/evidence-paths";
+import { buildEvidencePaths, buildEvidenceRunPaths, buildEvidenceScenarioDir } from "../../evidence/evidence-paths";
+import { parseDiscoveryCaseFailure, readDiscoveryScenarioEvidence, type DiscoveryFailureContext } from "./discovery-failure-context";
 import { loadEvidenceConfig, type EvidenceScenarioRecord } from "../../evidence/evidence-types";
 import { linkJiraAutomationToTestRailCase, loadAutomationIndex } from "../../automations/automation-index";
 import { validatePromotedArtifactForReuse } from "../../automations/automation-reuse";
@@ -1885,6 +1886,8 @@ function publishedEntryByCaseId(caseId: number, publishedCases: PublishedCaseEnt
 
 type EvidenceStepSnapshot = {
   stepIndex?: number;
+  /** evidence.json written by discovery numbers its steps with `index`. */
+  index?: number;
   action?: string;
   target?: string;
   status?: string;
@@ -1935,7 +1938,7 @@ function readCaseEvidenceFailureSnapshot(input: {
     };
     const steps = Array.isArray(parsed.steps) ? parsed.steps : [];
     const failedStep = steps.find((step) => String(step.status ?? "").toLowerCase() === "failed");
-    const failedAtStep = typeof failedStep?.stepIndex === "number" ? failedStep.stepIndex : undefined;
+    const failedAtStep = typeof (failedStep?.stepIndex ?? failedStep?.index) === "number" ? (failedStep?.stepIndex ?? failedStep?.index) : undefined;
     const failedTarget = nonEmptyString(failedStep?.target);
     const errorMessage = nonEmptyString(failedStep?.errorMessage);
     const screenshotPath = nonEmptyString(failedStep?.screenshotPath) ?? nonEmptyString(failedStep?.evidencePath);
@@ -2460,6 +2463,8 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
     failedStep?: number;
     screenshotPath?: string;
     evidencePath?: string;
+    /** What the discovery run left behind (failed step, expected result, evidence), when it is known. */
+    discovery?: DiscoveryFailureContext;
     caseLifecycleStartedAt: number;
     groupIndex: number;
     overallIndex: number;
@@ -2496,11 +2501,18 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       scenarioId: input.scenarioId,
       scenarioTitle: input.scenarioTitle,
       failureReasonText: input.errorMessage,
+      expectedResult: input.discovery?.expectedResult,
       technicalContext: {
         dedupeKey: buildDiscoveryBatchDefectDedupeKey({ jobId, caseId: input.caseId, scenarioId: input.scenarioId }),
         reasonCode: input.reasonCode,
         discoveryStatus: "failed",
         rawError: input.errorMessage,
+        ...(input.discovery?.failedTarget ? { failedTarget: input.discovery.failedTarget } : {}),
+        ...(input.discovery?.failedStepText ? { failedStepText: input.discovery.failedStepText } : {}),
+        ...(input.discovery?.expectedResult ? { expectedResult: input.discovery.expectedResult } : {}),
+        ...(input.discovery?.evidenceDir ? { evidenceDir: input.discovery.evidenceDir } : {}),
+        ...(input.discovery?.evidenceJsonPath ? { evidenceJsonPath: input.discovery.evidenceJsonPath } : {}),
+        ...(input.discovery?.lastSuccessfulStep ? { lastSuccessfulStep: input.discovery.lastSuccessfulStep } : {}),
         testRailCaseId: input.caseId,
         testRailRunId: params.testRunId,
         caseId: input.caseId,
@@ -3127,6 +3139,23 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
       }
       const blockedReason = route.reason;
       const jiraFailure = jiraSemanticOutcome?.status === "failed" ? jiraSemanticOutcome : undefined;
+      // A TestRail case that stopped during discovery: say which step failed and point to the evidence it saved.
+      let discovery: DiscoveryFailureContext | undefined;
+      if (!jiraFailure) {
+        try {
+          const scenarioDir = buildEvidenceScenarioDir({
+            appSlug: (params.appSlug ?? "").trim() || "default",
+            sectionSlug: normalizeSectionSlug(params.sectionSlug),
+            scenarioId: `C${caseId}`,
+            scenarioTitle,
+            outputRoot: loadEvidenceConfig().outputRoot,
+          });
+          discovery = {
+            ...parseDiscoveryCaseFailure(jobStore.get(jobId)?.logs ?? [], `C${caseId}`),
+            ...readDiscoveryScenarioEvidence(scenarioDir),
+          };
+        } catch { /* no usable discovery evidence: the defect keeps the batch-level reason */ }
+      }
       await recordPreFunctionalFailure({
         caseId,
         sourceGroup,
@@ -3135,11 +3164,15 @@ async function startDiscoveryBatchExecutionFlow(jobId: string, params: Discovery
         reasonCode: blockedReason,
         errorMessage: jiraFailure
           ? `Jira semantic Discovery failed${jiraFailure.failedAtStep ? ` at step ${jiraFailure.failedAtStep}` : ""}: ${jiraFailure.failedReason ?? blockedReason}.`
-          : `Case cannot continue before functional execution: ${blockedReason}`,
+          : discovery?.failedAtStep
+            ? `La exploración del caso falló en el paso ${discovery.failedAtStep}${discovery.failedStepText ? `: ${discovery.failedStepText}` : ""} (${blockedReason}).`
+            : `Case cannot continue before functional execution: ${blockedReason}`,
         durationMs: 0,
         completedAt: new Date().toISOString(),
-        ...(jiraFailure?.failedAtStep ? { failedStep: jiraFailure.failedAtStep } : {}),
-        ...(jiraFailure?.screenshotPath ? { screenshotPath: jiraFailure.screenshotPath, evidencePath: jiraFailure.screenshotPath } : {}),
+        ...(jiraFailure?.failedAtStep ? { failedStep: jiraFailure.failedAtStep } : discovery?.failedAtStep ? { failedStep: discovery.failedAtStep } : {}),
+        ...(jiraFailure?.screenshotPath ? { screenshotPath: jiraFailure.screenshotPath, evidencePath: jiraFailure.screenshotPath }
+          : discovery?.screenshotPath ? { screenshotPath: discovery.screenshotPath, evidencePath: discovery.screenshotPath } : {}),
+        ...(discovery ? { discovery } : {}),
         caseLifecycleStartedAt,
         groupIndex: scheduledCase.groupIndex,
         overallIndex: scheduledCase.overallIndex,

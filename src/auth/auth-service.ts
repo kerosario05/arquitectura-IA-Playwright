@@ -84,6 +84,7 @@ async function buildUserPrincipal(
     userId: user.id,
     username: user.username,
     fullName: user.fullName,
+    ...(user.email ? { email: user.email } : {}),
     sessionId: session?.id ?? null,
     scope: session?.scope ?? "full",
     permissions: new Set<PermissionKey>(permissions),

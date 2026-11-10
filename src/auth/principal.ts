@@ -13,6 +13,7 @@ export type Principal = {
   userId: string | null;
   username: string;
   fullName?: string;
+  email?: string;
   sessionId: string | null;
   scope: SessionScope;
   permissions: ReadonlySet<PermissionKey>;

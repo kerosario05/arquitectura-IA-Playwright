@@ -2,6 +2,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { config, requireTestRailConfig } from "../config/env";
 import { TestRailClient } from "../clients/testrail.client";
+import { isValidPartialDiscovery } from "../evidence/discovery-evidence";
 import { runCaseDiscoveryWorkflow } from "../discovery/case-discovery-workflow";
 import { shouldVerifyPortalSpecAfterCleanup } from "../discovery/portal-request-cleanup";
 import { resolveAppProfile, ensureAppStructure, loadPromotedAppConfigSync } from "../automations/app-profile";
@@ -194,13 +195,7 @@ export function resolvePreviewCompletion(
       && typeof workflowResult.specPath === "string"
       && workflowResult.specPath.length > 0
     : discoveryPassed;
-  const partialSteps = workflowResult.caseResult?.steps ?? [];
-  const partialDiscoveryHasValidEvidence = discoveryStatus === "discovered_partial"
-    && partialSteps.length > 0
-    && workflowResult.caseResult?.failedAtStep == null
-    && !workflowResult.caseResult?.failedTarget
-    && !workflowResult.caseResult?.failedReason
-    && partialSteps.every((step) => !step.error && !/failed|not_found|error/i.test(step.status ?? ""));
+  const partialDiscoveryHasValidEvidence = isValidPartialDiscovery(workflowResult.caseResult);
   const eventPassed = automationReady || partialDiscoveryHasValidEvidence;
 
   return {

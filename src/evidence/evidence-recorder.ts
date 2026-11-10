@@ -62,7 +62,20 @@ export class EvidenceRecorder {
     // to skip the full capture.
     const fullPage = finalCapture ? this.config.fullPage : await this.fullPageFor(page);
     const original = page.viewportSize();
-    const extra = fullPage && original ? await page.evaluate(INNER_SCROLL_EXTRA_HEIGHT).catch(() => 0) : 0;
+    const extra = this.config.fullPage && original ? await page.evaluate(INNER_SCROLL_EXTRA_HEIGHT).catch(() => 0) : 0;
+    if (original && extra > 0 && !fullPage) {
+      // Overlay open: resizing the viewport would close it. Shrink the page with CSS zoom instead (no resize event) so
+      // the content hidden below the fold fits in the same viewport-sized image.
+      const zoom = Math.max(0.4, original.height / (original.height + extra));
+      const previous = await page.evaluate(() => document.documentElement.style.zoom).catch(() => "");
+      try {
+        await page.evaluate((z) => { document.documentElement.style.zoom = String(z); }, zoom);
+        await page.waitForTimeout(250).catch(() => undefined);
+        return await page.screenshot({ ...options, fullPage: false, timeout: this.config.captureTimeoutMs });
+      } finally {
+        await page.evaluate((z) => { document.documentElement.style.zoom = z; }, previous).catch(() => undefined);
+      }
+    }
     if (!original || !(extra > 0)) {
       return page.screenshot({ ...options, fullPage, timeout: this.config.captureTimeoutMs });
     }
@@ -761,7 +774,9 @@ export class EvidenceRecorder {
       : this.steps.some((step) => Boolean(step.screenshotPath)) || this.initialScreenEvidence?.captured === true
         ? "success"
         : this.steps.length > 0 ? "failed" : "not_run";
-    const discoveryFailed = Boolean(this.discoveryStatus && !["discovered_passed", "repaired_passed", "passed"].includes(this.discoveryStatus));
+    const discoveryFailed = Boolean(this.discoveryStatus && !["discovered_passed", "repaired_passed", "passed"].includes(this.discoveryStatus)
+      // A partial discovery with every step clean was already judged a pass by the caller (functionalStatus).
+      && !(this.discoveryStatus === "discovered_partial" && this.functionalStatus === "passed"));
     let status = this.initialScreenEvidence?.status === "load_failed" || discoveryFailed || this.functionalStatus === "failed"
       ? "Fallido"
       : deriveScenarioStatus(this.steps);

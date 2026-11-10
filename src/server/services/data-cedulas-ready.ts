@@ -13,6 +13,28 @@ type Taken = Record<string, string>;
 const root = () => path.join(process.cwd(), ".artifacts");
 export const READY_STATE_FILE = () => path.join(root(), "data-cedulas-ready.json");
 export const READY_TAKEN_FILE = () => path.join(root(), "data-cedulas-taken.json");
+/** Cédulas that became customers: out of the stock for good. Kept apart from the state file so a running prepare
+ * script (which rewrites that file) can never bring them back. */
+export const READY_USED_FILE = () => path.join(root(), "data-cedulas-used.json");
+
+export function readUsedReadyCedulas(file = READY_USED_FILE()): Set<string> {
+  return new Set(Object.keys(readJson<Record<string, string>>(file, {})));
+}
+
+export function markReadyCedulasUsed(ids: string[], options: { now?: Date; usedFile?: string } = {}): void {
+  if (ids.length === 0) return;
+  const file = options.usedFile ?? READY_USED_FILE();
+  const used = readJson<Record<string, string>>(file, {});
+  for (const id of ids) used[id.replace(/\D/g, "")] = (options.now ?? new Date()).toISOString();
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(used));
+}
+
+/** How many prepared cédulas are still in the stock (approved and not used). */
+export function readyStockCount(stateFile = READY_STATE_FILE(), usedFile = READY_USED_FILE()): number {
+  const used = readUsedReadyCedulas(usedFile);
+  return (readJson<ReadyState>(stateFile, { approved: [] }).approved ?? []).filter((id) => !used.has(id.replace(/\D/g, ""))).length;
+}
 
 export function dataCedulasReadyEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
   return env.DATA_CEDULAS_USE_READY?.trim().toLowerCase() !== "false";
@@ -44,6 +66,7 @@ export function listReadyCedulas(options: {
   holdMinutes?: number;
   stateFile?: string;
   takenFile?: string;
+  usedFile?: string;
   random?: () => number;
 }): string[] {
   const now = (options.now ?? new Date()).getTime();
@@ -51,7 +74,7 @@ export function listReadyCedulas(options: {
   const taken = readJson<Taken>(options.takenFile ?? READY_TAKEN_FILE(), {});
   const maxAgeMs = (options.maxAgeDays ?? dataCedulasReadyMaxAgeDays()) * 86_400_000;
   const holdMs = (options.holdMinutes ?? dataCedulasReadyHoldMinutes()) * 60_000;
-  const excluded = new Set((options.excluded ?? []).map((id) => id.replace(/\D/g, "")));
+  const excluded = new Set([...(options.excluded ?? []).map((id) => id.replace(/\D/g, "")), ...readUsedReadyCedulas(options.usedFile)]);
   const fallbackApprovedAt = state.startedAt ? Date.parse(state.startedAt) : now;
   const usable = (state.approved ?? []).filter((id) => {
     const key = id.replace(/\D/g, "");

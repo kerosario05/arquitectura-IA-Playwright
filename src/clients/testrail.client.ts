@@ -194,6 +194,16 @@ export class TestRailClient {
     }
   }
 
+  /** TestRail user id for an email, or undefined when not found / not visible to the API user. */
+  async findUserByEmail(email: string): Promise<{ id: number; name?: string } | undefined> {
+    try {
+      const user = await this.requestJson<{ id?: number; name?: string }>(`get_user_by_email&email=${encodeURIComponent(email)}`);
+      return typeof user?.id === "number" ? { id: user.id, name: user.name } : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
   async addRun(input: CreateRunInput): Promise<TestRailRun> {
     const endpoint = `add_run/${input.projectId}`;
     const body: Record<string, unknown> = {
@@ -204,6 +214,9 @@ export class TestRailClient {
     }
     if (input.description) {
       body.description = input.description;
+    }
+    if (input.assignedToId) {
+      body.assignedto_id = input.assignedToId;
     }
     if (input.caseIds && input.caseIds.length > 0) {
       body.include_all = false;

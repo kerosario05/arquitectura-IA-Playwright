@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { dataCedulasReadyEnabled, holdReadyCedulas, listReadyCedulas } from "./data-cedulas-ready";
+import { dataCedulasReadyEnabled, holdReadyCedulas, listReadyCedulas, markReadyCedulasUsed, readyStockCount } from "./data-cedulas-ready";
 
 function setup(state: object) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ready-"));
@@ -23,6 +23,16 @@ test("excluded, expired and held cédulas are not offered; the rest are", () => 
     holdReadyCedulas(["002"], { now: new Date("2026-11-03T11:00:00Z"), takenFile });
     const ids = listReadyCedulas({ excluded: ["001"], now, stateFile, takenFile, random: () => 0 });
     assert.deepEqual(ids, ["003"]);
+  } finally { done(); }
+});
+
+test("a cédula that became a customer leaves the stock for good; the rest stay and count", () => {
+  const { stateFile, takenFile, done } = setup({ approved: ["010", "011"], approvedAt: { "010": "2026-11-02T00:00:00Z", "011": "2026-11-02T00:00:00Z" } });
+  const usedFile = stateFile.replace("state.json", "used.json");
+  try {
+    markReadyCedulasUsed(["010"], { usedFile });
+    assert.deepEqual(listReadyCedulas({ now, stateFile, takenFile, usedFile, random: () => 0 }), ["011"]);
+    assert.equal(readyStockCount(stateFile, usedFile), 1);
   } finally { done(); }
 });
 

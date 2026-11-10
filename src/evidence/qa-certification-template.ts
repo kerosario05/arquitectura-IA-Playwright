@@ -48,10 +48,16 @@ export async function buildCertificationHtml(page: Page, model: EvidenceDocument
     const tables = children(body, "tbl");
     if (tables.length !== 10) throw new Error("qa_certification_template_structure_invalid");
     const sourceById = new Map(records.map(r => [r.scenarioId, r]));
+    // A generated id (UUID) is internal: the report shows ESC-01, ESC-02… instead. Real case ids (C57449) stay.
+    const labelById = new Map(model.scenarios.map((s, i) => [s.scenarioId,
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s.scenarioId) ? `ESC-${String(i + 1).padStart(2, "0")}` : s.scenarioId]));
+    const shown = (id: string) => labelById.get(id) ?? id;
     const statusById = new Map(model.scenarios.map(s => [s.scenarioId, s.status]));
     const state = (s: string) => s === "Exitoso" ? "APROBADO" : s === "Fallido" ? "FALLIDO" : s === "No ejecutado" ? "NO EJECUTADO" : "CON OBSERVACIONES";
     const approved = model.scenarios.every(s => s.status === "Exitoso");
-    const rejected = model.scenarios.some(s => s.status === "Fallido");
+    // Rejected only when at least half of the scenarios failed; fewer failures read as "CON OBSERVACIONES".
+    const rejected = model.scenarios.filter(s => s.status === "Fallido").length * 2 >= model.scenarios.length
+      && model.scenarios.some(s => s.status === "Fallido");
     const final = approved ? "APROBADO" : rejected ? "RECHAZADO" : "CON OBSERVACIONES";
     const expected = (id: string) => sourceById.get(id)?.expectedResult?.trim() || "No especificado en el escenario de origen.";
     const obtained = (id: string) => {
@@ -85,16 +91,22 @@ export async function buildCertificationHtml(page: Page, model: EvidenceDocument
     };
     replaceAfter("Objetivo general", first.objective || `Documentar la ejecución de ${model.scenarios.length} caso(s) de prueba para ${model.requerimiento}.`);
     replaceAfter("Descripción del cambio", first.changeDescription || "No se proporcionó una descripción del cambio.");
-    replaceAfter("Alcance", records.map(r => `${r.scenarioId}: ${r.scenarioTitle}`).join("\n"));
-    const formatPreconditions = (items: string[]) => items.map(item => item.trim()).filter(Boolean)
-      .map(item => `• ${item.replace(/^[•*-]\s*/, "")}`).join("\n");
-    replaceAfter("Precondiciones", formatPreconditions([...new Set(records.flatMap(r => r.preconditions || []))]) || "No especificadas en el origen.");
+    replaceAfter("Alcance", records.map(r => `${shown(r.scenarioId)}: ${r.scenarioTitle}`).join("\n"));
+    // One line per precondition: internal markers and the repeated "Precondiciones:" label are dropped, duplicates collapse.
+    const cleanPreconditions = (items: string[]) => [...new Set(items
+      .flatMap(item => item.replace(/\[automationScenarioId:[^\]]*\]/gi, "").split(/\r?\n/))
+      .map(line => line.trim().replace(/^[•*-]\s*/, ""))
+      .filter(line => line && !/^precondiciones:?$/i.test(line)))];
+    const formatPreconditions = (items: string[]) => cleanPreconditions(items).map(line => `• ${line}`).join("\n");
+    // Each scenario keeps its own block, headed by its identifier and title, with a blank line between blocks.
+    replaceAfter("Precondiciones", records.map(r =>
+      `${shown(r.scenarioId)} – ${r.scenarioTitle}\n${formatPreconditions(r.preconditions || []) || "No especificadas en el origen."}`).join("\n \n"));
     replaceAfter("Criterios de aceptación", [...new Set(records.flatMap(r => r.acceptanceCriteria?.length ? r.acceptanceCriteria : (r.expectedResult ? [r.expectedResult] : [])).map(value => value.trim()).filter(Boolean))].join("\n") || "No especificados en el origen.");
     const summaryRow = children(tables[1], "tr")[1].cloneNode(true) as Element;
     children(tables[1], "tr").slice(1).forEach(r => r.remove());
     for (const sc of model.scenarios) {
       const row = summaryRow.cloneNode(true) as Element;
-      [sc.scenarioId, sc.title, expected(sc.scenarioId), obtained(sc.scenarioId), state(sc.status)].forEach((v, i) => replace(children(row, "tc")[i], v));
+      [shown(sc.scenarioId), sc.title, expected(sc.scenarioId), obtained(sc.scenarioId), state(sc.status)].forEach((v, i) => replace(children(row, "tc")[i], v));
       tables[1].appendChild(row);
     }
     const start = nodes.findIndex(n => n.localName === "p" && /^3\. CP-01/.test(txt(n)));
@@ -107,7 +119,7 @@ export async function buildCertificationHtml(page: Page, model: EvidenceDocument
     model.scenarios.forEach((sc, index) => {
       const record = sourceById.get(sc.scenarioId)!;
       const block = pattern.map(n => n.cloneNode(true) as Element);
-      replace(block[0], `${index + 3}. ${sc.scenarioId} – ${sc.title}`);
+      replace(block[0], `${index + 3}. ${shown(sc.scenarioId)} – ${sc.title}`);
       const table = block.find(n => n.localName === "tbl")!;
       const describeStep = (step: EvidenceScenarioRecord["steps"][number]) => {
         if (/^\s*project entry\s*$/i.test(step.stepText)) return "Abrir la aplicación configurada del proyecto";
@@ -176,7 +188,7 @@ export async function buildCertificationHtml(page: Page, model: EvidenceDocument
       [app, `${cases.length} caso(s) documentado(s)`, cases.every(s => s.status === "Exitoso") ? "APROBADO" : "CON OBSERVACIONES", "Consulte el resumen y las evidencias de cada caso."].forEach((v, i) => replace(children(row, "tc")[i], v));
       regression.appendChild(row);
     }
-    const defects = records.flatMap(r => r.steps.filter(s => s.status === "failed").map(s => `${r.scenarioId}, paso ${s.stepIndex ?? s.index}: ${s.errorMessage || s.stepText}`));
+    const defects = records.flatMap(r => r.steps.filter(s => s.status === "failed").map(s => `${shown(r.scenarioId)}, paso ${s.stepIndex ?? s.index}: ${s.errorMessage || s.stepText}`));
     replaceAfter("7. Defectos / observaciones", defects.join("\n") || (approved ? "Sin incidencias registradas en los casos ejecutados." : "Hay casos pendientes o con observaciones. Revise sus resultados antes de certificar."));
     replaceAfter("8. Conclusión de certificación", `${model.scenarios.filter(s => s.status === "Exitoso").length} de ${model.scenarios.length} caso(s) completado(s) con éxito. Resultado limitado a los escenarios y evidencias de esta ejecución.`);
     [final, approved ? "Revisión y aprobación QA pendientes." : "Requiere revisión y nueva validación de los casos pendientes o fallidos.", "Pendiente de aprobación."].forEach((v, i) => setCell(tables[9], i, 1, v));

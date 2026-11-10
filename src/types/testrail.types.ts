@@ -193,6 +193,8 @@ export type CreateRunInput = {
   description?: string;
   caseIds: number[];
   refs?: string;
+  /** TestRail user the run is assigned to (the API cannot change the creator, which is always the token owner). */
+  assignedToId?: number;
 };
 
 export type AddCaseInput = {

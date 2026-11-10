@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
+import { currentReportAnalyst, currentReportAnalystEmail } from "../../auth/report-attribution";
 import { linkJiraAutomationToTestRailCase, loadAutomationIndex } from "../../automations/automation-index";
 import { normalizeAppSlug } from "../../automations/app-profile";
 import { config, requireTestRailConfig } from "../../config/env";
@@ -283,8 +284,7 @@ function buildLaunchRunName(jiraKey?: string, sprintName?: string): string {
   const parts: string[] = [];
   if (jiraKey) parts.push(jiraKey);
   if (sprintName) parts.push(sprintName);
-  parts.push("QA Lab Automation Run");
-  parts.push(new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19));
+  parts.push("QA Lab Automation Run"); // TestRail already shows the creation date next to the run
   return parts.join(" - ");
 }
 
@@ -1063,11 +1063,19 @@ export async function launchExecution(input: LaunchExecutionInput): Promise<Laun
 
     const runName = buildLaunchRunName(input.jiraKey, input.sprintName);
     console.log(`[launch-execution] creating TestRail run include_all=false caseIds=${caseIdsForRun.length} ids=${JSON.stringify(caseIdsForRun)} refs=${runRefs || "(none)"}`);
+    // The creator shown by TestRail is always the API token owner; assign the run to, and name, the person actually running it.
+    const analystEmail = currentReportAnalystEmail();
+    const trUser = analystEmail ? await trClient.findUserByEmail(analystEmail) : undefined;
+    // The TestRail account's own name is what that person sees in TestRail; fall back to the QA Lab name.
+    const analyst = trUser?.name?.trim() || input.analystName?.trim() || currentReportAnalyst();
+    const assignedToId = trUser?.id;
+    console.log(`[launch-execution] testRun analyst=${analyst ? "yes" : "no"} assignedToFound=${assignedToId ? "yes" : "no"}`);
     const run = await trClient.addRun({
       projectId: String(input.projectId),
       suiteId: input.suiteId ? String(input.suiteId) : undefined,
-      name: runName,
-      description: `QA Lab launch for ${input.appSlug} | section=${effectiveSectionId} | ${selectionPlan.normalizedScenarios.length} scenarios | launchId=${launchId}`,
+      name: analyst ? `${runName} - ${analyst}` : runName,
+      assignedToId,
+      description: `QA Lab launch for ${input.appSlug} | section=${effectiveSectionId} | ${selectionPlan.normalizedScenarios.length} scenarios | launchId=${launchId}${analyst ? ` | Ejecutado por: ${analyst}` : ""}`,
       caseIds: caseIdsForRun,
       refs: runRefs || undefined,
     });
